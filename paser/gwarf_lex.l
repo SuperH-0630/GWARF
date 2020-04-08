@@ -24,7 +24,7 @@
 <INITIAL>' {BEGIN STRING_TEXT;}
 <INITIAL>\" {BEGIN STRING_TEXT;}
 <INITIAL>[1-9][0-9]*(\.[0-9]+)?|0 {
-    yylval.double_value = atoi(yytext);
+    yylval.double_value = atof(yytext);
     return NUMBER;
     }
 <INITIAL>[a-zA-Z_][a-zA-Z0-9_]* {

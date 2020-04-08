@@ -466,8 +466,8 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "cwarf_lex.l"
-#line 2 "cwarf_lex.l"
+#line 1 "gwarf_lex.l"
+#line 2 "gwarf_lex.l"
     #include<stdio.h>
     #include"y.tab.h"
 #line 473 "lex.yy.c"
@@ -691,7 +691,7 @@ YY_DECL
 		}
 
 	{
-#line 6 "cwarf_lex.l"
+#line 6 "gwarf_lex.l"
 
 #line 696 "lex.yy.c"
 
@@ -752,97 +752,95 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 7 "cwarf_lex.l"
+#line 7 "gwarf_lex.l"
 {return WHILE;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 9 "cwarf_lex.l"
+#line 9 "gwarf_lex.l"
 {return LB;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 10 "cwarf_lex.l"
+#line 10 "gwarf_lex.l"
 {return RB;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 11 "cwarf_lex.l"
+#line 11 "gwarf_lex.l"
 {return LP;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 12 "cwarf_lex.l"
+#line 12 "gwarf_lex.l"
 {return RP;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 14 "cwarf_lex.l"
+#line 14 "gwarf_lex.l"
 {return MORE;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 15 "cwarf_lex.l"
+#line 15 "gwarf_lex.l"
 {return LESS;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 16 "cwarf_lex.l"
+#line 16 "gwarf_lex.l"
 {return EQ;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 17 "cwarf_lex.l"
+#line 17 "gwarf_lex.l"
 {return ADD;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 18 "cwarf_lex.l"
+#line 18 "gwarf_lex.l"
 {return SUB;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 19 "cwarf_lex.l"
+#line 19 "gwarf_lex.l"
 {return MUL;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 20 "cwarf_lex.l"
+#line 20 "gwarf_lex.l"
 {return DIV;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 21 "cwarf_lex.l"
+#line 21 "gwarf_lex.l"
 {return POW;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 23 "cwarf_lex.l"
+#line 23 "gwarf_lex.l"
 {BEGIN COMMENT;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 24 "cwarf_lex.l"
+#line 24 "gwarf_lex.l"
 {BEGIN STRING_TEXT;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 25 "cwarf_lex.l"
+#line 25 "gwarf_lex.l"
 {BEGIN STRING_TEXT;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 26 "cwarf_lex.l"
+#line 26 "gwarf_lex.l"
 {
-    double tmp = atoi(yytext);
-    printf("yytext = %s, tmp = %f\n", yytext, tmp);
-    yylval.double_value = tmp;
+    yylval.double_value = atof(yytext);
     return NUMBER;
     }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 32 "cwarf_lex.l"
+#line 30 "gwarf_lex.l"
 {
     yylval.string_value = yytext;
     return VAR;
@@ -851,39 +849,39 @@ YY_RULE_SETUP
 case 19:
 /* rule 19 can match eol */
 YY_RULE_SETUP
-#line 36 "cwarf_lex.l"
+#line 34 "gwarf_lex.l"
 {return STOP;}
 	YY_BREAK
 case 20:
 /* rule 20 can match eol */
 YY_RULE_SETUP
-#line 38 "cwarf_lex.l"
+#line 36 "gwarf_lex.l"
 {BEGIN INITIAL;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 39 "cwarf_lex.l"
+#line 37 "gwarf_lex.l"
 {BEGIN INITIAL;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 40 "cwarf_lex.l"
+#line 38 "gwarf_lex.l"
 ;
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 42 "cwarf_lex.l"
+#line 40 "gwarf_lex.l"
 {BEGIN INITIAL;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 43 "cwarf_lex.l"
+#line 41 "gwarf_lex.l"
 {BEGIN INITIAL;}
 	YY_BREAK
 case 25:
 /* rule 25 can match eol */
 YY_RULE_SETUP
-#line 44 "cwarf_lex.l"
+#line 42 "gwarf_lex.l"
 {
     yylval.string_value = yytext;
     return STRING;
@@ -891,7 +889,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 48 "cwarf_lex.l"
+#line 46 "gwarf_lex.l"
 {
     yylval.string_value = yytext;
     return STRING;
@@ -899,10 +897,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 52 "cwarf_lex.l"
+#line 50 "gwarf_lex.l"
 ECHO;
 	YY_BREAK
-#line 905 "lex.yy.c"
+#line 903 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
 case YY_STATE_EOF(STRING_TEXT):
@@ -1909,7 +1907,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 52 "cwarf_lex.l"
+#line 50 "gwarf_lex.l"
 
 int yywrap(void) {
     return 1;

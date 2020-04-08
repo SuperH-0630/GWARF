@@ -91,13 +91,14 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 5 "cwarf_yacc.y"
+#line 8 "gwarf_yacc.y"
 
     int int_value;
     double double_value;
     char *string_value;
+    void *statement_value;
 
-#line 101 "y.tab.h"
+#line 102 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
