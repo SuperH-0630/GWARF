@@ -487,18 +487,18 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  7
+#define YYFINAL  9
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   6
+#define YYLAST   18
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  20
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  6
+#define YYNNTS  7
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  8
+#define YYNRULES  13
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  12
+#define YYNSTATES  20
 
 #define YYUNDEFTOK  2
 #define YYMAXUTOK   274
@@ -547,7 +547,8 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    20,    20,    21,    25,    32,    39,    40,    52
+       0,    20,    20,    21,    25,    26,    33,    40,    41,    50,
+      62,    63,    72,    84
 };
 #endif
 
@@ -559,7 +560,7 @@ static const char *const yytname[] =
   "$end", "error", "$undefined", "NUMBER", "STRING", "VAR", "ADD", "SUB",
   "DIV", "MUL", "EQ", "LESS", "MORE", "RB", "LB", "RP", "LP", "WHILE",
   "STOP", "POW", "$accept", "command_list", "command", "top_exp",
-  "first_number", "base_number", YY_NULLPTR
+  "first_number", "second_number", "base_number", YY_NULLPTR
 };
 #endif
 
@@ -587,8 +588,8 @@ static const yytype_int16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -2,   -17,     0,   -17,   -16,    -1,   -17,   -17,   -17,   -17,
-      -2,   -17
+      -2,   -17,   -17,     0,   -17,   -16,    -1,     1,   -17,   -17,
+     -17,   -17,    10,    10,    10,    10,     1,     1,   -17,   -17
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -596,20 +597,20 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       0,     8,     0,     2,     0,     5,     6,     1,     3,     4,
-       0,     7
+       0,    13,     4,     0,     2,     0,     6,     7,    10,     1,
+       3,     5,     0,     0,     0,     0,     8,     9,    12,    11
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -17,   -17,     2,   -17,   -17,    -4
+     -17,   -17,    11,   -17,   -17,    -5,    -3
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     2,     3,     4,     5,     6
+      -1,     3,     4,     5,     6,     7,     8
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -617,32 +618,36 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       7,     1,     9,     1,     8,    10,    11
+       9,     1,    11,     1,     0,    12,    13,    16,    17,    14,
+      15,    18,    19,     1,    10,     0,     2,     0,     2
 };
 
 static const yytype_int8 yycheck[] =
 {
-       0,     3,    18,     3,     2,     6,    10
+       0,     3,    18,     3,    -1,     6,     7,    12,    13,     8,
+       9,    14,    15,     3,     3,    -1,    18,    -1,    18
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     3,    21,    22,    23,    24,    25,     0,    22,    18,
-       6,    25
+       0,     3,    18,    21,    22,    23,    24,    25,    26,     0,
+      22,    18,     6,     7,     8,     9,    25,    25,    26,    26
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    20,    21,    21,    22,    23,    24,    24,    25
+       0,    20,    21,    21,    22,    22,    23,    24,    24,    24,
+      25,    25,    25,    26
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     1,     2,     2,     1,     1,     3,     1
+       0,     2,     1,     2,     1,     2,     1,     1,     3,     3,
+       1,     3,     3,     1
 };
 
 
@@ -1337,37 +1342,76 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 4:
-#line 26 "gwarf_yacc.y"
+  case 5:
+#line 27 "gwarf_yacc.y"
     {
         append_statement(global_inter->global_code, (yyvsp[-1].statement_value));
     }
-#line 1346 "y.tab.c"
+#line 1351 "y.tab.c"
     break;
 
-  case 5:
-#line 33 "gwarf_yacc.y"
+  case 6:
+#line 34 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[0].statement_value);
     }
-#line 1354 "y.tab.c"
+#line 1359 "y.tab.c"
     break;
 
-  case 7:
-#line 41 "gwarf_yacc.y"
+  case 8:
+#line 42 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
         code_tmp->code.operation.type = ADD_func;
-        code_tmp->code.operation.right_exp = (yyvsp[-2].statement_value);
-        code_tmp->code.operation.left_exp = (yyvsp[0].statement_value);
+        code_tmp->code.operation.left_exp = (yyvsp[-2].statement_value);
+        code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 1367 "y.tab.c"
+#line 1372 "y.tab.c"
     break;
 
-  case 8:
-#line 53 "gwarf_yacc.y"
+  case 9:
+#line 51 "gwarf_yacc.y"
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = SUB_func;
+        code_tmp->code.operation.left_exp = (yyvsp[-2].statement_value);
+        code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
+        (yyval.statement_value) = code_tmp;
+    }
+#line 1385 "y.tab.c"
+    break;
+
+  case 11:
+#line 64 "gwarf_yacc.y"
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = MUL_func;
+        code_tmp->code.operation.left_exp = (yyvsp[-2].statement_value);
+        code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
+        (yyval.statement_value) = code_tmp;
+    }
+#line 1398 "y.tab.c"
+    break;
+
+  case 12:
+#line 73 "gwarf_yacc.y"
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = DIV_func;
+        code_tmp->code.operation.left_exp = (yyvsp[-2].statement_value);
+        code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
+        (yyval.statement_value) = code_tmp;
+    }
+#line 1411 "y.tab.c"
+    break;
+
+  case 13:
+#line 85 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = base_value;
@@ -1375,11 +1419,11 @@ yyreduce:
         code_tmp->code.base_value.value.value.double_value = (yyvsp[0].double_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 1379 "y.tab.c"
+#line 1423 "y.tab.c"
     break;
 
 
-#line 1383 "y.tab.c"
+#line 1427 "y.tab.c"
 
       default: break;
     }
@@ -1611,7 +1655,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 62 "gwarf_yacc.y"
+#line 94 "gwarf_yacc.y"
 
 int yyerror(char const *str)
 {

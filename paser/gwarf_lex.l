@@ -17,7 +17,7 @@
 <INITIAL>"+" {return ADD;}
 <INITIAL>"-" {return SUB;}
 <INITIAL>"*" {return MUL;}
-<INITIAL>\\ {return DIV;}
+<INITIAL>"/" {return DIV;}
 <INITIAL>"^" {return POW;}
 
 <INITIAL>"#" {BEGIN COMMENT;}
@@ -31,7 +31,10 @@
     yylval.string_value = yytext;
     return VAR;
     }
+
+<INITIAL>" " ;
 <INITIAL>\n {return STOP;}
+<INITIAL>. {printf("text = [%s];\n", yytext);}
 
 <COMMENT>\n {BEGIN INITIAL;}
 <COMMENT>"#" {BEGIN INITIAL;}

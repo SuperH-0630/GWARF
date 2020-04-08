@@ -6,6 +6,9 @@
 // running code
 GWARF_result operation_func(statement *, var_list *);
 GWARF_result add_func(GWARF_result, GWARF_result, var_list *);
+GWARF_result sub_func(GWARF_result, GWARF_result, var_list *);
+GWARF_result mul_func(GWARF_result, GWARF_result, var_list *);
+GWARF_result div_func(GWARF_result, GWARF_result, var_list *);
 
 // ------------------------- var func
 
@@ -120,9 +123,10 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
             break;
         case 4:
             return_value.value = (the_statement->code).base_value.value;  // code
+            printf("get value = %f\n", return_value.value.value.double_value);
             break;
         default:
-            return_value.value.value.double_value = 10086;
+            puts("default");
             break;
     }
     return return_value;
@@ -137,24 +141,62 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var){  // re
         case ADD_func:
             value = add_func(left_result, right_result, the_var);
             break;
+        case SUB_func:
+            value = sub_func(left_result, right_result, the_var);
+            break;
+        case MUL_func:
+            value = mul_func(left_result, right_result, the_var);
+            break;
+        case DIV_func:
+            value = div_func(left_result, right_result, the_var);
+            break;
         default:
             break;
     }
     return value;
 }
 
+// ---------  ADD
 GWARF_result add_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for add and call from read_statement_list
     GWARF_result return_value;  // the result by call read_statement_list with left and right; value is the result for add
-    
-    // 计算左右表达式的值
-    // void traverse(statement *the_statement, var_list *the_var)
-
     if((left_result.value.type = NUMBER_value) && (right_result.value.type = NUMBER_value)){  // all is NUMBER
         return_value.u = return_def;
         return_value.value.type = NUMBER_value;
         return_value.value.value.double_value = left_result.value.value.double_value + right_result.value.value.double_value;  // 数值相加运算
     }
+    return return_value;
+}
 
+// ---------  SUB
+GWARF_result sub_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for sub and call from read_statement_list
+    GWARF_result return_value;  // the result by call read_statement_list with left and right; value is the result for add
+    if((left_result.value.type = NUMBER_value) && (right_result.value.type = NUMBER_value)){  // all is NUMBER
+        return_value.u = return_def;
+        return_value.value.type = NUMBER_value;
+        return_value.value.value.double_value = left_result.value.value.double_value - right_result.value.value.double_value;  // 数值相减运算
+    }
+    return return_value;
+}
+
+// ---------  MUL
+GWARF_result mul_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for mul and call from read_statement_list
+    GWARF_result return_value;  // the result by call read_statement_list with left and right; value is the result for add
+    if((left_result.value.type = NUMBER_value) && (right_result.value.type = NUMBER_value)){  // all is NUMBER
+        return_value.u = return_def;
+        return_value.value.type = NUMBER_value;
+        return_value.value.value.double_value = left_result.value.value.double_value * right_result.value.value.double_value;  // 数值相乘运算
+    }
+    return return_value;
+}
+
+// ---------  DIV
+GWARF_result div_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for div and call from read_statement_list
+    GWARF_result return_value;  // the result by call read_statement_list with left and right; value is the result for add
+    if((left_result.value.type = NUMBER_value) && (right_result.value.type = NUMBER_value)){  // all is NUMBER
+        return_value.u = return_def;
+        return_value.value.type = NUMBER_value;
+        return_value.value.value.double_value = left_result.value.value.double_value / right_result.value.value.double_value;  // 数值相除运算
+    }
     return return_value;
 }
 
@@ -179,13 +221,3 @@ inter *get_inter(){
     tmp->global_code = make_statement();
     return tmp;
 }
-
-// int main(){
-//     global_inter = get_inter();  // 拿全局解释器[并声明全局变量]
-//     parser();
-//     var_list *the_var;
-//     printf("----start run----\n");
-//     traverse(global_inter->global_code, the_var);
-//     printf("code end...\n");
-//     return 0;
-// }

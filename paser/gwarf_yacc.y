@@ -14,7 +14,7 @@
 %token <double_value> NUMBER
 %token <string_value> STRING VAR
 %token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE STOP POW
-%type <statement_value> base_number first_number top_exp
+%type <statement_value> base_number second_number first_number top_exp
 %%
 command_list
     : command
@@ -22,7 +22,8 @@ command_list
     ;
 
 command
-    : top_exp STOP
+    : STOP
+    | top_exp STOP
     {
         append_statement(global_inter->global_code, $1);
     }
@@ -36,14 +37,45 @@ top_exp
     ;
 
 first_number
-    : base_number
-    | first_number ADD base_number
+    : second_number
+    | first_number ADD second_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
         code_tmp->code.operation.type = ADD_func;
-        code_tmp->code.operation.right_exp = $1;
-        code_tmp->code.operation.left_exp = $3;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    | first_number SUB second_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = SUB_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    ;
+
+second_number
+    : base_number
+    | second_number MUL base_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = MUL_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    | second_number DIV base_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = DIV_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
     ;
