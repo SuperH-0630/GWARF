@@ -1,3 +1,6 @@
+#define false 0
+#define true 1
+#define bool int
 
 // the type of data(GWARF_value)
 typedef enum{
@@ -44,6 +47,12 @@ typedef struct statement{
                 DIV_func,  // /
                 MUL_func,  // *
                 ASSIGMENT_func, // =
+                EQUAL_func,  // ==
+                MORE_func,  // >
+                LESS_func,  // <
+                MOREEQ_func,  // >=
+                LESSEQ_func,  // <=
+                NOTEQ_func,  // <>
             } type;
             struct statement *right_exp;  // the right exp
             struct statement *left_exp;  // the left exp
@@ -67,6 +76,7 @@ typedef struct GWARF_result{
     enum{
         return_def=1,
         break_while,
+        wrong,
     } u;  // the result type[from where]
 } GWARF_result;
 
@@ -74,7 +84,7 @@ typedef struct GWARF_result{
 
 typedef struct var_list{
     var *var_base;
-    var *next;
+    struct var_list *next;
 } var_list;
 
 // ------------------------- inter
@@ -96,7 +106,7 @@ statement *make_statement();
 statement *append_statement(statement *, statement*);
 
 //------- run func
-GWARF_result traverse(statement *, var_list *);
+GWARF_result traverse(statement *, var_list *, bool);
 
 //------- inter func
 inter *get_inter();

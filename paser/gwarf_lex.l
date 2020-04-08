@@ -11,8 +11,12 @@
 <INITIAL>"{" {return LP;}
 <INITIAL>"}" {return RP;}
 
+<INITIAL>">=" {return MOREEQ;}
+<INITIAL>"<=" {return LESSEQ;}
+<INITIAL>"!=" {return NOTEQ;}
 <INITIAL>">" {return MORE;}
 <INITIAL>"<" {return LESS;}
+<INITIAL>"==" {return EQUAL;}
 <INITIAL>"=" {return EQ;}
 <INITIAL>"+" {return ADD;}
 <INITIAL>"-" {return SUB;}

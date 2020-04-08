@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 3.5.3.  */
+/* A Bison parser, made by GNU Bison 3.5.4.  */
 
 /* Bison interface for Yacc-like parsers in C
 
@@ -65,7 +65,11 @@ extern int yydebug;
     LP = 271,
     WHILE = 272,
     STOP = 273,
-    POW = 274
+    POW = 274,
+    EQUAL = 275,
+    MOREEQ = 276,
+    LESSEQ = 277,
+    NOTEQ = 278
   };
 #endif
 /* Tokens.  */
@@ -86,19 +90,23 @@ extern int yydebug;
 #define WHILE 272
 #define STOP 273
 #define POW 274
+#define EQUAL 275
+#define MOREEQ 276
+#define LESSEQ 277
+#define NOTEQ 278
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 8 "gwarf_yacc.y"
+#line 9 "gwarf_yacc.y"
 
     int int_value;
     double double_value;
     char *string_value;
     void *statement_value;
 
-#line 102 "y.tab.h"
+#line 110 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
