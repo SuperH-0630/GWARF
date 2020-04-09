@@ -10,6 +10,8 @@
 <INITIAL>[\n]*else(\(\))? {return ELSE;}
 <INITIAL>"break" {return BREAK;}
 <INITIAL>"broken" {return BROKEN;}
+<INITIAL>"continue" {return CONTINUE;}
+<INITIAL>"continued" {return CONTINUED;}
 
 <INITIAL>"(" {return LB;}
 <INITIAL>")" {return RB;}

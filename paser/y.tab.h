@@ -74,7 +74,9 @@ extern int yydebug;
     IF = 280,
     ELSE = 281,
     ELIF = 282,
-    BROKEN = 283
+    BROKEN = 283,
+    CONTINUE = 284,
+    CONTINUED = 285
   };
 #endif
 /* Tokens.  */
@@ -104,6 +106,8 @@ extern int yydebug;
 #define ELSE 281
 #define ELIF 282
 #define BROKEN 283
+#define CONTINUE 284
+#define CONTINUED 285
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -117,7 +121,7 @@ union YYSTYPE
     struct statement *statement_value;
     struct if_list *if_list_base;
 
-#line 121 "y.tab.h"
+#line 125 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

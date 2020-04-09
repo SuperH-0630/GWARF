@@ -39,6 +39,8 @@ typedef struct statement{
         if_branch,  // if
         break_cycle,  // break
         broken,  // break_cycle and other {}
+        continue_cycle,
+        continued,
     } type;  // the statement type
 
     union
@@ -79,12 +81,20 @@ typedef struct statement{
         } base_value;
 
         struct{
-            struct statement *times;  // while to do
+            struct statement *times;  // 层数
         } break_cycle;
 
         struct{
-            struct statement *times;  // while to do
+            struct statement *times;  // 层数
         } broken;
+
+        struct{
+            struct statement *times;  // 层数
+        } continue_cycle;
+
+        struct{
+            struct statement *times;  // 层数
+        } continued;
 
     } code;
     struct statement *next;
@@ -99,6 +109,8 @@ typedef struct GWARF_result{
         statement_end,
         cycle_break,
         code_broken,
+        cycle_continue,
+        code_continued,
         name_no_found,
     } u;  // the result type[from where]
 } GWARF_result;

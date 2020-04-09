@@ -14,8 +14,8 @@
 }
 %token <double_value> NUMBER
 %token <string_value> STRING VAR
-%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE STOP POW EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN
-%type <statement_value> base_number base_var_ element second_number first_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token
+%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE STOP POW EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED
+%type <statement_value> base_number base_var_ element second_number first_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp continued_token continued_exp
 %type <if_list_base> elif_exp
 %%
 command_block
@@ -68,6 +68,14 @@ command
         $$ = $1;
     }
     | broken_exp STOP
+    {
+        $$ = $1;
+    }
+    | continue_exp STOP
+    {
+        $$ = $1;
+    }
+    | continued_exp STOP
     {
         $$ = $1;
     }
@@ -284,6 +292,44 @@ while_exp
 
 block
     : LP command_list RP
+    ;
+
+continued_exp
+    : continued_token
+    | continued_token element
+    {
+        $1->code.continued.times = $2;
+        $$ = $1;
+    }
+    ;
+
+continued_token
+    : CONTINUED
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = continued;
+        code_tmp->code.continued.times = NULL;
+        $$ = code_tmp;
+    }
+    ;
+
+continue_exp
+    : continue_token
+    | continue_token element
+    {
+        $1->code.continue_cycle.times = $2;
+        $$ = $1;
+    }
+    ;
+
+continue_token
+    : CONTINUE
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = continue_cycle;
+        code_tmp->code.continue_cycle.times = NULL;
+        $$ = code_tmp;
+    }
     ;
 
 break_exp

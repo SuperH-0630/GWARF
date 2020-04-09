@@ -326,6 +326,26 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
             }
             printf("broken num = %f\n", return_value.value.value.double_value);
             break;
+        case continue_cycle:
+            return_value.u = cycle_continue;
+            if(the_statement->code.continue_cycle.times == NULL){
+                return_value.value.value.double_value = 0;
+            }
+            else{
+                return_value.value.value.double_value = traverse(the_statement->code.continue_cycle.times, the_var, false).value.value.double_value;  // 执行语句，获得弹出层
+            }
+            printf("continue num = %f\n", return_value.value.value.double_value);
+            break;
+        case continued:
+            return_value.u = code_continued;
+            if(the_statement->code.continued.times == NULL){
+                return_value.value.value.double_value = 0;
+            }
+            else{
+                return_value.value.value.double_value = traverse(the_statement->code.continued.times, the_var, false).value.value.double_value;  // 执行语句，获得弹出层
+            }
+            printf("continued num = %f\n", return_value.value.value.double_value);
+            break;
         default:
             puts("default");
             break;
@@ -337,7 +357,8 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
 
 GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statement list with case to run by func
     GWARF_result value;
-    if_list *start = if_base;
+    if_list *start;
+    again: start = if_base;
     while(1){
         if(start->condition  == NULL){  // else
             puts("----else----");
@@ -360,6 +381,19 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
         }
         start = start->next;
     }
+    if(value.u == cycle_continue){  // if不处理也不计入层次 同break一样
+        ;
+    }
+    if(value.u == code_continued){
+        if(value.value.value.double_value <= 0){
+            puts("----if continue real----");
+            value.u = statement_end;
+            goto again;
+        }
+        else{
+            value.value.value.double_value -= 1;
+        }
+    }
     return value;
 }
 
@@ -378,6 +412,18 @@ GWARF_result while_func(statement *the_statement, var_list *the_var){  // read t
         puts("----stop while----");
         if((value.u == cycle_break) || (value.u == code_broken)){  // break the while
             break;
+        }
+        printf("type = %d\n", value.u);
+        if((value.u == cycle_continue) || (value.u == code_continued)){
+            if(value.value.value.double_value <= 0){
+                puts("----continue real----");
+                value.u = statement_end;
+                continue;
+            }
+            else{
+                value.value.value.double_value -= 1;
+                break;
+            }
         }
     }
     return value;
@@ -525,6 +571,10 @@ GWARF_result traverse(statement *the_statement, var_list *the_var, bool new){  /
         result = read_statement_list(tmp, the_var);
         if((result.u == cycle_break) || (result.u == code_broken)){  // don't next the statement and return the result [the while_func[or for func] will get the result and stop cycle]
             puts("----break or broken----");
+            break;
+        }
+        if((result.u == cycle_continue) || (result.u == code_continued)){
+            puts("----continue or continued----");
             break;
         }
         tmp = tmp->next;
