@@ -36,7 +36,9 @@ typedef struct statement{
         base_var,  // return var address
         base_value,  // return an number or number
         while_cycle,  // while
+        if_branch,  // if
         break_cycle,  // break
+        broken,  // break_cycle and other {}
     } type;  // the statement type
 
     union
@@ -65,6 +67,10 @@ typedef struct statement{
         } while_cycle;
 
         struct{
+            struct if_list *done;  // if_list
+        } if_branch;
+
+        struct{
             char *var_name;  // return var
         } base_var;
 
@@ -73,7 +79,12 @@ typedef struct statement{
         } base_value;
 
         struct{
+            struct statement *times;  // while to do
         } break_cycle;
+
+        struct{
+            struct statement *times;  // while to do
+        } broken;
 
     } code;
     struct statement *next;
@@ -87,6 +98,7 @@ typedef struct GWARF_result{
         return_def=1,
         statement_end,
         cycle_break,
+        code_broken,
         name_no_found,
     } u;  // the result type[from where]
 } GWARF_result;
@@ -104,6 +116,15 @@ typedef struct statement_list{
     statement *statement_base;
     struct statement_list *next;
 } statement_list;
+
+
+// ------------------------- if list [记录着if...elif...else]
+
+typedef struct if_list{
+    struct statement *condition;  // when to while 
+    struct statement *done;  // while to do
+    struct if_list *next;
+} if_list;
 
 // ------------------------- inter
 
@@ -128,6 +149,11 @@ statement_list *make_statement_base(statement *);
 statement_list *append_statement_list(statement *, statement_list *);
 statement *find_statement_list(int, statement_list *);
 statement_list *free_statement_list(statement_list *);
+
+//------- if func
+if_list *make_base_if();
+if_list *make_if(statement *, statement *);
+if_list *append_elif(if_list *, if_list *);
 
 //------- run func
 GWARF_result traverse(statement *, var_list *, bool);

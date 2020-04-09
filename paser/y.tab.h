@@ -70,7 +70,11 @@ extern int yydebug;
     MOREEQ = 276,
     LESSEQ = 277,
     NOTEQ = 278,
-    BREAK = 279
+    BREAK = 279,
+    IF = 280,
+    ELSE = 281,
+    ELIF = 282,
+    BROKEN = 283
   };
 #endif
 /* Tokens.  */
@@ -96,6 +100,10 @@ extern int yydebug;
 #define LESSEQ 277
 #define NOTEQ 278
 #define BREAK 279
+#define IF 280
+#define ELSE 281
+#define ELIF 282
+#define BROKEN 283
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -106,9 +114,10 @@ union YYSTYPE
     int int_value;
     double double_value;
     char *string_value;
-    void *statement_value;
+    struct statement *statement_value;
+    struct if_list *if_list_base;
 
-#line 112 "y.tab.h"
+#line 121 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

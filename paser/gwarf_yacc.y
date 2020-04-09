@@ -9,13 +9,14 @@
     int int_value;
     double double_value;
     char *string_value;
-    void *statement_value;
+    struct statement *statement_value;
+    struct if_list *if_list_base;
 }
 %token <double_value> NUMBER
 %token <string_value> STRING VAR
-%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE STOP POW EQUAL MOREEQ LESSEQ NOTEQ BREAK
-%type <statement_value> base_number base_var_ element second_number first_number top_exp command third_number while_block while_exp break_exp
-
+%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE STOP POW EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN
+%type <statement_value> base_number base_var_ element second_number first_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token
+%type <if_list_base> elif_exp
 %%
 command_block
     : command_list
@@ -58,7 +59,15 @@ command
     {   
         $$ = $1;
     }
+    | if_block STOP
+    {
+        $$ = $1;
+    }
     | break_exp STOP
+    {
+        $$ = $1;
+    }
+    | broken_exp STOP
     {
         $$ = $1;
     }
@@ -214,6 +223,46 @@ base_var_
     }
     ;
 
+if_block
+    : if_exp block
+    {
+        statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
+        $$ = $1;
+    }
+    | if_block elif_exp block
+    {
+        append_elif($2, $1->code.if_branch.done);
+        $$ = $1;
+        statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
+    }
+    ;
+
+elif_exp
+    : ELIF LB top_exp RB
+    {
+        statement *done_tmp =  make_statement();
+        $$ = make_if($3, done_tmp);
+        statement_base = append_statement_list(done_tmp, statement_base);  // new statement_base (FILO)
+    }
+    | ELSE
+    {
+        statement *done_tmp =  make_statement();
+        $$ = make_if(NULL, done_tmp);
+        statement_base = append_statement_list(done_tmp, statement_base);  // new statement_base (FILO)
+    }
+    ;
+
+if_exp
+    : IF LB top_exp RB
+    {
+        statement *if_tmp =  make_statement(), *done_tmp =  make_statement();
+        if_tmp->type = if_branch;
+        if_tmp->code.if_branch.done = make_if($3, done_tmp);
+        statement_base = append_statement_list(done_tmp, statement_base);  // new statement_base (FILO)
+        $$ = if_tmp;
+    }
+    ;
+
 while_block
     : while_exp block
     {
@@ -235,16 +284,41 @@ while_exp
 
 block
     : LP command_list RP
-    {
-        printf("start-0\n");
-    }
     ;
 
 break_exp
+    : break_token
+    | break_token element
+    {
+        $1->code.break_cycle.times = $2;
+        $$ = $1;
+    }
+    ;
+
+break_token
     : BREAK
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = break_cycle;
+        code_tmp->code.break_cycle.times = NULL;
+        $$ = code_tmp;
+    }
+    ;
+
+broken_exp
+    : broken_token
+    | broken_token element
+    {
+        $1->code.broken.times = $2;
+        $$ = $1;
+    }
+
+broken_token
+    : BROKEN
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = broken;
+        code_tmp->code.broken.times = NULL;
         $$ = code_tmp;
     }
     ;
@@ -252,7 +326,7 @@ break_exp
 %%
 int yyerror(char const *str)
 {
-    fprintf(stderr, "parser error near %s ;\n", yytext, yytext);
+    fprintf(stderr, "parser error near [%s] ;\n", yytext, yytext);
     return 0;
 }
 

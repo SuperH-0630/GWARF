@@ -11,9 +11,10 @@ GWARF_result sub_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result mul_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result div_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result assigment_func(char *, GWARF_result, var_list *);
-GWARF_result equal_func(GWARF_result, GWARF_result, var_list *, int type);
+GWARF_result equal_func(GWARF_result, GWARF_result, var_list *, int);
+GWARF_result if_func(if_list *, var_list *);
 
-// ------------------------- var func
+// ---- var func
 
 var *make_var(){  // make var with base
     var *tmp;
@@ -92,7 +93,7 @@ void del_var(char *name, var *base_var){  // free an address
     }
 }
 
-// ------------------------- statement list
+// ---- statement list
 
 statement *make_statement(){  // make statement
     statement *tmp;
@@ -114,7 +115,7 @@ statement *append_statement(statement *base_statement, statement *new_tmp){  // 
     return new_tmp;
 }
 
-// ------------------------- var_list
+// ---- var_list
 
 var_list *make_var_list(){  // make a empty var_list node
     var_list *tmp;
@@ -173,7 +174,7 @@ void add_var(var_list *var_base,int from, char *name, GWARF_value value){  // ad
     append_var(name, value, start->var_base);
 }
 
-// ------------------------- statement_list
+// ---- statement_list
 statement_list *make_statement_list(){  // make a empty var_list node
     statement_list *tmp;
     tmp = malloc(sizeof(statement_list));  // get an address for base var
@@ -215,7 +216,36 @@ statement_list *free_statement_list(statement_list *statment_list_base){  // mak
     return statment_list_base;
 }
 
-// ------------------------- run code
+// ---- if_list
+if_list *make_base_if(){  // make base if
+    if_list *tmp;
+    tmp = malloc(sizeof(if_list));  // get an address for base var
+    tmp->next = NULL;
+    tmp->done = NULL;
+    tmp->condition = NULL;
+    return tmp;
+}
+
+if_list *make_if(statement *condition, statement *done_base){  // if
+    if_list *tmp = make_base_if();
+    tmp->done = done_base;
+    tmp->condition = condition;
+    return tmp;
+}
+
+if_list *append_elif(if_list *tmp ,if_list *base_if_list){  // elif
+    if_list *start = base_if_list;
+    while(1){
+        if(start->next  == NULL){
+            break;
+        }
+        start = start->next;
+    }
+    start->next = tmp;
+    return tmp;
+}
+
+// ---- run code
 
 GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func
     GWARF_result return_value;
@@ -225,12 +255,40 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
     switch (the_statement->type)
     {
         case operation:  // 表达式运算
+            puts("----code----");
             return_value = operation_func(the_statement, the_var);
             printf("operation value = %f\n", return_value.value.value.double_value);
+            puts("----stop code----");
             break;
         case while_cycle:
+            puts("----while code----");
             return_value = while_func(the_statement, the_var);
+            if((return_value.u == cycle_break) || (return_value.u == code_broken)){
+                printf("cycle_break(broken) %f\n", return_value.value.value.double_value);
+                return_value.value.value.double_value -= 1;
+                if(return_value.value.value.double_value < 0){
+                    return_value.u = statement_end;  // 正常设置[正常语句结束]
+                }
+            }
             printf("while operation value = %f\n", return_value.value.value.double_value);
+            puts("----stop while code----");
+            break;
+        case if_branch:
+            puts("----if code----");
+            return_value = if_func(the_statement->code.if_branch.done, the_var);
+            if(return_value.u == cycle_break){
+                printf("cycle_break %f\n", return_value.value.value.double_value);
+            }
+            if(return_value.u == code_broken){
+                printf("broken %f\n", return_value.value.value.double_value);
+                return_value.value.value.double_value -= 1;
+                if(return_value.value.value.double_value < 0){
+                    return_value.u = statement_end;  // 正常设置[正常语句结束]
+                }
+            }
+            printf("if type = %d\n", return_value.u);
+            printf("if operation value = %f\n", return_value.value.value.double_value);
+            puts("----stop if code----");
             break;
         case base_value:  // get value[所有字面量均为这个表达式]
             return_value.value = (the_statement->code).base_value.value;  // code
@@ -250,6 +308,23 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
         }
         case break_cycle:
             return_value.u = cycle_break;
+            if(the_statement->code.break_cycle.times == NULL){
+                return_value.value.value.double_value = 0;
+            }
+            else{
+                return_value.value.value.double_value = traverse(the_statement->code.break_cycle.times, the_var, false).value.value.double_value;  // 执行语句，获得弹出层
+            }
+            printf("break num = %f\n", return_value.value.value.double_value);
+            break;
+        case broken:
+            return_value.u = code_broken;
+            if(the_statement->code.broken.times == NULL){
+                return_value.value.value.double_value = 0;
+            }
+            else{
+                return_value.value.value.double_value = traverse(the_statement->code.broken.times, the_var, false).value.value.double_value;  // 执行语句，获得弹出层
+            }
+            printf("broken num = %f\n", return_value.value.value.double_value);
             break;
         default:
             puts("default");
@@ -258,20 +333,50 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
     return return_value;
 }
 
+// -----------------if func
+
+GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statement list with case to run by func
+    GWARF_result value;
+    if_list *start = if_base;
+    while(1){
+        if(start->condition  == NULL){  // else
+            puts("----else----");
+            value = traverse(start->done, the_var, false);
+            puts("----stop else----");
+            break;
+        }
+        else{  // not else
+            GWARF_result condition;
+            condition = traverse(start->condition, the_var, false);
+            if(condition.value.value.double_value){  // condition run success
+                puts("----if----");
+                value = traverse(start->done, the_var, false);
+                puts("----stop if----");
+                break;
+            }
+        }
+        if(start->next  == NULL){  // not next
+            break;
+        }
+        start = start->next;
+    }
+    return value;
+}
+
 // -----------------while func
 
 GWARF_result while_func(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func
     GWARF_result value, condition;
     while (1){
         condition = traverse((*the_statement).code.while_cycle.condition, the_var, false);
-        printf("condition = %f\n", condition.value.value.double_value);
+        printf("while condition = %f\n", condition.value.value.double_value);
         if(!condition.value.value.double_value){
             break;
         }
         puts("----while----");
         value = traverse((*the_statement).code.operation.right_exp, the_var, false);
         puts("----stop while----");
-        if(value.u == cycle_break){  // break the while
+        if((value.u == cycle_break) || (value.u == code_broken)){  // break the while
             break;
         }
     }
@@ -282,6 +387,7 @@ GWARF_result while_func(statement *the_statement, var_list *the_var){  // read t
 
 GWARF_result operation_func(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func
     GWARF_result value, left_result, right_result;
+
     left_result = traverse((*the_statement).code.operation.left_exp, the_var, false);
     right_result = traverse((*the_statement).code.operation.right_exp, the_var, false);
     switch (the_statement->code.operation.type)  // 获取运算类型
@@ -324,6 +430,7 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var){  // re
         default:
             break;
     }
+    value.u = statement_end;  // 正常设置[正常语句结束]
     return value;
 }
 
@@ -416,7 +523,8 @@ GWARF_result traverse(statement *the_statement, var_list *the_var, bool new){  /
             break;  // off
         }
         result = read_statement_list(tmp, the_var);
-        if(result.u == cycle_break){  // don't next the statement and return the result [the while_func[or for func] will get the result and stop cycle]
+        if((result.u == cycle_break) || (result.u == code_broken)){  // don't next the statement and return the result [the while_func[or for func] will get the result and stop cycle]
+            puts("----break or broken----");
             break;
         }
         tmp = tmp->next;

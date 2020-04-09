@@ -5,7 +5,11 @@
 %s COMMENT STRING_TEXT
 %%
 <INITIAL>"while" {return WHILE;}
+<INITIAL>"if" {return IF;}
+<INITIAL>[\n]*elif {return ELIF;}
+<INITIAL>[\n]*else(\(\))? {return ELSE;}
 <INITIAL>"break" {return BREAK;}
+<INITIAL>"broken" {return BROKEN;}
 
 <INITIAL>"(" {return LB;}
 <INITIAL>")" {return RB;}
