@@ -8,7 +8,7 @@
 
 <INITIAL>"(" {return LB;}
 <INITIAL>")" {return RB;}
-<INITIAL>"{" {return LP;}
+<INITIAL>[\n]*\{[\n]* {return LP;}
 <INITIAL>"}" {return RP;}
 
 <INITIAL>">=" {return MOREEQ;}
@@ -38,6 +38,7 @@
 
 <INITIAL>" " ;
 <INITIAL>\n {return STOP;}
+<INITIAL>";" {return STOP;}
 <INITIAL>. {printf("text = [%s];\n", yytext);}
 
 <COMMENT>\n {BEGIN INITIAL;}

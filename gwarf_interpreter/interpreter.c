@@ -172,6 +172,48 @@ void add_var(var_list *var_base,int from, char *name, GWARF_value value){  // ad
     append_var(name, value, start->var_base);
 }
 
+// ------------------------- statement_list
+statement_list *make_statement_list(){  // make a empty var_list node
+    statement_list *tmp;
+    tmp = malloc(sizeof(statement_list));  // get an address for base var
+    tmp->next = NULL;
+    tmp->statement_base = NULL;
+    return tmp;
+}
+
+statement_list *make_statement_base(statement *gloabl_code){
+    statement_list *tmp = make_statement_list();
+    tmp->statement_base = gloabl_code;
+    return tmp;
+}
+
+statement_list *append_statement_list(statement *statement_base, statement_list *statment_list_base){  // make var_list[FILO]
+    statement_list *tmp = make_statement_list();
+    tmp->statement_base = statement_base;
+    tmp->next = statment_list_base;
+    return tmp;
+}
+
+statement *find_statement_list(int from, statement_list *statment_list_base){  // find var by func get_var in var_list[iter to find]
+    statement_list *start = statment_list_base;
+    for(int i = 0;i < from;i+= 1){
+        if(start->next = NULL){
+            break;
+        }
+        start = start->next;
+    }
+    return start->statement_base;
+}
+
+statement_list *free_statement_list(statement_list *statment_list_base){  // make var_list[FILO]
+    statement_list *tmp = statment_list_base->next;
+    if(tmp != NULL){
+        free(statment_list_base);
+        return tmp;
+    }
+    return statment_list_base;
+}
+
 // ------------------------- run code
 
 GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func

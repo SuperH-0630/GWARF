@@ -99,7 +99,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 9 "gwarf_yacc.y"
+#line 8 "gwarf_yacc.y"
 
     int int_value;
     double double_value;

@@ -3,7 +3,6 @@
     #include"lex.yy.c"
     #include"../gwarf_interpreter/interprete.h"
     extern int yylex (void);
-    statement *the_global_code, *now_code;
 %}
 
 %union{
@@ -20,19 +19,22 @@
 %%
 command_block
     : command_list
+    | while_block
     ;
 
 command_list
     : command
     {
         if($1 != NULL){
-            append_statement(now_code, $1);
+            statement *tmp = find_statement_list(0, statement_base);
+            append_statement(tmp, $1);
         }
     }
     | command_list command
     {   
         if($2 != NULL){
-            append_statement(global_inter->global_code, $2);
+            statement *tmp = find_statement_list(0, statement_base);
+            append_statement(tmp, $2);
         }
     }
     ;
@@ -198,18 +200,34 @@ base_var_
     }
     ;
 
+while_block
+    : while_exp block
+    {
+        printf("start-1\n");
+    }
+
+while_exp
+    : WHILE LB top_exp RB
+    {
+        printf("start-2\n");
+    }
+
+block
+    : LP command_list RP STOP
+    {
+        printf("start-0\n");
+    }
+
 %%
 int yyerror(char const *str)
 {
-    fprintf(stderr, "parser error near %s\n", yytext);
+    fprintf(stderr, "parser error near %s ;\n", yytext, yytext);
     return 0;
 }
 
-int parser(void)
+int parser(char *file)
 {
-    the_global_code = global_inter->global_code;
-    now_code = the_global_code;
-    yyin = fopen("/home/songzihuan/test.gwf","r");
+    yyin = fopen(file,"r");
     yyparse();
     return 0;
 }

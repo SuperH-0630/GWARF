@@ -87,6 +87,13 @@ typedef struct var_list{
     struct var_list *next;
 } var_list;
 
+// ------------------------- inter paser [记录每一层变量code的链表]
+
+typedef struct statement_list{
+    statement *statement_base;
+    struct statement_list *next;
+} statement_list;
+
 // ------------------------- inter
 
 typedef struct{
@@ -105,6 +112,12 @@ void del_var(char *, var *);
 statement *make_statement();
 statement *append_statement(statement *, statement*);
 
+statement_list *make_statement_list();
+statement_list *make_statement_base(statement *);
+statement_list *append_statement_list(statement *, statement_list *);
+statement *find_statement_list(int, statement_list *);
+statement_list *free_statement_list(statement_list *);
+
 //------- run func
 GWARF_result traverse(statement *, var_list *, bool);
 
@@ -118,3 +131,4 @@ char *yytext;
 
 // main
 inter *global_inter;
+statement_list *statement_base;
