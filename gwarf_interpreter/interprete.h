@@ -36,6 +36,7 @@ typedef struct statement{
         base_var,  // return var address
         base_value,  // return an number or number
         while_cycle,  // while
+        break_cycle,  // break
     } type;  // the statement type
 
     union
@@ -59,12 +60,21 @@ typedef struct statement{
         } operation;
 
         struct{
+            struct statement *condition;  // when to while 
+            struct statement *done;  // while to do
+        } while_cycle;
+
+        struct{
             char *var_name;  // return var
         } base_var;
 
         struct{
             GWARF_value value;  // return value
         } base_value;
+
+        struct{
+        } break_cycle;
+
     } code;
     struct statement *next;
 } statement;
@@ -75,8 +85,9 @@ typedef struct GWARF_result{
     GWARF_value value;
     enum{
         return_def=1,
-        break_while,
-        wrong,
+        statement_end,
+        cycle_break,
+        name_no_found,
     } u;  // the result type[from where]
 } GWARF_result;
 

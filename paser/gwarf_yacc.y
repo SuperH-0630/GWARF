@@ -13,13 +13,12 @@
 }
 %token <double_value> NUMBER
 %token <string_value> STRING VAR
-%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE STOP POW EQUAL MOREEQ LESSEQ NOTEQ
-%type <statement_value> base_number base_var_ element second_number first_number top_exp command third_number
+%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE STOP POW EQUAL MOREEQ LESSEQ NOTEQ BREAK
+%type <statement_value> base_number base_var_ element second_number first_number top_exp command third_number while_block while_exp break_exp
 
 %%
 command_block
     : command_list
-    | while_block
     ;
 
 command_list
@@ -37,6 +36,13 @@ command_list
             append_statement(tmp, $2);
         }
     }
+    | while_block
+    {   
+        if($1 != NULL){
+            statement *tmp = find_statement_list(0, statement_base);
+            append_statement(tmp, $1);
+        }
+    }
     ;
 
 command
@@ -45,6 +51,14 @@ command
         $$ = NULL;
     }
     | top_exp STOP
+    {
+        $$ = $1;
+    }
+    | while_block STOP
+    {   
+        $$ = $1;
+    }
+    | break_exp STOP
     {
         $$ = $1;
     }
@@ -203,20 +217,37 @@ base_var_
 while_block
     : while_exp block
     {
-        printf("start-1\n");
+        statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
     }
+    ;
 
 while_exp
     : WHILE LB top_exp RB
     {
-        printf("start-2\n");
+        statement *while_tmp =  make_statement();
+        while_tmp->type = while_cycle;
+        while_tmp->code.while_cycle.condition = $3;
+        while_tmp->code.while_cycle.done = make_statement();
+        statement_base = append_statement_list(while_tmp->code.while_cycle.done, statement_base);  // new statement_base (FILO)
+        $$ = while_tmp;
     }
+    ;
 
 block
-    : LP command_list RP STOP
+    : LP command_list RP
     {
         printf("start-0\n");
     }
+    ;
+
+break_exp
+    : BREAK
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = break_cycle;
+        $$ = code_tmp;
+    }
+    ;
 
 %%
 int yyerror(char const *str)

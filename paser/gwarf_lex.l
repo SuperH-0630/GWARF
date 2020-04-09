@@ -5,6 +5,7 @@
 %s COMMENT STRING_TEXT
 %%
 <INITIAL>"while" {return WHILE;}
+<INITIAL>"break" {return BREAK;}
 
 <INITIAL>"(" {return LB;}
 <INITIAL>")" {return RB;}

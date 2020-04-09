@@ -69,7 +69,8 @@ extern int yydebug;
     EQUAL = 275,
     MOREEQ = 276,
     LESSEQ = 277,
-    NOTEQ = 278
+    NOTEQ = 278,
+    BREAK = 279
   };
 #endif
 /* Tokens.  */
@@ -94,6 +95,7 @@ extern int yydebug;
 #define MOREEQ 276
 #define LESSEQ 277
 #define NOTEQ 278
+#define BREAK 279
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -106,7 +108,7 @@ union YYSTYPE
     char *string_value;
     void *statement_value;
 
-#line 110 "y.tab.h"
+#line 112 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
