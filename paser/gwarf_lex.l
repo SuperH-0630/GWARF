@@ -11,6 +11,8 @@
 <INITIAL>"break" {return BREAK;}
 <INITIAL>"broken" {return BROKEN;}
 <INITIAL>"continue" {return CONTINUE;}
+<INITIAL>"restart" {return RESTART;}
+<INITIAL>"restarted" {return RESTARTED;}
 <INITIAL>"continued" {return CONTINUED;}
 
 <INITIAL>"(" {return LB;}

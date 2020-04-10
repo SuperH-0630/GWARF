@@ -14,8 +14,9 @@
 }
 %token <double_value> NUMBER
 %token <string_value> STRING VAR
-%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE STOP POW EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED
-%type <statement_value> base_number base_var_ element second_number first_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp continued_token continued_exp
+%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE STOP POW EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED
+%type <statement_value> base_number base_var_ element second_number first_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
+%type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token
 %type <if_list_base> elif_exp
 %%
 command_block
@@ -76,6 +77,14 @@ command
         $$ = $1;
     }
     | continued_exp STOP
+    {
+        $$ = $1;
+    }
+    | restart_exp STOP
+    {
+        $$ = $1;
+    }
+    | restarted_exp STOP
     {
         $$ = $1;
     }
@@ -292,6 +301,44 @@ while_exp
 
 block
     : LP command_list RP
+    ;
+
+restarted_exp
+    : restarted_token
+    | restarted_token element
+    {
+        $1->code.restarted.times = $2;
+        $$ = $1;
+    }
+    ;
+
+restarted_token
+    : RESTARTED
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = restarted;
+        code_tmp->code.restarted.times = NULL;
+        $$ = code_tmp;
+    }
+    ;
+
+restart_exp
+    : restart_token
+    | restart_token element
+    {
+        $1->code.restart.times = $2;
+        $$ = $1;
+    }
+    ;
+
+restart_token
+    : RESTART
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = restart;
+        code_tmp->code.restart.times = NULL;
+        $$ = code_tmp;
+    }
     ;
 
 continued_exp

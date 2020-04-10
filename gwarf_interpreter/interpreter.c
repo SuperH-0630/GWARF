@@ -346,6 +346,26 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
             }
             printf("continued num = %f\n", return_value.value.value.double_value);
             break;
+        case restart:
+            return_value.u = cycle_restart;
+            if(the_statement->code.restart.times == NULL){
+                return_value.value.value.double_value = 0;
+            }
+            else{
+                return_value.value.value.double_value = traverse(the_statement->code.restart.times, the_var, false).value.value.double_value;  // 执行语句，获得弹出层
+            }
+            printf("restart num = %f\n", return_value.value.value.double_value);
+            break;
+        case restarted:
+            return_value.u = code_restarted;
+            if(the_statement->code.restarted.times == NULL){
+                return_value.value.value.double_value = 0;
+            }
+            else{
+                return_value.value.value.double_value = traverse(the_statement->code.restarted.times, the_var, false).value.value.double_value;  // 执行语句，获得弹出层
+            }
+            printf("restarted num = %f\n", return_value.value.value.double_value);
+            break;
         default:
             puts("default");
             break;
@@ -361,18 +381,42 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
     again: start = if_base;
     while(1){
         if(start->condition  == NULL){  // else
+            else_restart:
             puts("----else----");
             value = traverse(start->done, the_var, false);
             puts("----stop else----");
+            if(value.u == code_restarted){
+                if(value.value.value.double_value <= 0){
+                    puts("----restarted real----");
+                    value.u = statement_end;
+                    goto else_restart;
+                }
+                else{
+                    value.value.value.double_value -= 1;
+                    break;
+                }
+            }
             break;
         }
         else{  // not else
             GWARF_result condition;
             condition = traverse(start->condition, the_var, false);
             if(condition.value.value.double_value){  // condition run success
+                if_restart:
                 puts("----if----");
                 value = traverse(start->done, the_var, false);
                 puts("----stop if----");
+                if(value.u == code_restarted){
+                    if(value.value.value.double_value <= 0){
+                        puts("----restarted real----");
+                        value.u = statement_end;
+                        goto if_restart;
+                    }
+                    else{
+                        value.value.value.double_value -= 1;
+                        break;
+                    }
+                }
                 break;
             }
         }
@@ -381,7 +425,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
         }
         start = start->next;
     }
-    if(value.u == cycle_continue){  // if不处理也不计入层次 同break一样
+    if((value.u == cycle_continue) || (value.u == cycle_restart)){  // if不处理也不计入层次 同break一样
         ;
     }
     if(value.u == code_continued){
@@ -407,6 +451,7 @@ GWARF_result while_func(statement *the_statement, var_list *the_var){  // read t
         if(!condition.value.value.double_value){
             break;
         }
+        restart_again: 
         puts("----while----");
         value = traverse((*the_statement).code.operation.right_exp, the_var, false);
         puts("----stop while----");
@@ -419,6 +464,17 @@ GWARF_result while_func(statement *the_statement, var_list *the_var){  // read t
                 puts("----continue real----");
                 value.u = statement_end;
                 continue;
+            }
+            else{
+                value.value.value.double_value -= 1;
+                break;
+            }
+        }
+        if((value.u == cycle_restart) || (value.u == code_restarted)){
+            if(value.value.value.double_value <= 0){
+                puts("----restart real----");
+                value.u = statement_end;
+                goto restart_again;
             }
             else{
                 value.value.value.double_value -= 1;
@@ -573,8 +629,8 @@ GWARF_result traverse(statement *the_statement, var_list *the_var, bool new){  /
             puts("----break or broken----");
             break;
         }
-        if((result.u == cycle_continue) || (result.u == code_continued)){
-            puts("----continue or continued----");
+        if((result.u == cycle_continue) || (result.u == code_continued) || (result.u == cycle_restart) || (result.u == code_restarted)){
+            puts("----continue/continued or restart/restarted----");
             break;
         }
         tmp = tmp->next;

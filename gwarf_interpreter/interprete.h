@@ -41,6 +41,8 @@ typedef struct statement{
         broken,  // break_cycle and other {}
         continue_cycle,
         continued,
+        restart,
+        restarted,
     } type;  // the statement type
 
     union
@@ -96,6 +98,14 @@ typedef struct statement{
             struct statement *times;  // 层数
         } continued;
 
+        struct{
+            struct statement *times;  // 层数
+        } restart;
+
+        struct{
+            struct statement *times;  // 层数
+        } restarted;
+
     } code;
     struct statement *next;
 } statement;
@@ -111,6 +121,8 @@ typedef struct GWARF_result{
         code_broken,
         cycle_continue,
         code_continued,
+        cycle_restart,
+        code_restarted,
         name_no_found,
     } u;  // the result type[from where]
 } GWARF_result;
