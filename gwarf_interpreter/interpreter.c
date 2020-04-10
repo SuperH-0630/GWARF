@@ -93,6 +93,54 @@ void del_var(char *name, var *base_var){  // free an address
     }
 }
 
+// --------------default_var
+
+default_var *make_default_var(){  // make_default_var
+    default_var *tmp;
+    tmp = malloc(sizeof(default_var));  // get an address for default_var
+    tmp->next = NULL;
+    return tmp;
+}
+
+default_var *make_default_var_base(){  // if
+    default_var *tmp = make_default_var();
+    tmp->name = "";
+    tmp->from = 0;
+    return tmp;
+}
+
+void append_default_var_base(char *name ,int from, default_var *base_default_var){  // elif
+    default_var *start = base_default_var;
+    while(1){
+        if (!strcmp(start->name, name)){  // if tmp->name == name , strcmp will return 0, if not strcmp return not 0
+            puts("SECOND");
+            return;  // 不可以二次设置
+        }
+        if (start->next == NULL){  // not var name *name
+            break;
+        }
+        start = start->next;  // get the next to iter
+    }
+    default_var *tmp = make_default_var();
+    tmp->name = name;
+    tmp->from = from;
+    start->next = tmp;
+    return;
+}
+
+int get_default(char *name, default_var *base_default_var){  // get the address
+    default_var *tmp = base_default_var;  // iter var
+    while(1){
+        if (!strcmp(tmp->name, name)){  // if tmp->name == name , strcmp will return 0, if not strcmp return not 0
+            return tmp->from;
+        }
+        if (tmp->next == NULL){  // not var name *name
+            return 0;
+        }
+        tmp = tmp->next;  // get the next to iter
+    }
+}
+
 // ---- statement list
 
 statement *make_statement(){  // make statement
@@ -122,6 +170,7 @@ var_list *make_var_list(){  // make a empty var_list node
     tmp = malloc(sizeof(var_list));  // get an address for base var
     tmp->next = NULL;
     tmp->var_base = NULL;
+    tmp->default_list = make_default_var_base();
     return tmp;
 }
 
@@ -151,6 +200,8 @@ var_list *free_var_list(var_list *var_list_base){  // free one var_list[FILO]
 var *find_var(var_list *var_base,int from, char *name){  // find var by func get_var in var_list[iter to find]
     var_list *start = var_base;
     var *return_var;
+    from += get_default(name, var_base->default_list);
+    printf("find from = %d\n", from);
     for(int i = 0;i < from;i+= 1){
         printf("the start = %d\n", start);
         if(start->next == NULL){
@@ -176,6 +227,9 @@ var *find_var(var_list *var_base,int from, char *name){  // find var by func get
 void add_var(var_list *var_base,int from, char *name, GWARF_value value){  // add var by func append_var in var_list[iter to find]
     var_list *start = var_base;
     var *return_var;
+    printf("base from = %d\n", from);
+    from += get_default(name, var_base->default_list);
+    printf("add from = %d\n", from);
     for(int i = 0;i < from;i+= 1){
         if(start->next == NULL){
             break;
@@ -382,6 +436,13 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
         case rego:
             return_value.u = code_rego;  // rego now
             break;
+        case set_default:{
+            char *name = the_statement->code.set_default.name;
+            int base_from = (int)traverse(the_statement->code.set_default.times, the_var, false).value.value.double_value;
+            append_default_var_base(name, base_from, the_var->default_list);
+            printf("set_default for %s\n", name);
+            break;
+        }
         default:
             puts("default");
             break;
@@ -568,11 +629,11 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var){  // re
         case ASSIGMENT_func:{  // because the var char, we should ues a {} to make a block[name space] for the tmp var;
             char *left = (the_statement->code.operation.left_exp)->code.base_var.var_name;  // get var name but not value
             int from = 0;
-            if((the_statement->code).base_var.from == NULL){
+            if((the_statement->code.operation.left_exp)->code.base_var.from == NULL){
                 from = 0;
             }
             else{
-                from = (int)traverse((the_statement->code).base_var.from, the_var, false).value.value.double_value;
+                from = (int)traverse((the_statement->code.operation.left_exp)->code.base_var.from, the_var, false).value.value.double_value;
             }
             value = assigment_func(left, right_result, the_var, from);
             break;
@@ -704,8 +765,8 @@ GWARF_result traverse(statement *the_statement, var_list *the_var, bool new){  /
             result = result2;
             break;
             }
-        if((result2.u == cycle_continue) || (result2.u == code_continued) || (result.u == cycle_restart) || (result.u == code_restarted)){
-            puts("----continue/continued or restart/restarted----");
+        if((result2.u == cycle_continue) || (result2.u == code_continued) || (result2.u == cycle_restart) || (result2.u == code_restarted)){
+            printf("----continue/continued or restart/restarted----[%d]", result2.u);
             result = result2;
             break;
         }

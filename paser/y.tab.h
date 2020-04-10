@@ -82,7 +82,8 @@ extern int yydebug;
     REGO = 288,
     REWENT = 289,
     RI = 290,
-    LI = 291
+    LI = 291,
+    DEFAULT = 292
   };
 #endif
 /* Tokens.  */
@@ -120,6 +121,7 @@ extern int yydebug;
 #define REWENT 289
 #define RI 290
 #define LI 291
+#define DEFAULT 292
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -133,7 +135,7 @@ union YYSTYPE
     struct statement *statement_value;
     struct if_list *if_list_base;
 
-#line 137 "y.tab.h"
+#line 139 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

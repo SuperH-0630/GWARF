@@ -37,6 +37,7 @@
 <INITIAL>"^" {return POW;}
 <INITIAL>"[" {return LI;}
 <INITIAL>"]" {return RI;}
+<INITIAL>"default" {return DEFAULT;}
 
 <INITIAL>"#" {BEGIN COMMENT;}
 <INITIAL>' {BEGIN STRING_TEXT;}

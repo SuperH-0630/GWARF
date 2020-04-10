@@ -45,6 +45,7 @@ typedef struct statement{
         restarted,
         rego,
         rewent,
+        set_default,
     } type;  // the statement type
 
     union
@@ -115,6 +116,11 @@ typedef struct statement{
         struct{
         } rewent;
 
+        struct{
+            char *name;
+            struct statement *times;  // 层数
+        } set_default;
+
     } code;
     struct statement *next;
 } statement;
@@ -138,10 +144,18 @@ typedef struct GWARF_result{
     } u;  // the result type[from where]
 } GWARF_result;
 
+// ------------------------- default_var [记录默认变量[层]]
+typedef struct default_var{
+    char *name;
+    int from;
+    struct default_var *next;
+} default_var;
+
 // ------------------------- var base list [记录每一层变量base的链表]
 
 typedef struct var_list{
     var *var_base;
+    default_var *default_list;
     struct var_list *next;
 } var_list;
 
@@ -174,6 +188,13 @@ void append_var(char *, GWARF_value , var *);
 void free_var(var *);
 var *get_var(char *, var *);
 void del_var(char *, var *);
+
+
+default_var *make_default_var();
+default_var *make_default_var_base();
+void append_default_var_base(char * ,int , default_var *);
+int get_default(char *, default_var *);
+
 
 //------- statement func
 statement *make_statement();

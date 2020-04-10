@@ -14,9 +14,9 @@
 }
 %token <double_value> NUMBER
 %token <string_value> STRING VAR
-%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE STOP POW EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI
+%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE STOP POW EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI DEFAULT
 %type <statement_value> base_number base_var_token base_var_ element second_number first_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
-%type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token
+%type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token
 %type <if_list_base> elif_exp
 %%
 command_block
@@ -99,6 +99,10 @@ command
         statement *code_tmp =  make_statement();
         code_tmp->type = rewent;
         $$ = code_tmp;
+    }
+    | default_token STOP
+    {
+        $$ = $1;
     }
     ;
 
@@ -240,6 +244,21 @@ base_number
     }
     ;
 
+default_token
+    : DEFAULT base_var_token element
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = set_default;
+        code_tmp->code.set_default.times = $3;
+        code_tmp->code.set_default.name = malloc(sizeof($2->code.base_var.var_name));
+        char *name_tmp = code_tmp->code.set_default.name;
+        strcpy(name_tmp, $2->code.base_var.var_name);
+        free($2->code.base_var.var_name);
+        free($2);
+        $$ = code_tmp;
+    }
+    ;
+
 base_var_
     : base_var_token
     | LI element RI base_var_token
@@ -256,6 +275,7 @@ base_var_token
         code_tmp->code.base_var.var_name = malloc(sizeof($1));
         char *name_tmp = code_tmp->code.base_var.var_name;
         code_tmp->type = base_var;
+        code_tmp->code.base_var.from = NULL;
         strcpy(name_tmp, $1);
         $$ = code_tmp;
     }
