@@ -78,7 +78,11 @@ extern int yydebug;
     CONTINUE = 284,
     CONTINUED = 285,
     RESTART = 286,
-    RESTARTED = 287
+    RESTARTED = 287,
+    REGO = 288,
+    REWENT = 289,
+    RI = 290,
+    LI = 291
   };
 #endif
 /* Tokens.  */
@@ -112,6 +116,10 @@ extern int yydebug;
 #define CONTINUED 285
 #define RESTART 286
 #define RESTARTED 287
+#define REGO 288
+#define REWENT 289
+#define RI 290
+#define LI 291
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -125,7 +133,7 @@ union YYSTYPE
     struct statement *statement_value;
     struct if_list *if_list_base;
 
-#line 129 "y.tab.h"
+#line 137 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

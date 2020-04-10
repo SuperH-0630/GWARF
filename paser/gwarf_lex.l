@@ -14,6 +14,9 @@
 <INITIAL>"restart" {return RESTART;}
 <INITIAL>"restarted" {return RESTARTED;}
 <INITIAL>"continued" {return CONTINUED;}
+<INITIAL>"rego" {return REGO;}
+<INITIAL>"rewent" {return REWENT;}
+
 
 <INITIAL>"(" {return LB;}
 <INITIAL>")" {return RB;}
@@ -32,6 +35,8 @@
 <INITIAL>"*" {return MUL;}
 <INITIAL>"/" {return DIV;}
 <INITIAL>"^" {return POW;}
+<INITIAL>"[" {return LI;}
+<INITIAL>"]" {return RI;}
 
 <INITIAL>"#" {BEGIN COMMENT;}
 <INITIAL>' {BEGIN STRING_TEXT;}
@@ -46,7 +51,7 @@
     }
 
 <INITIAL>" " ;
-<INITIAL>\n {return STOP;}
+<INITIAL>;?\n {return STOP;}
 <INITIAL>";" {return STOP;}
 <INITIAL>. {printf("text = [%s];\n", yytext);}
 

@@ -29,6 +29,7 @@
         "optional": "c",
         "fstream": "c",
         "streambuf": "c",
-        "interprete.h": "c"
+        "interprete.h": "c",
+        "mutex": "c"
     }
 }

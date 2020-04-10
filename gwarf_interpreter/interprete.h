@@ -43,6 +43,8 @@ typedef struct statement{
         continued,
         restart,
         restarted,
+        rego,
+        rewent,
     } type;  // the statement type
 
     union
@@ -76,6 +78,7 @@ typedef struct statement{
 
         struct{
             char *var_name;  // return var
+            struct statement *from;  // from where [double->int]
         } base_var;
 
         struct{
@@ -106,6 +109,12 @@ typedef struct statement{
             struct statement *times;  // 层数
         } restarted;
 
+        struct{
+        } rego;
+
+        struct{
+        } rewent;
+
     } code;
     struct statement *next;
 } statement;
@@ -123,6 +132,8 @@ typedef struct GWARF_result{
         code_continued,
         cycle_restart,
         code_restarted,
+        code_rego,
+        code_rewent,
         name_no_found,
     } u;  // the result type[from where]
 } GWARF_result;

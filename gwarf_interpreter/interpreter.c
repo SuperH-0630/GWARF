@@ -10,7 +10,7 @@ GWARF_result add_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result sub_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result mul_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result div_func(GWARF_result, GWARF_result, var_list *);
-GWARF_result assigment_func(char *, GWARF_result, var_list *);
+GWARF_result assigment_func(char *, GWARF_result, var_list *, int);
 GWARF_result equal_func(GWARF_result, GWARF_result, var_list *, int);
 GWARF_result if_func(if_list *, var_list *);
 
@@ -125,7 +125,7 @@ var_list *make_var_list(){  // make a empty var_list node
     return tmp;
 }
 
-var_list *make_var_base(var *gloabl_var){
+var_list *make_var_base(var *gloabl_var){  // make the base for global_var
     var_list *tmp = make_var_list();
     tmp->var_base = gloabl_var;
     return tmp;
@@ -139,15 +139,26 @@ var_list *append_var_list(var *var_base, var_list *var_list_base){  // make var_
     return tmp;
 }
 
+var_list *free_var_list(var_list *var_list_base){  // free one var_list[FILO]
+    var_list *tmp = var_list_base->next;
+    if(tmp==NULL){
+        return var_list_base;
+    }
+    free(var_list_base);
+    return tmp;
+}
+
 var *find_var(var_list *var_base,int from, char *name){  // find var by func get_var in var_list[iter to find]
     var_list *start = var_base;
     var *return_var;
     for(int i = 0;i < from;i+= 1){
-        if(start->next = NULL){
+        printf("the start = %d\n", start);
+        if(start->next == NULL){
             break;
         }
         start = start->next;
     }
+    printf("----find address = %d----\n", start);
     while (1)
     {
         return_var = get_var(name, start->var_base);
@@ -165,12 +176,13 @@ var *find_var(var_list *var_base,int from, char *name){  // find var by func get
 void add_var(var_list *var_base,int from, char *name, GWARF_value value){  // add var by func append_var in var_list[iter to find]
     var_list *start = var_base;
     var *return_var;
-    for(int i = 0;i < 100;i+= 1){
+    for(int i = 0;i < from;i+= 1){
         if(start->next == NULL){
             break;
         }
         start = start->next;
     }
+    printf("----add address = %d----\n", start);
     append_var(name, value, start->var_base);
 }
 
@@ -276,17 +288,6 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
         case if_branch:
             puts("----if code----");
             return_value = if_func(the_statement->code.if_branch.done, the_var);
-            if(return_value.u == cycle_break){
-                printf("cycle_break %f\n", return_value.value.value.double_value);
-            }
-            if(return_value.u == code_broken){
-                printf("broken %f\n", return_value.value.value.double_value);
-                return_value.value.value.double_value -= 1;
-                if(return_value.value.value.double_value < 0){
-                    return_value.u = statement_end;  // 正常设置[正常语句结束]
-                }
-            }
-            printf("if type = %d\n", return_value.u);
             printf("if operation value = %f\n", return_value.value.value.double_value);
             puts("----stop if code----");
             break;
@@ -295,7 +296,16 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
             printf("get value = %f\n", return_value.value.value.double_value);
             break;
         case base_var:{    // because the var tmp, we should ues a {} to make a block[name space] for the tmp var;
-            var *tmp = find_var(the_var, 0, (the_statement->code).base_var.var_name);
+            int from = 0;
+            if((the_statement->code).base_var.from == NULL){
+                from = 0;
+            }
+            else{
+                from = (int)traverse((the_statement->code).base_var.from, the_var, false).value.value.double_value;
+            }
+            printf("the_var = %d\n", the_var);
+            printf("from = %d\n", from);
+            var *tmp = find_var(the_var, from, (the_statement->code).base_var.var_name);
             if(tmp == NULL){
                 return_value.u = name_no_found;  // nameerror
             }
@@ -366,6 +376,12 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
             }
             printf("restarted num = %f\n", return_value.value.value.double_value);
             break;
+        case rewent:
+            return_value.u = code_rewent;  // rego but not now
+            break;
+        case rego:
+            return_value.u = code_rego;  // rego now
+            break;
         default:
             puts("default");
             break;
@@ -379,12 +395,15 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
     GWARF_result value;
     if_list *start;
     again: start = if_base;
+    bool rego = false;  // switch...case...
     while(1){
         if(start->condition  == NULL){  // else
             else_restart:
             puts("----else----");
-            value = traverse(start->done, the_var, false);
+            value = traverse(start->done, the_var, true);
             puts("----stop else----");
+            
+            // restarted
             if(value.u == code_restarted){
                 if(value.value.value.double_value <= 0){
                     puts("----restarted real----");
@@ -396,16 +415,38 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
                     break;
                 }
             }
-            break;
+
+            if(value.u == code_continued){
+                if(value.value.value.double_value <= 0){
+                    puts("----if continue real----");
+                    value.u = statement_end;
+                    goto again;
+                }
+                else{
+                    value.value.value.double_value -= 1;
+                }
+                break;
+            }
+            if(value.u == code_broken){
+                value.value.value.double_value -= 1;
+                if(value.value.value.double_value < 0){
+                    value.u = statement_end;  // 正常设置[正常语句结束]
+                }
+                break;
+            }
+
+            break;  // else not next and don't need rego
         }
         else{  // not else
             GWARF_result condition;
             condition = traverse(start->condition, the_var, false);
-            if(condition.value.value.double_value){  // condition run success
+            if(rego || (condition.value.value.double_value)){  // condition run success or rego(condition won't do) bug rewent can
                 if_restart:
                 puts("----if----");
-                value = traverse(start->done, the_var, false);
+                value = traverse(start->done, the_var, true);
                 puts("----stop if----");
+
+                // restarted
                 if(value.u == code_restarted){
                     if(value.value.value.double_value <= 0){
                         puts("----restarted real----");
@@ -417,7 +458,35 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
                         break;
                     }
                 }
-                break;
+                
+                // 设在在rewent和rego前面
+                if(value.u == code_continued){
+                    if(value.value.value.double_value <= 0){
+                        puts("----if continue real----");
+                        value.u = statement_end;
+                        goto again;
+                    }
+                    else{
+                        value.value.value.double_value -= 1;
+                    }
+                    break;
+                }
+                if(value.u == code_broken){
+                    value.value.value.double_value -= 1;
+                    if(value.value.value.double_value < 0){
+                        value.u = statement_end;  // 正常设置[正常语句结束]
+                    }
+                    break;
+                }
+
+                if((value.u == code_rewent) || (value.u == code_rego)){
+                    rego = true;
+                }
+
+                // not restarted -> if is rego
+                if(!rego){
+                    break;  // don't rego
+                }
             }
         }
         if(start->next  == NULL){  // not next
@@ -425,18 +494,8 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
         }
         start = start->next;
     }
-    if((value.u == cycle_continue) || (value.u == cycle_restart)){  // if不处理也不计入层次 同break一样
+    if((value.u == cycle_continue) || (value.u == cycle_restart) || (value.u == cycle_break)){  // if不处理也不计入层次 同break一样
         ;
-    }
-    if(value.u == code_continued){
-        if(value.value.value.double_value <= 0){
-            puts("----if continue real----");
-            value.u = statement_end;
-            goto again;
-        }
-        else{
-            value.value.value.double_value -= 1;
-        }
     }
     return value;
 }
@@ -453,7 +512,7 @@ GWARF_result while_func(statement *the_statement, var_list *the_var){  // read t
         }
         restart_again: 
         puts("----while----");
-        value = traverse((*the_statement).code.operation.right_exp, the_var, false);
+        value = traverse((*the_statement).code.operation.right_exp, the_var, true);
         puts("----stop while----");
         if((value.u == cycle_break) || (value.u == code_broken)){  // break the while
             break;
@@ -508,7 +567,14 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var){  // re
             break;
         case ASSIGMENT_func:{  // because the var char, we should ues a {} to make a block[name space] for the tmp var;
             char *left = (the_statement->code.operation.left_exp)->code.base_var.var_name;  // get var name but not value
-            value = assigment_func(left, right_result, the_var);
+            int from = 0;
+            if((the_statement->code).base_var.from == NULL){
+                from = 0;
+            }
+            else{
+                from = (int)traverse((the_statement->code).base_var.from, the_var, false).value.value.double_value;
+            }
+            value = assigment_func(left, right_result, the_var, from);
             break;
         }
         case EQUAL_func:
@@ -581,8 +647,8 @@ GWARF_result div_func(GWARF_result left_result, GWARF_result right_result, var_l
 }
 
 // ---------  ASSIGMENT
-GWARF_result assigment_func(char *left, GWARF_result right_result, var_list *the_var){  // the func for assigment and call from read_statement_list
-    add_var(the_var, 0, left, right_result.value);
+GWARF_result assigment_func(char *left, GWARF_result right_result, var_list *the_var, int from){  // the func for assigment and call from read_statement_list
+    add_var(the_var, from, left, right_result.value);
     return right_result;
 }
 
@@ -619,21 +685,49 @@ GWARF_result equal_func(GWARF_result left_result, GWARF_result right_result, var
 // --------- traverse[iter]
 GWARF_result traverse(statement *the_statement, var_list *the_var, bool new){  // traverse the statement
     statement *tmp = the_statement;
-    GWARF_result result;
+    GWARF_result result, result2;
+    bool lock = false;
+    if(new){  // need to make new var
+        printf("----address = %d----\n", the_var);
+        var *tmp = make_var();  // base_var
+        the_var = append_var_list(tmp, the_var);
+        printf("----new address = %d----\n", the_var);
+    }
     while(1){
         if(tmp == NULL){
             break;  // off
         }
-        result = read_statement_list(tmp, the_var);
-        if((result.u == cycle_break) || (result.u == code_broken)){  // don't next the statement and return the result [the while_func[or for func] will get the result and stop cycle]
+        result2 = read_statement_list(tmp, the_var);
+
+        if((result2.u == cycle_break) || (result2.u == code_broken)){  // don't next the statement and return the result [the while_func[or for func] will get the result and stop cycle]
             puts("----break or broken----");
+            result = result2;
+            break;
+            }
+        if((result2.u == cycle_continue) || (result2.u == code_continued) || (result.u == cycle_restart) || (result.u == code_restarted)){
+            puts("----continue/continued or restart/restarted----");
+            result = result2;
             break;
         }
-        if((result.u == cycle_continue) || (result.u == code_continued) || (result.u == cycle_restart) || (result.u == code_restarted)){
-            puts("----continue/continued or restart/restarted----");
+
+        if(result2.u == code_rego){
+            puts("----rego----");  // rego now
+            result = result2;
             break;
+        }
+
+        if(result2.u == code_rewent){
+            lock = true;  // keep the result is rewent for return
+            result = result2;
+        }
+
+        if(!lock){
+            result = result2;
         }
         tmp = tmp->next;
+    }
+    if(new){  // need to make new var
+        the_var = free_var_list(the_var);  // free the new var
     }
     return result;
 }

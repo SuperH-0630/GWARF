@@ -14,8 +14,8 @@
 }
 %token <double_value> NUMBER
 %token <string_value> STRING VAR
-%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE STOP POW EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED
-%type <statement_value> base_number base_var_ element second_number first_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
+%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE STOP POW EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI
+%type <statement_value> base_number base_var_token base_var_ element second_number first_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
 %type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token
 %type <if_list_base> elif_exp
 %%
@@ -87,6 +87,18 @@ command
     | restarted_exp STOP
     {
         $$ = $1;
+    }
+    | REGO STOP
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = rego;
+        $$ = code_tmp;
+    }
+    | REWENT STOP
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = rewent;
+        $$ = code_tmp;
     }
     ;
 
@@ -229,6 +241,15 @@ base_number
     ;
 
 base_var_
+    : base_var_token
+    | LI element RI base_var_token
+    {
+        $4->code.base_var.from = $2;
+        $$ = $4;
+    }
+    ;
+
+base_var_token
     : VAR
     {
         statement *code_tmp =  make_statement();
