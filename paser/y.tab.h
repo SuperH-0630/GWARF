@@ -50,21 +50,21 @@ extern int yydebug;
   enum yytokentype
   {
     NUMBER = 258,
-    STRING = 259,
-    VAR = 260,
-    ADD = 261,
-    SUB = 262,
-    DIV = 263,
-    MUL = 264,
-    EQ = 265,
-    LESS = 266,
-    MORE = 267,
-    RB = 268,
-    LB = 269,
-    RP = 270,
-    LP = 271,
-    WHILE = 272,
-    STOP = 273,
+    INT = 259,
+    STRING = 260,
+    VAR = 261,
+    ADD = 262,
+    SUB = 263,
+    DIV = 264,
+    MUL = 265,
+    EQ = 266,
+    LESS = 267,
+    MORE = 268,
+    RB = 269,
+    LB = 270,
+    RP = 271,
+    LP = 272,
+    WHILE = 273,
     POW = 274,
     EQUAL = 275,
     MOREEQ = 276,
@@ -87,26 +87,30 @@ extern int yydebug;
     FOR = 293,
     COMMA = 294,
     GLOBAL = 295,
-    NONLOCAL = 296
+    NONLOCAL = 296,
+    INDENTA = 297,
+    STOPN = 298,
+    STOPF = 299,
+    BLOCK = 300
   };
 #endif
 /* Tokens.  */
 #define NUMBER 258
-#define STRING 259
-#define VAR 260
-#define ADD 261
-#define SUB 262
-#define DIV 263
-#define MUL 264
-#define EQ 265
-#define LESS 266
-#define MORE 267
-#define RB 268
-#define LB 269
-#define RP 270
-#define LP 271
-#define WHILE 272
-#define STOP 273
+#define INT 259
+#define STRING 260
+#define VAR 261
+#define ADD 262
+#define SUB 263
+#define DIV 264
+#define MUL 265
+#define EQ 266
+#define LESS 267
+#define MORE 268
+#define RB 269
+#define LB 270
+#define RP 271
+#define LP 272
+#define WHILE 273
 #define POW 274
 #define EQUAL 275
 #define MOREEQ 276
@@ -130,12 +134,16 @@ extern int yydebug;
 #define COMMA 294
 #define GLOBAL 295
 #define NONLOCAL 296
+#define INDENTA 297
+#define STOPN 298
+#define STOPF 299
+#define BLOCK 300
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 8 "gwarf_yacc.y"
+#line 10 "gwarf_yacc.y"
 
     int int_value;
     double double_value;
@@ -143,7 +151,7 @@ union YYSTYPE
     struct statement *statement_value;
     struct if_list *if_list_base;
 
-#line 147 "y.tab.h"
+#line 155 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

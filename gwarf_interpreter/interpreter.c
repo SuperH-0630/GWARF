@@ -15,6 +15,7 @@ GWARF_result equal_func(GWARF_result, GWARF_result, var_list *, int);
 GWARF_result if_func(if_list *, var_list *);
 GWARF_result for_func(statement *, var_list *);
 int get_var_list_len(var_list *);
+GWARF_result block_func(statement *, var_list *);
 
 // ---- var func
 
@@ -337,30 +338,37 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
         case operation:  // 表达式运算
             puts("----code----");
             return_value = operation_func(the_statement, the_var);
-            printf("operation value = %f\n", return_value.value.value.double_value);
+            if(return_value.value.type == INT_value){
+                printf("operation value = %d\n", return_value.value.value.int_value);
+            }
+            else{
+                printf("operation value = %f\n", return_value.value.value.double_value);
+            }
             puts("----stop code----");
             break;
         case while_cycle:
             puts("----while code----");
             return_value = while_func(the_statement, the_var);
-            printf("while operation value = %f\n", return_value.value.value.double_value);
             puts("----stop while code----");
             break;
         case for_cycle:
             puts("----for code----");
             return_value = for_func(the_statement, the_var);
-            printf("for operation value = %f\n", return_value.value.value.double_value);
             puts("----for while code----");
             break;
         case if_branch:
             puts("----if code----");
             return_value = if_func(the_statement->code.if_branch.done, the_var);
-            printf("if operation value = %f\n", return_value.value.value.double_value);
             puts("----stop if code----");
             break;
         case base_value:  // get value[所有字面量均为这个表达式]
             return_value.value = (the_statement->code).base_value.value;  // code
-            printf("get value = %f\n", return_value.value.value.double_value);
+            if(return_value.value.type == INT_value){
+                printf("get value = %d\n", return_value.value.value.int_value);
+            }
+            else{
+                printf("get value = %f\n", return_value.value.value.double_value);
+            }
             break;
         case base_var:{    // because the var tmp, we should ues a {} to make a block[name space] for the tmp var;
             int from = 0;
@@ -370,8 +378,6 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
             else{
                 from = (int)traverse((the_statement->code).base_var.from, the_var, false).value.value.double_value;
             }
-            printf("the_var = %d\n", the_var);
-            printf("from = %d\n", from);
             var *tmp = find_var(the_var, from, (the_statement->code).base_var.var_name);
             if(tmp == NULL){
                 return_value.u = name_no_found;  // nameerror
@@ -379,69 +385,122 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
             else
             {
                 return_value.value = tmp->value;  // get_var
-                printf("var value = %f\n", return_value.value.value.double_value);
+                if(return_value.value.type == INT_value){
+                    printf("var value = %d\n", return_value.value.value.int_value);
+                }
+                else{
+                    printf("var value = %f\n", return_value.value.value.double_value);
+                }
             }
             break;
         }
         case break_cycle:
             return_value.u = cycle_break;
+            return_value.value.type = INT_value;
             if(the_statement->code.break_cycle.times == NULL){
-                return_value.value.value.double_value = 0;
+                return_value.value.value.int_value = 0;
             }
             else{
-                return_value.value.value.double_value = traverse(the_statement->code.break_cycle.times, the_var, false).value.value.double_value;  // 执行语句，获得弹出层
+                int int_tmp;
+                GWARF_result tmp_result = traverse(the_statement->code.break_cycle.times, the_var, false);
+                if(tmp_result.value.type == INT_value){
+                    int_tmp = tmp_result.value.value.int_value;
+                }
+                else{
+                    int_tmp = (int)tmp_result.value.value.double_value;
+                }
+                return_value.value.value.int_value = int_tmp;
             }
-            printf("break num = %f\n", return_value.value.value.double_value);
             break;
         case broken:
             return_value.u = code_broken;
+            return_value.value.type = INT_value;
             if(the_statement->code.broken.times == NULL){
-                return_value.value.value.double_value = 0;
+                return_value.value.value.int_value = 0;
             }
             else{
-                return_value.value.value.double_value = traverse(the_statement->code.broken.times, the_var, false).value.value.double_value;  // 执行语句，获得弹出层
+                GWARF_result tmp_result = traverse(the_statement->code.broken.times, the_var, false);
+                int int_tmp;
+                if(tmp_result.value.type == INT_value){
+                    int_tmp = tmp_result.value.value.int_value;
+                }
+                else{
+                    int_tmp = (int)tmp_result.value.value.double_value;
+                }
+                return_value.value.value.int_value = int_tmp;
             }
-            printf("broken num = %f\n", return_value.value.value.double_value);
             break;
         case continue_cycle:
             return_value.u = cycle_continue;
+            return_value.value.type = INT_value;
             if(the_statement->code.continue_cycle.times == NULL){
-                return_value.value.value.double_value = 0;
+                return_value.value.value.int_value = 0;
             }
             else{
-                return_value.value.value.double_value = traverse(the_statement->code.continue_cycle.times, the_var, false).value.value.double_value;  // 执行语句，获得弹出层
+                GWARF_result tmp_result = traverse(the_statement->code.continue_cycle.times, the_var, false);
+                int int_tmp;
+                if(tmp_result.value.type == INT_value){
+                    int_tmp = tmp_result.value.value.int_value;
+                }
+                else{
+                    int_tmp = (int)tmp_result.value.value.double_value;
+                }
+                return_value.value.value.int_value = int_tmp;
             }
-            printf("continue num = %f\n", return_value.value.value.double_value);
             break;
         case continued:
             return_value.u = code_continued;
+            return_value.value.type = INT_value;
             if(the_statement->code.continued.times == NULL){
-                return_value.value.value.double_value = 0;
+                return_value.value.value.int_value = 0;
             }
             else{
-                return_value.value.value.double_value = traverse(the_statement->code.continued.times, the_var, false).value.value.double_value;  // 执行语句，获得弹出层
+                GWARF_result tmp_result = traverse(the_statement->code.continued.times, the_var, false);
+                int int_tmp;
+                if(tmp_result.value.type == INT_value){
+                    int_tmp = tmp_result.value.value.int_value;
+                }
+                else{
+                    int_tmp = (int)tmp_result.value.value.double_value;
+                }
+                return_value.value.value.int_value = int_tmp;
             }
-            printf("continued num = %f\n", return_value.value.value.double_value);
             break;
         case restart:
             return_value.u = cycle_restart;
+            return_value.value.type = INT_value;
             if(the_statement->code.restart.times == NULL){
-                return_value.value.value.double_value = 0;
+                return_value.value.value.int_value = 0;
             }
             else{
-                return_value.value.value.double_value = traverse(the_statement->code.restart.times, the_var, false).value.value.double_value;  // 执行语句，获得弹出层
+                GWARF_result tmp_result = traverse(the_statement->code.restart.times, the_var, false);
+                int int_tmp;
+                if(tmp_result.value.type == INT_value){
+                    int_tmp = tmp_result.value.value.int_value;
+                }
+                else{
+                    int_tmp = (int)tmp_result.value.value.double_value;
+                }
+                return_value.value.value.int_value = int_tmp;
             }
-            printf("restart num = %f\n", return_value.value.value.double_value);
             break;
         case restarted:
             return_value.u = code_restarted;
+            return_value.value.type = INT_value;
             if(the_statement->code.restarted.times == NULL){
-                return_value.value.value.double_value = 0;
+                return_value.value.value.int_value = 0;
             }
             else{
-                return_value.value.value.double_value = traverse(the_statement->code.restarted.times, the_var, false).value.value.double_value;  // 执行语句，获得弹出层
+                GWARF_result tmp_result = traverse(the_statement->code.restarted.times, the_var, false);
+                int int_tmp;
+                if(tmp_result.value.type == INT_value){
+                    int_tmp = tmp_result.value.value.int_value;
+                }
+                else{
+                    int_tmp = (int)tmp_result.value.value.double_value;
+                }
+                return_value.value.value.int_value = int_tmp;
             }
-            printf("restarted num = %f\n", return_value.value.value.double_value);
             break;
         case rewent:
             return_value.u = code_rewent;  // rego but not now
@@ -451,7 +510,14 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
             break;
         case set_default:{
             char *name = the_statement->code.set_default.name;
-            int base_from = (int)traverse(the_statement->code.set_default.times, the_var, false).value.value.double_value;
+            GWARF_result tmp_result = traverse(the_statement->code.set_default.times, the_var, false);
+            int base_from;
+            if(tmp_result.value.type == INT_value){
+                base_from = tmp_result.value.value.int_value;
+            }
+            else{
+                base_from = (int)tmp_result.value.value.double_value;
+            }
             append_default_var_base(name, base_from, the_var->default_list);
             printf("set_default for %s\n", name);
             break;
@@ -469,6 +535,11 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
             printf("nonlocal for %s\n", name);
             break;
         }
+        case code_block:
+            puts("----block code----");
+            return_value = block_func(the_statement, the_var);
+            puts("----stop block code----");
+            break;
         default:
             puts("default");
             break;
@@ -492,34 +563,34 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
             
             // restarted操作
             if(value.u == code_restarted){
-                if(value.value.value.double_value <= 0){
+                if(value.value.value.int_value <= 0){
                     puts("----restarted real----");
                     value.u = statement_end;
                     goto else_restart;
                 }
                 else{
-                    value.value.value.double_value -= 1;
+                    value.value.value.int_value -= 1;
                     break;
                 }
             }
 
             // continued操作
             if(value.u == code_continued){
-                if(value.value.value.double_value <= 0){
+                if(value.value.value.int_value <= 0){
                     puts("----if continue real----");
                     value.u = statement_end;
                     goto again;
                 }
                 else{
-                    value.value.value.double_value -= 1;
+                    value.value.value.int_value -= 1;
                 }
                 break;
             }
 
             // broken操作
             if(value.u == code_broken){
-                value.value.value.double_value -= 1;
-                if(value.value.value.double_value < 0){
+                value.value.value.int_value -= 1;
+                if(value.value.value.int_value < 0){
                     value.u = statement_end;  // 正常设置[正常语句结束]
                 }
                 break;
@@ -544,34 +615,34 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
 
                 // restarted操作
                 if(value.u == code_restarted){
-                    if(value.value.value.double_value <= 0){
+                    if(value.value.value.int_value <= 0){
                         puts("----restarted real----");
                         value.u = statement_end;
                         goto if_restart;
                     }
                     else{
-                        value.value.value.double_value -= 1;
+                        value.value.value.int_value -= 1;
                         break;
                     }
                 }
                 
                 // continued操作 [设在在rewent和rego前面]
                 if(value.u == code_continued){
-                    if(value.value.value.double_value <= 0){
+                    if(value.value.value.int_value <= 0){
                         puts("----if continue real----");
                         value.u = statement_end;
                         goto again;
                     }
                     else{
-                        value.value.value.double_value -= 1;
+                        value.value.value.int_value -= 1;
                     }
                     break;
                 }
 
                 // broken操作
                 if(value.u == code_broken){
-                    value.value.value.double_value -= 1;
-                    if(value.value.value.double_value < 0){
+                    value.value.value.int_value -= 1;
+                    if(value.value.value.int_value < 0){
                         value.u = statement_end;  // 正常设置[正常语句结束]
                     }
                     break;
@@ -620,9 +691,9 @@ GWARF_result for_func(statement *the_statement, var_list *the_var){  // read the
 
         //break操作
         if((value.u == cycle_break) || (value.u == code_broken)){
-            printf("cycle_break(broken) %f\n", value.value.value.double_value);
-            value.value.value.double_value -= 1;
-            if(value.value.value.double_value < 0){
+            printf("cycle_break(broken) %f\n", value.value.value.int_value);
+            value.value.value.int_value -= 1;
+            if(value.value.value.int_value < 0){
                 value.u = statement_end;  // 正常设置[正常语句结束]
             }
             break;  // break don't need after do
@@ -635,28 +706,71 @@ GWARF_result for_func(statement *the_statement, var_list *the_var){  // read the
         }
         // continue操作
         if((value.u == cycle_continue) || (value.u == code_continued)){
-            if(value.value.value.double_value <= 0){
+            if(value.value.value.int_value <= 0){
                 puts("----continue real----");
                 value.u = statement_end;
                 continue;
             }
             else{
-                value.value.value.double_value -= 1;
+                value.value.value.int_value -= 1;
                 break;
             }
         }
 
         // restart操作
         if((value.u == cycle_restart) || (value.u == code_restarted)){
-            if(value.value.value.double_value <= 0){
+            if(value.value.value.int_value <= 0){
                 puts("----restart real----");
                 value.u = statement_end;
                 goto restart_again;
             }
             else{
-                value.value.value.double_value -= 1;
+                value.value.value.int_value -= 1;
                 break;
             }
+        }
+    }
+    return value;
+}
+
+// -----------------block func
+
+GWARF_result block_func(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func
+    GWARF_result value, condition;
+    again: 
+    puts("----block----");
+    value = traverse(the_statement->code.code_block.done, the_var, true);
+    puts("----stop block----");
+
+    // restart操作[和continue效果相同]
+    if(value.u == code_restarted){
+        if(value.value.value.int_value <= 0){
+            puts("----restarted real----");
+            value.u = statement_end;
+            goto again;
+        }
+        else{
+            value.value.value.int_value -= 1;
+        }
+    }
+    
+    // continued操作
+    if(value.u == code_continued){
+        if(value.value.value.int_value <= 0){
+            puts("----if continue real----");
+            value.u = statement_end;
+            goto again;
+        }
+        else{
+            value.value.value.int_value -= 1;
+        }
+    }
+
+    // broken操作
+    if(value.u == code_broken){
+        value.value.value.int_value -= 1;
+        if(value.value.value.int_value < 0){
+            value.u = statement_end;  // 正常设置[正常语句结束]
         }
     }
     return value;
@@ -679,35 +793,35 @@ GWARF_result while_func(statement *the_statement, var_list *the_var){  // read t
 
         // break的操作
         if((value.u == cycle_break) || (value.u == code_broken)){
-            printf("cycle_break(broken) %f\n", value.value.value.double_value);
-            value.value.value.double_value -= 1;
-            if(value.value.value.double_value < 0){
+            printf("cycle_break(broken) %f\n", value.value.value.int_value);
+            value.value.value.int_value -= 1;
+            if(value.value.value.int_value < 0){
                 value.u = statement_end;  // 正常设置[正常语句结束]
             }
         }
 
         // continue的操作
         if((value.u == cycle_continue) || (value.u == code_continued)){
-            if(value.value.value.double_value <= 0){
+            if(value.value.value.int_value <= 0){
                 puts("----continue real----");
                 value.u = statement_end;
                 continue;
             }
             else{
-                value.value.value.double_value -= 1;
+                value.value.value.int_value -= 1;
                 break;
             }
         }
 
         // restart的操作
         if((value.u == cycle_restart) || (value.u == code_restarted)){
-            if(value.value.value.double_value <= 0){
+            if(value.value.value.int_value <= 0){
                 puts("----restart real----");
                 value.u = statement_end;
                 goto restart_again;
             }
             else{
-                value.value.value.double_value -= 1;
+                value.value.value.int_value -= 1;
                 break;
             }
         }
@@ -743,7 +857,13 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var){  // re
                 from = 0;
             }
             else{
-                from = (int)traverse((the_statement->code.operation.left_exp)->code.base_var.from, the_var, false).value.value.double_value;
+                GWARF_result tmp_result = traverse((the_statement->code.operation.left_exp)->code.base_var.from, the_var, false);
+                if(tmp_result.value.type = INT_value){
+                    from = tmp_result.value.value.int_value;
+                }
+                else{
+                    from = (int)tmp_result.value.value.double_value;
+                }
             }
             value = assigment_func(left, right_result, the_var, from);
             break;
@@ -776,10 +896,25 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var){  // re
 // ---------  ADD
 GWARF_result add_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for add and call from read_statement_list
     GWARF_result return_value;  // the result by call read_statement_list with left and right; value is the result for add
-    if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+    if((left_result.value.type == INT_value) && (right_result.value.type == INT_value)){  // all is INT
+        return_value.u = return_def;
+        return_value.value.type = INT_value;
+        return_value.value.value.int_value = left_result.value.value.int_value + right_result.value.value.int_value;
+    }
+    else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
         return_value.u = return_def;
         return_value.value.type = NUMBER_value;
-        return_value.value.value.double_value = left_result.value.value.double_value + right_result.value.value.double_value;  // 数值相加运算
+        return_value.value.value.double_value = left_result.value.value.double_value + right_result.value.value.double_value;
+    }
+    else if((left_result.value.type == INT_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+        return_value.u = return_def;
+        return_value.value.type = NUMBER_value;
+        return_value.value.value.double_value = left_result.value.value.int_value + right_result.value.value.double_value;
+    }
+    else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value)){  // all is NUMBER
+        return_value.u = return_def;
+        return_value.value.type = NUMBER_value;
+        return_value.value.value.double_value = left_result.value.value.double_value + right_result.value.value.int_value;
     }
     return return_value;
 }
@@ -787,10 +922,25 @@ GWARF_result add_func(GWARF_result left_result, GWARF_result right_result, var_l
 // ---------  SUB
 GWARF_result sub_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for sub and call from read_statement_list
     GWARF_result return_value;  // the result by call read_statement_list with left and right; value is the result for sub
-    if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+    if((left_result.value.type == INT_value) && (right_result.value.type == INT_value)){  // all is INT
+        return_value.u = return_def;
+        return_value.value.type = INT_value;
+        return_value.value.value.int_value = left_result.value.value.int_value - right_result.value.value.int_value;
+    }
+    else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
         return_value.u = return_def;
         return_value.value.type = NUMBER_value;
-        return_value.value.value.double_value = left_result.value.value.double_value - right_result.value.value.double_value;  // 数值相减运算
+        return_value.value.value.double_value = left_result.value.value.double_value - right_result.value.value.double_value;
+    }
+    else if((left_result.value.type == INT_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+        return_value.u = return_def;
+        return_value.value.type = NUMBER_value;
+        return_value.value.value.double_value = left_result.value.value.int_value - right_result.value.value.double_value;
+    }
+    else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value)){  // all is NUMBER
+        return_value.u = return_def;
+        return_value.value.type = NUMBER_value;
+        return_value.value.value.double_value = left_result.value.value.double_value - right_result.value.value.int_value;
     }
     return return_value;
 }
@@ -798,10 +948,25 @@ GWARF_result sub_func(GWARF_result left_result, GWARF_result right_result, var_l
 // ---------  MUL
 GWARF_result mul_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for mul and call from read_statement_list
     GWARF_result return_value;  // the result by call read_statement_list with left and right; value is the result for mul
-    if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+    if((left_result.value.type == INT_value) && (right_result.value.type == INT_value)){  // all is INT
+        return_value.u = return_def;
+        return_value.value.type = INT_value;
+        return_value.value.value.int_value = left_result.value.value.int_value * right_result.value.value.int_value;
+    }
+    else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
         return_value.u = return_def;
         return_value.value.type = NUMBER_value;
-        return_value.value.value.double_value = left_result.value.value.double_value * right_result.value.value.double_value;  // 数值相乘运算
+        return_value.value.value.double_value = left_result.value.value.double_value * right_result.value.value.double_value;
+    }
+    else if((left_result.value.type == INT_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+        return_value.u = return_def;
+        return_value.value.type = NUMBER_value;
+        return_value.value.value.double_value = left_result.value.value.int_value * right_result.value.value.double_value;
+    }
+    else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value)){  // all is NUMBER
+        return_value.u = return_def;
+        return_value.value.type = NUMBER_value;
+        return_value.value.value.double_value = left_result.value.value.double_value * right_result.value.value.int_value;
     }
     return return_value;
 }
@@ -809,10 +974,25 @@ GWARF_result mul_func(GWARF_result left_result, GWARF_result right_result, var_l
 // ---------  DIV
 GWARF_result div_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for div and call from read_statement_list
     GWARF_result return_value;  // the result by call read_statement_list with left and right; value is the result for div
-    if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+    if((left_result.value.type == INT_value) && (right_result.value.type == INT_value)){  // all is INT
+        return_value.u = return_def;
+        return_value.value.type = INT_value;
+        return_value.value.value.int_value = left_result.value.value.int_value / right_result.value.value.int_value;
+    }
+    else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
         return_value.u = return_def;
         return_value.value.type = NUMBER_value;
-        return_value.value.value.double_value = left_result.value.value.double_value / right_result.value.value.double_value;  // 数值相除运算
+        return_value.value.value.double_value = left_result.value.value.double_value / right_result.value.value.double_value;
+    }
+    else if((left_result.value.type == INT_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+        return_value.u = return_def;
+        return_value.value.type = NUMBER_value;
+        return_value.value.value.double_value = left_result.value.value.int_value / right_result.value.value.double_value;
+    }
+    else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value)){  // all is NUMBER
+        return_value.u = return_def;
+        return_value.value.type = NUMBER_value;
+        return_value.value.value.double_value = left_result.value.value.double_value / right_result.value.value.int_value;
     }
     return return_value;
 }
@@ -826,30 +1006,93 @@ GWARF_result assigment_func(char *left, GWARF_result right_result, var_list *the
 // ---------  EQUAL
 GWARF_result equal_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var, int type){  // the func for equal and call from read_statement_list
     GWARF_result return_value;
-    double return_bool = 0;
+    int return_bool = 1;
     return_value.u = return_def;
-    if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
-        return_value.value.type = NUMBER_value;
+    if((left_result.value.type == INT_value) && (right_result.value.type == INT_value)){  // all is INT
+        return_value.value.type = INT_value;
+        if ((left_result.value.value.int_value == right_result.value.value.int_value) && (type == 0)){  // 如果相等
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+        if ((left_result.value.value.int_value > right_result.value.value.int_value) && (type == 1)){  // 如果大于
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+        if ((left_result.value.value.int_value < right_result.value.value.int_value) && (type == 2)){  // 如果小于
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+        if ((left_result.value.value.int_value >= right_result.value.value.int_value) && (type == 3)){  // 如果大于等于
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+        if ((left_result.value.value.int_value <= right_result.value.value.int_value) && (type == 4)){  // 如果小于等于
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+        if ((left_result.value.value.int_value != right_result.value.value.int_value) && (type == 5)){  // 如果不相等
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+    }
+    else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+        return_value.value.type = INT_value;
         if ((left_result.value.value.double_value == right_result.value.value.double_value) && (type == 0)){  // 如果相等
-            return_bool = 1;  // 返回1 否则(默认)为0
+            return_bool = true;  // 返回1 否则(默认)为0
         }
         if ((left_result.value.value.double_value > right_result.value.value.double_value) && (type == 1)){  // 如果大于
-            return_bool = 1;  // 返回1 否则(默认)为0
+            return_bool = true;  // 返回1 否则(默认)为0
         }
         if ((left_result.value.value.double_value < right_result.value.value.double_value) && (type == 2)){  // 如果小于
-            return_bool = 1;  // 返回1 否则(默认)为0
+            return_bool = true;  // 返回1 否则(默认)为0
         }
         if ((left_result.value.value.double_value >= right_result.value.value.double_value) && (type == 3)){  // 如果大于等于
-            return_bool = 1;  // 返回1 否则(默认)为0
+            return_bool = true;  // 返回1 否则(默认)为0
         }
         if ((left_result.value.value.double_value <= right_result.value.value.double_value) && (type == 4)){  // 如果小于等于
-            return_bool = 1;  // 返回1 否则(默认)为0
+            return_bool = true;  // 返回1 否则(默认)为0
         }
         if ((left_result.value.value.double_value != right_result.value.value.double_value) && (type == 5)){  // 如果不相等
-            return_bool = 1;  // 返回1 否则(默认)为0
+            return_bool = true;  // 返回1 否则(默认)为0
         }
-        return_value.value.value.double_value = return_bool;  // 数值相加运算
     }
+    else if((left_result.value.type == INT_value) && (right_result.value.type == INT_value)){  // all is NUMBER
+        return_value.value.type = INT_value;
+        if ((left_result.value.value.double_value == right_result.value.value.int_value) && (type == 0)){  // 如果相等
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+        if ((left_result.value.value.double_value > right_result.value.value.int_value) && (type == 1)){  // 如果大于
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+        if ((left_result.value.value.double_value < right_result.value.value.int_value) && (type == 2)){  // 如果小于
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+        if ((left_result.value.value.double_value >= right_result.value.value.int_value) && (type == 3)){  // 如果大于等于
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+        if ((left_result.value.value.double_value <= right_result.value.value.int_value) && (type == 4)){  // 如果小于等于
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+        if ((left_result.value.value.double_value != right_result.value.value.int_value) && (type == 5)){  // 如果不相等
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+    }
+    else if((left_result.value.type == INT_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+        return_value.value.type = INT_value;
+        if ((left_result.value.value.int_value == right_result.value.value.double_value) && (type == 0)){  // 如果相等
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+        if ((left_result.value.value.int_value > right_result.value.value.double_value) && (type == 1)){  // 如果大于
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+        if ((left_result.value.value.int_value < right_result.value.value.double_value) && (type == 2)){  // 如果小于
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+        if ((left_result.value.value.int_value >= right_result.value.value.double_value) && (type == 3)){  // 如果大于等于
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+        if ((left_result.value.value.int_value <= right_result.value.value.double_value) && (type == 4)){  // 如果小于等于
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+        if ((left_result.value.value.int_value != right_result.value.value.double_value) && (type == 5)){  // 如果不相等
+            return_bool = true;  // 返回1 否则(默认)为0
+        }
+    }
+    return_value.value.value.int_value = return_bool;
     return return_value;
 }
 

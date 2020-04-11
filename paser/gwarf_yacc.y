@@ -2,7 +2,9 @@
     #include<stdio.h>
     #include"lex.yy.c"
     #include"../gwarf_interpreter/interprete.h"
+    #define yylex yylex_self
     extern int yylex (void);
+    // 此处声明：定义的token：INDENTA不会在yacc中被使用，但将会在lex中被使用
 %}
 
 %union{
@@ -12,11 +14,11 @@
     struct statement *statement_value;
     struct if_list *if_list_base;
 }
-%token <double_value> NUMBER
+%token <double_value> NUMBER INT
 %token <string_value> STRING VAR
-%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE STOP POW EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI DEFAULT FOR COMMA GLOBAL NONLOCAL
+%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE POW EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI DEFAULT FOR COMMA GLOBAL NONLOCAL INDENTA STOPN STOPF BLOCK
 %type <statement_value> base_number base_var_token base_var_ element second_number first_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
-%type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token for_exp for_block global_token nonlocal_token
+%type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token for_exp for_block global_token nonlocal_token block_exp block_block
 %type <if_list_base> elif_exp
 %%
 command_block
@@ -48,71 +50,71 @@ command_list
     ;
 
 command
-    : STOP
-    {
-        $$ = NULL;
-    }
-    | top_exp STOP
+    : top_exp stop_token
     {
         $$ = $1;
     }
-    | while_block STOP
+    | while_block stop_token
     {   
         $$ = $1;
     }
-    | if_block STOP
+    | if_block stop_token
     {
         $$ = $1;
     }
-    | break_exp STOP
+    | break_exp stop_token
     {
         $$ = $1;
     }
-    | broken_exp STOP
+    | broken_exp stop_token
     {
         $$ = $1;
     }
-    | continue_exp STOP
+    | continue_exp stop_token
     {
         $$ = $1;
     }
-    | continued_exp STOP
+    | continued_exp stop_token
     {
         $$ = $1;
     }
-    | restart_exp STOP
+    | restart_exp stop_token
     {
         $$ = $1;
     }
-    | restarted_exp STOP
+    | restarted_exp stop_token
     {
         $$ = $1;
     }
-    | REGO STOP
+    | REGO stop_token
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = rego;
         $$ = code_tmp;
     }
-    | REWENT STOP
+    | REWENT stop_token
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = rewent;
         $$ = code_tmp;
     }
-    | default_token STOP
+    | default_token stop_token
     {
         $$ = $1;
     }
-    | global_token STOP
+    | global_token stop_token
     {
         $$ = $1;
     }
-    | for_block STOP
+    | for_block stop_token
     {
         $$ = $1;
     }
-    | nonlocal_token STOP
+    | nonlocal_token stop_token
+    {
+        $$ = $1;
+    }
+    | block_block stop_token
     {
         $$ = $1;
     }
@@ -251,7 +253,15 @@ base_number
         statement *code_tmp =  make_statement();
         code_tmp->type = base_value;
         code_tmp->code.base_value.value.type = NUMBER_value;
-        code_tmp->code.base_value.value.value.double_value = $1;
+        code_tmp->code.base_value.value.value.double_value = (double)$1;
+        $$ = code_tmp;
+    }
+    | INT
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = base_value;
+        code_tmp->code.base_value.value.type = INT_value;
+        code_tmp->code.base_value.value.value.int_value = (int)$1;
         $$ = code_tmp;
     }
     ;
@@ -358,6 +368,24 @@ if_exp
         if_tmp->code.if_branch.done = make_if($3, done_tmp);
         statement_base = append_statement_list(done_tmp, statement_base);  // new statement_base (FILO)
         $$ = if_tmp;
+    }
+    ;
+
+block_block
+    : block_exp block
+    {
+        statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
+    }
+    ;
+
+block_exp
+    : BLOCK
+    {
+        statement *block_tmp =  make_statement();
+        block_tmp->type = code_block;
+        block_tmp->code.code_block.done = make_statement();
+        statement_base = append_statement_list(block_tmp->code.code_block.done, statement_base);  // new statement_base (FILO)
+        $$ = block_tmp;
     }
     ;
 
@@ -593,6 +621,13 @@ broken_token
         code_tmp->code.broken.times = NULL;
         $$ = code_tmp;
     }
+    ;
+
+stop_token
+    : STOPN
+    | STOPF
+    | stop_token STOPF
+    | stop_token STOPN
     ;
 
 %%

@@ -1,9 +1,27 @@
 %{
     #include<stdio.h>
-    #include"y.tab.h"
+    #include"y.tab.h" 
+    int indentation = 0;
+    int tmp_indentation = 0;
+    int last_token;
+    int different = 0;
+    int flat = 0;
+    int is_last = 0;  // 是否\n
+    int is_stop = 0;  // 针对}需要返回一个}的同时返回一个STOP
 %}
-%s COMMENT STRING_TEXT
+%s COMMENT STRING_TEXT INDENTATION
 %%
+<INITIAL>^"    " {
+    return INDENTA;
+    }
+<INITIAL>[\n]+"    "[\n]* {
+    return INDENTA;
+    }
+<INITIAL>"    " {
+    if(tmp_indentation > 0){
+        return INDENTA;
+    }
+}
 <INITIAL>"while" {return WHILE;}
 <INITIAL>"if" {return IF;}
 <INITIAL>[\n]*elif {return ELIF;}
@@ -21,6 +39,7 @@
 <INITIAL>"default" {return DEFAULT;}
 <INITIAL>"global" {return GLOBAL;}
 <INITIAL>"nonlocal" {return NONLOCAL;}
+<INITIAL>"block" {return BLOCK;}
 
 <INITIAL>"(" {return LB;}
 <INITIAL>")" {return RB;}
@@ -38,26 +57,28 @@
 <INITIAL>"-" {return SUB;}
 <INITIAL>"*" {return MUL;}
 <INITIAL>"/" {return DIV;}
-<INITIAL>"^" {return POW;}
 <INITIAL>"[" {return LI;}
 <INITIAL>"]" {return RI;}
 
 <INITIAL>"#" {BEGIN COMMENT;}
 <INITIAL>' {BEGIN STRING_TEXT;}
 <INITIAL>\" {BEGIN STRING_TEXT;}
-<INITIAL>[1-9][0-9]*(\.[0-9]+)?|0 {
+<INITIAL>[1-9][0-9]*\.[0-9]+ {
     yylval.double_value = atof(yytext);
     return NUMBER;
+    }
+<INITIAL>[1-9][0-9]*|0 {
+    yylval.double_value = atof(yytext);
+    return INT;
     }
 <INITIAL>[a-zA-Z_][a-zA-Z0-9_]* {
     yylval.string_value = yytext;
     return VAR;
     }
-
+<INITIAL>\n {return STOPN;}
+<INITIAL>";" {return STOPF;}
 <INITIAL>" " ;
-<INITIAL>;?\n {return STOP;}
-<INITIAL>";" {return STOP;}
-<INITIAL>. {printf("text = [%s];\n", yytext);}
+<INITIAL>. {printf("other text = [%s];\n", yytext);}
 
 <COMMENT>\n {BEGIN INITIAL;}
 <COMMENT>"#" {BEGIN INITIAL;}
@@ -77,7 +98,79 @@
 int yywrap(void) {
     return 1;
 }
-// int main(){
-//     yylex();
-//     return 0;
-// }
+int yylex_self(void){
+    again: 
+    if(flat == 0){
+        int result = yylex();  // 正常执行yylex的模式
+        printf("return result = %d\n", result);
+        if((result == 0) && (indentation != 0)){  // 上一个是\n，这一行已经没有缩进了
+            printf("FFFF\n");
+            flat = 2;  // 进入返回模式
+            last_token = STOPN;  // 记录堆积的token[再次之后不再执行yylex]
+            different = indentation;  // tmp_indentation = 0了已经
+            is_last = 0;
+            is_stop = 0; // 清零
+            goto again;  // 回到顶部
+        }
+        else if(result == INDENTA){  // 返回缩进
+            flat = 1;  // 进入缩进模式
+            tmp_indentation += 1;  // 缩进+1
+            is_last = 0;
+            goto again;  // 回到顶部
+        }
+        else if((is_last) && (indentation != 0)){  // 上一个是\n，这一行已经没有缩进了
+            flat = 2;  // 进入返回模式
+            last_token = result;  // 记录堆积的token[再次之后不再执行yylex]
+            different = indentation;  // tmp_indentation = 0了已经
+            is_last = 0;
+            is_stop = 0; // 清零
+            goto again;  // 回到顶部
+        }
+
+        if(result == STOPN){
+            is_last = 1; // 已经是\n
+        }
+        return result;  // 返回值
+    }
+    else if(flat == 1){
+        int result = yylex();
+        if(result != INDENTA){  // 返回缩进
+            flat = 2;  // 进入返回模式
+            last_token = result;  // 记录堆积的token[再次之后不再执行yylex]
+            different = indentation - tmp_indentation;  // 如果>1，则缩进少了，返回}，如果小于1则缩进多了返回{
+            is_stop = 0; // 清零
+            goto again;  // 回到顶部
+        }
+        else{
+            tmp_indentation += 1;  // 缩进+1
+            goto again;  // 回到顶部
+        }
+    }
+    else if(flat == 2){
+        if(different < 0){
+            different += 1;
+            puts("return {");
+            return LP;
+        }
+        else if(different > 0){
+            if(is_stop){
+                different -= 1;  // 只有STOP才-1 保证了最后一个必须输出STOP
+                is_stop = 0;  // 下一个不输出STOP了
+                puts("return STOPN");
+                return STOPN;
+            }
+            else{
+                is_stop = 1;
+                puts("return }");
+                return RP;
+            }
+        }
+        else{  // RP或者LP返回完毕
+            indentation = tmp_indentation;  // 使用当前tmp
+            tmp_indentation = 0;  // 清0
+            flat = 0;  // 回到正常模式
+            printf("return result = %d\n", last_token);
+            return last_token;
+        }
+    }
+}

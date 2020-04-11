@@ -5,7 +5,9 @@
 // the type of data(GWARF_value)
 typedef enum{
     NUMBER_value = 1,
-    STRING_value,
+    INT_value,  // INT 类型
+    BOOL_value,  // bool : true or false
+    STRING_value,  // char *
 } GWARF_value_type;
 
 // all value is GWARF_value
@@ -14,6 +16,8 @@ typedef struct GWARF_value{
     union
     {
         double double_value;  // NUMBER
+        int int_value;
+        bool bool_value;
         char *string;  // STRING
     } value;
     
@@ -49,6 +53,7 @@ typedef struct statement{
         set_default,
         set_global,
         set_nonlocal,
+        code_block,
     } type;  // the statement type
 
     union
@@ -138,6 +143,10 @@ typedef struct statement{
         struct{
             char *name;
         } set_nonlocal;
+
+        struct{
+            struct statement *done;  // while to do
+        } code_block;
 
     } code;
     struct statement *next;
