@@ -14,9 +14,9 @@
 }
 %token <double_value> NUMBER
 %token <string_value> STRING VAR
-%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE STOP POW EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI DEFAULT
+%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE STOP POW EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI DEFAULT FOR COMMA GLOBAL NONLOCAL
 %type <statement_value> base_number base_var_token base_var_ element second_number first_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
-%type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token
+%type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token for_exp for_block global_token nonlocal_token
 %type <if_list_base> elif_exp
 %%
 command_block
@@ -101,6 +101,18 @@ command
         $$ = code_tmp;
     }
     | default_token STOP
+    {
+        $$ = $1;
+    }
+    | global_token STOP
+    {
+        $$ = $1;
+    }
+    | for_block STOP
+    {
+        $$ = $1;
+    }
+    | nonlocal_token STOP
     {
         $$ = $1;
     }
@@ -244,6 +256,34 @@ base_number
     }
     ;
 
+nonlocal_token
+    : NONLOCAL base_var_token
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = set_nonlocal;
+        code_tmp->code.set_nonlocal.name = malloc(sizeof($2->code.base_var.var_name));
+        char *name_tmp = code_tmp->code.set_nonlocal.name;
+        strcpy(name_tmp, $2->code.base_var.var_name);
+        free($2->code.base_var.var_name);
+        free($2);
+        $$ = code_tmp;
+    }
+    ;
+
+global_token
+    : GLOBAL base_var_token
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = set_global;
+        code_tmp->code.set_global.name = malloc(sizeof($2->code.base_var.var_name));
+        char *name_tmp = code_tmp->code.set_global.name;
+        strcpy(name_tmp, $2->code.base_var.var_name);
+        free($2->code.base_var.var_name);
+        free($2);
+        $$ = code_tmp;
+    }
+    ;
+
 default_token
     : DEFAULT base_var_token element
     {
@@ -318,6 +358,104 @@ if_exp
         if_tmp->code.if_branch.done = make_if($3, done_tmp);
         statement_base = append_statement_list(done_tmp, statement_base);  // new statement_base (FILO)
         $$ = if_tmp;
+    }
+    ;
+
+for_block
+    : for_exp block
+    {
+        statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
+    }
+    ;
+
+for_exp
+    : FOR LB COMMA COMMA RB
+    {
+        statement *for_tmp =  make_statement();
+        for_tmp->type = for_cycle;
+        for_tmp->code.for_cycle.first = NULL;
+        for_tmp->code.for_cycle.condition = NULL;
+        for_tmp->code.for_cycle.after = NULL;
+        for_tmp->code.for_cycle.done = make_statement();
+        statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
+        $$ = for_tmp;
+    }
+    | FOR LB top_exp COMMA COMMA RB
+    {
+        statement *for_tmp =  make_statement();
+        for_tmp->type = for_cycle;
+        for_tmp->code.for_cycle.first = $3;  // 只有初始化
+        for_tmp->code.for_cycle.condition = NULL;
+        for_tmp->code.for_cycle.after = NULL;
+        for_tmp->code.for_cycle.done = make_statement();
+        statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
+        $$ = for_tmp;
+    }
+    | FOR LB COMMA top_exp COMMA RB
+    {
+        statement *for_tmp =  make_statement();
+        for_tmp->type = for_cycle;
+        for_tmp->code.for_cycle.first = NULL;
+        for_tmp->code.for_cycle.condition = $4;  // 只有条件
+        for_tmp->code.for_cycle.after = NULL;
+        for_tmp->code.for_cycle.done = make_statement();
+        statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
+        $$ = for_tmp;
+    }
+    | FOR LB COMMA COMMA top_exp RB
+    {
+        statement *for_tmp =  make_statement();
+        for_tmp->type = for_cycle;
+        for_tmp->code.for_cycle.first = NULL;
+        for_tmp->code.for_cycle.condition = NULL;
+        for_tmp->code.for_cycle.after = $5;  // 只有后置操作
+        for_tmp->code.for_cycle.done = make_statement();
+        statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
+        $$ = for_tmp;
+    }
+    | FOR LB top_exp COMMA COMMA top_exp RB
+    {
+        statement *for_tmp =  make_statement();
+        for_tmp->type = for_cycle;
+        for_tmp->code.for_cycle.first = $3;
+        for_tmp->code.for_cycle.condition = NULL;  // 无条件
+        for_tmp->code.for_cycle.after = $6;
+        for_tmp->code.for_cycle.done = make_statement();
+        statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
+        $$ = for_tmp;
+    }
+    | FOR LB top_exp COMMA top_exp COMMA RB
+    {
+        statement *for_tmp =  make_statement();
+        for_tmp->type = for_cycle;
+        for_tmp->code.for_cycle.first = $3;
+        for_tmp->code.for_cycle.condition = $5;
+        for_tmp->code.for_cycle.after = NULL;  //无后置操作
+        for_tmp->code.for_cycle.done = make_statement();
+        statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
+        $$ = for_tmp;
+    }
+    | FOR LB COMMA top_exp COMMA top_exp RB
+    {
+        statement *for_tmp =  make_statement();
+        for_tmp->type = for_cycle;
+        for_tmp->code.for_cycle.first = NULL;  //无初始化
+        for_tmp->code.for_cycle.condition = $4;
+        for_tmp->code.for_cycle.after = $6;
+        for_tmp->code.for_cycle.done = make_statement();
+        statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
+        $$ = for_tmp;
+    }
+    | FOR LB top_exp COMMA top_exp COMMA top_exp RB
+    {
+        statement *for_tmp =  make_statement();
+        for_tmp->type = for_cycle;
+        for_tmp->code.for_cycle.first = $3;
+        for_tmp->code.for_cycle.condition = $5;
+        for_tmp->code.for_cycle.after = $7;
+        for_tmp->code.for_cycle.done = make_statement();
+        statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
+        $$ = for_tmp;
     }
     ;
 

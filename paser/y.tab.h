@@ -83,7 +83,11 @@ extern int yydebug;
     REWENT = 289,
     RI = 290,
     LI = 291,
-    DEFAULT = 292
+    DEFAULT = 292,
+    FOR = 293,
+    COMMA = 294,
+    GLOBAL = 295,
+    NONLOCAL = 296
   };
 #endif
 /* Tokens.  */
@@ -122,6 +126,10 @@ extern int yydebug;
 #define RI 290
 #define LI 291
 #define DEFAULT 292
+#define FOR 293
+#define COMMA 294
+#define GLOBAL 295
+#define NONLOCAL 296
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -135,7 +143,7 @@ union YYSTYPE
     struct statement *statement_value;
     struct if_list *if_list_base;
 
-#line 139 "y.tab.h"
+#line 147 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

@@ -36,6 +36,7 @@ typedef struct statement{
         base_var,  // return var address
         base_value,  // return an number or number
         while_cycle,  // while
+        for_cycle,
         if_branch,  // if
         break_cycle,  // break
         broken,  // break_cycle and other {}
@@ -46,6 +47,8 @@ typedef struct statement{
         rego,
         rewent,
         set_default,
+        set_global,
+        set_nonlocal,
     } type;  // the statement type
 
     union
@@ -73,6 +76,13 @@ typedef struct statement{
             struct statement *done;  // while to do
         } while_cycle;
 
+        struct{
+            struct statement *first;  // the first to do 
+            struct statement *condition;  // when to while 
+            struct statement *after;  // what to do after the done
+            struct statement *done;  // while to do
+        } for_cycle;
+        
         struct{
             struct if_list *done;  // if_list
         } if_branch;
@@ -120,6 +130,14 @@ typedef struct statement{
             char *name;
             struct statement *times;  // 层数
         } set_default;
+
+        struct{
+            char *name;
+        } set_global;
+
+        struct{
+            char *name;
+        } set_nonlocal;
 
     } code;
     struct statement *next;
@@ -213,6 +231,7 @@ if_list *append_elif(if_list *, if_list *);
 
 //------- run func
 GWARF_result traverse(statement *, var_list *, bool);
+GWARF_result traverse_global(statement *, var_list *);
 
 //------- inter func
 inter *get_inter();

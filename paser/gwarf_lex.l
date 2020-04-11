@@ -16,7 +16,11 @@
 <INITIAL>"continued" {return CONTINUED;}
 <INITIAL>"rego" {return REGO;}
 <INITIAL>"rewent" {return REWENT;}
-
+<INITIAL>"for" {return FOR;}
+<INITIAL>"," {return COMMA;}
+<INITIAL>"default" {return DEFAULT;}
+<INITIAL>"global" {return GLOBAL;}
+<INITIAL>"nonlocal" {return NONLOCAL;}
 
 <INITIAL>"(" {return LB;}
 <INITIAL>")" {return RB;}
@@ -37,7 +41,6 @@
 <INITIAL>"^" {return POW;}
 <INITIAL>"[" {return LI;}
 <INITIAL>"]" {return RI;}
-<INITIAL>"default" {return DEFAULT;}
 
 <INITIAL>"#" {BEGIN COMMENT;}
 <INITIAL>' {BEGIN STRING_TEXT;}

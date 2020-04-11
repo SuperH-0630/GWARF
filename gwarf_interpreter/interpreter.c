@@ -13,6 +13,8 @@ GWARF_result div_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result assigment_func(char *, GWARF_result, var_list *, int);
 GWARF_result equal_func(GWARF_result, GWARF_result, var_list *, int);
 GWARF_result if_func(if_list *, var_list *);
+GWARF_result for_func(statement *, var_list *);
+int get_var_list_len(var_list *);
 
 // ---- var func
 
@@ -197,13 +199,25 @@ var_list *free_var_list(var_list *var_list_base){  // free one var_list[FILO]
     return tmp;
 }
 
+int get_var_list_len(var_list *var_base){
+    var_list *start = var_base;
+    int tmp = 0;
+    while(1){
+        if(start->next == NULL){
+            break;
+        }
+        start = start->next;
+        tmp += 1;
+    }
+    return tmp;
+}
+
 var *find_var(var_list *var_base,int from, char *name){  // find var by func get_var in var_list[iter to find]
     var_list *start = var_base;
     var *return_var;
     from += get_default(name, var_base->default_list);
     printf("find from = %d\n", from);
     for(int i = 0;i < from;i+= 1){
-        printf("the start = %d\n", start);
         if(start->next == NULL){
             break;
         }
@@ -329,15 +343,14 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
         case while_cycle:
             puts("----while code----");
             return_value = while_func(the_statement, the_var);
-            if((return_value.u == cycle_break) || (return_value.u == code_broken)){
-                printf("cycle_break(broken) %f\n", return_value.value.value.double_value);
-                return_value.value.value.double_value -= 1;
-                if(return_value.value.value.double_value < 0){
-                    return_value.u = statement_end;  // 正常设置[正常语句结束]
-                }
-            }
             printf("while operation value = %f\n", return_value.value.value.double_value);
             puts("----stop while code----");
+            break;
+        case for_cycle:
+            puts("----for code----");
+            return_value = for_func(the_statement, the_var);
+            printf("for operation value = %f\n", return_value.value.value.double_value);
+            puts("----for while code----");
             break;
         case if_branch:
             puts("----if code----");
@@ -443,6 +456,19 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
             printf("set_default for %s\n", name);
             break;
         }
+        case set_global:{
+            char *name = the_statement->code.set_global.name;
+            int base_from = get_var_list_len(the_var);
+            append_default_var_base(name, base_from, the_var->default_list);
+            printf("global for %s\n", name);
+            break;
+        }
+        case set_nonlocal:{
+            char *name = the_statement->code.set_global.name;
+            append_default_var_base(name, 1, the_var->default_list);
+            printf("nonlocal for %s\n", name);
+            break;
+        }
         default:
             puts("default");
             break;
@@ -464,7 +490,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
             value = traverse(start->done, the_var, true);
             puts("----stop else----");
             
-            // restarted
+            // restarted操作
             if(value.u == code_restarted){
                 if(value.value.value.double_value <= 0){
                     puts("----restarted real----");
@@ -477,6 +503,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
                 }
             }
 
+            // continued操作
             if(value.u == code_continued){
                 if(value.value.value.double_value <= 0){
                     puts("----if continue real----");
@@ -488,12 +515,20 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
                 }
                 break;
             }
+
+            // broken操作
             if(value.u == code_broken){
                 value.value.value.double_value -= 1;
                 if(value.value.value.double_value < 0){
                     value.u = statement_end;  // 正常设置[正常语句结束]
                 }
                 break;
+            }
+
+            // rego操作
+            // else层的rego和rewent是可以往上层遗传的[也就是else如果显式指定rego和rewent是会遗传的，但是如果是if或elif指定rego是不会遗传的]
+            if((value.u == code_rewent) || (value.u == code_rego)){
+                ;
             }
 
             break;  // else not next and don't need rego
@@ -507,7 +542,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
                 value = traverse(start->done, the_var, true);
                 puts("----stop if----");
 
-                // restarted
+                // restarted操作
                 if(value.u == code_restarted){
                     if(value.value.value.double_value <= 0){
                         puts("----restarted real----");
@@ -520,7 +555,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
                     }
                 }
                 
-                // 设在在rewent和rego前面
+                // continued操作 [设在在rewent和rego前面]
                 if(value.u == code_continued){
                     if(value.value.value.double_value <= 0){
                         puts("----if continue real----");
@@ -532,6 +567,8 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
                     }
                     break;
                 }
+
+                // broken操作
                 if(value.u == code_broken){
                     value.value.value.double_value -= 1;
                     if(value.value.value.double_value < 0){
@@ -539,8 +576,10 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
                     }
                     break;
                 }
-
+                
+                // rego操作
                 if((value.u == code_rewent) || (value.u == code_rego)){
+                    value.u = statement_end;  // 设置为正常语句
                     rego = true;
                 }
 
@@ -561,24 +600,40 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
     return value;
 }
 
-// -----------------while func
-
-GWARF_result while_func(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func
+// -----------------for func
+GWARF_result for_func(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func
     GWARF_result value, condition;
+    if(the_statement->code.for_cycle.first != NULL){
+        traverse(the_statement->code.for_cycle.first, the_var, false); // first to do
+    }
     while (1){
-        condition = traverse((*the_statement).code.while_cycle.condition, the_var, false);
-        printf("while condition = %f\n", condition.value.value.double_value);
-        if(!condition.value.value.double_value){
-            break;
+        if(the_statement->code.for_cycle.condition != NULL){  // 检查是否存在循环条件
+            condition = traverse(the_statement->code.for_cycle.condition, the_var, false);
+            printf("for condition = %f\n", condition.value.value.double_value);
+            if(!condition.value.value.double_value){
+                break;
+            }
         }
         restart_again: 
-        puts("----while----");
-        value = traverse((*the_statement).code.operation.right_exp, the_var, true);
-        puts("----stop while----");
-        if((value.u == cycle_break) || (value.u == code_broken)){  // break the while
-            break;
+        puts("----for----");
+        value = traverse(the_statement->code.for_cycle.done, the_var, true);
+
+        //break操作
+        if((value.u == cycle_break) || (value.u == code_broken)){
+            printf("cycle_break(broken) %f\n", value.value.value.double_value);
+            value.value.value.double_value -= 1;
+            if(value.value.value.double_value < 0){
+                value.u = statement_end;  // 正常设置[正常语句结束]
+            }
+            break;  // break don't need after do
         }
-        printf("type = %d\n", value.u);
+        puts("----stop for----");
+
+        // after do
+        if(the_statement->code.for_cycle.after != NULL){
+            traverse(the_statement->code.for_cycle.after, the_var, false);
+        }
+        // continue操作
         if((value.u == cycle_continue) || (value.u == code_continued)){
             if(value.value.value.double_value <= 0){
                 puts("----continue real----");
@@ -590,6 +645,61 @@ GWARF_result while_func(statement *the_statement, var_list *the_var){  // read t
                 break;
             }
         }
+
+        // restart操作
+        if((value.u == cycle_restart) || (value.u == code_restarted)){
+            if(value.value.value.double_value <= 0){
+                puts("----restart real----");
+                value.u = statement_end;
+                goto restart_again;
+            }
+            else{
+                value.value.value.double_value -= 1;
+                break;
+            }
+        }
+    }
+    return value;
+}
+
+// -----------------while func
+
+GWARF_result while_func(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func
+    GWARF_result value, condition;
+    while (1){
+        condition = traverse(the_statement->code.while_cycle.condition, the_var, false);
+        printf("while condition = %f\n", condition.value.value.double_value);
+        if(!condition.value.value.double_value){
+            break;
+        }
+        restart_again: 
+        puts("----while----");
+        value = traverse(the_statement->code.while_cycle.done, the_var, true);
+        puts("----stop while----");
+
+        // break的操作
+        if((value.u == cycle_break) || (value.u == code_broken)){
+            printf("cycle_break(broken) %f\n", value.value.value.double_value);
+            value.value.value.double_value -= 1;
+            if(value.value.value.double_value < 0){
+                value.u = statement_end;  // 正常设置[正常语句结束]
+            }
+        }
+
+        // continue的操作
+        if((value.u == cycle_continue) || (value.u == code_continued)){
+            if(value.value.value.double_value <= 0){
+                puts("----continue real----");
+                value.u = statement_end;
+                continue;
+            }
+            else{
+                value.value.value.double_value -= 1;
+                break;
+            }
+        }
+
+        // restart的操作
         if((value.u == cycle_restart) || (value.u == code_restarted)){
             if(value.value.value.double_value <= 0){
                 puts("----restart real----");
@@ -789,6 +899,19 @@ GWARF_result traverse(statement *the_statement, var_list *the_var, bool new){  /
     }
     if(new){  // need to make new var
         the_var = free_var_list(the_var);  // free the new var
+    }
+    return result;
+}
+
+GWARF_result traverse_global(statement *the_statement, var_list *the_var){  // traverse the statement[not break、broken、and others]
+    statement *tmp = the_statement;
+    GWARF_result result;
+    while(1){
+        if(tmp == NULL){
+            break;  // off
+        }
+        result = read_statement_list(tmp, the_var);
+        tmp = tmp->next;
     }
     return result;
 }

@@ -9,7 +9,7 @@ int main(){
 
     parser("/home/songzihuan/test.gwf");
     printf("----start run----\n");
-    traverse(global_inter->global_code, the_var,false);
+    traverse_global(global_inter->global_code, the_var);
     printf("code end...\n");
     return 0;
 }
