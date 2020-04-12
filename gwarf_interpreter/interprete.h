@@ -71,6 +71,10 @@ typedef struct statement{
                 MOREEQ_func,  // >=
                 LESSEQ_func,  // <=
                 NOTEQ_func,  // <>
+                POW_func,  // <>
+                LOG_func,  // <>
+                SQRT_func,  // <>
+                NEGATIVE_func,  // -a
             } type;
             struct statement *right_exp;  // the right exp
             struct statement *left_exp;  // the left exp

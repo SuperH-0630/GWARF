@@ -53,6 +53,11 @@
 <INITIAL>"<" {return LESS;}
 <INITIAL>"==" {return EQUAL;}
 <INITIAL>"=" {return EQ;}
+<INITIAL>"**" {return POW;}
+<INITIAL>"^" {return POW;}
+<INITIAL>"~" {return SQRT;}
+<INITIAL>"log" {return LOG;}
+<INITIAL>"sqrt" {return SQRT;}
 <INITIAL>"+" {return ADD;}
 <INITIAL>"-" {return SUB;}
 <INITIAL>"*" {return MUL;}

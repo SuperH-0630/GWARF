@@ -16,9 +16,10 @@
 }
 %token <double_value> NUMBER INT
 %token <string_value> STRING VAR
-%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE POW EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI DEFAULT FOR COMMA GLOBAL NONLOCAL INDENTA STOPN STOPF BLOCK
-%type <statement_value> base_number base_var_token base_var_ element second_number first_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
+%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE POW LOG SQRT EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI DEFAULT FOR COMMA GLOBAL NONLOCAL INDENTA STOPN STOPF BLOCK
+%type <statement_value> base_value base_var_token base_var_ element second_number first_number zero_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
 %type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token for_exp for_block global_token nonlocal_token block_exp block_block
+%type <string_value> base_string
 %type <if_list_base> elif_exp
 %%
 command_block
@@ -217,8 +218,8 @@ second_number
     ;
 
 first_number
-    : element
-    | first_number MUL element
+    : zero_number
+    | first_number MUL zero_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -227,7 +228,7 @@ first_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | first_number DIV element
+    | first_number DIV zero_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -238,16 +239,56 @@ first_number
     }
     ;
 
+zero_number
+    : element
+    | zero_number POW element
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = POW_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    | zero_number LOG element
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = LOG_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    | zero_number SQRT element
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = SQRT_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    ;
+
 element
-    : base_number
+    : base_value
     | base_var_
+    | SUB element
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = NEGATIVE_func;
+        code_tmp->code.operation.left_exp = NULL;
+        code_tmp->code.operation.right_exp = $2;
+        $$ = code_tmp;
+    }
     | LB top_exp RB
     {
         $$ = $2;
     }
     ;
 
-base_number
+base_value
     : NUMBER
     {
         statement *code_tmp =  make_statement();
@@ -263,6 +304,52 @@ base_number
         code_tmp->code.base_value.value.type = INT_value;
         code_tmp->code.base_value.value.value.int_value = (int)$1;
         $$ = code_tmp;
+    }
+    | base_string
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = base_value;
+        code_tmp->code.base_value.value.type = STRING_value;
+        code_tmp->code.base_value.value.value.string = $1;
+        $$ = code_tmp;
+    }
+    ;
+
+base_var_
+    : base_var_token
+    | LI element RI base_var_token
+    {
+        $4->code.base_var.from = $2;
+        $$ = $4;
+    }
+    ;
+
+base_var_token
+    : VAR
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->code.base_var.var_name = malloc(sizeof($1));
+        char *name_tmp = code_tmp->code.base_var.var_name;
+        code_tmp->type = base_var;
+        code_tmp->code.base_var.from = NULL;
+        strcpy(name_tmp, $1);
+        $$ = code_tmp;
+    }
+    ;
+
+base_string
+    : STRING
+    {
+        // STRING is char * which the len is 1
+        char *tmp = malloc(sizeof($1));
+        strcpy(tmp, $1);
+        $$ = tmp;
+    }
+    | base_string STRING
+    {
+        char *tmp = realloc($1, strlen($1) + strlen($2));  // get address
+        strcat(tmp, $2);
+        $$ = tmp;
     }
     ;
 
@@ -305,28 +392,6 @@ default_token
         strcpy(name_tmp, $2->code.base_var.var_name);
         free($2->code.base_var.var_name);
         free($2);
-        $$ = code_tmp;
-    }
-    ;
-
-base_var_
-    : base_var_token
-    | LI element RI base_var_token
-    {
-        $4->code.base_var.from = $2;
-        $$ = $4;
-    }
-    ;
-
-base_var_token
-    : VAR
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->code.base_var.var_name = malloc(sizeof($1));
-        char *name_tmp = code_tmp->code.base_var.var_name;
-        code_tmp->type = base_var;
-        code_tmp->code.base_var.from = NULL;
-        strcpy(name_tmp, $1);
         $$ = code_tmp;
     }
     ;

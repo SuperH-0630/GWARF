@@ -30,6 +30,7 @@
         "fstream": "c",
         "streambuf": "c",
         "interprete.h": "c",
-        "mutex": "c"
+        "mutex": "c",
+        "cmath": "c"
     }
 }

@@ -66,32 +66,34 @@ extern int yydebug;
     LP = 272,
     WHILE = 273,
     POW = 274,
-    EQUAL = 275,
-    MOREEQ = 276,
-    LESSEQ = 277,
-    NOTEQ = 278,
-    BREAK = 279,
-    IF = 280,
-    ELSE = 281,
-    ELIF = 282,
-    BROKEN = 283,
-    CONTINUE = 284,
-    CONTINUED = 285,
-    RESTART = 286,
-    RESTARTED = 287,
-    REGO = 288,
-    REWENT = 289,
-    RI = 290,
-    LI = 291,
-    DEFAULT = 292,
-    FOR = 293,
-    COMMA = 294,
-    GLOBAL = 295,
-    NONLOCAL = 296,
-    INDENTA = 297,
-    STOPN = 298,
-    STOPF = 299,
-    BLOCK = 300
+    LOG = 275,
+    SQRT = 276,
+    EQUAL = 277,
+    MOREEQ = 278,
+    LESSEQ = 279,
+    NOTEQ = 280,
+    BREAK = 281,
+    IF = 282,
+    ELSE = 283,
+    ELIF = 284,
+    BROKEN = 285,
+    CONTINUE = 286,
+    CONTINUED = 287,
+    RESTART = 288,
+    RESTARTED = 289,
+    REGO = 290,
+    REWENT = 291,
+    RI = 292,
+    LI = 293,
+    DEFAULT = 294,
+    FOR = 295,
+    COMMA = 296,
+    GLOBAL = 297,
+    NONLOCAL = 298,
+    INDENTA = 299,
+    STOPN = 300,
+    STOPF = 301,
+    BLOCK = 302
   };
 #endif
 /* Tokens.  */
@@ -112,32 +114,34 @@ extern int yydebug;
 #define LP 272
 #define WHILE 273
 #define POW 274
-#define EQUAL 275
-#define MOREEQ 276
-#define LESSEQ 277
-#define NOTEQ 278
-#define BREAK 279
-#define IF 280
-#define ELSE 281
-#define ELIF 282
-#define BROKEN 283
-#define CONTINUE 284
-#define CONTINUED 285
-#define RESTART 286
-#define RESTARTED 287
-#define REGO 288
-#define REWENT 289
-#define RI 290
-#define LI 291
-#define DEFAULT 292
-#define FOR 293
-#define COMMA 294
-#define GLOBAL 295
-#define NONLOCAL 296
-#define INDENTA 297
-#define STOPN 298
-#define STOPF 299
-#define BLOCK 300
+#define LOG 275
+#define SQRT 276
+#define EQUAL 277
+#define MOREEQ 278
+#define LESSEQ 279
+#define NOTEQ 280
+#define BREAK 281
+#define IF 282
+#define ELSE 283
+#define ELIF 284
+#define BROKEN 285
+#define CONTINUE 286
+#define CONTINUED 287
+#define RESTART 288
+#define RESTARTED 289
+#define REGO 290
+#define REWENT 291
+#define RI 292
+#define LI 293
+#define DEFAULT 294
+#define FOR 295
+#define COMMA 296
+#define GLOBAL 297
+#define NONLOCAL 298
+#define INDENTA 299
+#define STOPN 300
+#define STOPF 301
+#define BLOCK 302
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -151,7 +155,7 @@ union YYSTYPE
     struct statement *statement_value;
     struct if_list *if_list_base;
 
-#line 155 "y.tab.h"
+#line 159 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
