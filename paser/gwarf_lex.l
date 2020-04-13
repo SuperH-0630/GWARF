@@ -68,6 +68,17 @@
 <INITIAL>"#" {BEGIN COMMENT;}
 <INITIAL>' {BEGIN STRING_TEXT;}
 <INITIAL>\" {BEGIN STRING_TEXT;}
+
+<INITIAL>"true" {return TRUE;}
+<INITIAL>"false" {return FALSE;}
+<INITIAL>"True" {return TRUE;}
+<INITIAL>"False" {return FALSE;}
+<INITIAL>"None" {return NULL_token;}
+<INITIAL>"NULL" {return NULL_token;}
+<INITIAL>"null" {return NULL_token;}
+<INITIAL>"def" {return DEF;}
+<INITIAL>"return" {return RETURN;}
+
 <INITIAL>[1-9][0-9]*\.[0-9]+ {
     yylval.double_value = atof(yytext);
     return NUMBER;

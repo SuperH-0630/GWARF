@@ -93,7 +93,12 @@ extern int yydebug;
     INDENTA = 299,
     STOPN = 300,
     STOPF = 301,
-    BLOCK = 302
+    BLOCK = 302,
+    FALSE = 303,
+    TRUE = 304,
+    NULL_token = 305,
+    DEF = 306,
+    RETURN = 307
   };
 #endif
 /* Tokens.  */
@@ -142,6 +147,11 @@ extern int yydebug;
 #define STOPN 300
 #define STOPF 301
 #define BLOCK 302
+#define FALSE 303
+#define TRUE 304
+#define NULL_token 305
+#define DEF 306
+#define RETURN 307
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -154,8 +164,9 @@ union YYSTYPE
     char *string_value;
     struct statement *statement_value;
     struct if_list *if_list_base;
+    struct parameter *parameter_list;
 
-#line 159 "y.tab.h"
+#line 170 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

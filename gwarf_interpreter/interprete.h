@@ -1,6 +1,14 @@
+#include <stdio.h>
 #define false 0
 #define true 1
 #define bool int
+
+// the func
+typedef struct func{
+    char *name;
+    struct parameter *parameter_list;  // def parameter
+    struct statement *done;  // def to do
+} func;
 
 // the type of data(GWARF_value)
 typedef enum{
@@ -8,6 +16,8 @@ typedef enum{
     INT_value,  // INT 类型
     BOOL_value,  // bool : true or false
     STRING_value,  // char *
+    NULL_value,
+    FUNC_value,
 } GWARF_value_type;
 
 // all value is GWARF_value
@@ -19,9 +29,19 @@ typedef struct GWARF_value{
         int int_value;
         bool bool_value;
         char *string;  // STRING
+        func *func_value;
     } value;
-    
 } GWARF_value;
+
+// ------------------------- parameter for def
+typedef struct parameter{
+    union
+    {
+        char *name;  // var name
+        struct statement *value;  // or value
+    } u;
+    struct parameter *next;  // for list
+} parameter;
 
 // ------------------------- var
 
@@ -54,6 +74,9 @@ typedef struct statement{
         set_global,
         set_nonlocal,
         code_block,
+        def,  // func
+        call,  // func()
+        return_code,
     } type;  // the statement type
 
     union
@@ -152,6 +175,21 @@ typedef struct statement{
             struct statement *done;  // while to do
         } code_block;
 
+        struct{
+            char *name;
+            parameter *parameter_list;  // def parameter
+            struct statement *done;  // def to do
+        } def;
+
+        struct{
+            parameter *parameter_list;  // def parameter
+            struct statement *func;  // get func value
+        } call;
+
+        struct{
+            struct statement *times;  // 层数
+            struct statement *value;  // return value
+        } return_code;
     } code;
     struct statement *next;
 } statement;
@@ -171,8 +209,10 @@ typedef struct GWARF_result{
         code_restarted,
         code_rego,
         code_rewent,
+        code_return,
         name_no_found,
     } u;  // the result type[from where]
+    int return_times;  // return用
 } GWARF_result;
 
 // ------------------------- default_var [记录默认变量[层]]
@@ -253,6 +293,14 @@ inter *get_inter();
 int yyerror(char const *);
 FILE *yyin;
 char *yytext;
+
+// ---- parameter func[形参]
+parameter *make_parameter_name(char *);
+void append_parameter_name(char *, parameter *);
+
+// ---- parameter func[实参]
+parameter *make_parameter_value(statement *);
+void append_parameter_value(statement *, parameter *);
 
 // main
 inter *global_inter;

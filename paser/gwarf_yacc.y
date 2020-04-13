@@ -13,12 +13,15 @@
     char *string_value;
     struct statement *statement_value;
     struct if_list *if_list_base;
+    struct parameter *parameter_list;
 }
 %token <double_value> NUMBER INT
 %token <string_value> STRING VAR
-%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE POW LOG SQRT EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI DEFAULT FOR COMMA GLOBAL NONLOCAL INDENTA STOPN STOPF BLOCK
+%token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE POW LOG SQRT EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI DEFAULT FOR COMMA GLOBAL NONLOCAL INDENTA STOPN STOPF BLOCK FALSE TRUE
+%token NULL_token DEF RETURN
 %type <statement_value> base_value base_var_token base_var_ element second_number first_number zero_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
-%type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token for_exp for_block global_token nonlocal_token block_exp block_block
+%type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token for_exp for_block global_token nonlocal_token block_exp block_block call_number def_block def_exp return_exp return_token
+%type <parameter_list> formal_parameter arguments
 %type <string_value> base_string
 %type <if_list_base> elif_exp
 %%
@@ -39,13 +42,6 @@ command_list
         if($2 != NULL){
             statement *tmp = find_statement_list(0, statement_base);
             append_statement(tmp, $2);
-        }
-    }
-    | while_block
-    {   
-        if($1 != NULL){
-            statement *tmp = find_statement_list(0, statement_base);
-            append_statement(tmp, $1);
         }
     }
     ;
@@ -116,6 +112,14 @@ command
         $$ = $1;
     }
     | block_block stop_token
+    {
+        $$ = $1;
+    }
+    | def_block stop_token
+    {
+        $$ = $1;
+    }
+    | return_exp stop_token
     {
         $$ = $1;
     }
@@ -240,8 +244,8 @@ first_number
     ;
 
 zero_number
-    : element
-    | zero_number POW element
+    : call_number
+    | zero_number POW call_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -250,7 +254,7 @@ zero_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | zero_number LOG element
+    | zero_number LOG call_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -259,13 +263,33 @@ zero_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | zero_number SQRT element
+    | zero_number SQRT call_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
         code_tmp->code.operation.type = SQRT_func;
         code_tmp->code.operation.left_exp = $1;
         code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    ;
+
+call_number
+    : element
+    | element LB RB
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = call;
+        code_tmp->code.call.func = $1;
+        code_tmp->code.call.parameter_list = NULL;
+        $$ = code_tmp;
+    }
+    | element LB arguments RB
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = call;
+        code_tmp->code.call.func = $1;
+        code_tmp->code.call.parameter_list = $3;
         $$ = code_tmp;
     }
     ;
@@ -311,6 +335,30 @@ base_value
         code_tmp->type = base_value;
         code_tmp->code.base_value.value.type = STRING_value;
         code_tmp->code.base_value.value.value.string = $1;
+        $$ = code_tmp;
+    }
+    | TRUE
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = base_value;
+        code_tmp->code.base_value.value.type = BOOL_value;
+        code_tmp->code.base_value.value.value.bool_value = true;
+        $$ = code_tmp;
+    }
+    | FALSE
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = base_value;
+        code_tmp->code.base_value.value.type = BOOL_value;
+        code_tmp->code.base_value.value.value.bool_value = false;
+        $$ = code_tmp;
+    }
+    | NULL_token
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = base_value;
+        code_tmp->code.base_value.value.type = NULL_value;
+        code_tmp->code.base_value.value.value.int_value = 0;
         $$ = code_tmp;
     }
     ;
@@ -571,8 +619,103 @@ while_exp
     }
     ;
 
+def_block
+    : def_exp block
+    {
+        statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
+    }
+    ;
+
+def_exp
+    : DEF  base_var_ LB RB
+    {   
+        //无参数方法
+        statement *def_tmp =  make_statement();
+        def_tmp->type = def;
+
+        def_tmp->code.def.name = malloc(sizeof($2->code.base_var.var_name));
+        char *name_tmp = def_tmp->code.def.name;
+        strcpy(name_tmp, $2->code.base_var.var_name);
+
+        def_tmp->code.def.parameter_list = NULL;
+        def_tmp->code.def.done = make_statement();
+        statement_base = append_statement_list(def_tmp->code.def.done, statement_base);  // new statement_base (FILO)
+
+        free($2->code.base_var.var_name);
+        free($2);
+        $$ = def_tmp;
+    }
+    | DEF  base_var_ LB formal_parameter RB
+    {   
+        statement *def_tmp =  make_statement();
+        def_tmp->type = def;
+
+        def_tmp->code.def.name = malloc(sizeof($2->code.base_var.var_name));
+        char *name_tmp = def_tmp->code.def.name;
+        strcpy(name_tmp, $2->code.base_var.var_name);
+
+        def_tmp->code.def.parameter_list = $4;
+        def_tmp->code.def.done = make_statement();
+        statement_base = append_statement_list(def_tmp->code.def.done, statement_base);  // new statement_base (FILO)
+
+        free($2->code.base_var.var_name);
+        free($2);
+        $$ = def_tmp;
+    }
+    ;
+
+formal_parameter
+    : base_var_
+    {
+        $$ = make_parameter_name($1->code.base_var.var_name);
+        free($1->code.base_var.var_name);
+        free($1);
+    }
+    | formal_parameter COMMA base_var_
+    {
+        append_parameter_name($3->code.base_var.var_name, $1);
+        $$ = $1;
+    }
+
+arguments
+    : top_exp
+    {
+        $$ = make_parameter_value($1);
+    }
+    | arguments COMMA top_exp
+    {
+        append_parameter_value($3, $1);
+        $$ = $1;
+    }
+
 block
     : LP command_list RP
+    ;
+
+return_exp
+    : return_token
+    | return_token top_exp
+    {
+        $1->code.return_code.value = $2;
+        $$ = $1;
+    }
+    | return_token top_exp element
+    {
+        $1->code.return_code.value = $2;
+        $1->code.return_code.times = $3;
+        $$ = $1;
+    }
+    ;
+
+return_token
+    : RETURN
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = return_code;
+        code_tmp->code.return_code.times = NULL;
+        code_tmp->code.return_code.value = NULL;
+        $$ = code_tmp;
+    }
     ;
 
 restarted_exp
