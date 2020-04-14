@@ -78,6 +78,8 @@
 <INITIAL>"null" {return NULL_token;}
 <INITIAL>"def" {return DEF;}
 <INITIAL>"return" {return RETURN;}
+<INITIAL>"class" {return CLASS;}
+<INITIAL>"." {return POINT;}
 
 <INITIAL>[1-9][0-9]*\.[0-9]+ {
     yylval.double_value = atof(yytext);

@@ -18,9 +18,10 @@
 %token <double_value> NUMBER INT
 %token <string_value> STRING VAR
 %token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE POW LOG SQRT EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI DEFAULT FOR COMMA GLOBAL NONLOCAL INDENTA STOPN STOPF BLOCK FALSE TRUE
-%token NULL_token DEF RETURN
+%token NULL_token DEF RETURN CLASS POINT
 %type <statement_value> base_value base_var_token base_var_ element second_number first_number zero_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
 %type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token for_exp for_block global_token nonlocal_token block_exp block_block call_number def_block def_exp return_exp return_token
+%type <statement_value> eq_number class_block class_exp
 %type <parameter_list> formal_parameter arguments
 %type <string_value> base_string
 %type <if_list_base> elif_exp
@@ -123,14 +124,22 @@ command
     {
         $$ = $1;
     }
-    ;
-
-top_exp
-    : third_number
+    | class_block stop_token
     {
         $$ = $1;
     }
-    | base_var_ EQ top_exp
+    ;
+
+top_exp
+    : eq_number
+    {
+        $$ = $1;
+    }
+    ;
+
+eq_number
+    : third_number
+    | eq_number EQ third_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -305,6 +314,14 @@ element
         code_tmp->code.operation.left_exp = NULL;
         code_tmp->code.operation.right_exp = $2;
         $$ = code_tmp;
+    }
+    | element POINT element
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = point;
+        code_tmp->code.point.base_var = $1;
+        code_tmp->code.point.child_var = $3;
+        $$ = code_tmp; 
     }
     | LB top_exp RB
     {
@@ -616,6 +633,33 @@ while_exp
         while_tmp->code.while_cycle.done = make_statement();
         statement_base = append_statement_list(while_tmp->code.while_cycle.done, statement_base);  // new statement_base (FILO)
         $$ = while_tmp;
+    }
+    ;
+
+class_block
+    : class_exp block
+    {
+        statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
+    }
+    ;
+
+class_exp
+    : CLASS  base_var_ LB RB
+    {   
+        //无参数方法
+        statement *class_tmp =  make_statement();
+        class_tmp->type = set_class;
+
+        class_tmp->code.set_class.name = malloc(sizeof($2->code.base_var.var_name));
+        char *name_tmp = class_tmp->code.set_class.name;
+        strcpy(name_tmp, $2->code.base_var.var_name);
+
+        class_tmp->code.set_class.done = make_statement();
+        statement_base = append_statement_list(class_tmp->code.set_class.done, statement_base);  // new statement_base (FILO)
+
+        free($2->code.base_var.var_name);
+        free($2);
+        $$ = class_tmp;
     }
     ;
 

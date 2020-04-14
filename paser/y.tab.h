@@ -98,7 +98,9 @@ extern int yydebug;
     TRUE = 304,
     NULL_token = 305,
     DEF = 306,
-    RETURN = 307
+    RETURN = 307,
+    CLASS = 308,
+    POINT = 309
   };
 #endif
 /* Tokens.  */
@@ -152,6 +154,8 @@ extern int yydebug;
 #define NULL_token 305
 #define DEF 306
 #define RETURN 307
+#define CLASS 308
+#define POINT 309
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -166,7 +170,7 @@ union YYSTYPE
     struct if_list *if_list_base;
     struct parameter *parameter_list;
 
-#line 170 "y.tab.h"
+#line 174 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

@@ -2,13 +2,24 @@
 #define false 0
 #define true 1
 #define bool int
+#define read_statement_list(the_statement, the_var) read_statement(the_statement, the_var, NULL)
 
-// the func
 typedef struct func{
-    char *name;
     struct parameter *parameter_list;  // def parameter
     struct statement *done;  // def to do
+    struct var_list *the_var;  // func会记录the_var，因为不同地方调用var如果var链不统一那就会很乱
+    int is_class; 
 } func;
+
+typedef struct class_object{
+    struct var_list *out_var;  // 外部the_var list
+    struct var_list *the_var;  // 记录class_object的  -- 相当与cls
+} class_object;
+
+typedef struct the_object{
+    struct var_list *cls;  // 记录class_object的  -- 相当与cls
+    struct var_list *the_var;  // 记录class_object的实例  -- 相当与self
+} the_object;
 
 // the type of data(GWARF_value)
 typedef enum{
@@ -18,6 +29,8 @@ typedef enum{
     STRING_value,  // char *
     NULL_value,
     FUNC_value,
+    CLASS_value,
+    OBJECT_value,
 } GWARF_value_type;
 
 // all value is GWARF_value
@@ -30,6 +43,8 @@ typedef struct GWARF_value{
         bool bool_value;
         char *string;  // STRING
         func *func_value;
+        class_object *class_value;
+        the_object *object_value;
     } value;
 } GWARF_value;
 
@@ -57,7 +72,7 @@ typedef struct statement{
     enum statement_type{
         start=1,  // for base statement
         operation,  // such as + - * /
-        base_var,  // return var address
+        base_var,  // return var value by name
         base_value,  // return an number or number
         while_cycle,  // while
         for_cycle,
@@ -76,7 +91,9 @@ typedef struct statement{
         code_block,
         def,  // func
         call,  // func()
+        point,  // a.b  注：返回变量同时返回the_var链表[func 用于回调]
         return_code,
+        set_class,  // class aaa; b = aaa() is ```call```
     } type;  // the statement type
 
     union
@@ -123,6 +140,11 @@ typedef struct statement{
             char *var_name;  // return var
             struct statement *from;  // from where [double->int]
         } base_var;
+
+        struct{
+            struct statement *base_var;  // a.b --> a
+            struct statement *child_var;  // a.b --> b
+        } point;
 
         struct{
             GWARF_value value;  // return value
@@ -172,7 +194,7 @@ typedef struct statement{
         } set_nonlocal;
 
         struct{
-            struct statement *done;  // while to do
+            struct statement *done;  // block to do
         } code_block;
 
         struct{
@@ -190,6 +212,12 @@ typedef struct statement{
             struct statement *times;  // 层数
             struct statement *value;  // return value
         } return_code;
+
+        struct{
+            char *name;  // class name
+            struct statement *done;  // class to do
+        } set_class;
+
     } code;
     struct statement *next;
 } statement;
@@ -198,6 +226,7 @@ typedef struct statement{
 
 typedef struct GWARF_result{
     GWARF_value value;
+    GWARF_value *father;  // a.b --> a
     enum{
         return_def=1,
         statement_end,
@@ -215,7 +244,7 @@ typedef struct GWARF_result{
     int return_times;  // return用
 } GWARF_result;
 
-// ------------------------- default_var [记录默认变量[层]]
+// ------------------------- default_var [记录默认变量[层]] 用于default语句
 typedef struct default_var{
     char *name;
     int from;
@@ -301,6 +330,7 @@ void append_parameter_name(char *, parameter *);
 // ---- parameter func[实参]
 parameter *make_parameter_value(statement *);
 void append_parameter_value(statement *, parameter *);
+parameter *add_parameter_value(statement *, parameter *);
 
 // main
 inter *global_inter;

@@ -5,7 +5,7 @@
 
 // running code
 GWARF_result while_func(statement *, var_list *);
-GWARF_result operation_func(statement *, var_list *);
+GWARF_result operation_func(statement *, var_list *, var_list *);
 GWARF_result add_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result sub_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result mul_func(GWARF_result, GWARF_result, var_list *);
@@ -19,7 +19,11 @@ GWARF_result if_func(if_list *, var_list *);
 GWARF_result for_func(statement *, var_list *);
 GWARF_result negative_func(GWARF_result, var_list *);
 GWARF_result call_back(statement *, var_list *);
+
 int get_var_list_len(var_list *);
+var_list *copy_var_list(var_list *);
+var_list * append_by_var_list(var_list *, var_list *);
+
 GWARF_result block_func(statement *, var_list *);
 
 // math
@@ -98,6 +102,12 @@ void append_parameter_value(statement *value, parameter *parameter_base){
     }
     parameter *new_tmp = make_parameter_value(value);
     tmp->next = new_tmp;
+}
+
+parameter *add_parameter_value(statement *value, parameter *parameter_base){
+    parameter *new_tmp = make_parameter_value(value);
+    new_tmp->next = parameter_base;
+    return new_tmp;
 }
 
 // ---- var func
@@ -199,7 +209,6 @@ void append_default_var_base(char *name ,int from, default_var *base_default_var
     default_var *start = base_default_var;
     while(1){
         if (!strcmp(start->name, name)){  // if tmp->name == name , strcmp will return 0, if not strcmp return not 0
-            puts("SECOND");
             return;  // 不可以二次设置
         }
         if (start->next == NULL){  // not var name *name
@@ -274,6 +283,18 @@ var_list *append_var_list(var *var_base, var_list *var_list_base){  // make var_
     return tmp;
 }
 
+var_list *append_by_var_list(var_list *back_var_list, var_list *var_list_base){  // make var_list[FILO]
+    var_list *start = back_var_list;
+    while(1){
+        if(start->next == NULL){  // to the last
+            break;
+        }
+        start = start->next;
+    }
+    start->next = var_list_base;
+    return back_var_list;
+}
+
 var_list *free_var_list(var_list *var_list_base){  // free one var_list[FILO]
     var_list *tmp = var_list_base->next;
     if(tmp==NULL){
@@ -300,14 +321,13 @@ var *find_var(var_list *var_base,int from, char *name){  // find var by func get
     var_list *start = var_base;
     var *return_var;
     from += get_default(name, var_base->default_list);
-    printf("find from = %d\n", from);
     for(int i = 0;i < from;i+= 1){
         if(start->next == NULL){
             break;
         }
         start = start->next;
     }
-    printf("----find address = %d----\n", start);
+    printf("----var find address = %d----\n", start);
     while (1)
     {
         return_var = get_var(name, start->var_base);
@@ -325,17 +345,32 @@ var *find_var(var_list *var_base,int from, char *name){  // find var by func get
 void add_var(var_list *var_base,int from, char *name, GWARF_value value){  // add var by func append_var in var_list[iter to find]
     var_list *start = var_base;
     var *return_var;
-    printf("base from = %d\n", from);
     from += get_default(name, var_base->default_list);
-    printf("add from = %d\n", from);
     for(int i = 0;i < from;i+= 1){
         if(start->next == NULL){
             break;
         }
         start = start->next;
     }
-    printf("----add address = %d----\n", start);
+    printf("----var add address = %d----\n", start);
     append_var(name, value, start->var_base);
+}
+
+var_list *copy_var_list(var_list *var_list_base){  // 复制一条var链到另一个内存地址上[base不复制]
+    var_list *start = malloc(sizeof(var_list_base)), *tmp;
+    memcpy(start, var_list_base, sizeof(var_list_base));  // 复制base节点
+    tmp = start;  // 记录base节点
+    while(1){  // 复制var_list链
+        if((start == NULL) || (start->next == NULL)){
+            break;
+        }
+        puts("F1");
+        var_list *next_tmp = malloc(sizeof(start->next));
+        memcpy(next_tmp, start->next, sizeof(start->next));  // 复制到新的地方
+        start->next = next_tmp;  // 应用新的地方
+        start = start->next;
+    }
+    return tmp;
 }
 
 // ---- statement_list
@@ -411,7 +446,10 @@ if_list *append_elif(if_list *tmp ,if_list *base_if_list){  // elif
 
 // ---- run code
 
-GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func
+GWARF_result read_statement(statement *the_statement, var_list *the_var, var_list *login_var){  // read the statement list with case to run by func
+    if(login_var == NULL){
+        login_var = the_var;
+    }
     GWARF_result return_value;
     return_value.u = statement_end;  // 正常设置[正常语句结束]
     return_value.value.type = NUMBER_value;  // 默认设置
@@ -420,7 +458,7 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
     {
         case operation:  // 表达式运算
             puts("----code----");
-            return_value = operation_func(the_statement, the_var);
+            return_value = operation_func(the_statement, the_var, login_var);
             if((return_value.value.type == INT_value)){
                 printf("operation value = %d\n", return_value.value.value.int_value);
             }
@@ -473,14 +511,14 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
                 printf("get value = %f\n", return_value.value.value.double_value);
             }
             else if(return_value.value.type == NULL_value){
-                printf("operation value = None\n");
+                printf("get value = None\n");
             }
             else if(return_value.value.type == STRING_value){
                 printf("get value = %s\n", return_value.value.value.string);
             }
             else{
-                    printf("var value = other\n");
-                }
+                printf("get value = other\n");
+            }
             break;
         case base_var:{    // because the var tmp, we should ues a {} to make a block[name space] for the tmp var;
             int from = 0;
@@ -504,15 +542,31 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
                     printf("var value = %f\n", return_value.value.value.double_value);
                 }
                 else if(return_value.value.type == NULL_value){
-                    printf("operation value = None\n");
+                    printf("var value = None\n");
                 }
                 else if(return_value.value.type == STRING_value){
                     printf("var value = %s\n", return_value.value.value.string);
                 }
                 else{
-                    printf("var value = other\n");
+                    printf("var value = other[%d]\n", return_value.value.type);
                 }
             }
+            break;
+        }
+        case point:{
+            puts("----point----");
+            GWARF_value base_the_var = traverse((the_statement->code).point.base_var, the_var, false).value;
+            if(base_the_var.type == CLASS_value){  // is class so that can use "."
+                puts("func: point");
+                return_value = traverse((the_statement->code).point.child_var, base_the_var.value.class_value->the_var, false);
+            }
+            else if(base_the_var.type == OBJECT_value){
+                puts("func: point");
+                return_value = traverse((the_statement->code).point.child_var, base_the_var.value.object_value->the_var, false);
+            }
+            return_value.father = malloc(sizeof(return_value.father));  // 记录father的值
+            *(return_value.father) = base_the_var;
+            puts("----stop point----");
             break;
         }
         case def:{
@@ -521,11 +575,43 @@ GWARF_result read_statement_list(statement *the_statement, var_list *the_var){  
 
             func_tmp->done = the_statement->code.def.done;
             func_tmp->parameter_list = the_statement->code.def.parameter_list;
+            func_tmp->the_var = copy_var_list(the_var);
+            if(login_var != the_var){  // 定义为类方法
+                func_tmp->is_class = 1;
+            }
+            else{
+                func_tmp->is_class = 0;
+            }
 
             func_value.value.type = FUNC_value;
             func_value.value.value.func_value = func_tmp;
 
-            assigment_func(the_statement->code.def.name, func_value, the_var, 0);
+            assigment_func(the_statement->code.def.name, func_value, login_var, 0);  // 注册函数到指定的位置
+            break;
+        }
+        case set_class:{
+            puts("----set class----");
+            GWARF_result class_value;
+            class_object *class_tmp = malloc(sizeof(class_object));
+
+            class_tmp->the_var = make_var_base(make_var());  // make class var list
+            class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
+            class_value.value.type = CLASS_value;
+            class_value.value.value.class_value = class_tmp;
+
+            statement *tmp = the_statement->code.set_class.done;
+            GWARF_result result;
+            while(1){
+                if(tmp == NULL){
+                    break;  // off
+                }
+                read_statement(tmp, the_var, class_tmp->the_var);
+                tmp = tmp->next;
+            }
+
+            assigment_func(the_statement->code.set_class.name, class_value, login_var, 0);  // 注册class 的 位置
+            puts("----stop set class----");
+            break;
         }
         case break_cycle:
             return_value.u = cycle_break;
@@ -1000,7 +1086,7 @@ GWARF_result while_func(statement *the_statement, var_list *the_var){  // read t
 
 // -----------------operation func
 
-GWARF_result operation_func(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func
+GWARF_result operation_func(statement *the_statement, var_list *the_var, var_list *login_var){  // read the statement list with case to run by func
     GWARF_result value, left_result, right_result;
     int func_type = the_statement->code.operation.type;
     if((func_type != ASSIGMENT_func) && (func_type != NEGATIVE_func)){  // don't run because I don't need[if it's and func ,it will be run twice]
@@ -1025,21 +1111,53 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var){  // re
             value = negative_func(right_result, the_var);
             break;
         case ASSIGMENT_func:{  // because the var char, we should ues a {} to make a block[name space] for the tmp var;
-            char *left = (the_statement->code.operation.left_exp)->code.base_var.var_name;  // get var name but not value
-            int from = 0;
-            if((the_statement->code.operation.left_exp)->code.base_var.from == NULL){
-                from = 0;
-            }
-            else{
-                GWARF_result tmp_result = traverse((the_statement->code.operation.left_exp)->code.base_var.from, the_var, false);
-                if(tmp_result.value.type = INT_value){
-                    from = tmp_result.value.value.int_value;
+            if((the_statement->code.operation.left_exp)->type == base_var){  // 通过base_var赋值
+                char *left = (the_statement->code.operation.left_exp)->code.base_var.var_name;  // get var name but not value
+                int from = 0;
+                if((the_statement->code.operation.left_exp)->code.base_var.from == NULL){
+                    from = 0;
                 }
                 else{
-                    from = (int)tmp_result.value.value.double_value;
+                    GWARF_result tmp_result = traverse((the_statement->code.operation.left_exp)->code.base_var.from, the_var, false);
+                    if(tmp_result.value.type = INT_value){
+                        from = tmp_result.value.value.int_value;
+                    }
+                    else{
+                        from = (int)tmp_result.value.value.double_value;
+                    }
+                }
+                value = assigment_func(left, right_result, login_var, from);
+            }
+            else if((the_statement->code.operation.left_exp)->type == point){  // 通过point赋值
+                printf("(the_statement->code).point.base_var = %u\n", (the_statement->code.operation.left_exp)->code.point.base_var);
+                GWARF_value base_the_var = traverse((the_statement->code.operation.left_exp)->code.point.base_var, the_var, false).value;
+                if(((the_statement->code.operation.left_exp)->code.point.child_var)->type == base_var){
+                    char *left = ((the_statement->code.operation.left_exp)->code.point.child_var)->code.base_var.var_name;
+                    int from = 0;
+                    if(((the_statement->code.operation.left_exp)->code.point.child_var)->code.base_var.from == NULL){
+                        from = 0;
+                    }
+                    else{
+                        GWARF_result tmp_result = traverse(((the_statement->code.operation.left_exp)->code.point.child_var)->code.base_var.from, the_var, false);
+                        if(tmp_result.value.type = INT_value){
+                            from = tmp_result.value.value.int_value;
+                        }
+                        else{
+                            from = (int)tmp_result.value.value.double_value;
+                        }
+                    }
+                    value = assigment_func(left, right_result, base_the_var.value.object_value->the_var, from);
+                }
+                else{
+                    puts("Bad assigment");
+                    goto the_else;
                 }
             }
-            value = assigment_func(left, right_result, the_var, from);
+            else{  // 若不是变量[或者切片、成员访问]则当作==处理 ...... 这种处理不是期望的
+                the_else: 
+                left_result = traverse((*the_statement).code.operation.left_exp, the_var, false);
+                value = equal_func(left_result, right_result, the_var, 0);
+            }
             break;
         }
         case EQUAL_func:
@@ -1078,46 +1196,62 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var){  // re
 
 GWARF_result call_back(statement *the_statement, var_list *the_var){  // the func for add and call from read_statement_list
     GWARF_result result, get = traverse(the_statement->code.call.func, the_var, false);
-    if(get.value.type != FUNC_value){
-        goto return_result;
-    }
+    if(get.value.type == FUNC_value){
+        func *func_ = get.value.value.func_value;
+        parameter *tmp_x = func_->parameter_list, *tmp_s = the_statement->code.call.parameter_list;
+        the_var = func_->the_var;
+        // tmp_x:形参，tmp_s:实参
 
-    func *func_ = get.value.value.func_value;
-    parameter *tmp_x = func_->parameter_list, *tmp_s = the_statement->code.call.parameter_list;
-    // tmp_x:形参，tmp_s:实参
+        printf("----address = %d----\n", the_var);
+        var *tmp = make_var();  // base_var
+        the_var = append_var_list(tmp, the_var);
+        printf("----new address = %d----\n", the_var);
 
-    printf("----address = %d----\n", the_var);
-    var *tmp = make_var();  // base_var
-    the_var = append_var_list(tmp, the_var);
-    printf("----new address = %d----\n", the_var);
-
-    if(tmp_x == NULL){
-        puts("No tmp_x");
-        goto no_tmp_x;  // 无形参
-    }
-    while(1){
-        GWARF_result tmp = traverse(tmp_s->u.value, the_var, false);
-        assigment_func(tmp_x->u.name, tmp, the_var, 0);
-        puts("set func var: tmp_x->u.name");
-        if ((tmp_x->next == NULL)||(tmp_s->next == NULL)){  // the last
-            break;
+        if(tmp_x == NULL){
+            puts("No tmp_x");
+            goto no_tmp_x;  // 无形参
         }
-        tmp_x = tmp_x->next;  // get the next to iter
-        tmp_s = tmp_s->next;
-    }
-    no_tmp_x: 
-    puts("run func");
-    result = traverse(func_->done, the_var, false);  // 执行func_value->done
-    the_var = free_var_list(the_var);  // free the new var
-    if(result.u == code_return){
-        if(result.return_times <= 0){
-            result.u = return_def;
+        GWARF_result father;
+        father.value = *(get.father);
+        if(func_->is_class  == 1){
+            assigment_func(tmp_x->u.name, father, the_var, 0);
+            if (tmp_x->next == NULL){  // the last
+                goto no_tmp_x;
+            }
+            tmp_x = tmp_x->next;  // get the next to iter
         }
-        else{
-           result.return_times -= 1; 
+        while(1){
+            GWARF_result tmp = traverse(tmp_s->u.value, the_var, false);
+            assigment_func(tmp_x->u.name, tmp, the_var, 0);
+            if ((tmp_x->next == NULL)||(tmp_s->next == NULL)){  // the last
+                break;
+            }
+            tmp_x = tmp_x->next;  // get the next to iter
+            tmp_s = tmp_s->next;
         }
+        no_tmp_x: 
+        puts("----start func----");
+        result = traverse(func_->done, the_var, false);  // 执行func_value->done
+        the_var = free_var_list(the_var);  // free the new var
+        if(result.u == code_return){
+            if(result.return_times <= 0){
+                result.u = return_def;
+            }
+            else{
+            result.return_times -= 1; 
+            }
+        }
+        puts("----stop start func----");
     }
-    return_result: return result;
+    else if(get.value.type == CLASS_value){  // 生成实例
+        the_object *object_tmp = malloc(sizeof(the_object));  // 生成object的空间
+        object_tmp->cls = get.value.value.class_value->the_var;
+        object_tmp->the_var = append_by_var_list(make_var_base(make_var()), object_tmp->cls);
+        GWARF_value tmp;
+        tmp.type = OBJECT_value;
+        tmp.value.object_value = object_tmp;
+    }
+    return result;
 }
 
 // ---------  ADD
