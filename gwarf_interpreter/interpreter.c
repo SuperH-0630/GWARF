@@ -531,6 +531,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             var *tmp = find_var(the_var, from, (the_statement->code).base_var.var_name);
             if(tmp == NULL){
                 return_value.u = name_no_found;  // nameerror
+                puts("name not found");
             }
             else
             {
@@ -1245,11 +1246,7 @@ GWARF_result call_back(statement *the_statement, var_list *the_var){  // the fun
             puts("----stop start func----");
         }
         else{
-            GWARF_result father;
-            if(func_->is_class  == 1){
-                father.value = *(get.father);
-            }
-            result = func_->paser(func_, tmp_s, the_var, father);
+            result = func_->paser(func_, tmp_s, the_var, get);
         }
         the_var = free_var_list(the_var);  // free the new var
     }
@@ -1304,11 +1301,7 @@ GWARF_result call_back(statement *the_statement, var_list *the_var){  // the fun
                 puts("----stop start func----");
             }
             else{
-                GWARF_result father;
-                if(func_->is_class  == 1){
-                    father.value = *(get.father);
-                }
-                result = func_->paser(func_, tmp_s, the_var, father);
+                result = func_->paser(func_, tmp_s, the_var, get);
             }
             the_var = free_var_list(the_var);  // free the new var
         }
@@ -1957,9 +1950,9 @@ void text_login_official(var_list *the_var, GWARF_result (*paser)(func *, parame
 
     // 注册函数
     // {{official_func_type, is_class}}
-    int a[][2] = {{1,0}};
+    int a[][2] = {{2,1}};
     // {login_name}
-    char *name[] = {"print"};
+    char *name[] = {"__init__"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
@@ -1970,10 +1963,23 @@ void text_login_official(var_list *the_var, GWARF_result (*paser)(func *, parame
 // text 全局内置函数解析器
 GWARF_result text_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father){
     GWARF_result return_value;
+    var_list *login_var;
+    if(father.father->type == CLASS_value){  // is class so that can use "."
+        login_var = father.father->value.class_value->the_var;
+    }
+    else if(father.father->type == OBJECT_value){
+        login_var = father.father->value.object_value->the_var;
+    }
     switch (the_func->official_func)
     {
-    case printf_func:{  // printf something
-        printf("text.print\n");  // 换行
+    case __init__func:{  // printf something
+        char *left = "C";  // get var name but not value
+        GWARF_result right_result;
+        right_result.value.type = NUMBER_value;
+        right_result.value.value.double_value = 10.2;
+        assigment_func(left, right_result, login_var, 0);
+
+        var *tmp = find_var(login_var, 0, (the_statement->code).base_var.var_name);
         break;
     }
     default:

@@ -306,6 +306,7 @@ typedef enum{
 
 typedef enum{
     printf_func = 1,  // print_func
+    __init__func = 2,
 } official_func_type;
 
 typedef struct func{
