@@ -1300,6 +1300,10 @@ GWARF_result call_back(statement *the_statement, var_list *the_var){  // the fun
             puts("----stop start func----");
             the_var = free_var_list(the_var);  // free the new var
         }
+        // 记录返回值
+        result.u = return_def;
+        result.value = tmp;
+
     }
     return result;
 }
