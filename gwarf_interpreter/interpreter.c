@@ -19,7 +19,6 @@ GWARF_result if_func(if_list *, var_list *);
 GWARF_result for_func(statement *, var_list *);
 GWARF_result negative_func(GWARF_result, var_list *);
 GWARF_result call_back(statement *, var_list *);
-GWARF_result official_func(func *, parameter *, var_list *);
 
 int get_var_list_len(var_list *);
 var_list *copy_var_list(var_list *);
@@ -1215,8 +1214,8 @@ GWARF_result call_back(statement *the_statement, var_list *the_var){  // the fun
                 goto no_tmp_x;  // 无形参
             }
             GWARF_result father;
-            father.value = *(get.father);
             if(func_->is_class  == 1){
+                father.value = *(get.father);
                 assigment_func(tmp_x->u.name, father, the_var, 0);
                 if (tmp_x->next == NULL){  // the last
                     goto no_tmp_x;
@@ -1246,7 +1245,11 @@ GWARF_result call_back(statement *the_statement, var_list *the_var){  // the fun
             puts("----stop start func----");
         }
         else{
-            result = func_->paser(func_, tmp_s, the_var);
+            GWARF_result father;
+            if(func_->is_class  == 1){
+                father.value = *(get.father);
+            }
+            result = func_->paser(func_, tmp_s, the_var, father);
         }
         the_var = free_var_list(the_var);  // free the new var
     }
@@ -1271,33 +1274,42 @@ GWARF_result call_back(statement *the_statement, var_list *the_var){  // the fun
             the_var = append_var_list(tmp, the_var);
             printf("----new address = %d----\n", the_var);
 
-            if(tmp_x == NULL){
-                puts("No tmp_x");
-                goto no_tmp_x_init;  // 无形参
-            }
-            GWARF_result father;
-            father.value.type = OBJECT_value;
-            father.value.value.object_value = object_tmp;
-            if(func_->is_class  == 1){
-                assigment_func(tmp_x->u.name, father, the_var, 0);
-                if (tmp_x->next == NULL){  // the last
-                    goto no_tmp_x_init;
+            if(func_->type == customize){  // 用户定义的方法
+                if(tmp_x == NULL){
+                    puts("No tmp_x");
+                    goto no_tmp_x_init;  // 无形参
                 }
-                tmp_x = tmp_x->next;  // get the next to iter
-            }
-            while(1){
-                GWARF_result tmp = traverse(tmp_s->u.value, the_var, false);
-                assigment_func(tmp_x->u.name, tmp, the_var, 0);
-                if ((tmp_x->next == NULL)||(tmp_s->next == NULL)){  // the last
-                    break;
+                GWARF_result father;
+                father.value.type = OBJECT_value;
+                father.value.value.object_value = object_tmp;
+                if(func_->is_class  == 1){
+                    assigment_func(tmp_x->u.name, father, the_var, 0);
+                    if (tmp_x->next == NULL){  // the last
+                        goto no_tmp_x_init;
+                    }
+                    tmp_x = tmp_x->next;  // get the next to iter
                 }
-                tmp_x = tmp_x->next;  // get the next to iter
-                tmp_s = tmp_s->next;
+                while(1){
+                    GWARF_result tmp = traverse(tmp_s->u.value, the_var, false);
+                    assigment_func(tmp_x->u.name, tmp, the_var, 0);
+                    if ((tmp_x->next == NULL)||(tmp_s->next == NULL)){  // the last
+                        break;
+                    }
+                    tmp_x = tmp_x->next;  // get the next to iter
+                    tmp_s = tmp_s->next;
+                }
+                no_tmp_x_init: 
+                puts("----start func----");
+                traverse(func_->done, the_var, false);  // 执行func_value->done
+                puts("----stop start func----");
             }
-            no_tmp_x_init: 
-            puts("----start func----");
-            traverse(func_->done, the_var, false);  // 执行func_value->done
-            puts("----stop start func----");
+            else{
+                GWARF_result father;
+                if(func_->is_class  == 1){
+                    father.value = *(get.father);
+                }
+                result = func_->paser(func_, tmp_s, the_var, father);
+            }
             the_var = free_var_list(the_var);  // free the new var
         }
         // 记录返回值
@@ -1840,7 +1852,7 @@ inter *get_inter(){
 }
 
 // ------official func
-void login_official_func(int type, int is_class, var_list *the_var, char *name, GWARF_result (*paser)(struct func *, struct parameter *, struct var_list *the_var)){  // 注册单个official func
+void login_official_func(int type, int is_class, var_list *the_var, char *name, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result)){  // 注册单个official func
     GWARF_result func_value;
     func *func_tmp = malloc(sizeof(func));
 
@@ -1857,7 +1869,7 @@ void login_official_func(int type, int is_class, var_list *the_var, char *name, 
     assigment_func(name, func_value, the_var, 0);  // 注册函数到指定的位置
 }
 
-void login_official(var_list *the_var, GWARF_result (*paser)(struct func *, struct parameter *, struct var_list *the_var)){
+void login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result)){
     // {{official_func_type, is_class}}
     int a[][2] = {{1,0}};
     // {login_name}
@@ -1871,7 +1883,7 @@ void login_official(var_list *the_var, GWARF_result (*paser)(struct func *, stru
 
 
 // global 全局内置函数解析器
-GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var){
+GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father){
     GWARF_result return_value;
     switch (the_func->official_func)
     {
@@ -1919,6 +1931,49 @@ GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var){
             tmp_s = tmp_s->next;
         }
         printf("\n");  // 换行
+        break;
+    }
+    default:
+        break;
+    }
+    return_result: return return_value;
+}
+
+
+// 注册test 对象
+void text_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result)){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value;
+    class_object *class_tmp = malloc(sizeof(class_object));
+
+    class_tmp->the_var = make_var_base(make_var());  // make class var list
+    class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assigment_func("text", class_value, the_var, 0);  // 注册class 的 位置
+    puts("----stop set class----");
+
+    // 注册函数
+    // {{official_func_type, is_class}}
+    int a[][2] = {{1,0}};
+    // {login_name}
+    char *name[] = {"print"};
+
+    int lenth = sizeof(a)/sizeof(a[0]);
+    for(int i = 0;i < lenth;i+=1){
+        login_official_func(a[i][0], a[i][1], class_tmp->the_var, name[i], paser);
+    }
+}
+
+// text 全局内置函数解析器
+GWARF_result text_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father){
+    GWARF_result return_value;
+    switch (the_func->official_func)
+    {
+    case printf_func:{  // printf something
+        printf("text.print\n");  // 换行
         break;
     }
     default:
