@@ -4,7 +4,18 @@
 #define bool int
 #define read_statement_list(the_statement, the_var) read_statement(the_statement, the_var, NULL)
 
+typedef enum{
+    customize = 1,  // func by user
+    official,  // func by gwarf
+} func_type;
+
+typedef enum{
+    printf_func = 1,  // print_func
+} official_func_type;
+
 typedef struct func{
+    func_type type;
+    official_func_type official_func;
     struct parameter *parameter_list;  // def parameter
     struct statement *done;  // def to do
     struct var_list *the_var;  // func会记录the_var，因为不同地方调用var如果var链不统一那就会很乱
@@ -335,3 +346,6 @@ parameter *add_parameter_value(statement *, parameter *);
 // main
 inter *global_inter;
 statement_list *statement_base;
+
+void login_official_func(int, int, var_list *, char *);
+void login_official(var_list *);

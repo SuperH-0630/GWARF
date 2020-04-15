@@ -19,6 +19,7 @@ GWARF_result if_func(if_list *, var_list *);
 GWARF_result for_func(statement *, var_list *);
 GWARF_result negative_func(GWARF_result, var_list *);
 GWARF_result call_back(statement *, var_list *);
+GWARF_result official_func(func *, parameter *, var_list *);
 
 int get_var_list_len(var_list *);
 var_list *copy_var_list(var_list *);
@@ -576,6 +577,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             func_tmp->done = the_statement->code.def.done;
             func_tmp->parameter_list = the_statement->code.def.parameter_list;
             func_tmp->the_var = copy_var_list(the_var);
+            func_tmp->type = customize;  // func by user
             if(login_var != the_var){  // 定义为类方法
                 func_tmp->is_class = 1;
             }
@@ -1207,41 +1209,46 @@ GWARF_result call_back(statement *the_statement, var_list *the_var){  // the fun
         the_var = append_var_list(tmp, the_var);
         printf("----new address = %d----\n", the_var);
 
-        if(tmp_x == NULL){
-            puts("No tmp_x");
-            goto no_tmp_x;  // 无形参
-        }
-        GWARF_result father;
-        father.value = *(get.father);
-        if(func_->is_class  == 1){
-            assigment_func(tmp_x->u.name, father, the_var, 0);
-            if (tmp_x->next == NULL){  // the last
-                goto no_tmp_x;
+        if(func_->type == customize){  // 用户定义的方法
+            if(tmp_x == NULL){
+                puts("No tmp_x");
+                goto no_tmp_x;  // 无形参
             }
-            tmp_x = tmp_x->next;  // get the next to iter
-        }
-        while(1){
-            GWARF_result tmp = traverse(tmp_s->u.value, the_var, false);
-            assigment_func(tmp_x->u.name, tmp, the_var, 0);
-            if ((tmp_x->next == NULL)||(tmp_s->next == NULL)){  // the last
-                break;
+            GWARF_result father;
+            father.value = *(get.father);
+            if(func_->is_class  == 1){
+                assigment_func(tmp_x->u.name, father, the_var, 0);
+                if (tmp_x->next == NULL){  // the last
+                    goto no_tmp_x;
+                }
+                tmp_x = tmp_x->next;  // get the next to iter
             }
-            tmp_x = tmp_x->next;  // get the next to iter
-            tmp_s = tmp_s->next;
+            while(1){
+                GWARF_result tmp = traverse(tmp_s->u.value, the_var, false);
+                assigment_func(tmp_x->u.name, tmp, the_var, 0);
+                if ((tmp_x->next == NULL)||(tmp_s->next == NULL)){  // the last
+                    break;
+                }
+                tmp_x = tmp_x->next;  // get the next to iter
+                tmp_s = tmp_s->next;
+            }
+            no_tmp_x: 
+            puts("----start func----");
+            result = traverse(func_->done, the_var, false);  // 执行func_value->done
+            if(result.u == code_return){
+                if(result.return_times <= 0){
+                    result.u = return_def;
+                }
+                else{
+                result.return_times -= 1; 
+                }
+            }
+            puts("----stop start func----");
         }
-        no_tmp_x: 
-        puts("----start func----");
-        result = traverse(func_->done, the_var, false);  // 执行func_value->done
+        else{
+            result = official_func(func_, tmp_s, the_var);
+        }
         the_var = free_var_list(the_var);  // free the new var
-        if(result.u == code_return){
-            if(result.return_times <= 0){
-                result.u = return_def;
-            }
-            else{
-            result.return_times -= 1; 
-            }
-        }
-        puts("----stop start func----");
     }
     else if(get.value.type == CLASS_value){  // 生成实例
         the_object *object_tmp = malloc(sizeof(the_object));  // 生成object的空间
@@ -1783,4 +1790,89 @@ inter *get_inter(){
     tmp->global_var = make_var();
     tmp->global_code = make_statement();
     return tmp;
+}
+
+// ------official func
+void login_official_func(int type, int is_class, var_list *the_var, char *name){  // 注册单个official func
+    GWARF_result func_value;
+    func *func_tmp = malloc(sizeof(func));
+
+    func_tmp->done = NULL;
+    func_tmp->parameter_list = NULL;
+    func_tmp->the_var = copy_var_list(the_var);
+    func_tmp->type = official;
+    func_tmp->official_func = type;
+    func_tmp->is_class = is_class;
+
+    func_value.value.type = FUNC_value;
+    func_value.value.value.func_value = func_tmp;
+    assigment_func(name, func_value, the_var, 0);  // 注册函数到指定的位置
+}
+
+void login_official(var_list *the_var){
+    // {{official_func_type, is_class}}
+    int a[][2] = {{1,0}};
+    // {login_name}
+    char *name[] = {"print"};
+
+    int lenth = sizeof(a)/sizeof(a[0]);
+    for(int i = 0;i < lenth;i+=1){
+        login_official_func(a[i][0], a[i][1], the_var, name[i]);
+    }
+}
+
+GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var){
+    GWARF_result return_value;
+    switch (the_func->official_func)
+    {
+    case printf_func:{  // printf something
+        if(tmp_s == NULL){  // 没有东西要打印
+            goto return_result;
+        }
+        while(1){
+            GWARF_result tmp = traverse(tmp_s->u.value, the_var, false);
+            if((tmp.value.type == INT_value)){
+                printf("%d", tmp.value.value.int_value);
+            }
+            else if(tmp.value.type == BOOL_value){
+                if(tmp.value.value.bool_value){
+                    printf("true");
+                }
+                else{
+                    printf("false");
+                } 
+            }
+            else if(tmp.value.type == NUMBER_value){
+                printf("%f", tmp.value.value.double_value);
+            }
+            else if(tmp.value.type == NULL_value){
+                printf("<-None->");
+            }
+            else if(tmp.value.type == STRING_value){
+                printf("'%s'", tmp.value.value.string);
+            }
+            else if(tmp.value.type == FUNC_value){
+                printf("<-function on %u->", tmp.value.value.func_value);
+            }
+            else if(tmp.value.type == CLASS_value){
+                printf("<-class on %u->", tmp.value.value.class_value);
+            }
+            else if(tmp.value.type == OBJECT_value){
+                printf("<-object on %u->", tmp.value.value.object_value);
+            }
+            else{
+                printf("var value = other\n");
+            }
+            if (tmp_s->next == NULL){  // the last
+                break;
+            }
+            tmp_s = tmp_s->next;
+        }
+        printf("\n");  // 换行
+        break;
+    }
+    default:
+        break;
+    }
+    return_result: return return_value;
 }
