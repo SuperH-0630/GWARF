@@ -4,34 +4,6 @@
 #define bool int
 #define read_statement_list(the_statement, the_var) read_statement(the_statement, the_var, NULL)
 
-typedef enum{
-    customize = 1,  // func by user
-    official,  // func by gwarf
-} func_type;
-
-typedef enum{
-    printf_func = 1,  // print_func
-} official_func_type;
-
-typedef struct func{
-    func_type type;
-    official_func_type official_func;
-    struct parameter *parameter_list;  // def parameter
-    struct statement *done;  // def to do
-    struct var_list *the_var;  // func会记录the_var，因为不同地方调用var如果var链不统一那就会很乱
-    int is_class; 
-} func;
-
-typedef struct class_object{
-    struct var_list *out_var;  // 外部the_var list
-    struct var_list *the_var;  // 记录class_object的  -- 相当与cls
-} class_object;
-
-typedef struct the_object{
-    struct var_list *cls;  // 记录class_object的  -- 相当与cls
-    struct var_list *the_var;  // 记录class_object的实例  -- 相当与self
-} the_object;
-
 // the type of data(GWARF_value)
 typedef enum{
     NUMBER_value = 1,
@@ -53,9 +25,9 @@ typedef struct GWARF_value{
         int int_value;
         bool bool_value;
         char *string;  // STRING
-        func *func_value;
-        class_object *class_value;
-        the_object *object_value;
+        struct func *func_value;
+        struct class_object *class_value;
+        struct the_object *object_value;
     } value;
 } GWARF_value;
 
@@ -326,6 +298,36 @@ if_list *append_elif(if_list *, if_list *);
 GWARF_result traverse(statement *, var_list *, bool);
 GWARF_result traverse_global(statement *, var_list *);
 
+//------- class/object/func
+typedef enum{
+    customize = 1,  // func by user
+    official,  // func by gwarf
+} func_type;
+
+typedef enum{
+    printf_func = 1,  // print_func
+} official_func_type;
+
+typedef struct func{
+    func_type type;
+    official_func_type official_func;
+    struct GWARF_result (*paser)(struct func *, struct parameter *, struct var_list *the_var);
+    struct parameter *parameter_list;  // def parameter
+    struct statement *done;  // def to do
+    struct var_list *the_var;  // func会记录the_var，因为不同地方调用var如果var链不统一那就会很乱
+    int is_class; 
+} func;
+
+typedef struct class_object{
+    struct var_list *out_var;  // 外部the_var list
+    struct var_list *the_var;  // 记录class_object的  -- 相当与cls
+} class_object;
+
+typedef struct the_object{
+    struct var_list *cls;  // 记录class_object的  -- 相当与cls
+    struct var_list *the_var;  // 记录class_object的实例  -- 相当与self
+} the_object;
+
 //------- inter func
 inter *get_inter();
 
@@ -347,5 +349,8 @@ parameter *add_parameter_value(statement *, parameter *);
 inter *global_inter;
 statement_list *statement_base;
 
-void login_official_func(int, int, var_list *, char *);
-void login_official(var_list *);
+void login_official_func(int type, int is_class, var_list *the_var, char *name, GWARF_result (*paser)(struct func *, struct parameter *, struct var_list *the_var));
+void login_official(var_list *the_var, GWARF_result (*paser)(struct func *, struct parameter *, struct var_list *the_var));
+
+// 内置函数
+GWARF_result official_func(func *, parameter *, var_list *);

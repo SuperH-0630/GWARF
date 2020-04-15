@@ -1246,7 +1246,7 @@ GWARF_result call_back(statement *the_statement, var_list *the_var){  // the fun
             puts("----stop start func----");
         }
         else{
-            result = official_func(func_, tmp_s, the_var);
+            result = func_->paser(func_, tmp_s, the_var);
         }
         the_var = free_var_list(the_var);  // free the new var
     }
@@ -1840,7 +1840,7 @@ inter *get_inter(){
 }
 
 // ------official func
-void login_official_func(int type, int is_class, var_list *the_var, char *name){  // 注册单个official func
+void login_official_func(int type, int is_class, var_list *the_var, char *name, GWARF_result (*paser)(struct func *, struct parameter *, struct var_list *the_var)){  // 注册单个official func
     GWARF_result func_value;
     func *func_tmp = malloc(sizeof(func));
 
@@ -1850,13 +1850,14 @@ void login_official_func(int type, int is_class, var_list *the_var, char *name){
     func_tmp->type = official;
     func_tmp->official_func = type;
     func_tmp->is_class = is_class;
+    func_tmp->paser = paser;
 
     func_value.value.type = FUNC_value;
     func_value.value.value.func_value = func_tmp;
     assigment_func(name, func_value, the_var, 0);  // 注册函数到指定的位置
 }
 
-void login_official(var_list *the_var){
+void login_official(var_list *the_var, GWARF_result (*paser)(struct func *, struct parameter *, struct var_list *the_var)){
     // {{official_func_type, is_class}}
     int a[][2] = {{1,0}};
     // {login_name}
@@ -1864,10 +1865,12 @@ void login_official(var_list *the_var){
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
-        login_official_func(a[i][0], a[i][1], the_var, name[i]);
+        login_official_func(a[i][0], a[i][1], the_var, name[i], paser);
     }
 }
 
+
+// global 全局内置函数解析器
 GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var){
     GWARF_result return_value;
     switch (the_func->official_func)
