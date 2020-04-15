@@ -6,14 +6,14 @@
 
 // the type of data(GWARF_value)
 typedef enum{
-    NUMBER_value = 1,
-    INT_value,  // INT 类型
-    BOOL_value,  // bool : true or false
-    STRING_value,  // char *
-    NULL_value,
-    FUNC_value,
-    CLASS_value,
-    OBJECT_value,
+    NUMBER_value = 1,  // [只允许系统使用]
+    INT_value,  // INT 类型[只允许系统使用]
+    BOOL_value,  // bool : true or false [只允许系统使用]
+    STRING_value,  // char * [只允许系统使用]
+    NULL_value,  // 无值类型 [只允许系统使用]
+    FUNC_value,  // 函数
+    CLASS_value,  // 对象
+    OBJECT_value,  // 实例
 } GWARF_value_type;
 
 // all value is GWARF_value
@@ -307,12 +307,17 @@ typedef enum{
 typedef enum{
     printf_func = 1,  // print_func
     __init__func = 2,
+    __value__func = 3,
+    __add__func = 4,
+    __sub__func = 5,
+    __mul__func = 6,
+    __div__func = 7,
 } official_func_type;
 
 typedef struct func{
     func_type type;
     official_func_type official_func;
-    struct GWARF_result (*paser)(struct func *, struct parameter *, struct var_list *the_var, GWARF_result);
+    struct GWARF_result (*paser)(struct func *, struct parameter *, struct var_list *the_var, GWARF_result, var_list *);
     struct parameter *parameter_list;  // def parameter
     struct statement *done;  // def to do
     struct var_list *the_var;  // func会记录the_var，因为不同地方调用var如果var链不统一那就会很乱
@@ -345,17 +350,18 @@ void append_parameter_name(char *, parameter *);
 parameter *make_parameter_value(statement *);
 void append_parameter_value(statement *, parameter *);
 parameter *add_parameter_value(statement *, parameter *);
+parameter *pack_value_parameter(GWARF_value);
 
 // main
 inter *global_inter;
 statement_list *statement_base;
 
-void login_official_func(int type, int is_class, var_list *the_var, char *name, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result));
-void login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result));
+void login_official_func(int type, int is_class, var_list *the_var, char *name, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *));
+void login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *));
 
 // 内置函数
-GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father);
+GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *);
 
-// text内置类
-void text_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result));
-GWARF_result text_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father);
+// int内置类
+void int_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *));
+GWARF_result int_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *);
