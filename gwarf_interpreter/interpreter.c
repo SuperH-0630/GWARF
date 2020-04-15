@@ -1257,6 +1257,9 @@ GWARF_result call_back(statement *the_statement, var_list *the_var){  // the fun
         GWARF_value tmp;
         tmp.type = OBJECT_value;
         tmp.value.object_value = object_tmp;
+
+        result.u = return_def;
+        result.value = tmp;
     }
     return result;
 }
