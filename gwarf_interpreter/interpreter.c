@@ -1257,6 +1257,49 @@ GWARF_result call_back(statement *the_statement, var_list *the_var){  // the fun
         GWARF_value tmp;
         tmp.type = OBJECT_value;
         tmp.value.object_value = object_tmp;
+
+        // 执行__init__
+        var *init_tmp = find_var(object_tmp->cls, 0, "__init__");
+        if(init_tmp != NULL){  // 找到了__init__
+            func *func_ = init_tmp->value.value.func_value;
+            parameter *tmp_x = func_->parameter_list, *tmp_s = the_statement->code.call.parameter_list;
+            the_var = func_->the_var;
+            // tmp_x:形参，tmp_s:实参
+
+            printf("----address = %d----\n", the_var);
+            var *tmp = make_var();  // base_var
+            the_var = append_var_list(tmp, the_var);
+            printf("----new address = %d----\n", the_var);
+
+            if(tmp_x == NULL){
+                puts("No tmp_x");
+                goto no_tmp_x_init;  // 无形参
+            }
+            GWARF_result father;
+            father.value.type = OBJECT_value;
+            father.value.value.object_value = object_tmp;
+            if(func_->is_class  == 1){
+                assigment_func(tmp_x->u.name, father, the_var, 0);
+                if (tmp_x->next == NULL){  // the last
+                    goto no_tmp_x_init;
+                }
+                tmp_x = tmp_x->next;  // get the next to iter
+            }
+            while(1){
+                GWARF_result tmp = traverse(tmp_s->u.value, the_var, false);
+                assigment_func(tmp_x->u.name, tmp, the_var, 0);
+                if ((tmp_x->next == NULL)||(tmp_s->next == NULL)){  // the last
+                    break;
+                }
+                tmp_x = tmp_x->next;  // get the next to iter
+                tmp_s = tmp_s->next;
+            }
+            no_tmp_x_init: 
+            puts("----start func----");
+            traverse(func_->done, the_var, false);  // 执行func_value->done
+            puts("----stop start func----");
+            the_var = free_var_list(the_var);  // free the new var
+        }
     }
     return result;
 }
