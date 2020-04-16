@@ -332,46 +332,68 @@ element
 base_value
     : NUMBER
     {
+        // 调用double内置类的构造函数
+        GWARF_value tmp_value;
+        tmp_value.type = NUMBER_value;
+        tmp_value.value.double_value = (double)$1;
+
         statement *code_tmp =  make_statement();
-        code_tmp->type = base_value;
-        code_tmp->code.base_value.value.type = NUMBER_value;
-        code_tmp->code.base_value.value.value.double_value = (double)$1;
+        code_tmp->type = call;
+        code_tmp->code.call.func = pack_call_name("double", NULL);
+        code_tmp->code.call.parameter_list = pack_value_parameter(tmp_value);
         $$ = code_tmp;
     }
     | INT
     {
+        GWARF_value tmp_value;
+        tmp_value.type = INT_value;
+        tmp_value.value.int_value = (int)$1;
+
         statement *code_tmp =  make_statement();
-        code_tmp->type = base_value;
-        code_tmp->code.base_value.value.type = INT_value;
-        code_tmp->code.base_value.value.value.int_value = (int)$1;
+        code_tmp->type = call;
+        code_tmp->code.call.func = pack_call_name("int", NULL);
+        code_tmp->code.call.parameter_list = pack_value_parameter(tmp_value);
         $$ = code_tmp;
     }
     | base_string
     {
+        GWARF_value tmp_value;
+        tmp_value.type = STRING_value;
+        tmp_value.value.string = $1;  // base_string已经动态生成内存了
+
         statement *code_tmp =  make_statement();
-        code_tmp->type = base_value;
-        code_tmp->code.base_value.value.type = STRING_value;
-        code_tmp->code.base_value.value.value.string = $1;
+        code_tmp->type = call;
+        code_tmp->code.call.func = pack_call_name("str", NULL);
+        code_tmp->code.call.parameter_list = pack_value_parameter(tmp_value);
         $$ = code_tmp;
     }
     | TRUE
     {
+        GWARF_value tmp_value;
+        tmp_value.type = BOOL_value;
+        tmp_value.value.bool_value = true;
+
         statement *code_tmp =  make_statement();
-        code_tmp->type = base_value;
-        code_tmp->code.base_value.value.type = BOOL_value;
-        code_tmp->code.base_value.value.value.bool_value = true;
+        code_tmp->type = call;
+        code_tmp->code.call.func = pack_call_name("bool", NULL);
+        code_tmp->code.call.parameter_list = pack_value_parameter(tmp_value);
         $$ = code_tmp;
     }
     | FALSE
     {
+        GWARF_value tmp_value;
+        tmp_value.type = BOOL_value;
+        tmp_value.value.bool_value = false;
+
         statement *code_tmp =  make_statement();
-        code_tmp->type = base_value;
-        code_tmp->code.base_value.value.type = BOOL_value;
-        code_tmp->code.base_value.value.value.bool_value = false;
+        code_tmp->type = call;
+        code_tmp->code.call.func = pack_call_name("bool", NULL);
+        code_tmp->code.call.parameter_list = pack_value_parameter(tmp_value);
         $$ = code_tmp;
     }
     | NULL_token
     {
+        // NULL代表空值，是GWARF_value
         statement *code_tmp =  make_statement();
         code_tmp->type = base_value;
         code_tmp->code.base_value.value.type = NULL_value;
@@ -382,8 +404,9 @@ base_value
 
 base_var_
     : base_var_token
-    | LI element RI base_var_token
+    | LI top_exp RI base_var_token
     {
+        printf("$2 = %x\n", $2);
         $4->code.base_var.from = $2;
         $$ = $4;
     }

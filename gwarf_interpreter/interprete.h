@@ -10,7 +10,7 @@ typedef enum{
     INT_value,  // INT 类型[只允许系统使用]
     BOOL_value,  // bool : true or false [只允许系统使用]
     STRING_value,  // char * [只允许系统使用]
-    NULL_value,  // 无值类型 [只允许系统使用]
+    NULL_value,  // 无值类型
     FUNC_value,  // 函数
     CLASS_value,  // 对象
     OBJECT_value,  // 实例
@@ -350,11 +350,14 @@ void append_parameter_name(char *, parameter *);
 parameter *make_parameter_value(statement *);
 void append_parameter_value(statement *, parameter *);
 parameter *add_parameter_value(statement *, parameter *);
+
 parameter *pack_value_parameter(GWARF_value);
+statement *pack_call_name(char *, statement *);
 
 // main
 inter *global_inter;
 statement_list *statement_base;
+GWARF_value to_object(GWARF_value, var_list *);
 
 void login_official_func(int type, int is_class, var_list *the_var, char *name, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *));
 void login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *));
