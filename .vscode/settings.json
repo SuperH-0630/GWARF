@@ -32,6 +32,11 @@
         "interprete.h": "c",
         "mutex": "c",
         "cmath": "c",
-        "string_view": "c"
-    }
+        "string_view": "c",
+        "hash_map": "c",
+        "algorithm": "c",
+        "initializer_list": "c",
+        "valarray": "c"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }

@@ -20,6 +20,17 @@ GWARF_result for_func(statement *, var_list *);
 GWARF_result negative_func(GWARF_result, var_list *);
 GWARF_result call_back(statement *, var_list *);
 GWARF_result call_back_core(GWARF_result, var_list *, parameter *);
+int len_only_double(double num);
+int len_double(double num);
+int len_int(int num);
+int len_intx(unsigned int num);
+
+GWARF_value to_int(GWARF_value, var_list *the_var);
+GWARF_value to_double(GWARF_value value, var_list *the_var);
+GWARF_value to_bool_(GWARF_value value, var_list *the_var);
+GWARF_value to_str(GWARF_value value, var_list *the_var);
+bool to_bool(GWARF_value);
+GWARF_result get__value__(GWARF_value *base_the_var, var_list *the_var);
 
 int get_var_list_len(var_list *);
 var_list *copy_var_list(var_list *);
@@ -39,7 +50,6 @@ double sqrt_(double base, double num){  // 定义根号sqrt
 }
 
 // bool[bool逻辑转换]
-bool to_bool(GWARF_value);
 bool to_bool(GWARF_value value){
     double bool_double = 1;  // if bool_double == 0则返回false其他返回true
     if(value.type == INT_value || value.type == BOOL_value){
@@ -2000,62 +2010,6 @@ GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var, 
     return_result: return return_value;
 }
 
-
-// // 注册test 对象
-// void text_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result)){
-//     // 创建对象[空对象]
-//     puts("----set class----");
-//     GWARF_result class_value;
-//     class_object *class_tmp = malloc(sizeof(class_object));
-
-//     class_tmp->the_var = make_var_base(make_var());  // make class var list
-//     class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
-//     class_value.value.type = CLASS_value;
-//     class_value.value.value.class_value = class_tmp;
-
-//     assigment_func("text", class_value, the_var, 0);  // 注册class 的 位置
-//     puts("----stop set class----");
-
-//     // 注册函数
-//     // {{official_func_type, is_class}}
-//     int a[][2] = {{2,1}};
-//     // {login_name}
-//     char *name[] = {"__init__"};
-
-//     int lenth = sizeof(a)/sizeof(a[0]);
-//     for(int i = 0;i < lenth;i+=1){
-//         login_official_func(a[i][0], a[i][1], class_tmp->the_var, name[i], paser);
-//     }
-// }
-
-// // text 全局内置函数解析器
-// GWARF_result text_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father){
-//     GWARF_result return_value;
-//     var_list *login_var;
-//     if(father.father->type == CLASS_value){  // is class so that can use "."
-//         login_var = father.father->value.class_value->the_var;
-//     }
-//     else if(father.father->type == OBJECT_value){
-//         login_var = father.father->value.object_value->the_var;
-//     }
-//     switch (the_func->official_func)
-//     {
-//     case __init__func:{  // printf something
-//         char *left = "C";  // get var name but not value
-//         GWARF_result right_result;
-//         right_result.value.type = NUMBER_value;
-//         right_result.value.value.double_value = 10.2;
-//         assigment_func(left, right_result, login_var, 0);
-
-//         var *tmp = find_var(login_var, 0, (the_statement->code).base_var.var_name);
-//         break;
-//     }
-//     default:
-//         break;
-//     }
-//     return_result: return return_value;
-// }
-
 void int_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *)){
     // 创建对象[空对象]
     puts("----set class----");
@@ -2080,7 +2034,6 @@ void int_login_official(var_list *the_var, GWARF_result (*paser)(func *, paramet
     }
 }
 
-// text 全局内置函数解析器
 GWARF_result int_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var){  // out_var是外部环境
     GWARF_result return_value;
     var_list *login_var;
@@ -2097,7 +2050,8 @@ GWARF_result int_official_func(func *the_func, parameter *tmp_s, var_list *the_v
     switch (the_func->official_func)
     {
         case __init__func:{  // printf something
-            GWARF_result tmp = traverse(tmp_s->u.value, out_var, false);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+            GWARF_result tmp;
+            tmp.value = to_int(traverse(tmp_s->u.value, out_var, false).value, out_var);  // 只有一个参数[要针对不同数据类型对此处作出处理]
             assigment_func("value", tmp, login_var, 0);  // 注册到self
             break;
         }
@@ -2107,73 +2061,33 @@ GWARF_result int_official_func(func *the_func, parameter *tmp_s, var_list *the_v
             break;
         }
         case __add__func:{
-            GWARF_result reight_tmp, left_tmp, get;
+            GWARF_result reight_tmp, left_tmp;
             GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
-            var_list *call_var;
-            if(base_the_var.type == CLASS_value){  // is class so that can use "."
-                call_var = base_the_var.value.class_value->the_var;
-            }
-            else if(base_the_var.type == OBJECT_value){
-                call_var = base_the_var.value.object_value->the_var;
-            }
-            get.value = find_var(call_var, 0, "__value__")->value;
-            get.father = &base_the_var;  // 设置father
-            reight_tmp = call_back_core(get, the_var, NULL);
-            printf("reight_tmp.value.type = %d\n", reight_tmp.value.type);
+            reight_tmp = get__value__(&base_the_var, the_var);
             left_tmp.value = find_var(login_var, 0, "value")->value;
             return_value = add_func(left_tmp, reight_tmp, the_var);
             break;
         }
         case __sub__func:{
-            GWARF_result reight_tmp, left_tmp, get;
+            GWARF_result reight_tmp, left_tmp;
             GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
-            var_list *call_var;
-            if(base_the_var.type == CLASS_value){  // is class so that can use "."
-                call_var = base_the_var.value.class_value->the_var;
-            }
-            else if(base_the_var.type == OBJECT_value){
-                call_var = base_the_var.value.object_value->the_var;
-            }
-            get.value = find_var(call_var, 0, "__value__")->value;
-            get.father = &base_the_var;  // 设置father
-            reight_tmp = call_back_core(get, the_var, NULL);
-            printf("reight_tmp.value.type = %d\n", reight_tmp.value.type);
+            reight_tmp = get__value__(&base_the_var, the_var);
             left_tmp.value = find_var(login_var, 0, "value")->value;
             return_value = sub_func(left_tmp, reight_tmp, the_var);
             break;
         }
         case __mul__func:{
-            GWARF_result reight_tmp, left_tmp, get;
+            GWARF_result reight_tmp, left_tmp;
             GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
-            var_list *call_var;
-            if(base_the_var.type == CLASS_value){  // is class so that can use "."
-                call_var = base_the_var.value.class_value->the_var;
-            }
-            else if(base_the_var.type == OBJECT_value){
-                call_var = base_the_var.value.object_value->the_var;
-            }
-            get.value = find_var(call_var, 0, "__value__")->value;
-            get.father = &base_the_var;  // 设置father
-            reight_tmp = call_back_core(get, the_var, NULL);
-            printf("reight_tmp.value.type = %d\n", reight_tmp.value.type);
+            reight_tmp = get__value__(&base_the_var, the_var);
             left_tmp.value = find_var(login_var, 0, "value")->value;
             return_value = mul_func(left_tmp, reight_tmp, the_var);
             break;
         }
         case __div__func:{
-            GWARF_result reight_tmp, left_tmp, get;
+            GWARF_result reight_tmp, left_tmp;
             GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
-            var_list *call_var;
-            if(base_the_var.type == CLASS_value){  // is class so that can use "."
-                call_var = base_the_var.value.class_value->the_var;
-            }
-            else if(base_the_var.type == OBJECT_value){
-                call_var = base_the_var.value.object_value->the_var;
-            }
-            get.value = find_var(call_var, 0, "__value__")->value;
-            get.father = &base_the_var;  // 设置father
-            reight_tmp = call_back_core(get, the_var, NULL);
-            printf("reight_tmp.value.type = %d\n", reight_tmp.value.type);
+            reight_tmp = get__value__(&base_the_var, the_var);
             left_tmp.value = find_var(login_var, 0, "value")->value;
             return_value = div_func(left_tmp, reight_tmp, the_var);
             break;
@@ -2184,138 +2098,452 @@ GWARF_result int_official_func(func *the_func, parameter *tmp_s, var_list *the_v
     return_result: return return_value;
 }
 
-// GWARF_value base_the_var = traverse((the_statement->code).point.base_var, the_var, false).value;
-// if(base_the_var.type == CLASS_value){  // is class so that can use "."
-//     puts("func: point");
-//     return_value = traverse((the_statement->code).point.child_var, base_the_var.value.class_value->the_var, false);
-// }
-// else if(base_the_var.type == OBJECT_value){
-//     puts("func: point");
-//     return_value = traverse((the_statement->code).point.child_var, base_the_var.value.object_value->the_var, false);
-// }
-// return_value.father = malloc(sizeof(return_value.father));  // 记录father的值
-// *(return_value.father) = base_the_var;
-// puts("----stop point----");
+// to int[底层实现]
+GWARF_value to_int(GWARF_value value, var_list *the_var){
+    if((value.type == INT_value)){
+        return value;  // 直接返回数据
+    }
 
-// GWARF_result call_back(statement *the_statement, var_list *the_var){  // the func for add and call from read_statement_list
-//     GWARF_result result, get = traverse(the_statement->code.call.func, the_var, false);
-//     var_list *old_var_list = the_var;
-//     if(get.value.type == FUNC_value){
-//         func *func_ = get.value.value.func_value;
-//         parameter *tmp_x = func_->parameter_list, *tmp_s = the_statement->code.call.parameter_list;
-//         the_var = func_->the_var;
-//         // tmp_x:形参，tmp_s:实参
+    GWARF_value return_number;
+    return_number.type = INT_value;
 
-//         printf("----address = %d----\n", the_var);
-//         var *tmp = make_var();  // base_var
-//         the_var = append_var_list(tmp, the_var);
-//         printf("----new address = %d----\n", the_var);
+    if(value.type == OBJECT_value){  // 调用__value__方法
+        return_number = to_int(get__value__(&value, the_var).value, the_var);  // 递归
+    }
+    else{
+        if(value.type == BOOL_value){
+            return_number.value.int_value = value.value.bool_value;
+        }
+        else if(value.type == NUMBER_value){
+            return_number.value.int_value = (int)value.value.double_value;
+        }
+        else if(value.type == STRING_value){
+            return_number.value.int_value = atoi(value.value.string);
+        }
+        else{
+            return_number.value.int_value = 0;
+        }
+    }
+    return return_number;
+}
 
-//         if(func_->type == customize){  // 用户定义的方法
-//             if(tmp_x == NULL){
-//                 puts("No tmp_x");
-//                 goto no_tmp_x;  // 无形参
-//             }
-//             GWARF_result father;
-//             if(func_->is_class  == 1){
-//                 father.value = *(get.father);
-//                 assigment_func(tmp_x->u.name, father, the_var, 0);
-//                 if (tmp_x->next == NULL){  // the last
-//                     goto no_tmp_x;
-//                 }
-//                 tmp_x = tmp_x->next;  // get the next to iter
-//             }
-//             while(1){
-//                 GWARF_result tmp = traverse(tmp_s->u.value, the_var, false);
-//                 assigment_func(tmp_x->u.name, tmp, the_var, 0);
-//                 if ((tmp_x->next == NULL)||(tmp_s->next == NULL)){  // the last
-//                     break;
-//                 }
-//                 tmp_x = tmp_x->next;  // get the next to iter
-//                 tmp_s = tmp_s->next;
-//             }
-//             no_tmp_x: 
-//             puts("----start func----");
-//             result = traverse(func_->done, the_var, false);  // 执行func_value->done
-//             if(result.u == code_return){
-//                 if(result.return_times <= 0){
-//                     result.u = return_def;
-//                 }
-//                 else{
-//                 result.return_times -= 1; 
-//                 }
-//             }
-//             puts("----stop start func----");
-//         }
-//         else{
-//             result = func_->paser(func_, tmp_s, the_var, get, old_var_list);
-//         }
-//         the_var = free_var_list(the_var);  // free the new var
-//     }
-//     else if(get.value.type == CLASS_value){  // 生成实例
-//         the_object *object_tmp = malloc(sizeof(the_object));  // 生成object的空间
-//         object_tmp->cls = get.value.value.class_value->the_var;
-//         object_tmp->the_var = append_by_var_list(make_var_base(make_var()), object_tmp->cls);
-//         GWARF_value tmp;
-//         tmp.type = OBJECT_value;
-//         tmp.value.object_value = object_tmp;
 
-//         // 执行__init__
-//         var *init_tmp = find_var(object_tmp->cls, 0, "__init__");
-//         if(init_tmp != NULL){  // 找到了__init__
-//             func *func_ = init_tmp->value.value.func_value;
-//             parameter *tmp_x = func_->parameter_list, *tmp_s = the_statement->code.call.parameter_list;
-//             the_var = func_->the_var;
-//             // tmp_x:形参，tmp_s:实参
+void double_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *)){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value;
+    class_object *class_tmp = malloc(sizeof(class_object));
 
-//             printf("----address = %d----\n", the_var);
-//             var *tmp = make_var();  // base_var
-//             the_var = append_var_list(tmp, the_var);
-//             printf("----new address = %d----\n", the_var);
+    class_tmp->the_var = make_var_base(make_var());  // make class var list
+    class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
 
-//             if(func_->type == customize){  // 用户定义的方法
-//                 if(tmp_x == NULL){
-//                     puts("No tmp_x");
-//                     goto no_tmp_x_init;  // 无形参
-//                 }
-//                 GWARF_result father;
-//                 father.value.type = OBJECT_value;
-//                 father.value.value.object_value = object_tmp;
-//                 if(func_->is_class  == 1){
-//                     assigment_func(tmp_x->u.name, father, the_var, 0);
-//                     if (tmp_x->next == NULL){  // the last
-//                         goto no_tmp_x_init;
-//                     }
-//                     tmp_x = tmp_x->next;  // get the next to iter
-//                 }
-//                 while(1){
-//                     GWARF_result tmp = traverse(tmp_s->u.value, the_var, false);
-//                     assigment_func(tmp_x->u.name, tmp, the_var, 0);
-//                     if ((tmp_x->next == NULL)||(tmp_s->next == NULL)){  // the last
-//                         break;
-//                     }
-//                     tmp_x = tmp_x->next;  // get the next to iter
-//                     tmp_s = tmp_s->next;
-//                 }
-//                 no_tmp_x_init: 
-//                 puts("----start func----");
-//                 traverse(func_->done, the_var, false);  // 执行func_value->done
-//                 puts("----stop start func----");
-//             }
-//             else{
-//                 GWARF_result tmp_get;
-//                 GWARF_value father;
-//                 father.type = OBJECT_value;
-//                 father.value.object_value = object_tmp;
-//                 tmp_get.father = &father;
-//                 result = func_->paser(func_, tmp_s, the_var, tmp_get, old_var_list);
-//             }
-//             the_var = free_var_list(the_var);  // free the new var
-//         }
-//         // 记录返回值
-//         result.u = return_def;
-//         result.value = tmp;
+    assigment_func("double", class_value, the_var, 0);  // 注册class 的 位置
+    puts("----stop set class----");
 
-//     }
-//     return result;
-// }
+    // 注册函数
+    int a[][2] = {{2,1}, {3,1}, {4,1}, {5,1}, {6,1}, {7,1}};
+    char *name[] = {"__init__", "__value__", "__add__", "__sub__", "__mul__","__div__"};
+
+    int lenth = sizeof(a)/sizeof(a[0]);
+    for(int i = 0;i < lenth;i+=1){
+        login_official_func(a[i][0], a[i][1], class_tmp->the_var, name[i], paser);
+    }
+}
+
+GWARF_result double_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var){  // out_var是外部环境
+    GWARF_result return_value;
+    var_list *login_var;
+    return_value.u = return_def;
+    if(father.father->type == CLASS_value){  // is class so that can use "."
+        login_var = father.father->value.class_value->the_var;
+    }
+    else if(father.father->type == OBJECT_value){
+        login_var = father.father->value.object_value->the_var;
+    }
+    else{
+        printf("NO login, father type = %d\n", father.father->type);
+    }
+    switch (the_func->official_func)
+    {
+        case __init__func:{  // printf something
+            GWARF_result tmp;
+            tmp.value = to_double(traverse(tmp_s->u.value, out_var, false).value, out_var);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+            assigment_func("value", tmp, login_var, 0);  // 注册到self
+            break;
+        }
+        case __value__func:{  // 若想实现运算必须要有这个方法
+            var *tmp = find_var(login_var, 0, "value");
+            return_value.value = tmp->value;  // 取得用于计算的数值
+            break;
+        }
+        case __add__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = add_func(left_tmp, reight_tmp, the_var);
+            break;
+        }
+        case __sub__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = sub_func(left_tmp, reight_tmp, the_var);
+            break;
+        }
+        case __mul__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = mul_func(left_tmp, reight_tmp, the_var);
+            break;
+        }
+        case __div__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = div_func(left_tmp, reight_tmp, the_var);
+            break;
+        }
+        default:
+            break;
+    }
+    return_result: return return_value;
+}
+
+// to double[底层实现]
+GWARF_value to_double(GWARF_value value, var_list *the_var){
+    if((value.type == NUMBER_value)){
+        return value;  // 直接返回数据
+    }
+
+    GWARF_value return_number;
+    return_number.type = NUMBER_value;
+
+    if(value.type == OBJECT_value){  // 调用__value__方法
+        return_number = to_double(get__value__(&value, the_var).value, the_var);  // 递归
+    }
+    else{
+        if(value.type == BOOL_value){
+            return_number.value.double_value = (double)value.value.bool_value;
+        }
+        else if(value.type == INT_value){
+            return_number.value.double_value = (double)value.value.int_value;
+        }
+        else if(value.type == STRING_value){
+            return_number.value.double_value = (double)atof(value.value.string);
+        }
+        else{
+            return_number.value.double_value = 0;
+        }
+    }
+    return return_number;
+}
+
+void str_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *)){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value;
+    class_object *class_tmp = malloc(sizeof(class_object));
+
+    class_tmp->the_var = make_var_base(make_var());  // make class var list
+    class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assigment_func("str", class_value, the_var, 0);  // 注册class 的 位置
+    puts("----stop set class----");
+
+    // 注册函数
+    int a[][2] = {{2,1}, {3,1}, {4,1}, {5,1}, {6,1}, {7,1}};
+    char *name[] = {"__init__", "__value__", "__add__", "__sub__", "__mul__","__div__"};
+
+    int lenth = sizeof(a)/sizeof(a[0]);
+    for(int i = 0;i < lenth;i+=1){
+        login_official_func(a[i][0], a[i][1], class_tmp->the_var, name[i], paser);
+    }
+}
+
+GWARF_result str_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var){  // out_var是外部环境
+    GWARF_result return_value;
+    var_list *login_var;
+    return_value.u = return_def;
+    if(father.father->type == CLASS_value){  // is class so that can use "."
+        login_var = father.father->value.class_value->the_var;
+    }
+    else if(father.father->type == OBJECT_value){
+        login_var = father.father->value.object_value->the_var;
+    }
+    else{
+        printf("NO login, father type = %d\n", father.father->type);
+    }
+    switch (the_func->official_func)
+    {
+        case __init__func:{  // printf something
+            GWARF_result tmp;
+            tmp.value = to_str(traverse(tmp_s->u.value, out_var, false).value, out_var);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+            assigment_func("value", tmp, login_var, 0);  // 注册到self
+            break;
+        }
+        case __value__func:{  // 若想实现运算必须要有这个方法
+            var *tmp = find_var(login_var, 0, "value");
+            return_value.value = tmp->value;  // 取得用于计算的数值
+            break;
+        }
+        case __add__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = add_func(left_tmp, reight_tmp, the_var);
+            break;
+        }
+        case __sub__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = sub_func(left_tmp, reight_tmp, the_var);
+            break;
+        }
+        case __mul__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = mul_func(left_tmp, reight_tmp, the_var);
+            break;
+        }
+        case __div__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = div_func(left_tmp, reight_tmp, the_var);
+            break;
+        }
+        default:
+            break;
+    }
+    return_result: return return_value;
+}
+
+// to str[底层实现]
+GWARF_value to_str(GWARF_value value, var_list *the_var){
+    if((value.type == STRING_value)){
+        return value;  // 直接返回数据
+    }
+
+    GWARF_value return_number;
+    return_number.type = STRING_value;
+
+    if(value.type == OBJECT_value){  // 调用__value__方法
+        return_number = to_str(get__value__(&value, the_var).value, the_var);  // 递归
+    }
+    else{
+        if(value.type == BOOL_value){
+            if(value.value.bool_value){
+                return_number.value.string = "true";
+            }
+            else{
+                return_number.value.string = "false";
+            }
+        }
+        else if(value.type == INT_value){
+            size_t size = (size_t)(2 + len_int(value.value.int_value));
+            return_number.value.string = (char *)malloc(size);
+            snprintf(return_number.value.string, size, "%d", value.value.int_value);
+        }
+        else if(value.type == NUMBER_value){
+            size_t size = (size_t)(2 + len_double(value.value.double_value));
+            return_number.value.string = (char *)malloc(size);
+            snprintf(return_number.value.string, size, "%f", value.value.double_value);
+        }
+        else if(value.type == NULL_value){
+            return_number.value.string = "<-None->";
+        }
+        else if(value.type == FUNC_value){
+            size_t size = (size_t)(20 + len_intx((unsigned int)value.value.func_value));  // 转换为无符号整形数字
+            return_number.value.string = (char *)malloc(size);
+            snprintf(return_number.value.string, size, "<-function on %u->", value.value.func_value);
+        }
+        else if(value.type == CLASS_value){
+            size_t size = (size_t)(16 + len_intx((unsigned int)value.value.class_value));
+            return_number.value.string = (char *)malloc(size);
+            snprintf(return_number.value.string, size, "<-class on %u->", value.value.class_value);
+        }
+        else{
+            printf("var value = other\n");
+        }
+    }
+    return return_number;
+}
+
+void bool_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *)){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value;
+    class_object *class_tmp = malloc(sizeof(class_object));
+
+    class_tmp->the_var = make_var_base(make_var());  // make class var list
+    class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assigment_func("bool", class_value, the_var, 0);  // 注册class 的 位置
+    puts("----stop set class----");
+
+    // 注册函数
+    int a[][2] = {{2,1}, {3,1}, {4,1}, {5,1}, {6,1}, {7,1}};
+    char *name[] = {"__init__", "__value__", "__add__", "__sub__", "__mul__","__div__"};
+
+    int lenth = sizeof(a)/sizeof(a[0]);
+    for(int i = 0;i < lenth;i+=1){
+        login_official_func(a[i][0], a[i][1], class_tmp->the_var, name[i], paser);
+    }
+}
+
+GWARF_result bool_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var){  // out_var是外部环境
+    GWARF_result return_value;
+    var_list *login_var;
+    return_value.u = return_def;
+    if(father.father->type == CLASS_value){  // is class so that can use "."
+        login_var = father.father->value.class_value->the_var;
+    }
+    else if(father.father->type == OBJECT_value){
+        login_var = father.father->value.object_value->the_var;
+    }
+    else{
+        printf("NO login, father type = %d\n", father.father->type);
+    }
+    switch (the_func->official_func)
+    {
+        case __init__func:{  // printf something
+            GWARF_result tmp;
+            tmp.value = to_bool_(traverse(tmp_s->u.value, out_var, false).value, out_var);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+            assigment_func("value", tmp, login_var, 0);  // 注册到self
+            break;
+        }
+        case __value__func:{  // 若想实现运算必须要有这个方法
+            var *tmp = find_var(login_var, 0, "value");
+            return_value.value = tmp->value;  // 取得用于计算的数值
+            break;
+        }
+        case __add__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = add_func(left_tmp, reight_tmp, the_var);
+            break;
+        }
+        case __sub__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = sub_func(left_tmp, reight_tmp, the_var);
+            break;
+        }
+        case __mul__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = mul_func(left_tmp, reight_tmp, the_var);
+            break;
+        }
+        case __div__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = div_func(left_tmp, reight_tmp, the_var);
+            break;
+        }
+        default:
+            break;
+    }
+    return_result: return return_value;
+}
+
+// to bool[底层实现]
+GWARF_value to_bool_(GWARF_value value, var_list *the_var){
+    if((value.type == BOOL_value)){
+        return value;  // 直接返回数据
+    }
+
+    GWARF_value return_number;
+    return_number.type = BOOL_value;
+
+    if(value.type == OBJECT_value){  // 调用__value__方法
+        return_number = to_bool_(get__value__(&value, the_var).value, the_var);  // 递归
+    }
+    else{
+        return_number.value.bool_value = to_bool(value);  // 转换成bool
+    }
+    return return_number;
+}
+
+GWARF_result get__value__(GWARF_value *base_the_var, var_list *the_var){  // 用于计算的get__value__统一核心
+    GWARF_result reight_tmp, get;
+    var_list *call_var;
+    if(base_the_var->type == CLASS_value){  // is class so that can use "."
+        call_var = base_the_var->value.class_value->the_var;
+    }
+    else if(base_the_var->type == OBJECT_value){
+        call_var = base_the_var->value.object_value->the_var;
+    }
+    get.value = find_var(call_var, 0, "__value__")->value;  // TODO:: 需要检查__value__是否存在
+    get.father = base_the_var;  // 设置father
+    reight_tmp = call_back_core(get, the_var, NULL);
+    return reight_tmp;
+}
+
+int len_int(int num){
+    int count = 1;  // 默认得有1位
+    while(1){
+        num = num / 10;
+        if(num <= 0){
+            break;
+        }
+        count += 1;
+    }
+    return count;
+}
+
+int len_only_double(double num){
+    int count = 1;  // 默认得有1位
+    while(1){
+        num = num * 10;
+        if(num - (int)num <= 0){
+            break;
+        }
+        count += 1;
+    }
+    return count;
+}
+
+int len_double(double num){
+    int count = 1, i = (int)num;
+    count += len_int(i);
+    count += len_only_double(num);
+    return count;
+}
+
+int len_intx(unsigned int num){  // 16进制
+    int count = 1;  // 默认得有1位
+    while(1){
+        num = num / 16;
+        if(num <= 0){
+            break;
+        }
+        count += 1;
+    }
+    return count;
+}
