@@ -1,7 +1,11 @@
 %{
     #include<stdio.h>
     #include"lex.yy.c"
-    #include"../gwarf_interpreter/interpreter.h"
+
+    #ifndef _INTERPRETER_H
+    #include"../inter/interpreter.h"
+    #endif
+    
     #define yylex yylex_self
     extern int yylex (void);
     // 此处声明：定义的token：INDENTA不会在yacc中被使用，但将会在lex中被使用

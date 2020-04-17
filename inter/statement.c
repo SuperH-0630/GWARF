@@ -1,13 +1,6 @@
 #include<stdio.h>
-// #include "interpreter.h"
 
-statement *make_statement();
-statement *append_statement(statement *, statement*);
-statement_list *make_statement_list();
-statement_list *make_statement_base(statement *);
-statement_list *append_statement_list(statement *, statement_list *);
-statement *find_statement_list(int, statement_list *);
-statement_list *free_statement_list(statement_list *);
+#include "interpreter.h"
 
 statement *make_statement(){  // make statement
     statement *tmp;

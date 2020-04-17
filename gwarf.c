@@ -1,5 +1,15 @@
-#include<stdio.h>
-#include"gwarf_interpreter/interpreter.c"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "paser/y.tab.c"
+#include "inter/branch.c"
+#include "inter/cfunc.c"
+#include "inter/parameter.c"
+#include "inter/statement.c"
+#include "inter/var.c"
+
+#include "inter/interpreter.c"
 
 
 int main(){

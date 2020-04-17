@@ -1,24 +1,6 @@
 #include<stdio.h>
-// #include "interpreter.h"
 
-var *make_var();
-void append_var(char *name, GWARF_value, var *);
-void free_var(var *);
-var *get_var(char *, var *);
-void del_var(char *, var *);
-default_var *make_default_var();
-default_var *make_default_var_base();
-void append_default_var_base(char * ,int , default_var *);
-int get_default(char *, default_var *);
-var_list *make_var_list();
-var_list *make_var_base(var *);
-var_list *append_var_list(var *, var_list *);
-var_list *append_by_var_list(var_list *, var_list *);
-var_list *free_var_list(var_list *);
-int get_var_list_len(var_list *);
-var *find_var(var_list *,int , char *);
-void add_var(var_list *,int , char *, GWARF_value);
-var_list *copy_var_list(var_list *);
+#include "interpreter.h"
 
 var *make_var(){  // make var with base
     var *tmp;

@@ -70,12 +70,14 @@
 
     #include<stdio.h>
     #include"lex.yy.c"
-    #include"../gwarf_interpreter/interpreter.h"
+    #ifndef _INTERPRETER_H
+    #include"../inter/interpreter.h"
+    #endif
     #define yylex yylex_self
     extern int yylex (void);
     // 此处声明：定义的token：INDENTA不会在yacc中被使用，但将会在lex中被使用
 
-#line 79 "y.tab.c"
+#line 81 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -235,7 +237,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 10 "gwarf_yacc.y"
+#line 12 "gwarf_yacc.y"
 
     int int_value;
     double double_value;
@@ -244,7 +246,7 @@ union YYSTYPE
     struct if_list *if_list_base;
     struct parameter *parameter_list;
 
-#line 248 "y.tab.c"
+#line 250 "y.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -624,19 +626,19 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    30,    30,    34,    41,    51,    55,    59,    63,    67,
-      71,    75,    79,    83,    87,    93,    99,   103,   107,   111,
-     115,   119,   123,   127,   134,   141,   142,   154,   155,   164,
-     173,   182,   191,   200,   212,   213,   222,   234,   235,   244,
-     256,   257,   266,   275,   287,   288,   296,   307,   308,   309,
-     318,   326,   333,   346,   358,   370,   382,   394,   406,   407,
-     415,   428,   435,   444,   458,   472,   487,   492,   501,   507,
-     516,   527,   534,   545,   552,   563,   574,   585,   596,   607,
-     618,   629,   643,   650,   662,   669,   687,   708,   715,   733,
-     753,   759,   766,   770,   777,   781,   782,   787,   796,   807,
-     808,   816,   826,   827,   835,   845,   846,   854,   864,   865,
-     873,   883,   884,   892,   902,   903,   910,   920,   921,   922,
-     923
+       0,    32,    32,    36,    43,    53,    57,    61,    65,    69,
+      73,    77,    81,    85,    89,    95,   101,   105,   109,   113,
+     117,   121,   125,   129,   136,   143,   144,   156,   157,   166,
+     175,   184,   193,   202,   214,   215,   224,   236,   237,   246,
+     258,   259,   268,   277,   289,   290,   298,   309,   310,   311,
+     320,   328,   335,   348,   360,   372,   384,   396,   408,   409,
+     417,   430,   437,   446,   460,   474,   489,   494,   503,   509,
+     518,   529,   536,   547,   554,   565,   576,   587,   598,   609,
+     620,   631,   645,   652,   664,   671,   689,   710,   717,   735,
+     755,   761,   768,   772,   779,   783,   784,   789,   798,   809,
+     810,   818,   828,   829,   837,   847,   848,   856,   866,   867,
+     875,   885,   886,   894,   904,   905,   912,   922,   923,   924,
+     925
 };
 #endif
 
@@ -1617,193 +1619,193 @@ yyreduce:
   switch (yyn)
     {
   case 3:
-#line 35 "gwarf_yacc.y"
+#line 37 "gwarf_yacc.y"
     {
         if((yyvsp[0].statement_value) != NULL){
             statement *tmp = find_statement_list(0, statement_base);
             append_statement(tmp, (yyvsp[0].statement_value));
         }
     }
-#line 1628 "y.tab.c"
+#line 1630 "y.tab.c"
     break;
 
   case 4:
-#line 42 "gwarf_yacc.y"
+#line 44 "gwarf_yacc.y"
     {   
         if((yyvsp[0].statement_value) != NULL){
             statement *tmp = find_statement_list(0, statement_base);
             append_statement(tmp, (yyvsp[0].statement_value));
         }
     }
-#line 1639 "y.tab.c"
+#line 1641 "y.tab.c"
     break;
 
   case 5:
-#line 52 "gwarf_yacc.y"
+#line 54 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 1647 "y.tab.c"
+#line 1649 "y.tab.c"
     break;
 
   case 6:
-#line 56 "gwarf_yacc.y"
+#line 58 "gwarf_yacc.y"
     {   
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 1655 "y.tab.c"
+#line 1657 "y.tab.c"
     break;
 
   case 7:
-#line 60 "gwarf_yacc.y"
+#line 62 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 1663 "y.tab.c"
+#line 1665 "y.tab.c"
     break;
 
   case 8:
-#line 64 "gwarf_yacc.y"
+#line 66 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 1671 "y.tab.c"
+#line 1673 "y.tab.c"
     break;
 
   case 9:
-#line 68 "gwarf_yacc.y"
+#line 70 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 1679 "y.tab.c"
+#line 1681 "y.tab.c"
     break;
 
   case 10:
-#line 72 "gwarf_yacc.y"
+#line 74 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 1687 "y.tab.c"
+#line 1689 "y.tab.c"
     break;
 
   case 11:
-#line 76 "gwarf_yacc.y"
+#line 78 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 1695 "y.tab.c"
+#line 1697 "y.tab.c"
     break;
 
   case 12:
-#line 80 "gwarf_yacc.y"
+#line 82 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 1703 "y.tab.c"
+#line 1705 "y.tab.c"
     break;
 
   case 13:
-#line 84 "gwarf_yacc.y"
+#line 86 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 1711 "y.tab.c"
+#line 1713 "y.tab.c"
     break;
 
   case 14:
-#line 88 "gwarf_yacc.y"
+#line 90 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = rego;
         (yyval.statement_value) = code_tmp;
     }
-#line 1721 "y.tab.c"
+#line 1723 "y.tab.c"
     break;
 
   case 15:
-#line 94 "gwarf_yacc.y"
+#line 96 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = rewent;
         (yyval.statement_value) = code_tmp;
     }
-#line 1731 "y.tab.c"
+#line 1733 "y.tab.c"
     break;
 
   case 16:
-#line 100 "gwarf_yacc.y"
+#line 102 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 1739 "y.tab.c"
+#line 1741 "y.tab.c"
     break;
 
   case 17:
-#line 104 "gwarf_yacc.y"
+#line 106 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 1747 "y.tab.c"
+#line 1749 "y.tab.c"
     break;
 
   case 18:
-#line 108 "gwarf_yacc.y"
+#line 110 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 1755 "y.tab.c"
+#line 1757 "y.tab.c"
     break;
 
   case 19:
-#line 112 "gwarf_yacc.y"
+#line 114 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 1763 "y.tab.c"
+#line 1765 "y.tab.c"
     break;
 
   case 20:
-#line 116 "gwarf_yacc.y"
+#line 118 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 1771 "y.tab.c"
+#line 1773 "y.tab.c"
     break;
 
   case 21:
-#line 120 "gwarf_yacc.y"
+#line 122 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 1779 "y.tab.c"
+#line 1781 "y.tab.c"
     break;
 
   case 22:
-#line 124 "gwarf_yacc.y"
+#line 126 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 1787 "y.tab.c"
+#line 1789 "y.tab.c"
     break;
 
   case 23:
-#line 128 "gwarf_yacc.y"
+#line 130 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 1795 "y.tab.c"
+#line 1797 "y.tab.c"
     break;
 
   case 24:
-#line 135 "gwarf_yacc.y"
+#line 137 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[0].statement_value);
     }
-#line 1803 "y.tab.c"
+#line 1805 "y.tab.c"
     break;
 
   case 26:
-#line 143 "gwarf_yacc.y"
+#line 145 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -1812,11 +1814,11 @@ yyreduce:
         code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 1816 "y.tab.c"
+#line 1818 "y.tab.c"
     break;
 
   case 28:
-#line 156 "gwarf_yacc.y"
+#line 158 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -1825,11 +1827,11 @@ yyreduce:
         code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 1829 "y.tab.c"
+#line 1831 "y.tab.c"
     break;
 
   case 29:
-#line 165 "gwarf_yacc.y"
+#line 167 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -1838,11 +1840,11 @@ yyreduce:
         code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 1842 "y.tab.c"
+#line 1844 "y.tab.c"
     break;
 
   case 30:
-#line 174 "gwarf_yacc.y"
+#line 176 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -1851,11 +1853,11 @@ yyreduce:
         code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 1855 "y.tab.c"
+#line 1857 "y.tab.c"
     break;
 
   case 31:
-#line 183 "gwarf_yacc.y"
+#line 185 "gwarf_yacc.y"
         {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -1864,11 +1866,11 @@ yyreduce:
         code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 1868 "y.tab.c"
+#line 1870 "y.tab.c"
     break;
 
   case 32:
-#line 192 "gwarf_yacc.y"
+#line 194 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -1877,11 +1879,11 @@ yyreduce:
         code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 1881 "y.tab.c"
+#line 1883 "y.tab.c"
     break;
 
   case 33:
-#line 201 "gwarf_yacc.y"
+#line 203 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -1890,11 +1892,11 @@ yyreduce:
         code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 1894 "y.tab.c"
+#line 1896 "y.tab.c"
     break;
 
   case 35:
-#line 214 "gwarf_yacc.y"
+#line 216 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -1903,11 +1905,11 @@ yyreduce:
         code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 1907 "y.tab.c"
+#line 1909 "y.tab.c"
     break;
 
   case 36:
-#line 223 "gwarf_yacc.y"
+#line 225 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -1916,11 +1918,11 @@ yyreduce:
         code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 1920 "y.tab.c"
+#line 1922 "y.tab.c"
     break;
 
   case 38:
-#line 236 "gwarf_yacc.y"
+#line 238 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -1929,11 +1931,11 @@ yyreduce:
         code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 1933 "y.tab.c"
+#line 1935 "y.tab.c"
     break;
 
   case 39:
-#line 245 "gwarf_yacc.y"
+#line 247 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -1942,11 +1944,11 @@ yyreduce:
         code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 1946 "y.tab.c"
+#line 1948 "y.tab.c"
     break;
 
   case 41:
-#line 258 "gwarf_yacc.y"
+#line 260 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -1955,11 +1957,11 @@ yyreduce:
         code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 1959 "y.tab.c"
+#line 1961 "y.tab.c"
     break;
 
   case 42:
-#line 267 "gwarf_yacc.y"
+#line 269 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -1968,11 +1970,11 @@ yyreduce:
         code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 1972 "y.tab.c"
+#line 1974 "y.tab.c"
     break;
 
   case 43:
-#line 276 "gwarf_yacc.y"
+#line 278 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -1981,11 +1983,11 @@ yyreduce:
         code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 1985 "y.tab.c"
+#line 1987 "y.tab.c"
     break;
 
   case 45:
-#line 289 "gwarf_yacc.y"
+#line 291 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = call;
@@ -1993,11 +1995,11 @@ yyreduce:
         code_tmp->code.call.parameter_list = NULL;
         (yyval.statement_value) = code_tmp;
     }
-#line 1997 "y.tab.c"
+#line 1999 "y.tab.c"
     break;
 
   case 46:
-#line 297 "gwarf_yacc.y"
+#line 299 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = call;
@@ -2005,11 +2007,11 @@ yyreduce:
         code_tmp->code.call.parameter_list = (yyvsp[-1].parameter_list);
         (yyval.statement_value) = code_tmp;
     }
-#line 2009 "y.tab.c"
+#line 2011 "y.tab.c"
     break;
 
   case 49:
-#line 310 "gwarf_yacc.y"
+#line 312 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -2018,11 +2020,11 @@ yyreduce:
         code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 2022 "y.tab.c"
+#line 2024 "y.tab.c"
     break;
 
   case 50:
-#line 319 "gwarf_yacc.y"
+#line 321 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = point;
@@ -2030,19 +2032,19 @@ yyreduce:
         code_tmp->code.point.child_var = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp; 
     }
-#line 2034 "y.tab.c"
+#line 2036 "y.tab.c"
     break;
 
   case 51:
-#line 327 "gwarf_yacc.y"
+#line 329 "gwarf_yacc.y"
     {
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 2042 "y.tab.c"
+#line 2044 "y.tab.c"
     break;
 
   case 52:
-#line 334 "gwarf_yacc.y"
+#line 336 "gwarf_yacc.y"
     {
         // 调用double内置类的构造函数
         GWARF_value tmp_value;
@@ -2055,11 +2057,11 @@ yyreduce:
         code_tmp->code.call.parameter_list = pack_value_parameter(tmp_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 2059 "y.tab.c"
+#line 2061 "y.tab.c"
     break;
 
   case 53:
-#line 347 "gwarf_yacc.y"
+#line 349 "gwarf_yacc.y"
     {
         GWARF_value tmp_value;
         tmp_value.type = INT_value;
@@ -2071,11 +2073,11 @@ yyreduce:
         code_tmp->code.call.parameter_list = pack_value_parameter(tmp_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 2075 "y.tab.c"
+#line 2077 "y.tab.c"
     break;
 
   case 54:
-#line 359 "gwarf_yacc.y"
+#line 361 "gwarf_yacc.y"
     {
         GWARF_value tmp_value;
         tmp_value.type = STRING_value;
@@ -2087,11 +2089,11 @@ yyreduce:
         code_tmp->code.call.parameter_list = pack_value_parameter(tmp_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 2091 "y.tab.c"
+#line 2093 "y.tab.c"
     break;
 
   case 55:
-#line 371 "gwarf_yacc.y"
+#line 373 "gwarf_yacc.y"
     {
         GWARF_value tmp_value;
         tmp_value.type = BOOL_value;
@@ -2103,11 +2105,11 @@ yyreduce:
         code_tmp->code.call.parameter_list = pack_value_parameter(tmp_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 2107 "y.tab.c"
+#line 2109 "y.tab.c"
     break;
 
   case 56:
-#line 383 "gwarf_yacc.y"
+#line 385 "gwarf_yacc.y"
     {
         GWARF_value tmp_value;
         tmp_value.type = BOOL_value;
@@ -2119,11 +2121,11 @@ yyreduce:
         code_tmp->code.call.parameter_list = pack_value_parameter(tmp_value);
         (yyval.statement_value) = code_tmp;
     }
-#line 2123 "y.tab.c"
+#line 2125 "y.tab.c"
     break;
 
   case 57:
-#line 395 "gwarf_yacc.y"
+#line 397 "gwarf_yacc.y"
     {
         // NULL代表空值，是GWARF_value
         statement *code_tmp =  make_statement();
@@ -2132,20 +2134,20 @@ yyreduce:
         code_tmp->code.base_value.value.value.int_value = 0;
         (yyval.statement_value) = code_tmp;
     }
-#line 2136 "y.tab.c"
+#line 2138 "y.tab.c"
     break;
 
   case 59:
-#line 408 "gwarf_yacc.y"
+#line 410 "gwarf_yacc.y"
     {
         (yyvsp[0].statement_value)->code.base_var.from = (yyvsp[-2].statement_value);
         (yyval.statement_value) = (yyvsp[0].statement_value);
     }
-#line 2145 "y.tab.c"
+#line 2147 "y.tab.c"
     break;
 
   case 60:
-#line 416 "gwarf_yacc.y"
+#line 418 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->code.base_var.var_name = malloc(sizeof((yyvsp[0].string_value)));
@@ -2155,32 +2157,32 @@ yyreduce:
         strcpy(name_tmp, (yyvsp[0].string_value));
         (yyval.statement_value) = code_tmp;
     }
-#line 2159 "y.tab.c"
+#line 2161 "y.tab.c"
     break;
 
   case 61:
-#line 429 "gwarf_yacc.y"
+#line 431 "gwarf_yacc.y"
     {
         // STRING is char * which the len is 1
         char *tmp = malloc(sizeof((yyvsp[0].string_value)));
         strcpy(tmp, (yyvsp[0].string_value));
         (yyval.string_value) = tmp;
     }
-#line 2170 "y.tab.c"
+#line 2172 "y.tab.c"
     break;
 
   case 62:
-#line 436 "gwarf_yacc.y"
+#line 438 "gwarf_yacc.y"
     {
         char *tmp = realloc((yyvsp[-1].string_value), strlen((yyvsp[-1].string_value)) + strlen((yyvsp[0].string_value)));  // get address
         strcat(tmp, (yyvsp[0].string_value));
         (yyval.string_value) = tmp;
     }
-#line 2180 "y.tab.c"
+#line 2182 "y.tab.c"
     break;
 
   case 63:
-#line 445 "gwarf_yacc.y"
+#line 447 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = set_nonlocal;
@@ -2191,11 +2193,11 @@ yyreduce:
         free((yyvsp[0].statement_value));
         (yyval.statement_value) = code_tmp;
     }
-#line 2195 "y.tab.c"
+#line 2197 "y.tab.c"
     break;
 
   case 64:
-#line 459 "gwarf_yacc.y"
+#line 461 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = set_global;
@@ -2206,11 +2208,11 @@ yyreduce:
         free((yyvsp[0].statement_value));
         (yyval.statement_value) = code_tmp;
     }
-#line 2210 "y.tab.c"
+#line 2212 "y.tab.c"
     break;
 
   case 65:
-#line 473 "gwarf_yacc.y"
+#line 475 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = set_default;
@@ -2222,50 +2224,50 @@ yyreduce:
         free((yyvsp[-1].statement_value));
         (yyval.statement_value) = code_tmp;
     }
-#line 2226 "y.tab.c"
+#line 2228 "y.tab.c"
     break;
 
   case 66:
-#line 488 "gwarf_yacc.y"
+#line 490 "gwarf_yacc.y"
     {
         statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 2235 "y.tab.c"
+#line 2237 "y.tab.c"
     break;
 
   case 67:
-#line 493 "gwarf_yacc.y"
+#line 495 "gwarf_yacc.y"
     {
         append_elif((yyvsp[-1].if_list_base), (yyvsp[-2].statement_value)->code.if_branch.done);
         (yyval.statement_value) = (yyvsp[-2].statement_value);
         statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
     }
-#line 2245 "y.tab.c"
+#line 2247 "y.tab.c"
     break;
 
   case 68:
-#line 502 "gwarf_yacc.y"
+#line 504 "gwarf_yacc.y"
     {
         statement *done_tmp =  make_statement();
         (yyval.if_list_base) = make_if((yyvsp[-1].statement_value), done_tmp);
         statement_base = append_statement_list(done_tmp, statement_base);  // new statement_base (FILO)
     }
-#line 2255 "y.tab.c"
+#line 2257 "y.tab.c"
     break;
 
   case 69:
-#line 508 "gwarf_yacc.y"
+#line 510 "gwarf_yacc.y"
     {
         statement *done_tmp =  make_statement();
         (yyval.if_list_base) = make_if(NULL, done_tmp);
         statement_base = append_statement_list(done_tmp, statement_base);  // new statement_base (FILO)
     }
-#line 2265 "y.tab.c"
+#line 2267 "y.tab.c"
     break;
 
   case 70:
-#line 517 "gwarf_yacc.y"
+#line 519 "gwarf_yacc.y"
     {
         statement *if_tmp =  make_statement(), *done_tmp =  make_statement();
         if_tmp->type = if_branch;
@@ -2273,19 +2275,19 @@ yyreduce:
         statement_base = append_statement_list(done_tmp, statement_base);  // new statement_base (FILO)
         (yyval.statement_value) = if_tmp;
     }
-#line 2277 "y.tab.c"
+#line 2279 "y.tab.c"
     break;
 
   case 71:
-#line 528 "gwarf_yacc.y"
+#line 530 "gwarf_yacc.y"
     {
         statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
     }
-#line 2285 "y.tab.c"
+#line 2287 "y.tab.c"
     break;
 
   case 72:
-#line 535 "gwarf_yacc.y"
+#line 537 "gwarf_yacc.y"
     {
         statement *block_tmp =  make_statement();
         block_tmp->type = code_block;
@@ -2293,19 +2295,19 @@ yyreduce:
         statement_base = append_statement_list(block_tmp->code.code_block.done, statement_base);  // new statement_base (FILO)
         (yyval.statement_value) = block_tmp;
     }
-#line 2297 "y.tab.c"
+#line 2299 "y.tab.c"
     break;
 
   case 73:
-#line 546 "gwarf_yacc.y"
+#line 548 "gwarf_yacc.y"
     {
         statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
     }
-#line 2305 "y.tab.c"
+#line 2307 "y.tab.c"
     break;
 
   case 74:
-#line 553 "gwarf_yacc.y"
+#line 555 "gwarf_yacc.y"
     {
         statement *for_tmp =  make_statement();
         for_tmp->type = for_cycle;
@@ -2316,11 +2318,11 @@ yyreduce:
         statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
         (yyval.statement_value) = for_tmp;
     }
-#line 2320 "y.tab.c"
+#line 2322 "y.tab.c"
     break;
 
   case 75:
-#line 564 "gwarf_yacc.y"
+#line 566 "gwarf_yacc.y"
     {
         statement *for_tmp =  make_statement();
         for_tmp->type = for_cycle;
@@ -2331,11 +2333,11 @@ yyreduce:
         statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
         (yyval.statement_value) = for_tmp;
     }
-#line 2335 "y.tab.c"
+#line 2337 "y.tab.c"
     break;
 
   case 76:
-#line 575 "gwarf_yacc.y"
+#line 577 "gwarf_yacc.y"
     {
         statement *for_tmp =  make_statement();
         for_tmp->type = for_cycle;
@@ -2346,11 +2348,11 @@ yyreduce:
         statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
         (yyval.statement_value) = for_tmp;
     }
-#line 2350 "y.tab.c"
+#line 2352 "y.tab.c"
     break;
 
   case 77:
-#line 586 "gwarf_yacc.y"
+#line 588 "gwarf_yacc.y"
     {
         statement *for_tmp =  make_statement();
         for_tmp->type = for_cycle;
@@ -2361,11 +2363,11 @@ yyreduce:
         statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
         (yyval.statement_value) = for_tmp;
     }
-#line 2365 "y.tab.c"
+#line 2367 "y.tab.c"
     break;
 
   case 78:
-#line 597 "gwarf_yacc.y"
+#line 599 "gwarf_yacc.y"
     {
         statement *for_tmp =  make_statement();
         for_tmp->type = for_cycle;
@@ -2376,11 +2378,11 @@ yyreduce:
         statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
         (yyval.statement_value) = for_tmp;
     }
-#line 2380 "y.tab.c"
+#line 2382 "y.tab.c"
     break;
 
   case 79:
-#line 608 "gwarf_yacc.y"
+#line 610 "gwarf_yacc.y"
     {
         statement *for_tmp =  make_statement();
         for_tmp->type = for_cycle;
@@ -2391,11 +2393,11 @@ yyreduce:
         statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
         (yyval.statement_value) = for_tmp;
     }
-#line 2395 "y.tab.c"
+#line 2397 "y.tab.c"
     break;
 
   case 80:
-#line 619 "gwarf_yacc.y"
+#line 621 "gwarf_yacc.y"
     {
         statement *for_tmp =  make_statement();
         for_tmp->type = for_cycle;
@@ -2406,11 +2408,11 @@ yyreduce:
         statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
         (yyval.statement_value) = for_tmp;
     }
-#line 2410 "y.tab.c"
+#line 2412 "y.tab.c"
     break;
 
   case 81:
-#line 630 "gwarf_yacc.y"
+#line 632 "gwarf_yacc.y"
     {
         statement *for_tmp =  make_statement();
         for_tmp->type = for_cycle;
@@ -2421,19 +2423,19 @@ yyreduce:
         statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
         (yyval.statement_value) = for_tmp;
     }
-#line 2425 "y.tab.c"
+#line 2427 "y.tab.c"
     break;
 
   case 82:
-#line 644 "gwarf_yacc.y"
+#line 646 "gwarf_yacc.y"
     {
         statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
     }
-#line 2433 "y.tab.c"
+#line 2435 "y.tab.c"
     break;
 
   case 83:
-#line 651 "gwarf_yacc.y"
+#line 653 "gwarf_yacc.y"
     {
         statement *while_tmp =  make_statement();
         while_tmp->type = while_cycle;
@@ -2442,19 +2444,19 @@ yyreduce:
         statement_base = append_statement_list(while_tmp->code.while_cycle.done, statement_base);  // new statement_base (FILO)
         (yyval.statement_value) = while_tmp;
     }
-#line 2446 "y.tab.c"
+#line 2448 "y.tab.c"
     break;
 
   case 84:
-#line 663 "gwarf_yacc.y"
+#line 665 "gwarf_yacc.y"
     {
         statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
     }
-#line 2454 "y.tab.c"
+#line 2456 "y.tab.c"
     break;
 
   case 85:
-#line 670 "gwarf_yacc.y"
+#line 672 "gwarf_yacc.y"
     {   
         //无参数方法
         statement *class_tmp =  make_statement();
@@ -2472,11 +2474,11 @@ yyreduce:
         free((yyvsp[-2].statement_value));
         (yyval.statement_value) = class_tmp;
     }
-#line 2476 "y.tab.c"
+#line 2478 "y.tab.c"
     break;
 
   case 86:
-#line 688 "gwarf_yacc.y"
+#line 690 "gwarf_yacc.y"
     {   
         //无参数方法
         statement *class_tmp =  make_statement();
@@ -2494,19 +2496,19 @@ yyreduce:
         free((yyvsp[-3].statement_value));
         (yyval.statement_value) = class_tmp;
     }
-#line 2498 "y.tab.c"
+#line 2500 "y.tab.c"
     break;
 
   case 87:
-#line 709 "gwarf_yacc.y"
+#line 711 "gwarf_yacc.y"
     {
         statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
     }
-#line 2506 "y.tab.c"
+#line 2508 "y.tab.c"
     break;
 
   case 88:
-#line 716 "gwarf_yacc.y"
+#line 718 "gwarf_yacc.y"
     {   
         //无参数方法
         statement *def_tmp =  make_statement();
@@ -2524,11 +2526,11 @@ yyreduce:
         free((yyvsp[-2].statement_value));
         (yyval.statement_value) = def_tmp;
     }
-#line 2528 "y.tab.c"
+#line 2530 "y.tab.c"
     break;
 
   case 89:
-#line 734 "gwarf_yacc.y"
+#line 736 "gwarf_yacc.y"
     {   
         statement *def_tmp =  make_statement();
         def_tmp->type = def;
@@ -2545,66 +2547,66 @@ yyreduce:
         free((yyvsp[-3].statement_value));
         (yyval.statement_value) = def_tmp;
     }
-#line 2549 "y.tab.c"
+#line 2551 "y.tab.c"
     break;
 
   case 90:
-#line 754 "gwarf_yacc.y"
+#line 756 "gwarf_yacc.y"
     {
         (yyval.parameter_list) = make_parameter_name((yyvsp[0].statement_value)->code.base_var.var_name);
         free((yyvsp[0].statement_value)->code.base_var.var_name);
         free((yyvsp[0].statement_value));
     }
-#line 2559 "y.tab.c"
+#line 2561 "y.tab.c"
     break;
 
   case 91:
-#line 760 "gwarf_yacc.y"
+#line 762 "gwarf_yacc.y"
     {
         append_parameter_name((yyvsp[0].statement_value)->code.base_var.var_name, (yyvsp[-2].parameter_list));
         (yyval.parameter_list) = (yyvsp[-2].parameter_list);
     }
-#line 2568 "y.tab.c"
+#line 2570 "y.tab.c"
     break;
 
   case 92:
-#line 767 "gwarf_yacc.y"
+#line 769 "gwarf_yacc.y"
     {
         (yyval.parameter_list) = make_parameter_value((yyvsp[0].statement_value));
     }
-#line 2576 "y.tab.c"
+#line 2578 "y.tab.c"
     break;
 
   case 93:
-#line 771 "gwarf_yacc.y"
+#line 773 "gwarf_yacc.y"
     {
         append_parameter_value((yyvsp[0].statement_value), (yyvsp[-2].parameter_list));
         (yyval.parameter_list) = (yyvsp[-2].parameter_list);
     }
-#line 2585 "y.tab.c"
+#line 2587 "y.tab.c"
     break;
 
   case 96:
-#line 783 "gwarf_yacc.y"
+#line 785 "gwarf_yacc.y"
     {
         (yyvsp[-1].statement_value)->code.return_code.value = (yyvsp[0].statement_value);
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 2594 "y.tab.c"
+#line 2596 "y.tab.c"
     break;
 
   case 97:
-#line 788 "gwarf_yacc.y"
+#line 790 "gwarf_yacc.y"
     {
         (yyvsp[-2].statement_value)->code.return_code.value = (yyvsp[-1].statement_value);
         (yyvsp[-2].statement_value)->code.return_code.times = (yyvsp[0].statement_value);
         (yyval.statement_value) = (yyvsp[-2].statement_value);
     }
-#line 2604 "y.tab.c"
+#line 2606 "y.tab.c"
     break;
 
   case 98:
-#line 797 "gwarf_yacc.y"
+#line 799 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = return_code;
@@ -2612,131 +2614,131 @@ yyreduce:
         code_tmp->code.return_code.value = NULL;
         (yyval.statement_value) = code_tmp;
     }
-#line 2616 "y.tab.c"
+#line 2618 "y.tab.c"
     break;
 
   case 100:
-#line 809 "gwarf_yacc.y"
+#line 811 "gwarf_yacc.y"
     {
         (yyvsp[-1].statement_value)->code.restarted.times = (yyvsp[0].statement_value);
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 2625 "y.tab.c"
+#line 2627 "y.tab.c"
     break;
 
   case 101:
-#line 817 "gwarf_yacc.y"
+#line 819 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = restarted;
         code_tmp->code.restarted.times = NULL;
         (yyval.statement_value) = code_tmp;
     }
-#line 2636 "y.tab.c"
+#line 2638 "y.tab.c"
     break;
 
   case 103:
-#line 828 "gwarf_yacc.y"
+#line 830 "gwarf_yacc.y"
     {
         (yyvsp[-1].statement_value)->code.restart.times = (yyvsp[0].statement_value);
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 2645 "y.tab.c"
+#line 2647 "y.tab.c"
     break;
 
   case 104:
-#line 836 "gwarf_yacc.y"
+#line 838 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = restart;
         code_tmp->code.restart.times = NULL;
         (yyval.statement_value) = code_tmp;
     }
-#line 2656 "y.tab.c"
+#line 2658 "y.tab.c"
     break;
 
   case 106:
-#line 847 "gwarf_yacc.y"
+#line 849 "gwarf_yacc.y"
     {
         (yyvsp[-1].statement_value)->code.continued.times = (yyvsp[0].statement_value);
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 2665 "y.tab.c"
+#line 2667 "y.tab.c"
     break;
 
   case 107:
-#line 855 "gwarf_yacc.y"
+#line 857 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = continued;
         code_tmp->code.continued.times = NULL;
         (yyval.statement_value) = code_tmp;
     }
-#line 2676 "y.tab.c"
+#line 2678 "y.tab.c"
     break;
 
   case 109:
-#line 866 "gwarf_yacc.y"
+#line 868 "gwarf_yacc.y"
     {
         (yyvsp[-1].statement_value)->code.continue_cycle.times = (yyvsp[0].statement_value);
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 2685 "y.tab.c"
+#line 2687 "y.tab.c"
     break;
 
   case 110:
-#line 874 "gwarf_yacc.y"
+#line 876 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = continue_cycle;
         code_tmp->code.continue_cycle.times = NULL;
         (yyval.statement_value) = code_tmp;
     }
-#line 2696 "y.tab.c"
+#line 2698 "y.tab.c"
     break;
 
   case 112:
-#line 885 "gwarf_yacc.y"
+#line 887 "gwarf_yacc.y"
     {
         (yyvsp[-1].statement_value)->code.break_cycle.times = (yyvsp[0].statement_value);
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 2705 "y.tab.c"
+#line 2707 "y.tab.c"
     break;
 
   case 113:
-#line 893 "gwarf_yacc.y"
+#line 895 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = break_cycle;
         code_tmp->code.break_cycle.times = NULL;
         (yyval.statement_value) = code_tmp;
     }
-#line 2716 "y.tab.c"
+#line 2718 "y.tab.c"
     break;
 
   case 115:
-#line 904 "gwarf_yacc.y"
+#line 906 "gwarf_yacc.y"
     {
         (yyvsp[-1].statement_value)->code.broken.times = (yyvsp[0].statement_value);
         (yyval.statement_value) = (yyvsp[-1].statement_value);
     }
-#line 2725 "y.tab.c"
+#line 2727 "y.tab.c"
     break;
 
   case 116:
-#line 911 "gwarf_yacc.y"
+#line 913 "gwarf_yacc.y"
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = broken;
         code_tmp->code.broken.times = NULL;
         (yyval.statement_value) = code_tmp;
     }
-#line 2736 "y.tab.c"
+#line 2738 "y.tab.c"
     break;
 
 
-#line 2740 "y.tab.c"
+#line 2742 "y.tab.c"
 
       default: break;
     }
@@ -2968,7 +2970,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 926 "gwarf_yacc.y"
+#line 928 "gwarf_yacc.y"
 
 int yyerror(char const *str)
 {

@@ -1,16 +1,6 @@
 #include<stdio.h>
-// #include "interpreter.h"
 
-parameter *make_parameter_name(char *);
-void append_parameter_name(char *, parameter *);
-
-parameter *make_parameter_value(statement *);
-void append_parameter_value(statement *, parameter *);
-parameter *add_parameter_value(statement *, parameter *);
-
-parameter *pack_value_parameter(GWARF_value);
-statement *pack_call_name(char *, statement *);
-
+#include "interpreter.h"
 
 parameter *make_parameter_name(char *name){
     parameter *tmp;

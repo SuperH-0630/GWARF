@@ -1,9 +1,6 @@
 #include<stdio.h>
-// #include "interpreter.h"
 
-if_list *make_base_if();
-if_list *make_if(statement *, statement *);
-if_list *append_elif(if_list *, if_list *);
+#include "interpreter.h"
 
 if_list *make_base_if(){  // make base if
     if_list *tmp;

@@ -36,7 +36,8 @@
         "hash_map": "c",
         "algorithm": "c",
         "initializer_list": "c",
-        "valarray": "c"
+        "valarray": "c",
+        "interpreter.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

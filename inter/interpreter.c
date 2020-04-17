@@ -1,48 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../paser/y.tab.c"
 #include <math.h>
 
-// #include "interpreter.h"
-#include "branch.c"
-#include "cfunc.c"
-#include "parameter.c"
-#include "statement.c"
-#include "var.c"
-
-// running code
-GWARF_result operation_func(statement *, var_list *, var_list *);
-GWARF_result while_func(statement *, var_list *);
-GWARF_result if_func(if_list *, var_list *);
-GWARF_result for_func(statement *, var_list *);
-GWARF_result call_back(statement *, var_list *);
-GWARF_result call_back_core(GWARF_result, var_list *, parameter *);
-GWARF_result block_func(statement *, var_list *);
-
-GWARF_result add_func(GWARF_result, GWARF_result, var_list *);
-GWARF_result sub_func(GWARF_result, GWARF_result, var_list *);
-GWARF_result mul_func(GWARF_result, GWARF_result, var_list *);
-GWARF_result div_func(GWARF_result, GWARF_result, var_list *);
-GWARF_result pow_func(GWARF_result, GWARF_result, var_list *);
-GWARF_result log_func(GWARF_result, GWARF_result, var_list *);
-GWARF_result sqrt_func(GWARF_result, GWARF_result, var_list *);
-GWARF_result assigment_func(char *, GWARF_result, var_list *, int);
-GWARF_result equal_func(GWARF_result, GWARF_result, var_list *, int);
-GWARF_result negative_func(GWARF_result, var_list *);
-
-double sqrt_(double, double);
-double log_(double, double);
-
-GWARF_value to_int(GWARF_value, var_list *the_var);
-GWARF_value to_double(GWARF_value value, var_list *the_var);
-GWARF_value to_str(GWARF_value value, var_list *the_var);
-GWARF_value to_bool_(GWARF_value value, var_list *the_var);
-bool to_bool(GWARF_value);
-
-GWARF_result get__value__(GWARF_value *, var_list *);
-GWARF_result get__bool__(GWARF_value *, var_list *);
-GWARF_result run_func(GWARF_value *, var_list *, char *);
-
+#include "interpreter.h"
 
 double log_(double base, double num){  // 自己定义一次log
     return log(num) / log(base);
