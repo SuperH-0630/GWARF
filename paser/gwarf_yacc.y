@@ -676,7 +676,26 @@ class_exp
         char *name_tmp = class_tmp->code.set_class.name;
         strcpy(name_tmp, $2->code.base_var.var_name);
 
+        class_tmp->code.set_class.father_list = NULL;
         class_tmp->code.set_class.done = make_statement();
+        statement_base = append_statement_list(class_tmp->code.set_class.done, statement_base);  // new statement_base (FILO)
+
+        free($2->code.base_var.var_name);
+        free($2);
+        $$ = class_tmp;
+    }
+    | CLASS  base_var_ LB arguments RB
+    {   
+        //无参数方法
+        statement *class_tmp =  make_statement();
+        class_tmp->type = set_class;
+
+        class_tmp->code.set_class.name = malloc(sizeof($2->code.base_var.var_name));
+        char *name_tmp = class_tmp->code.set_class.name;
+        strcpy(name_tmp, $2->code.base_var.var_name);
+
+        class_tmp->code.set_class.done = make_statement();
+        class_tmp->code.set_class.father_list = $4;  // set father
         statement_base = append_statement_list(class_tmp->code.set_class.done, statement_base);  // new statement_base (FILO)
 
         free($2->code.base_var.var_name);

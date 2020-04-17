@@ -316,7 +316,7 @@ var_list *append_var_list(var *var_base, var_list *var_list_base){  // make var_
     return tmp;
 }
 
-var_list *append_by_var_list(var_list *back_var_list, var_list *var_list_base){  // make var_list[FILO]
+var_list *append_by_var_list(var_list *back_var_list, var_list *var_list_base){  // 拼凑两个var_list
     var_list *start = back_var_list;
     while(1){
         if(start->next == NULL){  // to the last
@@ -659,10 +659,32 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             class_object *class_tmp = malloc(sizeof(class_object));
 
             class_tmp->the_var = make_var_base(make_var());  // make class var list
-            class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
             class_value.value.type = CLASS_value;
             class_value.value.value.class_value = class_tmp;
 
+            // 获取father  -- append_by_var_list[拼凑]
+            GWARF_result father_tmp;
+            parameter *tmp_s = the_statement->code.set_class.father_list;
+            if(tmp_s == NULL){
+                goto not_tmp_s;
+            }
+            while(1){
+                father_tmp = traverse(tmp_s->u.value, the_var, false);  // 执行
+                if(father_tmp.value.type == CLASS_value){  // 可以通过class继承, 也可以通过object.cls继承
+                    append_by_var_list(class_tmp->the_var, father_tmp.value.value.class_value->the_var);
+                }
+                else if(father_tmp.value.type == OBJECT_value){
+                    append_by_var_list(class_tmp->the_var, father_tmp.value.value.object_value->cls);
+                }
+                if (tmp_s->next == NULL){  // the last
+                    break;
+                }
+                tmp_s = tmp_s->next;
+            }
+            
+            not_tmp_s: 
+            class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  //TODO::class_tmp->out_var = copy_var_list(the_var);
+            // 执行done
             statement *tmp = the_statement->code.set_class.done;
             GWARF_result result;
             while(1){
@@ -1408,7 +1430,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                 tmp_x = tmp_x->next;  // get the next to iter
             }
             while(1){
-                GWARF_result tmp = traverse(tmp_s->u.value, the_var, false);
+                GWARF_result tmp = traverse(tmp_s->u.value, the_var, false);  // 不需要取__value__
                 assigment_func(tmp_x->u.name, tmp, the_var, 0);
                 if ((tmp_x->next == NULL)||(tmp_s->next == NULL)){  // the last
                     break;
@@ -2802,4 +2824,4 @@ int len_intx(unsigned int num){  // 16进制
     return count;
 }
 
-// TODO::增加运算方法和(to_bool)，设置func和NULL均为object，设置object无__add___等方法时的操作
+// TODO::增加运算方法和(to_bool)，设置func和NULL均为object，设置object无__add___等方法时的操作，实现继承

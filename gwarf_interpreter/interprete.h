@@ -199,6 +199,7 @@ typedef struct statement{
         struct{
             char *name;  // class name
             struct statement *done;  // class to do
+            parameter *father_list;  // 继承
         } set_class;
 
     } code;
