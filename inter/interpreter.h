@@ -291,6 +291,11 @@ typedef enum{
     __log__func = 15,
     __sqrt__func = 16,
     __negative__func = 17,
+    __powr__func = 18,
+    __logr__func = 19,
+    __sqrtr__func = 20,
+    __subr__func = 21,
+    __divr__func = 22,
 } official_func_type;
 
 typedef struct func{

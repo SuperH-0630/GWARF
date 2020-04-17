@@ -243,8 +243,14 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 }
             }
             else{
-                father_tmp.value = find_var(the_var, 0, "object")->value;
-                append_by_var_list(class_tmp->the_var, father_tmp.value.value.class_value->the_var);
+                var *object_tmp = find_var(the_var, 0, "object");
+                if(object_tmp != NULL){
+                    father_tmp.value = object_tmp->value;
+                    append_by_var_list(class_tmp->the_var, father_tmp.value.value.class_value->the_var);
+                }
+                else{
+                    // TODO::返回error -> var_list错误
+                }
             }
 
             class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  //TODO::class_tmp->out_var = copy_var_list(the_var);
@@ -1090,30 +1096,47 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
 
 // ---------  ADD
 GWARF_result add_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for add and call from read_statement_list
-    GWARF_result return_value;  // the result by call read_statement_list with left and right; value is the result for add
+    GWARF_result return_value, get;  // the result by call read_statement_list with left and right; value is the result for add
     if(left_result.value.type == OBJECT_value){  // 调用左add方法
         GWARF_result get;
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
-        get.value = find_var(call_var, 0, "__add__")->value;
-        get.father = &base_the_var;  // 设置father
-        return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+
+        var *tmp = find_var(call_var, 0, "__add__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+            goto return_back;
+        }
+        // goto next if
     }
-    else if(right_result.value.type == OBJECT_value){  // 调用右add方法
+    if(right_result.value.type == OBJECT_value){  // 调用右add方法
         GWARF_result get;
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        get.value = find_var(call_var, 0, "__add__")->value;
-        get.father = &base_the_var;  // 设置father
-        return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        var *tmp = find_var(call_var, 0, "__add__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        }
+        else{
+            return_value.u = statement_end;
+            return_value.value = left_result.value;
+        }
+        goto return_back;
     }
-    else{
+
+    {
         // 理论上用户是不可以直接调用下面的基类的，计算过程中万物皆类
         if(left_result.value.type == NULL_value){
+            return_value.u = statement_end;
             return_value.value = right_result.value;  // NULL加法相当于0
         }
         else if(right_result.value.type == NULL_value){
+            return_value.u = statement_end;
             return_value.value = left_result.value;  // NULL加法相当于0
         }
         else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
@@ -1147,7 +1170,7 @@ GWARF_result add_func(GWARF_result left_result, GWARF_result right_result, var_l
         }
         
     }
-    return return_value;
+    return_back: return return_value;
 }
 
 // ---------  SUB
@@ -1158,24 +1181,38 @@ GWARF_result sub_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        get.value = find_var(call_var, 0, "__sub__")->value;
-        get.father = &base_the_var;  // 设置father
-        return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+        var *tmp = find_var(call_var, 0, "__sub__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+            goto return_back;
+        }
     }
-    else if(right_result.value.type == OBJECT_value){  // 调用右sub方法
+    if(right_result.value.type == OBJECT_value){  // 调用右sub方法
         GWARF_result get;
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        get.value = find_var(call_var, 0, "__sub__")->value;
-        get.father = &base_the_var;  // 设置father
-        return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        var *tmp = find_var(call_var, 0, "__sub__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        }
+        else{
+            return_value.u = statement_end;
+            return_value.value = left_result.value;
+        }
+        goto return_back;
     }
-    else{
+    {
         if(left_result.value.type == NULL_value){
+            return_value.u = statement_end;
             return negative_func(right_result, the_var);  // NULL减法相当于0
         }
         else if(right_result.value.type == NULL_value){
+            return_value.u = statement_end;
             return_value.value = left_result.value;  // NULL减法相当于0
         }
         else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
@@ -1199,7 +1236,7 @@ GWARF_result sub_func(GWARF_result left_result, GWARF_result right_result, var_l
             return_value.value.value.double_value = (double)(left_result.value.value.double_value - right_result.value.value.int_value);
         }
     }
-    return return_value;
+    return_back: return return_value;
 }
 
 // ---------  negative
@@ -1210,9 +1247,17 @@ GWARF_result negative_func(GWARF_result right_result, var_list *the_var){  // th
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        get.value = find_var(call_var, 0, "__negative__")->value;
-        get.father = &base_the_var;  // 设置father
-        return_value = call_back_core(get, the_var, NULL);
+        var *tmp = find_var(call_var, 0, "__negative__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+        }
+        else{
+            return_value.u = statement_end;
+            return_value.value.type = BOOL_value;
+            return_value.value.value.bool_value = true;
+        }
     }
     else{
         if(right_result.value.type == NULL_value){  // 返回bool true
@@ -1253,7 +1298,7 @@ GWARF_result negative_func(GWARF_result right_result, var_list *the_var){  // th
             }
         }
     }
-    return return_value;
+    return_back: return return_value;
 }
 
 // ---------  MUL
@@ -1264,20 +1309,32 @@ GWARF_result mul_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        get.value = find_var(call_var, 0, "__mul__")->value;
-        get.father = &base_the_var;  // 设置father
-        return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+        var *tmp = find_var(call_var, 0, "__mul__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+            goto return_back;
+        }
     }
-    else if(right_result.value.type == OBJECT_value){  // 调用右mul方法
+    if(right_result.value.type == OBJECT_value){  // 调用右mul方法
         GWARF_result get;
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        get.value = find_var(call_var, 0, "__mul__")->value;
-        get.father = &base_the_var;  // 设置father
-        return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        var *tmp = find_var(call_var, 0, "__mul__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        }
+        else{
+            return_value.u = statement_end;
+            return_value.value = left_result.value;
+        }
+        goto return_back;
     }
-    else{
+    {
         if(left_result.value.type == NULL_value){
             return_value.value = right_result.value;  // NULL乘法相当于1
         }
@@ -1364,7 +1421,7 @@ GWARF_result mul_func(GWARF_result left_result, GWARF_result right_result, var_l
             
         }
     }
-    return return_value;
+    return_back: return return_value;
 }
 
 // ---------  DIV
@@ -1375,20 +1432,32 @@ GWARF_result div_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        get.value = find_var(call_var, 0, "__div__")->value;
-        get.father = &base_the_var;  // 设置father
-        return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+        var *tmp = find_var(call_var, 0, "__div__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+            goto return_back;
+        }
     }
-    else if(right_result.value.type == OBJECT_value){  // 调用右div方法
+    if(right_result.value.type == OBJECT_value){  // 调用右div方法
         GWARF_result get;
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        get.value = find_var(call_var, 0, "__div__")->value;
-        get.father = &base_the_var;  // 设置father
-        return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        var *tmp = find_var(call_var, 0, "__div__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        }
+        else{
+            return_value.u = statement_end;
+            return_value.value = left_result.value;
+        }
+        goto return_back;
     }
-    else{
+    {
         if(left_result.value.type == NULL_value){
             left_result.value.type = INT_value;
             left_result.value.value.int_value = 1;
@@ -1419,7 +1488,7 @@ GWARF_result div_func(GWARF_result left_result, GWARF_result right_result, var_l
             return_value.value.value.double_value = (left_result.value.value.double_value / (double)right_result.value.value.int_value);
         }
     }
-    return_result: return return_value;
+    return_back: return_result: return return_value;
 }
 
 // ---------  POW
@@ -1430,20 +1499,32 @@ GWARF_result pow_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        get.value = find_var(call_var, 0, "__pow__")->value;
-        get.father = &base_the_var;  // 设置father
-        return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+        var *tmp = find_var(call_var, 0, "__pow__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+            goto return_back;
+        }
     }
-    else if(right_result.value.type == OBJECT_value){  // 调用右pow方法
+    if(right_result.value.type == OBJECT_value){  // 调用右pow方法
         GWARF_result get;
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        get.value = find_var(call_var, 0, "__pow__")->value;
-        get.father = &base_the_var;  // 设置father
-        return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        var *tmp = find_var(call_var, 0, "__pow__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        }
+        else{
+            return_value.u = statement_end;
+            return_value.value = left_result.value;
+        }
+        goto return_back;
     }
-    else{
+    {
         if(left_result.value.type == NULL_value){
             return_value.u = statement_end;
             return_value.value.type = INT_value;
@@ -1473,7 +1554,7 @@ GWARF_result pow_func(GWARF_result left_result, GWARF_result right_result, var_l
             return_value.value.value.double_value = (double)pow((double)left_result.value.value.double_value, (double)right_result.value.value.int_value);
         }
     }
-    return return_value;
+    return_back: return return_value;
 }
 
 // ---------  LOG
@@ -1484,20 +1565,32 @@ GWARF_result log_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        get.value = find_var(call_var, 0, "__log__")->value;
-        get.father = &base_the_var;  // 设置father
-        return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+        var *tmp = find_var(call_var, 0, "__log__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+            goto return_back;
+        }
     }
-    else if(right_result.value.type == OBJECT_value){  // 调用右log方法
+    if(right_result.value.type == OBJECT_value){  // 调用右log方法
         GWARF_result get;
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        get.value = find_var(call_var, 0, "__log__")->value;
-        get.father = &base_the_var;  // 设置father
-        return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        var *tmp = find_var(call_var, 0, "__log__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        }
+        else{
+            return_value.u = statement_end;
+            return_value.value = left_result.value;
+        }
+        goto return_back;
     }
-    else{
+    {
         if(left_result.value.type == NULL_value){
             return_value.value = left_result.value;  // 返回NULL
         }
@@ -1527,7 +1620,7 @@ GWARF_result log_func(GWARF_result left_result, GWARF_result right_result, var_l
             return_value.value.value.double_value = (double)log_((double)left_result.value.value.double_value, (double)right_result.value.value.int_value);
         }
     }
-    return return_value;
+    return_back: return return_value;
 }
 
 // ---------  SQRT
@@ -1538,20 +1631,32 @@ GWARF_result sqrt_func(GWARF_result left_result, GWARF_result right_result, var_
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        get.value = find_var(call_var, 0, "__sqrt__")->value;
-        get.father = &base_the_var;  // 设置father
-        return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+        var *tmp = find_var(call_var, 0, "__sqrt__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+            goto return_back;
+        }
     }
-    else if(right_result.value.type == OBJECT_value){  // 调用右sqrt方法
+    if(right_result.value.type == OBJECT_value){  // 调用右sqrt方法
         GWARF_result get;
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        get.value = find_var(call_var, 0, "__sqrt__")->value;
-        get.father = &base_the_var;  // 设置father
-        return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        var *tmp = find_var(call_var, 0, "__sqrt__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        }
+        else{
+            return_value.u = statement_end;
+            return_value.value = left_result.value;
+        }
+        goto return_back;
     }
-    else{
+    {
         if(left_result.value.type == NULL_value){
             return_value.u = statement_end;
             return_value.value.type = INT_value;
@@ -1581,7 +1686,7 @@ GWARF_result sqrt_func(GWARF_result left_result, GWARF_result right_result, var_
             return_value.value.value.double_value = (double)sqrt_((double)left_result.value.value.double_value, (double)right_result.value.value.int_value);
         }
     }
-    return return_value;
+    return_back: return return_value;
 }
 
 // ---------  ASSIGMENT
@@ -1601,18 +1706,31 @@ GWARF_result equal_func(GWARF_result left_result, GWARF_result right_result, var
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        get.value = find_var(call_var, 0, func_list[type])->value;
-        get.father = &base_the_var;  // 设置father
-        return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+        var *tmp = find_var(call_var, 0, func_list[type]);
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+            goto return_back;
+        }
     }
-    else if(right_result.value.type == OBJECT_value){  // 调用右div方法
+    if(right_result.value.type == OBJECT_value){  // 调用右div方法
         GWARF_result get;
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        get.value = find_var(call_var, 0, func_list[type])->value;
-        get.father = &base_the_var;  // 设置father
-        return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        var *tmp = find_var(call_var, 0, func_list[type]);
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        }
+        else{
+            return_value.u = statement_end;
+            return_value.value.value.bool_value = true;
+            return_value.value.type = BOOL_value;
+        }
+        goto return_back;
     }
     else{
         return_value.u = statement_end;
@@ -1702,7 +1820,7 @@ GWARF_result equal_func(GWARF_result left_result, GWARF_result right_result, var
         return_value.value.value.bool_value = return_bool;
         return_value.value.type = BOOL_value;
     }
-    return return_value;
+    return_back: return return_value;
 }
 
 // --------- traverse[iter]
@@ -1717,10 +1835,8 @@ GWARF_result traverse(statement *the_statement, var_list *the_var, bool new){  /
     }
     bool lock = false;
     if(new){  // need to make new var
-        // printf("----address = %d----\n", the_var);
         var *tmp = make_var();  // base_var
         the_var = append_var_list(tmp, the_var);
-        // printf("----new address = %d----\n", the_var);
     }
     while(1){
         if(tmp == NULL){
@@ -1729,42 +1845,21 @@ GWARF_result traverse(statement *the_statement, var_list *the_var, bool new){  /
         result2 = read_statement_list(tmp, the_var);
 
         // 错误停止
-        if(result2.u == name_no_found){
+        if(result2.u == name_no_found){  // Name Error错误
             puts("STOP:: Name No Found!");
-            exit(1);  // 停止运行
+            result = result2;
+            break;
         }
-
-        if((result2.u == cycle_break) || (result2.u == code_broken)){  // don't next the statement and return the result [the while_func[or for func] will get the result and stop cycle]
-            puts("----break or broken----");
+        else if(result2.u == cycle_break || result2.u == code_broken || result2.u == cycle_continue || result2.u == code_continued || 
+                result2.u == cycle_restart || result2.u == code_restarted || result2.u == return_def || result2.u == code_rego || result2.u == code_rewent){
             result = result2;
             break;
             }
-        if((result2.u == cycle_continue) || (result2.u == code_continued) || (result2.u == cycle_restart) || (result2.u == code_restarted)){
-            printf("----continue/continued or restart/restarted----\n");
-            result = result2;
-            break;
-        }
-
-        if(result2.u == return_def){
-            printf("----return----\n");
-            result = result2;
-            break;
-        }
-
-        if(result2.u == code_rego){
-            puts("----rego----");  // rego now
-            result = result2;
-            break;
-        }
-
-        if(result2.u == code_rewent){
-            lock = true;  // keep the result is rewent for return
-            result = result2;
-        }
-
+        
         if(!lock){
             result = result2;
         }
+
         tmp = tmp->next;
     }
     if(new){  // need to make new var
@@ -1786,7 +1881,6 @@ GWARF_result traverse_global(statement *the_statement, var_list *the_var){  // t
     return result;
 }
 
-// -------inter func
 inter *get_inter(){
     inter *tmp;
     tmp = malloc(sizeof(inter));  // get an address for base var
@@ -1795,7 +1889,4 @@ inter *get_inter(){
     return tmp;
 }
 
-// ------official func
-
-
-// TODO::设置func和NULL均为object，设置object无__add___等方法时的操作:: NULL永远只有一个实例, object回调__call__   [find_var类型检查]
+// TODO::设置func和NULL均为object，设置object无__add___等方法时的操作:: NULL永远只有一个实例, object回调__call__   [find_var类型检查]    malloc返回值检查
