@@ -30,7 +30,9 @@ GWARF_value to_double(GWARF_value value, var_list *the_var);
 GWARF_value to_bool_(GWARF_value value, var_list *the_var);
 GWARF_value to_str(GWARF_value value, var_list *the_var);
 bool to_bool(GWARF_value);
-GWARF_result get__value__(GWARF_value *base_the_var, var_list *the_var);
+GWARF_result get__value__(GWARF_value *, var_list *);
+GWARF_result get__bool__(GWARF_value *, var_list *);
+GWARF_result run_func(GWARF_value *, var_list *, char *);
 
 int get_var_list_len(var_list *);
 var_list *copy_var_list(var_list *);
@@ -52,18 +54,24 @@ double sqrt_(double base, double num){  // 定义根号sqrt
 // bool[bool逻辑转换]
 bool to_bool(GWARF_value value){
     double bool_double = 1;  // if bool_double == 0则返回false其他返回true
-    if(value.type == INT_value || value.type == BOOL_value){
-        bool_double = (double)value.value.int_value;
+    if(value.type == OBJECT_value){  // 调用左add方法
+        bool_double = to_bool(get__bool__(&value, NULL).value);  // 实际上不需要the_var参数链[没有实参]
     }
-    else if(value.type == NUMBER_value){
-        bool_double = value.value.double_value;
+    else{
+        if(value.type == INT_value || value.type == BOOL_value){
+            bool_double = (double)value.value.int_value;
+        }
+        else if(value.type == NUMBER_value){
+            bool_double = value.value.double_value;
+        }
+        else if(value.type == STRING_value){
+            bool_double = (double)strlen(value.value.string);
+        }
+        else if(value.type == NULL_value){
+            bool_double = 0;
+        }
     }
-    else if(value.type == STRING_value){
-        bool_double = (double)strlen(value.value.string);
-    }
-    else if(value.type == NULL_value){
-        bool_double = 0;
-    }
+    // 返回值
     if(bool_double){
         return true;
     }
@@ -988,6 +996,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
         else{  // not else
             bool condition;
             condition = to_bool(traverse(start->condition, the_var, false).value);
+            printf("if condition = %d", condition);
             if(rego || (condition)){  // condition run success or rego(condition won't do) bug rewent can
                 if_restart:
                 puts("----if----");
@@ -1638,43 +1647,54 @@ GWARF_result sub_func(GWARF_result left_result, GWARF_result right_result, var_l
 }
 
 // ---------  negative
-GWARF_result negative_func(GWARF_result right_result, var_list *the_var){  // the func for sub and call from read_statement_list
-    GWARF_result return_value;  // the result by call read_statement_list with left and right; value is the result for sub
-    if(right_result.value.type == NULL_value){  // 返回bool true
-        return_value.u = statement_end;
-        return_value.value.type = BOOL_value;
-        return_value.value.value.bool_value = true;
+GWARF_result negative_func(GWARF_result right_result, var_list *the_var){  // the func for negative and call from read_statement_list
+    GWARF_result return_value;  // the result by call read_statement_list with left and right; value is the result for negative
+    if(right_result.value.type == OBJECT_value){  // 调用右sub方法
+        GWARF_result get;
+        GWARF_value base_the_var = right_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        get.value = find_var(call_var, 0, "__negative__")->value;
+        get.father = &base_the_var;  // 设置father
+        return_value = call_back_core(get, the_var, NULL);
     }
-    else if(right_result.value.type == INT_value){  // all is INT
-        return_value.u = statement_end;
-        return_value.value.type = INT_value;
-        return_value.value.value.int_value = (int)(-1 * right_result.value.value.int_value);
-    }
-    else if(right_result.value.type == BOOL_value){
-        return_value.u = statement_end;
-        return_value.value.type = BOOL_value;
-        if(right_result.value.value.bool_value)
-        {
-            return_value.value.value.bool_value = false;
-        }
-        else{
+    else{
+        if(right_result.value.type == NULL_value){  // 返回bool true
+            return_value.u = statement_end;
+            return_value.value.type = BOOL_value;
             return_value.value.value.bool_value = true;
         }
-    }
-    else if(right_result.value.type == NUMBER_value){  // all is NUMBER
-        return_value.u = statement_end;
-        return_value.value.type = NUMBER_value;
-        return_value.value.value.double_value = (double)(-1 * right_result.value.value.double_value);
-    }
-    else if(right_result.value.type == STRING_value){  // 字符串
-        return_value.u = statement_end;
-        return_value.value.type = STRING_value;
-        char *r = right_result.value.value.string;
-        return_value.value.value.string = malloc(strlen(r));  // 创建新空间
-        char *tmp = malloc(strlen(r));
-        strcpy(tmp, r);  // 复制字符串
-        for(int i=0;i<strlen(tmp);i += 1){
-            return_value.value.value.string[i] = tmp[strlen(tmp) - i - 1];  // 反转
+        else if(right_result.value.type == INT_value){  // all is INT
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = (int)(-1 * right_result.value.value.int_value);
+        }
+        else if(right_result.value.type == BOOL_value){
+            return_value.u = statement_end;
+            return_value.value.type = BOOL_value;
+            if(right_result.value.value.bool_value)
+            {
+                return_value.value.value.bool_value = false;
+            }
+            else{
+                return_value.value.value.bool_value = true;
+            }
+        }
+        else if(right_result.value.type == NUMBER_value){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = NUMBER_value;
+            return_value.value.value.double_value = (double)(-1 * right_result.value.value.double_value);
+        }
+        else if(right_result.value.type == STRING_value){  // 字符串
+            return_value.u = statement_end;
+            return_value.value.type = STRING_value;
+            char *r = right_result.value.value.string;
+            return_value.value.value.string = malloc(strlen(r));  // 创建新空间
+            char *tmp = malloc(strlen(r));
+            strcpy(tmp, r);  // 复制字符串
+            for(int i=0;i<strlen(tmp);i += 1){
+                return_value.value.value.string[i] = tmp[strlen(tmp) - i - 1];  // 反转
+            }
         }
     }
     return return_value;
@@ -1849,33 +1869,53 @@ GWARF_result div_func(GWARF_result left_result, GWARF_result right_result, var_l
 // ---------  POW
 GWARF_result pow_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for div and call from read_statement_list
     GWARF_result return_value;  // the result by call read_statement_list with left and right; value is the result for div
-    if(left_result.value.type == NULL_value){
-        return_value.u = statement_end;
-        return_value.value.type = INT_value;
-        return_value.value.value.int_value = 1;
+    if(left_result.value.type == OBJECT_value){  // 调用左pow方法
+        GWARF_result get;
+        GWARF_value base_the_var = left_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        get.value = find_var(call_var, 0, "__pow__")->value;
+        get.father = &base_the_var;  // 设置father
+        return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
     }
-    else if(right_result.value.type == NULL_value){
-        return_value.value = left_result.value;  // NULL乘方相当于1
+    else if(right_result.value.type == OBJECT_value){  // 调用右pow方法
+        GWARF_result get;
+        GWARF_value base_the_var = right_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        get.value = find_var(call_var, 0, "__pow__")->value;
+        get.father = &base_the_var;  // 设置father
+        return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
     }
-    else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
-        return_value.u = statement_end;
-        return_value.value.type = INT_value;
-        return_value.value.value.int_value = (int)pow((double)left_result.value.value.int_value, (double)right_result.value.value.int_value);
-    }
-    else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
-        return_value.u = statement_end;
-        return_value.value.type = NUMBER_value;
-        return_value.value.value.double_value = (double)pow(left_result.value.value.double_value, right_result.value.value.double_value);
-    }
-    else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
-        return_value.u = statement_end;
-        return_value.value.type = NUMBER_value;
-        return_value.value.value.double_value = (double)pow((double)left_result.value.value.int_value, (double)right_result.value.value.double_value);
-    }
-    else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is NUMBER
-        return_value.u = statement_end;
-        return_value.value.type = NUMBER_value;
-        return_value.value.value.double_value = (double)pow((double)left_result.value.value.double_value, (double)right_result.value.value.int_value);
+    else{
+        if(left_result.value.type == NULL_value){
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = 1;
+        }
+        else if(right_result.value.type == NULL_value){
+            return_value.value = left_result.value;  // NULL乘方相当于1
+        }
+        else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = (int)pow((double)left_result.value.value.int_value, (double)right_result.value.value.int_value);
+        }
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = NUMBER_value;
+            return_value.value.value.double_value = (double)pow(left_result.value.value.double_value, right_result.value.value.double_value);
+        }
+        else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = NUMBER_value;
+            return_value.value.value.double_value = (double)pow((double)left_result.value.value.int_value, (double)right_result.value.value.double_value);
+        }
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = NUMBER_value;
+            return_value.value.value.double_value = (double)pow((double)left_result.value.value.double_value, (double)right_result.value.value.int_value);
+        }
     }
     return return_value;
 }
@@ -1883,33 +1923,53 @@ GWARF_result pow_func(GWARF_result left_result, GWARF_result right_result, var_l
 // ---------  LOG
 GWARF_result log_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for div and call from read_statement_list
     GWARF_result return_value;  // the result by call read_statement_list with left and right; value is the result for div
-    if(left_result.value.type == NULL_value){
-        return_value.value = left_result.value;  // 返回NULL
+    if(left_result.value.type == OBJECT_value){  // 调用左log方法
+        GWARF_result get;
+        GWARF_value base_the_var = left_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        get.value = find_var(call_var, 0, "__log__")->value;
+        get.father = &base_the_var;  // 设置father
+        return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
     }
-    else if(right_result.value.type == NULL_value){
-        return_value.u = statement_end;
-        return_value.value.type = INT_value;
-        return_value.value.value.int_value = 0;
+    else if(right_result.value.type == OBJECT_value){  // 调用右log方法
+        GWARF_result get;
+        GWARF_value base_the_var = right_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        get.value = find_var(call_var, 0, "__log__")->value;
+        get.father = &base_the_var;  // 设置father
+        return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
     }
-    else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
-        return_value.u = statement_end;
-        return_value.value.type = INT_value;
-        return_value.value.value.int_value = (int)log_((double)left_result.value.value.int_value, (double)right_result.value.value.int_value);
-    }
-    else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
-        return_value.u = statement_end;
-        return_value.value.type = NUMBER_value;
-        return_value.value.value.double_value = (double)log_(left_result.value.value.double_value, right_result.value.value.double_value);
-    }
-    else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
-        return_value.u = statement_end;
-        return_value.value.type = NUMBER_value;
-        return_value.value.value.double_value = (double)log_((double)left_result.value.value.int_value, (double)right_result.value.value.double_value);
-    }
-    else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is NUMBER
-        return_value.u = statement_end;
-        return_value.value.type = NUMBER_value;
-        return_value.value.value.double_value = (double)log_((double)left_result.value.value.double_value, (double)right_result.value.value.int_value);
+    else{
+        if(left_result.value.type == NULL_value){
+            return_value.value = left_result.value;  // 返回NULL
+        }
+        else if(right_result.value.type == NULL_value){
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = 0;
+        }
+        else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = (int)log_((double)left_result.value.value.int_value, (double)right_result.value.value.int_value);
+        }
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = NUMBER_value;
+            return_value.value.value.double_value = (double)log_(left_result.value.value.double_value, right_result.value.value.double_value);
+        }
+        else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = NUMBER_value;
+            return_value.value.value.double_value = (double)log_((double)left_result.value.value.int_value, (double)right_result.value.value.double_value);
+        }
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = NUMBER_value;
+            return_value.value.value.double_value = (double)log_((double)left_result.value.value.double_value, (double)right_result.value.value.int_value);
+        }
     }
     return return_value;
 }
@@ -1917,33 +1977,53 @@ GWARF_result log_func(GWARF_result left_result, GWARF_result right_result, var_l
 // ---------  SQRT
 GWARF_result sqrt_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for div and call from read_statement_list
     GWARF_result return_value;  // the result by call read_statement_list with left and right; value is the result for div
-    if(left_result.value.type == NULL_value){
-        return_value.u = statement_end;
-        return_value.value.type = INT_value;
-        return_value.value.value.int_value = 0;
+    if(left_result.value.type == OBJECT_value){  // 调用左sqrt方法
+        GWARF_result get;
+        GWARF_value base_the_var = left_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        get.value = find_var(call_var, 0, "__sqrt__")->value;
+        get.father = &base_the_var;  // 设置father
+        return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
     }
-    else if(right_result.value.type == NULL_value){
-        return_value.value = right_result.value;  // 返回NULL
+    else if(right_result.value.type == OBJECT_value){  // 调用右sqrt方法
+        GWARF_result get;
+        GWARF_value base_the_var = right_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        get.value = find_var(call_var, 0, "__sqrt__")->value;
+        get.father = &base_the_var;  // 设置father
+        return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
     }
-    else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
-        return_value.u = statement_end;
-        return_value.value.type = INT_value;
-        return_value.value.value.int_value = (int)sqrt_((double)left_result.value.value.int_value, (double)right_result.value.value.int_value);
-    }
-    else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
-        return_value.u = statement_end;
-        return_value.value.type = NUMBER_value;
-        return_value.value.value.double_value = (double)sqrt_(left_result.value.value.double_value, right_result.value.value.double_value);
-    }
-    else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
-        return_value.u = statement_end;
-        return_value.value.type = NUMBER_value;
-        return_value.value.value.double_value = (double)sqrt_((double)left_result.value.value.int_value, (double)right_result.value.value.double_value);
-    }
-    else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is NUMBER
-        return_value.u = statement_end;
-        return_value.value.type = NUMBER_value;
-        return_value.value.value.double_value = (double)sqrt_((double)left_result.value.value.double_value, (double)right_result.value.value.int_value);
+    else{
+        if(left_result.value.type == NULL_value){
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = 0;
+        }
+        else if(right_result.value.type == NULL_value){
+            return_value.value = right_result.value;  // 返回NULL
+        }
+        else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = (int)sqrt_((double)left_result.value.value.int_value, (double)right_result.value.value.int_value);
+        }
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = NUMBER_value;
+            return_value.value.value.double_value = (double)sqrt_(left_result.value.value.double_value, right_result.value.value.double_value);
+        }
+        else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = NUMBER_value;
+            return_value.value.value.double_value = (double)sqrt_((double)left_result.value.value.int_value, (double)right_result.value.value.double_value);
+        }
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = NUMBER_value;
+            return_value.value.value.double_value = (double)sqrt_((double)left_result.value.value.double_value, (double)right_result.value.value.int_value);
+        }
     }
     return return_value;
 }
@@ -1958,96 +2038,114 @@ GWARF_result assigment_func(char *left, GWARF_result right_result, var_list *the
 GWARF_result equal_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var, int type){  // the func for equal and call from read_statement_list
     GWARF_result return_value;
     int return_bool = false;
-    return_value.u = statement_end;
-    if(left_result.value.type == NULL_value || right_result.value.type == NULL_value){
-        return_bool = false;  // 无论什么都返回false NULL != NULL
+    char *func_list[] = {"__eq__", "__more__", "__less__", "__eqmore__", "__eqless__","__noteq__"};  // bool 运算符
+
+    if(left_result.value.type == OBJECT_value){  // 调用左div方法
+        GWARF_result get;
+        GWARF_value base_the_var = left_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        get.value = find_var(call_var, 0, func_list[type])->value;
+        get.father = &base_the_var;  // 设置father
+        return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
     }
-    else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
-        return_value.value.type = INT_value;
-        if ((left_result.value.value.int_value == right_result.value.value.int_value) && (type == 0)){  // 如果相等:: __eq__
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
-        if ((left_result.value.value.int_value > right_result.value.value.int_value) && (type == 1)){  // 如果大于::__more__
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
-        if ((left_result.value.value.int_value < right_result.value.value.int_value) && (type == 2)){  // 如果小于::__less__
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
-        if ((left_result.value.value.int_value >= right_result.value.value.int_value) && (type == 3)){  // 如果大于等于::__eqmore__
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
-        if ((left_result.value.value.int_value <= right_result.value.value.int_value) && (type == 4)){  // 如果小于等于::__eqless__
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
-        if ((left_result.value.value.int_value != right_result.value.value.int_value) && (type == 5)){  // 如果不相等::__noteq__
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
+    else if(right_result.value.type == OBJECT_value){  // 调用右div方法
+        GWARF_result get;
+        GWARF_value base_the_var = right_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        get.value = find_var(call_var, 0, func_list[type])->value;
+        get.father = &base_the_var;  // 设置father
+        return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
     }
-    else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
-        return_value.value.type = INT_value;
-        if ((left_result.value.value.double_value == right_result.value.value.double_value) && (type == 0)){  // 如果相等
-            return_bool = true;  // 返回1 否则(默认)为0
+    else{
+        return_value.u = statement_end;
+        if(left_result.value.type == NULL_value || right_result.value.type == NULL_value){
+            return_bool = false;  // 无论什么都返回false NULL != NULL
         }
-        if ((left_result.value.value.double_value > right_result.value.value.double_value) && (type == 1)){  // 如果大于
-            return_bool = true;  // 返回1 否则(默认)为0
+        else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
+            if ((left_result.value.value.int_value == right_result.value.value.int_value) && (type == 0)){  // 如果相等:: __eq__
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.int_value > right_result.value.value.int_value) && (type == 1)){  // 如果大于::__more__
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.int_value < right_result.value.value.int_value) && (type == 2)){  // 如果小于::__less__
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.int_value >= right_result.value.value.int_value) && (type == 3)){  // 如果大于等于::__eqmore__
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.int_value <= right_result.value.value.int_value) && (type == 4)){  // 如果小于等于::__eqless__
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.int_value != right_result.value.value.int_value) && (type == 5)){  // 如果不相等::__noteq__
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
         }
-        if ((left_result.value.value.double_value < right_result.value.value.double_value) && (type == 2)){  // 如果小于
-            return_bool = true;  // 返回1 否则(默认)为0
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            if ((left_result.value.value.double_value == right_result.value.value.double_value) && (type == 0)){  // 如果相等
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.double_value > right_result.value.value.double_value) && (type == 1)){  // 如果大于
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.double_value < right_result.value.value.double_value) && (type == 2)){  // 如果小于
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.double_value >= right_result.value.value.double_value) && (type == 3)){  // 如果大于等于
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.double_value <= right_result.value.value.double_value) && (type == 4)){  // 如果小于等于
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.double_value != right_result.value.value.double_value) && (type == 5)){  // 如果不相等
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
         }
-        if ((left_result.value.value.double_value >= right_result.value.value.double_value) && (type == 3)){  // 如果大于等于
-            return_bool = true;  // 返回1 否则(默认)为0
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is NUMBER
+            if ((left_result.value.value.double_value == right_result.value.value.int_value) && (type == 0)){  // 如果相等
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.double_value > right_result.value.value.int_value) && (type == 1)){  // 如果大于
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.double_value < right_result.value.value.int_value) && (type == 2)){  // 如果小于
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.double_value >= right_result.value.value.int_value) && (type == 3)){  // 如果大于等于
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.double_value <= right_result.value.value.int_value) && (type == 4)){  // 如果小于等于
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.double_value != right_result.value.value.int_value) && (type == 5)){  // 如果不相等
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
         }
-        if ((left_result.value.value.double_value <= right_result.value.value.double_value) && (type == 4)){  // 如果小于等于
-            return_bool = true;  // 返回1 否则(默认)为0
+        else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            if ((left_result.value.value.int_value == right_result.value.value.double_value) && (type == 0)){  // 如果相等
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.int_value > right_result.value.value.double_value) && (type == 1)){  // 如果大于
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.int_value < right_result.value.value.double_value) && (type == 2)){  // 如果小于
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.int_value >= right_result.value.value.double_value) && (type == 3)){  // 如果大于等于
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.int_value <= right_result.value.value.double_value) && (type == 4)){  // 如果小于等于
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+            if ((left_result.value.value.int_value != right_result.value.value.double_value) && (type == 5)){  // 如果不相等
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
         }
-        if ((left_result.value.value.double_value != right_result.value.value.double_value) && (type == 5)){  // 如果不相等
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
+        return_value.value.value.bool_value = return_bool;
+        return_value.value.type = BOOL_value;
     }
-    else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is NUMBER
-        return_value.value.type = INT_value;
-        if ((left_result.value.value.double_value == right_result.value.value.int_value) && (type == 0)){  // 如果相等
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
-        if ((left_result.value.value.double_value > right_result.value.value.int_value) && (type == 1)){  // 如果大于
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
-        if ((left_result.value.value.double_value < right_result.value.value.int_value) && (type == 2)){  // 如果小于
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
-        if ((left_result.value.value.double_value >= right_result.value.value.int_value) && (type == 3)){  // 如果大于等于
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
-        if ((left_result.value.value.double_value <= right_result.value.value.int_value) && (type == 4)){  // 如果小于等于
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
-        if ((left_result.value.value.double_value != right_result.value.value.int_value) && (type == 5)){  // 如果不相等
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
-    }
-    else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
-        return_value.value.type = INT_value;
-        if ((left_result.value.value.int_value == right_result.value.value.double_value) && (type == 0)){  // 如果相等
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
-        if ((left_result.value.value.int_value > right_result.value.value.double_value) && (type == 1)){  // 如果大于
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
-        if ((left_result.value.value.int_value < right_result.value.value.double_value) && (type == 2)){  // 如果小于
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
-        if ((left_result.value.value.int_value >= right_result.value.value.double_value) && (type == 3)){  // 如果大于等于
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
-        if ((left_result.value.value.int_value <= right_result.value.value.double_value) && (type == 4)){  // 如果小于等于
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
-        if ((left_result.value.value.int_value != right_result.value.value.double_value) && (type == 5)){  // 如果不相等
-            return_bool = true;  // 返回1 否则(默认)为0
-        }
-    }
-    return_value.value.value.bool_value = return_bool;
-    return_value.value.type = BOOL_value;
     return return_value;
 }
 
@@ -2251,8 +2349,8 @@ class_object *gobject_login_official(var_list *the_var, GWARF_result (*paser)(fu
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{2,1}, {3,1}, {4,1}, {5,1}, {6,1}, {7,1}};
-    char *name[] = {"__init__", "__value__", "__add__", "__sub__", "__mul__","__div__"};
+    int a[][2] = {{2,1}, {3,1}, {4,1}, {5,1}, {6,1}, {7,1}, {8,1}, {9,1}, {10,1}, {11,1}, {12,1}, {13,1}, {14,1}, {15,1}, {16,1}, {17,1}, {3,1}};
+    char *name[] = {"__init__", "__value__", "__add__", "__sub__", "__mul__","__div__","__eq__", "__more__", "__less__", "__eqmore__", "__eqless__","__noteq__", "__pow__", "__log__","__sqrt__","__negative__","__bool__"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
@@ -2322,14 +2420,84 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             return_value = div_func(left_tmp, reight_tmp, out_var);
             break;
         }
-        // case __eq__func:{
-        //     GWARF_result reight_tmp, left_tmp;
-        //     GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
-        //     reight_tmp = get__value__(&base_the_var, the_var);
-        //     left_tmp.value = find_var(login_var, 0, "value")->value;
-        //     return_value = equal_func(left_tmp, reight_tmp, out_var, 1);
-        //     break;
-        // }
+        case __eq__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = equal_func(left_tmp, reight_tmp, out_var, 0);
+            break;
+        }
+        case __more__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = equal_func(left_tmp, reight_tmp, out_var, 1);
+            break;
+        }
+        case __less__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = equal_func(left_tmp, reight_tmp, out_var, 2);
+            break;
+        }
+        case __eqmore__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = equal_func(left_tmp, reight_tmp, out_var, 3);
+            break;
+        }
+        case __eqless__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = equal_func(left_tmp, reight_tmp, out_var, 4);
+            break;
+        }
+        case __noteq__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = equal_func(left_tmp, reight_tmp, out_var, 5);
+            break;
+        }
+        case __pow__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = pow_func(left_tmp, reight_tmp, out_var);
+            break;
+        }
+        case __log__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = log_func(left_tmp, reight_tmp, out_var);
+            break;
+        }
+        case __sqrt__func:{
+            GWARF_result reight_tmp, left_tmp;
+            GWARF_value base_the_var = traverse(tmp_s->u.value, out_var, false).value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = sqrt_func(left_tmp, reight_tmp, out_var);
+            break;
+        }
+        case __negative__func:{
+            GWARF_result left_tmp;
+            left_tmp.value = find_var(login_var, 0, "value")->value;
+            return_value = negative_func(left_tmp, out_var);
+            break;
+        }
         default:
             break;
     }
@@ -2695,6 +2863,14 @@ GWARF_value to_bool_(GWARF_value value, var_list *the_var){
 }
 
 GWARF_result get__value__(GWARF_value *base_the_var, var_list *the_var){  // 用于计算的get__value__统一核心
+    return run_func(base_the_var, the_var, "__value__");
+}
+
+GWARF_result get__bool__(GWARF_value *base_the_var, var_list *the_var){  // 用于计算的get__value__统一核心
+    return run_func(base_the_var, the_var, "__bool__");
+}
+
+GWARF_result run_func(GWARF_value *base_the_var, var_list *the_var, char *name){  // 无参数func->直到返回GWARF_value[not class]
     GWARF_result reight_tmp, get;
     int times = 0;
     var_list *call_var;
@@ -2711,7 +2887,7 @@ GWARF_result get__value__(GWARF_value *base_the_var, var_list *the_var){  // 用
             reight_tmp.return_times = times;
             goto return_result;  // 如果类型不是object或者class
         }
-        get.value = find_var(call_var, 0, "__value__")->value;  // TODO:: 需要检查__value__是否存在
+        get.value = find_var(call_var, 0, name)->value;  // TODO:: 需要检查__value__是否存在
         get.father = base_the_var;  // 设置father
         reight_tmp = call_back_core(get, the_var, NULL);
         times = reight_tmp.return_times;

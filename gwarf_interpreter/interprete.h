@@ -318,6 +318,10 @@ typedef enum{
     __eqmore__func = 11,
     __eqless__func = 12,
     __noteq__func = 13,
+    __pow__func = 14,
+    __log__func = 15,
+    __sqrt__func = 16,
+    __negative__func = 17,
 } official_func_type;
 
 typedef struct func{
