@@ -265,39 +265,6 @@ typedef struct{
     statement *global_code;  // global code链表
 } inter;
 
-//------- var func
-var *make_var();
-void append_var(char *, GWARF_value , var *);
-void free_var(var *);
-var *get_var(char *, var *);
-void del_var(char *, var *);
-
-
-default_var *make_default_var();
-default_var *make_default_var_base();
-void append_default_var_base(char * ,int , default_var *);
-int get_default(char *, default_var *);
-
-
-//------- statement func
-statement *make_statement();
-statement *append_statement(statement *, statement*);
-
-statement_list *make_statement_list();
-statement_list *make_statement_base(statement *);
-statement_list *append_statement_list(statement *, statement_list *);
-statement *find_statement_list(int, statement_list *);
-statement_list *free_statement_list(statement_list *);
-
-//------- if func
-if_list *make_base_if();
-if_list *make_if(statement *, statement *);
-if_list *append_elif(if_list *, if_list *);
-
-//------- run func
-GWARF_result traverse(statement *, var_list *, bool);
-GWARF_result traverse_global(statement *, var_list *);
-
 //------- class/object/func
 typedef enum{
     customize = 1,  // func by user
@@ -344,29 +311,43 @@ typedef struct the_object{
     struct var_list *the_var;  // 记录class_object的实例  -- 相当与self
 } the_object;
 
-//------- inter func
-inter *get_inter();
+// 函数声明
+GWARF_result operation_func(statement *, var_list *, var_list *);
+GWARF_result while_func(statement *, var_list *);
+GWARF_result if_func(if_list *, var_list *);
+GWARF_result for_func(statement *, var_list *);
+GWARF_result call_back(statement *, var_list *);
+GWARF_result call_back_core(GWARF_result, var_list *, parameter *);
+GWARF_result block_func(statement *, var_list *);
 
-// //------ paser func
-int yyerror(char const *);
-FILE *yyin;
-char *yytext;
+GWARF_result add_func(GWARF_result, GWARF_result, var_list *);
+GWARF_result sub_func(GWARF_result, GWARF_result, var_list *);
+GWARF_result mul_func(GWARF_result, GWARF_result, var_list *);
+GWARF_result div_func(GWARF_result, GWARF_result, var_list *);
+GWARF_result pow_func(GWARF_result, GWARF_result, var_list *);
+GWARF_result log_func(GWARF_result, GWARF_result, var_list *);
+GWARF_result sqrt_func(GWARF_result, GWARF_result, var_list *);
+GWARF_result assigment_func(char *, GWARF_result, var_list *, int);
+GWARF_result equal_func(GWARF_result, GWARF_result, var_list *, int);
+GWARF_result negative_func(GWARF_result, var_list *);
 
-// ---- parameter func[形参]
-parameter *make_parameter_name(char *);
-void append_parameter_name(char *, parameter *);
+double sqrt_(double, double);
+double log_(double, double);
 
-// ---- parameter func[实参]
-parameter *make_parameter_value(statement *);
-void append_parameter_value(statement *, parameter *);
-parameter *add_parameter_value(statement *, parameter *);
+GWARF_value to_int(GWARF_value, var_list *the_var);
+GWARF_value to_double(GWARF_value value, var_list *the_var);
+GWARF_value to_str(GWARF_value value, var_list *the_var);
+GWARF_value to_bool_(GWARF_value value, var_list *the_var);
+bool to_bool(GWARF_value);
 
-parameter *pack_value_parameter(GWARF_value);
-statement *pack_call_name(char *, statement *);
+GWARF_result get__value__(GWARF_value *, var_list *);
+GWARF_result get__bool__(GWARF_value *, var_list *);
+GWARF_result run_func(GWARF_value *, var_list *, char *);
 
-// main
-inter *global_inter;
-statement_list *statement_base;
+int len_only_double(double num);
+int len_double(double num);
+int len_int(int num);
+int len_intx(unsigned int num);
 GWARF_value to_object(GWARF_value, var_list *);
 
 void login_official_func(int type, int is_class, var_list *the_var, char *name, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *));
@@ -398,3 +379,57 @@ GWARF_result str_official_func(func *the_func, parameter *tmp_s, var_list *the_v
 // bool内置类
 class_object *bool_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list);
 GWARF_result bool_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var);
+
+if_list *make_base_if();
+if_list *make_if(statement *, statement *);
+if_list *append_elif(if_list *, if_list *);
+
+statement *make_statement();
+statement *append_statement(statement *, statement*);
+statement_list *make_statement_list();
+statement_list *make_statement_base(statement *);
+statement_list *append_statement_list(statement *, statement_list *);
+statement *find_statement_list(int, statement_list *);
+statement_list *free_statement_list(statement_list *);
+
+var *make_var();
+void append_var(char *name, GWARF_value, var *);
+void free_var(var *);
+var *get_var(char *, var *);
+void del_var(char *, var *);
+default_var *make_default_var();
+default_var *make_default_var_base();
+void append_default_var_base(char * ,int , default_var *);
+int get_default(char *, default_var *);
+var_list *make_var_list();
+var_list *make_var_base(var *);
+var_list *append_var_list(var *, var_list *);
+var_list *append_by_var_list(var_list *, var_list *);
+var_list *free_var_list(var_list *);
+int get_var_list_len(var_list *);
+var *find_var(var_list *,int , char *);
+void add_var(var_list *,int , char *, GWARF_value);
+var_list *copy_var_list(var_list *);
+
+parameter *make_parameter_name(char *);
+void append_parameter_name(char *, parameter *);
+
+parameter *make_parameter_value(statement *);
+void append_parameter_value(statement *, parameter *);
+parameter *add_parameter_value(statement *, parameter *);
+
+parameter *pack_value_parameter(GWARF_value);
+statement *pack_call_name(char *, statement *);
+
+
+GWARF_result traverse(statement *, var_list *, bool);
+GWARF_result traverse_global(statement *, var_list *);
+
+inter *get_inter();
+
+inter *global_inter;
+statement_list *statement_base;
+
+int yyerror(char const *);
+FILE *yyin;
+char *yytext;
