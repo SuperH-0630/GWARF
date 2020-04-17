@@ -10,7 +10,8 @@ int main(){
 
     login_official(the_var, official_func);  // 注册官方函数
 
-    class_object *tmp_gobject = gobject_login_official(the_var, gobject_official_func, NULL);  // 注册goobject
+    class_object *tmp_object = object_login_official(the_var, object_official_func);  // 注册oobject
+    class_object *tmp_gobject = gobject_login_official(the_var, gobject_official_func, tmp_object->the_var);  // 注册goobject
 
     int_login_official(the_var, int_official_func, tmp_gobject->the_var);  // 注册int
     double_login_official(the_var, double_official_func, tmp_gobject->the_var);  // 注册double

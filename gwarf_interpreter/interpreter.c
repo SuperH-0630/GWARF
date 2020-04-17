@@ -673,24 +673,26 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             // 获取father  -- append_by_var_list[拼凑]
             GWARF_result father_tmp;
             parameter *tmp_s = the_statement->code.set_class.father_list;
-            if(tmp_s == NULL){
-                goto not_tmp_s;
+            if(tmp_s != NULL){
+                while(1){
+                    father_tmp = traverse(tmp_s->u.value, the_var, false);  // 执行
+                    if(father_tmp.value.type == CLASS_value){  // 可以通过class继承, 也可以通过object.cls继承
+                        append_by_var_list(class_tmp->the_var, father_tmp.value.value.class_value->the_var);
+                    }
+                    else if(father_tmp.value.type == OBJECT_value){
+                        append_by_var_list(class_tmp->the_var, father_tmp.value.value.object_value->cls);
+                    }
+                    if (tmp_s->next == NULL){  // the last
+                        break;
+                    }
+                    tmp_s = tmp_s->next;
+                }
             }
-            while(1){
-                father_tmp = traverse(tmp_s->u.value, the_var, false);  // 执行
-                if(father_tmp.value.type == CLASS_value){  // 可以通过class继承, 也可以通过object.cls继承
-                    append_by_var_list(class_tmp->the_var, father_tmp.value.value.class_value->the_var);
-                }
-                else if(father_tmp.value.type == OBJECT_value){
-                    append_by_var_list(class_tmp->the_var, father_tmp.value.value.object_value->cls);
-                }
-                if (tmp_s->next == NULL){  // the last
-                    break;
-                }
-                tmp_s = tmp_s->next;
+            else{
+                father_tmp.value = find_var(the_var, 0, "object")->value;
+                append_by_var_list(class_tmp->the_var, father_tmp.value.value.class_value->the_var);
             }
-            
-            not_tmp_s: 
+
             class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  //TODO::class_tmp->out_var = copy_var_list(the_var);
             // 执行done
             statement *tmp = the_statement->code.set_class.done;
@@ -2330,6 +2332,53 @@ GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var, 
     return_result: return return_value;
 }
 
+class_object *object_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *)){  // 内置对象继承的类
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value;
+    class_object *class_tmp = malloc(sizeof(class_object));
+    class_tmp->the_var = make_var_base(make_var());  // make class var list
+    class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assigment_func("object", class_value, the_var, 0);  // 注册class 的 位置
+    puts("----stop set class----");
+
+
+    // 注册函数
+    int a[][2] = {{3,1}};
+    char *name[] = {"__value__"};
+
+    int lenth = sizeof(a)/sizeof(a[0]);
+    for(int i = 0;i < lenth;i+=1){
+        login_official_func(a[i][0], a[i][1], class_tmp->the_var, name[i], paser);
+    }
+    return class_tmp;
+}
+
+GWARF_result object_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var){  // out_var是外部环境
+    GWARF_result return_value;
+    var_list *login_var;
+    return_value.u = return_def;
+    return_value.return_times = 0;
+    if(father.father->type == CLASS_value){  // is class so that can use "."
+        login_var = father.father->value.class_value->the_var;
+    }
+    else if(father.father->type == OBJECT_value){
+        login_var = father.father->value.object_value->the_var;
+    }
+    switch (the_func->official_func)
+    {
+        case __value__func:{  // 若想实现运算必须要有这个方法
+            return_value.value.type = STRING_value;  // 取得用于计算的数值
+            return_value.value = to_str(*(father.father), out_var);
+            break;
+        }
+    }
+    return_result: return return_value;
+}
+
 class_object *gobject_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list){  // 内置对象继承的类
     // 创建对象[空对象]
     puts("----set class----");
@@ -2345,7 +2394,7 @@ class_object *gobject_login_official(var_list *the_var, GWARF_result (*paser)(fu
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
-    assigment_func("int", class_value, the_var, 0);  // 注册class 的 位置
+    assigment_func("gobject", class_value, the_var, 0);  // 注册class 的 位置
     puts("----stop set class----");
 
     // 注册函数
@@ -2964,4 +3013,4 @@ int len_intx(unsigned int num){  // 16进制
     return count;
 }
 
-// TODO::增加运算方法和(to_bool)，设置func和NULL均为object，设置object无__add___等方法时的操作，实现继承
+// TODO::设置func和NULL均为object，设置object无__add___等方法时的操作
