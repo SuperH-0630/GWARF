@@ -387,6 +387,8 @@ GWARF_result str_official_func(func *the_func, parameter *tmp_s, var_list *the_v
 class_object *bool_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list);
 GWARF_result bool_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var);
 
+bool is_space(GWARF_result *);
+
 if_list *make_base_if();
 if_list *make_if(statement *, statement *);
 if_list *append_elif(if_list *, if_list *);
