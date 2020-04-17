@@ -406,7 +406,6 @@ base_var_
     : base_var_token
     | LI top_exp RI base_var_token
     {
-        printf("$2 = %x\n", $2);
         $4->code.base_var.from = $2;
         $$ = $4;
     }

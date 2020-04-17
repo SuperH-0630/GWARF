@@ -221,7 +221,6 @@ typedef struct GWARF_result{
         code_restarted,
         code_rego,
         code_rewent,
-        code_return,
         name_no_found,
     } u;  // the result type[from where]
     int return_times;  // return用
@@ -312,6 +311,12 @@ typedef enum{
     __sub__func = 5,
     __mul__func = 6,
     __div__func = 7,
+    __eq__func = 8,
+    __more__func = 9,
+    __less__func = 10,
+    __eqmore__func = 11,
+    __eqless__func = 12,
+    __noteq__func = 13,
 } official_func_type;
 
 typedef struct func{
