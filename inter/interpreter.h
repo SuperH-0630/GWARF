@@ -21,6 +21,7 @@ typedef enum{
     FUNC_value,  // 函数
     CLASS_value,  // 对象
     OBJECT_value,  // 实例
+    LIST_value,  // 列表类型
 } GWARF_value_type;
 
 // all value is GWARF_value
@@ -35,6 +36,7 @@ typedef struct GWARF_value{
         struct func *func_value;
         struct class_object *class_value;
         struct the_object *object_value;
+        struct the_list *list_value;
     } value;
 } GWARF_value;
 
@@ -63,7 +65,8 @@ typedef struct statement{
         start=1,  // for base statement
         operation,  // such as + - * /
         base_var,  // return var value by name
-        base_value,  // return an number or number
+        base_value,  // return an GWARF_value
+        base_list,  // return an GWARF_value->LIST_value
         while_cycle,  // while
         for_cycle,
         if_branch,  // if
@@ -82,6 +85,7 @@ typedef struct statement{
         def,  // func
         call,  // func()
         point,  // a.b  注：返回变量同时返回the_var链表[func 用于回调]
+        down,  // a[b]  注：返回变量同时返回the_var链表[func 用于回调]
         return_code,
         set_class,  // class aaa; b = aaa() is ```call```
     } type;  // the statement type
@@ -137,8 +141,17 @@ typedef struct statement{
         } point;
 
         struct{
+            struct statement *base_var;  // a[b] --> a
+            struct statement *child_var;  // a[b] --> b
+        } down;
+
+        struct{
             GWARF_value value;  // return value
         } base_value;
+
+        struct{
+            parameter *value;  // return value
+        } base_list;
 
         struct{
             struct statement *times;  // 层数
@@ -302,6 +315,9 @@ typedef enum{
     __sqrtr__func = 20,
     __subr__func = 21,
     __divr__func = 22,
+    __len__func = 23,
+    __down__func = 24,
+    __set__func = 25,
 } official_func_type;
 
 typedef struct func{
@@ -323,6 +339,12 @@ typedef struct the_object{
     struct var_list *cls;  // 记录class_object的  -- 相当与cls
     struct var_list *the_var;  // 记录class_object的实例  -- 相当与self
 } the_object;
+
+typedef struct the_list  // 列表类型
+{
+    GWARF_value *list_value;  // 列表类型
+    int index;  // the max index
+} the_list;
 
 // 函数声明
 GWARF_result operation_func(statement *, var_list *, var_list *);
@@ -351,6 +373,8 @@ GWARF_value to_int(GWARF_value, var_list *the_var);
 GWARF_value to_double(GWARF_value value, var_list *the_var);
 GWARF_value to_str(GWARF_value value, var_list *the_var);
 GWARF_value to_bool_(GWARF_value value, var_list *the_var);
+GWARF_value to_list(GWARF_value value, var_list *the_var);
+GWARF_value parameter_to_list(parameter *tmp_s, var_list *the_var);
 bool to_bool(GWARF_value);
 
 GWARF_result get__value__(GWARF_value *, var_list *);
@@ -393,7 +417,12 @@ GWARF_result str_official_func(func *the_func, parameter *tmp_s, var_list *the_v
 class_object *bool_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list);
 GWARF_result bool_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var);
 
+// list内置类
+class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list);
+GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var);
+
 bool is_space(GWARF_result *);
+bool is_error(GWARF_result *tmp);
 
 if_list *make_base_if();
 if_list *make_if(statement *, statement *);

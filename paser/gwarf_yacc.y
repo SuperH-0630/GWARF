@@ -327,6 +327,14 @@ element
         code_tmp->code.point.child_var = $3;
         $$ = code_tmp; 
     }
+    | element LI element RI
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = down;
+        code_tmp->code.down.base_var = $1;
+        code_tmp->code.down.child_var = $3;
+        $$ = code_tmp; 
+    }
     | LB top_exp RB
     {
         $$ = $2;
@@ -393,6 +401,23 @@ base_value
         code_tmp->type = call;
         code_tmp->code.call.func = pack_call_name("bool", NULL);
         code_tmp->code.call.parameter_list = pack_value_parameter(tmp_value);
+        $$ = code_tmp;
+    }
+    | LI arguments RI
+    {
+        parameter *tmp;
+        tmp = malloc(sizeof(parameter));  // get an address for base var
+        tmp->next = NULL;
+        statement *statement_tmp = malloc(sizeof(statement));
+        statement_tmp->type = base_list;
+        statement_tmp->code.base_list.value = $2;
+        tmp->u.value = statement_tmp;
+
+        statement *code_tmp =  make_statement();
+        code_tmp->type = call;
+        code_tmp->code.call.func = pack_call_name("list", NULL);
+        code_tmp->code.call.parameter_list = tmp;
+
         $$ = code_tmp;
     }
     | NULL_token

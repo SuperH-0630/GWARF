@@ -19,7 +19,7 @@ int main(){
     statement_base = make_statement_base(global_inter->global_code);
     GWARF_result father;
 
-    login_official(the_var, official_func);  // 注册官方函数
+    login_official(the_var, official_func);  // 注册内置函数
 
     class_object *tmp_object = object_login_official(the_var, object_official_func);  // 注册oobject
     class_object *tmp_gobject = gobject_login_official(the_var, gobject_official_func, tmp_object->the_var);  // 注册goobject
@@ -28,6 +28,7 @@ int main(){
     double_login_official(the_var, double_official_func, tmp_gobject->the_var);  // 注册double
     str_login_official(the_var, str_official_func, tmp_gobject->the_var);  // 注册str
     bool_login_official(the_var, bool_official_func, tmp_gobject->the_var);  // 注册bool
+    list_login_official(the_var, list_official_func, tmp_gobject->the_var);  // 注册list
 
     parser("/home/songzihuan/test.gwf");
     printf("----start run----\n");
