@@ -563,7 +563,7 @@ char *yytext;
 #line 1 "gwarf_lex.l"
 #line 2 "gwarf_lex.l"
     #include<stdio.h>
-    #include"y.tab.h" 
+    #include"y.tab.h"
     int indentation = 0;
     int tmp_indentation = 0;
     int last_token;

@@ -930,8 +930,13 @@ stop_token
 %%
 int yyerror(char const *str)
 {
-    fprintf(stderr, "parser error near [%s] ;\n", yytext, yytext);
-    return 0;
+    printf("[ERROR] %s in [%s];\ncontinue to run? [Y/n(default)]\n", str, yytext);
+    if(getc(stdin) == 'Y'){
+        return 0;
+    }
+    else{
+        exit(1);
+    }
 }
 
 int parser(char *file)

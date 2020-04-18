@@ -232,6 +232,7 @@ typedef struct GWARF_result{
         name_no_found,
     } u;  // the result type[from where]
     int return_times;  // return用
+    char *error_info;  // 输出的错误信息
 } GWARF_result;
 
 // ------------------------- default_var [记录默认变量[层]] 用于default语句
