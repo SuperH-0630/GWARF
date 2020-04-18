@@ -695,7 +695,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
             }
 
             condition = to_bool(tmp_result.value);
-            printf("if condition = %d", condition);
+            printf("if condition = %d\n", condition);
             if(rego || (condition)){  // condition run success or rego(condition won't do) bug rewent can
                 if_restart:
                 puts("----if----");
@@ -1653,6 +1653,7 @@ GWARF_result mul_func(GWARF_result left_result, GWARF_result right_result, var_l
                 for(int i=0;i<strlen(tmp);i += 1){
                     return_value.value.value.string[i] = tmp[strlen(tmp) - i - 1];  // 反转
                 }
+                free(tmp);
             }
         }
         else if((left_result.value.type == STRING_value) && (right_result.value.type == INT_value)){  // all is NUMBER
@@ -1682,6 +1683,7 @@ GWARF_result mul_func(GWARF_result left_result, GWARF_result right_result, var_l
                 for(int i=0;i<strlen(tmp);i += 1){
                     return_value.value.value.string[i] = tmp[strlen(tmp) - i - 1];  // 反转
                 }
+                free(tmp);
             }
             
         }
@@ -2137,7 +2139,7 @@ GWARF_result traverse(statement *the_statement, var_list *the_var, bool new){  /
     return_back: return result;
 }
 
-GWARF_result traverse_global(statement *the_statement, var_list *the_var){  // traverse the statement[not break、broken、and others]
+GWARF_result traverse_global(statement *the_statement, var_list *the_var){  // traverse the statement[not break、broken、and others] but error
     statement *tmp = the_statement;
     GWARF_result result;
     while(1){
@@ -2158,4 +2160,5 @@ inter *get_inter(){
     return tmp;
 }
 
-// TODO::设置func和NULL均为object，设置object无__add___等方法时的操作:: NULL永远只有一个实例, object回调__call__   [traverse]  malloc返回值检查
+// TODO::设置func和NULL均为object，设置object无__add___等方法时的操作:: NULL永远只有一个实例, object回调__call__   malloc返回值检查
+// TODO::错误捕捉

@@ -37,7 +37,9 @@
         "algorithm": "c",
         "initializer_list": "c",
         "valarray": "c",
-        "interpreter.h": "c"
+        "interpreter.h": "c",
+        "cstring": "c",
+        "cstdlib": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

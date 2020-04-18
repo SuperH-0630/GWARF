@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "mem/mem.c"
 #include "paser/y.tab.c"
 #include "inter/branch.c"
 #include "inter/cfunc.c"
