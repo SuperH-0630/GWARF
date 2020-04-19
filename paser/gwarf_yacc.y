@@ -22,11 +22,11 @@
 %token <double_value> NUMBER INT
 %token <string_value> STRING VAR
 %token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE POW LOG SQRT EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI DEFAULT FOR COMMA GLOBAL NONLOCAL INDENTA STOPN STOPF BLOCK FALSE TRUE
-%token NULL_token DEF RETURN CLASS POINT
+%token NULL_token DEF RETURN CLASS POINT COLON
 %type <statement_value> base_value base_var_token base_var_ element second_number first_number zero_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
 %type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token for_exp for_block global_token nonlocal_token block_exp block_block call_number def_block def_exp return_exp return_token
-%type <statement_value> eq_number class_block class_exp
-%type <parameter_list> formal_parameter arguments
+%type <statement_value> eq_number class_block class_exp slice_arguments_token
+%type <parameter_list> formal_parameter arguments slice_arguments
 %type <string_value> base_string
 %type <if_list_base> elif_exp
 %%
@@ -304,6 +304,14 @@ call_number
         code_tmp->code.call.func = $1;
         code_tmp->code.call.parameter_list = $3;
         $$ = code_tmp;
+    }
+    | element LI slice_arguments RI
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = slice;
+        code_tmp->code.slice.base_var = $1;
+        code_tmp->code.slice.value = $3;
+        $$ = code_tmp; 
     }
     ;
 
@@ -801,6 +809,31 @@ arguments
         append_parameter_value($3, $1);
         $$ = $1;
     }
+    ;
+
+slice_arguments
+    : slice_arguments_token
+    {
+        $$ = make_parameter_value($1);
+    }
+    | slice_arguments slice_arguments_token
+    {
+        append_parameter_value($2, $1);
+        $$ = $1;
+    }
+    | slice_arguments top_exp
+    {
+        append_parameter_value($2, $1);
+        $$ = $1;
+    }
+    ;
+
+slice_arguments_token
+    : top_exp COLON
+    {
+        $$ = $1;
+    }
+    ;
 
 block
     : LP command_list RP

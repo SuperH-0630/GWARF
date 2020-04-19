@@ -36,6 +36,7 @@
 <INITIAL>"rewent" {return REWENT;}
 <INITIAL>"for" {return FOR;}
 <INITIAL>"," {return COMMA;}
+<INITIAL>":" {return COLON;}
 <INITIAL>"default" {return DEFAULT;}
 <INITIAL>"global" {return GLOBAL;}
 <INITIAL>"nonlocal" {return NONLOCAL;}

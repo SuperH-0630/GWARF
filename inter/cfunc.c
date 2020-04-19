@@ -79,6 +79,13 @@ GWARF_value to_object(GWARF_value value, var_list *the_var){  // 把GWARF_value�
             func_result.value = tmp->value;
         }
     }
+    else if(value.type == LIST_value){
+        tmp = find_var(the_var, 0, "list");
+        if(tmp != NULL){
+            func_result.value = tmp->value;
+            puts("list");
+        }
+    }
     else{
         return value;
     }
@@ -1141,8 +1148,8 @@ class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func 
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{2,1},{23,1},{24,1},{25,1}};
-    char *name[] = {"__init__", "__len__", "__down__", "__set__"};  //  __len__是获取长度，__down__是获取下值，__set__是设置值，__slice__是切片
+    int a[][2] = {{2,1},{23,1},{24,1},{25,1},{26,1}};
+    char *name[] = {"__init__", "__len__", "__down__", "__set__", "__slice__"};  //  __len__是获取长度，__down__是获取下值，__set__是设置值，__slice__是切片
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
@@ -1180,6 +1187,7 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 return_value.u = statement_end;  // __init__没有return
             }
             else{
+                puts("list.__init__");
                 GWARF_result tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
                 if(tmp_result.u == name_no_found){  // Name Error错误
                     return_value = tmp_result;
@@ -1209,7 +1217,6 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
         }
         case __down__func:{  // return index
             var *tmp = find_var(login_var, 0, "value");
-            int len = (int)(sizeof(tmp->value.value.list_value->list_value) / sizeof(GWARF_value));
             if(tmp != NULL){
                 GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false);
                 if(tmp_result.u == name_no_found){  // Name Error错误
@@ -1223,18 +1230,62 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
                 get_value = get__value__(&base_the_var, the_var);
                 get_value.value = to_int(get_value.value, out_var);
-
+                // puts("NONE");
                 return_value.value = tmp->value.value.list_value->list_value[get_value.value.value.int_value];
             }
             else{
-                return_value.value.type = INT_value;
+                return_value.value.type = NULL_value;
+                return_value.value.value.int_value = 0;
+            }
+            break;
+        }
+        case __slice__func:{  // return index
+            var *tmp = find_var(login_var, 0, "value");
+            int len = (int)(sizeof(tmp->value.value.list_value->list_value) / sizeof(GWARF_value));
+            int start, end;
+            if(tmp != NULL){
+                GWARF_result start_result = traverse(tmp_s->u.value, out_var, false), end_result;
+                if(start_result.u == name_no_found){  // Name Error错误
+                    return_value = start_result;
+                    goto return_result;
+                }
+                else if(is_space(&start_result)){
+                    return_value = start_result;
+                    goto return_result;
+                }
+
+                start = to_int(get__value__(&(start_result.value), the_var).value, out_var).value.int_value;
+                tmp_s = tmp_s->next;
+                if(tmp_s != NULL){
+                    end_result = traverse(tmp_s->u.value, out_var, false);
+                    if(end_result.u == name_no_found){  // Name Error错误
+                        return_value = end_result;
+                        goto return_result;
+                    }
+                    else if(is_space(&end_result)){
+                        return_value = end_result;
+                        goto return_result;
+                    }
+                    end = to_int(get__value__(&(end_result.value), the_var).value, out_var).value.int_value;
+                }
+                else{
+                    end = len;
+                }
+
+                return_value.value.type = LIST_value;
+                return_value.value.value.list_value = malloc(sizeof(the_list));  // 申请list的空间
+                return_value.value.value.list_value->list_value = malloc((size_t)((end - start) * sizeof(GWARF_value)));
+                memcpy(return_value.value.value.list_value->list_value, (tmp->value.value.list_value->list_value + start), (size_t)((end - start) * sizeof(GWARF_value)));
+                return_value.value.value.list_value->index = (end - len) - 1;
+            }
+            else{
+                return_value.value.type = NULL_value;
                 return_value.value.value.int_value = 0;
             }
             break;
         }
         case __set__func:{  // return index
             var *tmp = find_var(login_var, 0, "value");
-            int len = (int)(sizeof(tmp->value.value.list_value->list_value) / sizeof(GWARF_value));
             if(tmp != NULL){
                 GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false);
                 if(tmp_result.u == name_no_found){  // Name Error错误
@@ -1264,13 +1315,15 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 tmp->value.value.list_value->index += 1;
             }
             else{
-                return_value.value.type = INT_value;
+                return_value.value.type = NULL_value;
                 return_value.value.value.int_value = 0;
             }
             break;
         }
         default:
             break;
+    }
+    if(the_func->official_func == __slice__func){
     }
     return_result: return return_value;
 }

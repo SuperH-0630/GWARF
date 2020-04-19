@@ -146,6 +146,43 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
         case base_list:  // get value[所有字面量均为这个表达式]
             return_value.value = parameter_to_list(the_statement->code.base_list.value, the_var);  // code
             break;
+        case slice:{  // get value[所有字面量均为这个表达式]
+            GWARF_result tmp_result = traverse((the_statement->code).slice.base_var, the_var, false), get;  // 把a[1:2:3]的a取出来
+            if(is_error(&tmp_result)){  // Name Error错误
+                return_value = tmp_result;
+                goto the_break_slice;
+            }
+            else if(is_space(&tmp_result)){
+                return_value = tmp_result;
+                goto the_break_slice;
+            }
+
+            GWARF_value base_the_var = tmp_result.value;
+
+            if(base_the_var.type == CLASS_value){  // is class so that can use "."
+                var *tmp = find_var(base_the_var.value.class_value->the_var, 0, "__slice__");
+                if(tmp != NULL){
+                    get.value = tmp->value;
+                    get.father = &base_the_var;  // 设置father
+                    return_value = call_back_core(get, the_var, the_statement->code.slice.value);
+                    goto the_break_slice;
+                }
+            }
+            else if(base_the_var.type == OBJECT_value){
+                var *tmp = find_var(base_the_var.value.object_value->the_var, 0, "__slice__");
+                if(tmp != NULL){
+                    get.value = tmp->value;
+                    get.father = &base_the_var;  // 设置father
+                    return_value = call_back_core(get, the_var, the_statement->code.slice.value);
+                    goto the_break_slice;
+                }
+            }
+
+            the_break_slice: 
+            return_value.value = to_object(return_value.value, the_var);
+            // printf("return_value.value.type = %d\n", return_value.value);
+            break;
+        }
         case base_var:{    // because the var tmp, we should ues a {} to make a block[name space] for the tmp var;
             int from = 0;
             if(the_statement->code.base_var.from == NULL){
@@ -232,19 +269,21 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
 
             return_value.father = malloc(sizeof(return_value.father));  // 记录father的值
             *(return_value.father) = base_the_var;
+
+            the_break: 
             return_value.value = to_object(return_value.value, the_var);
-            the_break: break;
+            break;
         }
         case down:{
             GWARF_result tmp_result = traverse((the_statement->code).down.base_var, the_var, false), get;
             if(is_error(&tmp_result)){  // Name Error错误
                 // puts("STOP:: Name No Found!");
                 return_value = tmp_result;
-                goto the_break;
+                goto the_break_down;
             }
             else if(is_space(&tmp_result)){
                 return_value = tmp_result;
-                goto the_break;
+                goto the_break_down;
             }
 
             GWARF_value base_the_var = tmp_result.value;
@@ -266,25 +305,15 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                     get.value = tmp->value;
                     get.father = &base_the_var;  // 设置father
                     return_value = call_back_core(get, the_var, pack_value_parameter(child_value.value));
+                    puts("DOWN");
                     goto the_break_down;
                 }
             }
-            else{  // 其他类型
-                goto the_break_down;
-            }
 
-            if(is_error(&return_value)){  // Name Error错误
-                // puts("STOP:: Name No Found!");
-                goto the_break_down;
-            }
-            else if(is_space(&return_value)){
-                goto the_break_down;
-            }
-
-            return_value.father = malloc(sizeof(return_value.father));  // 记录father的值
-            *(return_value.father) = base_the_var;
-            return_value.value = to_object(return_value.value, the_var);
-            the_break_down: break;
+            the_break_down: 
+            return_value.value = to_object(return_value.value, the_var);  // call_back_core 返回值是object
+            printf("down = return_value.value.type = %d\n", return_value.value.type);
+            break;
         }
         case def:{
             GWARF_result func_value;
@@ -1087,6 +1116,7 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
     int func_type = the_statement->code.operation.type;
     if((func_type != ASSIGMENT_func) && (func_type != NEGATIVE_func)){  // don't run because I don't need[if it's and func ,it will be run twice]
         left_result = traverse((*the_statement).code.operation.left_exp, the_var, false);
+        printf("left_result.value.type = %d\n",left_result.value.type);
         if(is_error(&left_result)){  // Name Error错误
             // puts("STOP:: Name No Found!");
             return left_result;
@@ -1152,7 +1182,6 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
                 value = assigment_func(left, right_result, login_var, from);
             }
             else if((the_statement->code.operation.left_exp)->type == point){  // 通过point赋值
-                printf("(the_statement->code).point.base_var = %u\n", (the_statement->code.operation.left_exp)->code.point.base_var);
                 GWARF_result tmp_result = traverse((the_statement->code.operation.left_exp)->code.point.base_var, the_var, false);  // 不用取value
                 if(is_error(&tmp_result)){  // Name Error错误
                     // puts("STOP:: Name No Found!");
@@ -1189,6 +1218,44 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
                         }
                     }
                     value = assigment_func(left, right_result, base_the_var.value.object_value->the_var, from);
+                }
+                else{
+                    goto the_else;
+                }
+            }
+            else if((the_statement->code.operation.left_exp)->type == down){  // 通过down赋值
+                GWARF_result tmp_result = traverse((the_statement->code.operation.left_exp)->code.down.base_var, the_var, false), get;  // 不用取value
+                if(is_error(&tmp_result)){  // Name Error错误
+                    // puts("STOP:: Name No Found!");
+                    return tmp_result;
+                }
+                else if(is_space(&tmp_result)){
+                    return tmp_result;
+                }
+                GWARF_value base_the_var = tmp_result.value;  // 不用取value
+                if(base_the_var.type == CLASS_value){  // is class so that can use "."
+                    GWARF_result child_value = traverse((the_statement->code.operation.left_exp)->code.down.child_var, the_var, false);  // 作为参数
+                    var *tmp = find_var(base_the_var.value.class_value->the_var, 0, "__set__");
+                    if(tmp != NULL){
+                        get.value = tmp->value;
+                        get.father = &base_the_var;  // 设置father
+                        parameter *tmp = pack_value_parameter(child_value.value);
+                        tmp->next = pack_value_parameter(right_result.value);
+                        value = call_back_core(get, the_var, tmp);
+                        goto the_else;
+                    }
+                }
+                else if(base_the_var.type == OBJECT_value){
+                    GWARF_result child_value = traverse((the_statement->code.operation.left_exp)->code.down.child_var, the_var, false);  // 作为参数
+                    var *tmp = find_var(base_the_var.value.object_value->the_var, 0, "__set__");
+                    if(tmp != NULL){
+                        get.value = tmp->value;
+                        get.father = &base_the_var;  // 设置father
+                        parameter *tmp = pack_value_parameter(child_value.value);
+                        tmp->next = pack_value_parameter(right_result.value);
+                        value = call_back_core(get, the_var, tmp);
+                        goto the_else;
+                    }
                 }
                 else{
                     goto the_else;
@@ -1502,6 +1569,8 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
 
 // ---------  ADD
 GWARF_result add_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for add and call from read_statement_list
+    puts("come to add");
+    // printf("left_result.value.type = %d\n", left_result.value.type);
     GWARF_result return_value, get;  // the result by call read_statement_list with left and right; value is the result for add
     if(left_result.value.type == OBJECT_value){  // 调用左add方法
         GWARF_result get;
@@ -1513,6 +1582,7 @@ GWARF_result add_func(GWARF_result left_result, GWARF_result right_result, var_l
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
             return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+            printf("return_value.value.type = %d\n", return_value.value.type);
             goto return_back;
         }
         // goto next if
@@ -2271,7 +2341,9 @@ GWARF_result traverse(statement *the_statement, var_list *the_var, bool new){  /
         if(!lock){
             result = result2;
         }
-
+        else{
+            puts("local");
+        }
         tmp = tmp->next;
     }
     if(new){  // need to make new var

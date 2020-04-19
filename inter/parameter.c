@@ -32,7 +32,7 @@ parameter *make_parameter_value(statement *value){
     return tmp;
 }
 
-void append_parameter_value(statement *value, parameter *parameter_base){
+void append_parameter_value(statement *value, parameter *parameter_base){  // add at last
     parameter *tmp = parameter_base;  // iter var
     while(1){
         if (tmp->next == NULL){  // the last
@@ -44,7 +44,7 @@ void append_parameter_value(statement *value, parameter *parameter_base){
     tmp->next = new_tmp;
 }
 
-parameter *add_parameter_value(statement *value, parameter *parameter_base){
+parameter *add_parameter_value(statement *value, parameter *parameter_base){  // add at first
     parameter *new_tmp = make_parameter_value(value);
     new_tmp->next = parameter_base;
     return new_tmp;
@@ -54,7 +54,7 @@ parameter *pack_value_parameter(GWARF_value value){  // 把value封装成参数
     parameter *tmp;
     tmp = malloc(sizeof(parameter));  // get an address for base var
     tmp->next = NULL;
-    statement *statement_tmp = malloc(sizeof(statement));
+    statement *statement_tmp = make_statement();
     statement_tmp->type = base_value;
     statement_tmp->code.base_value.value = value;
     tmp->u.value = statement_tmp;

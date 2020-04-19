@@ -1,7 +1,7 @@
 #ifndef _INTERPRETER_H
 #define _INTERPRETER_H
 
-#define malloc(size) safe_malloc(size)
+// #define malloc(size) safe_malloc(size)
 #define free(p) p=safe_free(p)
 #define realloc(p,size) safe_realloc(p,size)
 #define memcpy(p1,p2,size) safe_memcpy(p1,p2,size)
@@ -13,15 +13,15 @@
 
 // the type of data(GWARF_value)
 typedef enum{
-    NUMBER_value = 1,  // [只允许系统使用]
-    INT_value,  // INT 类型[只允许系统使用]
-    BOOL_value,  // bool : true or false [只允许系统使用]
-    STRING_value,  // char * [只允许系统使用]
-    NULL_value,  // 无值类型
-    FUNC_value,  // 函数
-    CLASS_value,  // 对象
-    OBJECT_value,  // 实例
-    LIST_value,  // 列表类型
+    NUMBER_value = 1,  // [只允许系统使用] [1]
+    INT_value,  // INT 类型[只允许系统使用] [2]
+    BOOL_value,  // bool : true or false [只允许系统使用] [3]
+    STRING_value,  // char * [只允许系统使用] [4]
+    NULL_value,  // 无值类型 [5]
+    FUNC_value,  // 函数 [6]
+    CLASS_value,  // 对象 [7]
+    OBJECT_value,  // 实例 [8]
+    LIST_value,  // 列表类型 [9]
 } GWARF_value_type;
 
 // all value is GWARF_value
@@ -86,6 +86,7 @@ typedef struct statement{
         call,  // func()
         point,  // a.b  注：返回变量同时返回the_var链表[func 用于回调]
         down,  // a[b]  注：返回变量同时返回the_var链表[func 用于回调]
+        slice,
         return_code,
         set_class,  // class aaa; b = aaa() is ```call```
     } type;  // the statement type
@@ -150,8 +151,13 @@ typedef struct statement{
         } base_value;
 
         struct{
-            parameter *value;  // return value
+            parameter *value;  // [1,2,3,4] -> to_list
         } base_list;
+
+        struct{
+            struct statement *base_var;  // a[1:2:3] -> a
+            parameter *value;  // a[1:2:3] -> 1 2 3
+        } slice;
 
         struct{
             struct statement *times;  // 层数
@@ -318,6 +324,7 @@ typedef enum{
     __len__func = 23,
     __down__func = 24,
     __set__func = 25,
+    __slice__func = 26,
 } official_func_type;
 
 typedef struct func{
