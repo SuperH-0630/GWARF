@@ -756,10 +756,115 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
         case throw_e:
             return_value = raise_func(the_statement, the_var, false);
             break;
+        case import_class:  // import xxx as xxx 语句
+            return_value = import_func(the_statement, the_var);
+            break;
+        case include_import:  // import xxx as xxx 语句
+            return_value = include_func(the_statement, the_var);
+            break;
         default:
             puts("default");
             break;
     }
+    return return_value;
+}
+
+// -----------------include func
+GWARF_result include_func(statement *the_statement, var_list *the_var){
+    GWARF_result return_value;
+    statement *file_statement = the_statement->code.include_import.file;
+
+    GWARF_value file = to_str(traverse(file_statement, the_var, false).value, the_var);
+
+    // TODO:: 使用链表来存储
+    inter *old_global = global_inter;  // 保存旧迭代器
+    statement_list *old_statement_base = statement_base;  // 保存statement_base
+
+    global_inter = get_inter();  // 拿全局解释器[并声明全局变量]
+    free(global_inter->global_var);  // 不需要新的the_var
+    global_inter->global_var = the_var->var_base;
+    statement_base = make_statement_base(global_inter->global_code);
+    
+    parser(file.value.string);
+    printf("----start run----\n");
+    traverse_global(global_inter->global_code, the_var);
+    printf("code end...\n");
+
+    global_inter = old_global;  // 变回旧迭代器
+    statement_base = old_statement_base;  // 变回statement_base
+
+    return_value.u = statement_end;
+    return_value.value.type = NULL_value;
+    return_value.value.value.int_value = 0;
+    return return_value;
+}
+
+// -----------------import func
+GWARF_result import_func(statement *the_statement, var_list *the_var){
+    GWARF_result return_value;
+    statement *file_statement = the_statement->code.import_class.file;
+    
+    char *name = the_statement->code.import_class.name;
+    GWARF_value file = to_str(traverse(file_statement, the_var, false).value, the_var);
+
+    // TODO:: 使用链表来存储
+    inter *old_global = global_inter;  // 保存旧迭代器
+    statement_list *old_statement_base = statement_base;  // 保存statement_base
+
+    global_inter = get_inter();  // 拿全局解释器[并声明全局变量]
+    var_list *new_the_var = make_var_base(global_inter->global_var);
+    statement_base = make_statement_base(global_inter->global_code);
+    
+    login(new_the_var);
+    
+    parser(file.value.string);
+    printf("----start run----\n");
+    traverse_global(global_inter->global_code, new_the_var);
+    printf("code end...\n");
+
+    global_inter = old_global;  // 保存旧迭代器
+    statement_base = old_statement_base;  // 保存statement_base
+
+    GWARF_result import_result;
+    import_result.value.type = CLASS_value;
+    
+    class_object *class_tmp = malloc(sizeof(class_object));
+    class_tmp->the_var = new_the_var;  // make class var list
+    class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
+
+    int from;
+    if(the_statement->code.import_class.from == NULL){
+        from = 0;
+    }
+    else{
+        GWARF_result tmp_result, tmp_object = traverse(the_statement->code.import_class.from, the_var, false);
+        if(is_error(&tmp_object)){  // Name Error错误
+            // puts("STOP:: Name No Found!");
+            from = 0;
+        }
+        else if(is_space(&tmp_object)){
+            from = 0;
+        }
+        else{
+            tmp_result = get__value__(&(tmp_object.value), the_var);  // 从object中提取value
+            if(tmp_result.value.type == INT_value){
+                from = tmp_result.value.value.int_value;
+            }
+            else if(tmp_result.value.type == NUMBER_value){
+                from = (int)tmp_result.value.value.double_value;
+            }
+            else{
+                from = 0;
+            }
+        }
+    }
+
+    import_result.value.value.class_value = class_tmp;
+    assigment_func(name, import_result, the_var, from);
+
+    return_value.u = statement_end;
+    return_value.value.type = NULL_value;
+    return_value.value.value.int_value = 0;
     return return_value;
 }
 

@@ -23,11 +23,11 @@
 %token <string_value> STRING VAR
 
 %token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE POW LOG SQRT EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI DEFAULT FOR COMMA GLOBAL NONLOCAL INDENTA STOPN STOPF BLOCK FALSE TRUE
-%token NULL_token DEF RETURN CLASS POINT COLON TRY EXCEPT AS RAISE THROW
+%token NULL_token DEF RETURN CLASS POINT COLON TRY EXCEPT AS RAISE THROW IMPORT INCLUDE
 
 %type <statement_value> base_value base_var_token base_var_ element second_number first_number zero_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
 %type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token for_exp for_block global_token nonlocal_token block_exp block_block call_number def_block def_exp return_exp return_token
-%type <statement_value> eq_number class_block class_exp slice_arguments_token try_block try_exp try_token raise_exp
+%type <statement_value> eq_number class_block class_exp slice_arguments_token try_block try_exp try_token raise_exp import_exp include_exp
 
 %type <parameter_list> formal_parameter arguments slice_arguments
 
@@ -142,6 +142,14 @@ command
         $$ = $1;
     }
     | raise_exp stop_token
+    {
+        $$ = $1;
+    }
+    | import_exp stop_token
+    {
+        $$ = $1;
+    }
+    | include_exp stop_token
     {
         $$ = $1;
     }
@@ -686,6 +694,36 @@ for_exp
         for_tmp->code.for_cycle.done = make_statement();
         statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
         $$ = for_tmp;
+    }
+    ;
+
+include_exp
+    : INCLUDE top_exp
+    {
+        statement *import_tmp =  make_statement();
+        import_tmp->type = include_import;
+        import_tmp->code.include_import.file = $2;
+        $$ = import_tmp;
+    }
+    ;
+
+import_exp
+    : IMPORT top_exp AS base_var_
+    {
+        statement *import_tmp =  make_statement();
+        import_tmp->type = import_class;
+        import_tmp->code.import_class.file = $2;
+
+        import_tmp->code.import_class.name = malloc(sizeof($4->code.base_var.var_name));
+        char *name_tmp = import_tmp->code.import_class.name;
+        strcpy(name_tmp, $4->code.base_var.var_name);
+
+        import_tmp->code.import_class.from = $4->code.base_var.from;
+
+        free($4->code.base_var.var_name);  // 实际上会内存泄露[from没有被释放]
+        free($4);
+
+        $$ = import_tmp;
     }
     ;
 

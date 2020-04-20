@@ -42,6 +42,9 @@
 <INITIAL>"nonlocal" {return NONLOCAL;}
 <INITIAL>"block" {return BLOCK;}
 
+<INITIAL>"import" {return IMPORT;}
+<INITIAL>"include" {return INCLUDE;}
+
 <INITIAL>"(" {return LB;}
 <INITIAL>")" {return RB;}
 <INITIAL>[\n]*\{[\n]* {return LP;}

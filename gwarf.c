@@ -17,8 +17,17 @@ int main(){
     global_inter = get_inter();  // 拿全局解释器[并声明全局变量]
     var_list *the_var = make_var_base(global_inter->global_var);
     statement_base = make_statement_base(global_inter->global_code);
-    GWARF_result father;
+    
+    login(the_var);
 
+    parser("/home/songzihuan/test.gwf");
+    printf("----start run----\n");
+    traverse_global(global_inter->global_code, the_var);
+    printf("code end...\n");
+    return 0;
+}
+
+void login(var_list *the_var){
     login_official(the_var, official_func);  // 注册内置函数
 
     class_object *tmp_object = object_login_official(the_var, object_official_func);  // 注册oobject
@@ -34,10 +43,4 @@ int main(){
     class_object *tmp_BaseException = BaseException_login_official(the_var, BaseException_official_func, tmp_object->the_var);  // 注册goobject
     class_object *tmp_Exception = Exception_login_official(the_var, tmp_BaseException->the_var);  // 注册goobject
     NameException_login_official(the_var, tmp_Exception->the_var);  // 注册goobject
-
-    parser("/home/songzihuan/test.gwf");
-    printf("----start run----\n");
-    traverse_global(global_inter->global_code, the_var);
-    printf("code end...\n");
-    return 0;
 }

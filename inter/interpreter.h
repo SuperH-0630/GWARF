@@ -92,6 +92,8 @@ typedef struct statement{
         try_code,  // try to do something except to do something
         raise_e,  // raise exception
         throw_e,  // throw the object class func or NULL
+        import_class,   // import file
+        include_import,  // include file
     } type;  // the statement type
 
     union
@@ -251,6 +253,18 @@ typedef struct statement{
             struct statement *done;  // done to get exception object
         } throw_e;
 
+        struct
+        {
+            struct statement *file;  // get address for file
+            char *name;  // as name
+            struct statement *from;  // from where
+        } import_class;
+
+        struct
+        {
+            struct statement *file;  // get address for file
+        } include_import;
+
     } code;
     struct statement *next;
 } statement;
@@ -386,6 +400,8 @@ GWARF_result call_back_core(GWARF_result, var_list *, parameter *);
 GWARF_result block_func(statement *, var_list *);
 GWARF_result try_func(statement *, var_list *);
 GWARF_result raise_func(statement *, var_list *, bool);
+GWARF_result import_func(statement *, var_list *);
+GWARF_result include_func(statement *, var_list *);
 
 GWARF_result add_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result sub_func(GWARF_result, GWARF_result, var_list *);
@@ -514,6 +530,7 @@ GWARF_result traverse(statement *, var_list *, bool);
 GWARF_result traverse_global(statement *, var_list *);
 
 inter *get_inter();
+void login(var_list *the_var);
 
 inter *global_inter;
 statement_list *statement_base;
