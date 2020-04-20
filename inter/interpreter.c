@@ -14,7 +14,10 @@ double sqrt_(double base, double num){  // 定义根号sqrt
 
 bool is_space(GWARF_result *tmp){  // 使用指针是不想复制数据
     if(tmp->u == cycle_break || tmp->u == code_broken || tmp->u == cycle_continue || tmp->u == code_continued || 
-            tmp->u == cycle_restart || tmp->u == code_restarted || tmp->u == return_def || tmp->u == code_rego || tmp->u == code_rewent){
+            tmp->u == cycle_restart || tmp->u == code_restarted || tmp->u == code_rego || tmp->u == code_rewent){
+        return true;
+    }
+    if(tmp->u == return_def && tmp->return_times != 0){  // return def
         return true;
     }
     return false;
@@ -320,6 +323,12 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             func_tmp->done = the_statement->code.def.done;
             func_tmp->parameter_list = the_statement->code.def.parameter_list;
             func_tmp->the_var = copy_var_list(the_var);
+            if(find_var(func_tmp->the_var, 0,"int") == NULL){
+                puts("NOT FOUND");
+            }
+            else{
+                puts("FOUND");
+            }
             func_tmp->type = customize;  // func by user
             if(login_var != the_var){  // 定义为类方法
                 func_tmp->is_class = 1;
@@ -331,7 +340,34 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             func_value.value.type = FUNC_value;
             func_value.value.value.func_value = func_tmp;
 
-            assigment_func(the_statement->code.def.name, func_value, login_var, 0);  // 注册函数到指定的位置
+            int from;
+            if(the_statement->code.def.from == NULL){
+                from = 0;
+            }
+            else{
+                GWARF_result tmp_result, tmp_object = traverse(the_statement->code.def.from, the_var, false);
+                if(is_error(&tmp_object)){  // Name Error错误
+                    // puts("STOP:: Name No Found!");
+                    from = 0;
+                }
+                else if(is_space(&tmp_object)){
+                    from = 0;
+                }
+                else{
+                    tmp_result = get__value__(&(tmp_object.value), the_var);  // 从object中提取value
+                    if(tmp_result.value.type == INT_value){
+                        from = tmp_result.value.value.int_value;
+                    }
+                    else if(tmp_result.value.type == NUMBER_value){
+                        from = (int)tmp_result.value.value.double_value;
+                    }
+                    else{
+                        from = 0;
+                    }
+                }
+            }
+            printf("[tag 1]def address = %x\n", login_var);
+            assigment_func(the_statement->code.def.name, func_value, login_var, from);  // 注册函数到指定的位置
             // 无返回值
             break;
         }
@@ -394,7 +430,34 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 tmp = tmp->next;
             }
 
-            assigment_func(the_statement->code.set_class.name, class_value, login_var, 0);  // 注册class 的 位置
+            int from;
+            if(the_statement->code.set_class.from == NULL){
+                from = 0;
+            }
+            else{
+                GWARF_result tmp_result, tmp_object = traverse(the_statement->code.set_class.from, the_var, false);
+                if(is_error(&tmp_object)){  // Name Error错误
+                    // puts("STOP:: Name No Found!");
+                    from = 0;
+                }
+                else if(is_space(&tmp_object)){
+                    from = 0;
+                }
+                else{
+                    tmp_result = get__value__(&(tmp_object.value), the_var);  // 从object中提取value
+                    if(tmp_result.value.type == INT_value){
+                        from = tmp_result.value.value.int_value;
+                    }
+                    else if(tmp_result.value.type == NUMBER_value){
+                        from = (int)tmp_result.value.value.double_value;
+                    }
+                    else{
+                        from = 0;
+                    }
+                }
+            }
+
+            assigment_func(the_statement->code.set_class.name, class_value, login_var, from);  // 注册class 的 位置
             puts("----stop set class----");
             // 无返回值
             break;
@@ -1245,10 +1308,9 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
     }
     right_result = traverse((*the_statement).code.operation.right_exp, the_var, false);
     if(is_error(&right_result)){  // Name Error错误
-        // puts("STOP:: Name No Found!");
         return right_result;
     }
-    else if(is_space(&right_result)){
+    else if(right_result.u != return_def && is_space(&right_result)){
         return right_result;
     }
 
@@ -1297,6 +1359,7 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
                     }
                 }
 
+                printf("[tag 3]name = %s, address = %x, from = %d\n", left, login_var, from);
                 value = assigment_func(left, right_result, login_var, from);
             }
             else if((the_statement->code.operation.left_exp)->type == point){  // 通过point赋值
@@ -2444,7 +2507,10 @@ GWARF_result traverse(statement *the_statement, var_list *the_var, bool new){  /
             break;
         }
         // TODO::rewent语句得优化一下 设置result2.is_rewent值
-        if(result2.u == code_rewent){
+        if(result2.u == return_def && result2.return_times != 0){  // return def
+            result2.return_times -= 1;
+        }
+        else if(result2.u == code_rewent){
             lock = true;  // keep the result is rewent for return
             result = result2;
         }
@@ -2491,7 +2557,3 @@ inter *get_inter(){
     tmp->global_code = make_statement();
     return tmp;
 }
-
-// TODO::设置func和NULL均为object，设置object无__add___等方法时的操作:: NULL永远只有一个实例, object回调__call__ malloc返回值检查
-// TODO::错误捕捉
-// TODO::使用Var的地方都允许使用层数

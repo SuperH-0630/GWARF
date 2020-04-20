@@ -231,14 +231,14 @@ var_list *copy_var_list(var_list *var_list_base){  // 复制一条var链到另�
     memcpy(start, var_list_base, sizeof(var_list_base));  // 复制base节点
     tmp = start;  // 记录base节点
     while(1){  // 复制var_list链
-        if((start == NULL) || (start->next == NULL)){
+        if(var_list_base == NULL){  // 已经匹配到了最后一个
             break;
         }
-        puts("F1");
-        var_list *next_tmp = malloc(sizeof(start->next));
-        memcpy(next_tmp, start->next, sizeof(start->next));  // 复制到新的地方
+        var_list *next_tmp = malloc(sizeof(var_list_base));
+        memcpy(next_tmp, var_list_base, sizeof(var_list_base));  // 复制到新的地方
         start->next = next_tmp;  // 应用新的地方
         start = start->next;
+        var_list_base = var_list_base->next;
     }
     return tmp;
 }

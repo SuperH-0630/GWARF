@@ -775,6 +775,7 @@ class_exp
         statement *class_tmp =  make_statement();
         class_tmp->type = set_class;
 
+        class_tmp->code.set_class.from = $2->code.base_var.from;
         class_tmp->code.set_class.name = malloc(sizeof($2->code.base_var.var_name));
         char *name_tmp = class_tmp->code.set_class.name;
         strcpy(name_tmp, $2->code.base_var.var_name);
@@ -796,6 +797,7 @@ class_exp
         class_tmp->code.set_class.name = malloc(sizeof($2->code.base_var.var_name));
         char *name_tmp = class_tmp->code.set_class.name;
         strcpy(name_tmp, $2->code.base_var.var_name);
+        class_tmp->code.set_class.from = $2->code.base_var.from;
 
         class_tmp->code.set_class.done = make_statement();
         class_tmp->code.set_class.father_list = $4;  // set father
@@ -825,11 +827,12 @@ def_exp
         char *name_tmp = def_tmp->code.def.name;
         strcpy(name_tmp, $2->code.base_var.var_name);
 
+        def_tmp->code.def.from = $2->code.base_var.from;
         def_tmp->code.def.parameter_list = NULL;
         def_tmp->code.def.done = make_statement();
         statement_base = append_statement_list(def_tmp->code.def.done, statement_base);  // new statement_base (FILO)
 
-        free($2->code.base_var.var_name);
+        free($2->code.base_var.var_name);  // 实际上会内存泄露[from没有被释放]
         free($2);
         $$ = def_tmp;
     }
@@ -842,6 +845,7 @@ def_exp
         char *name_tmp = def_tmp->code.def.name;
         strcpy(name_tmp, $2->code.base_var.var_name);
 
+        def_tmp->code.def.from = $2->code.base_var.from;
         def_tmp->code.def.parameter_list = $4;
         def_tmp->code.def.done = make_statement();
         statement_base = append_statement_list(def_tmp->code.def.done, statement_base);  // new statement_base (FILO)

@@ -213,6 +213,7 @@ typedef struct statement{
             char *name;
             parameter *parameter_list;  // def parameter
             struct statement *done;  // def to do
+            struct statement *from;  // from where
         } def;
 
         struct{
@@ -229,6 +230,7 @@ typedef struct statement{
             char *name;  // class name
             struct statement *done;  // class to do
             parameter *father_list;  // 继承
+            struct statement *from;  // from where [double->int]
         } set_class;
 
         struct
