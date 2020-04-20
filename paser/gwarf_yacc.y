@@ -21,13 +21,18 @@
 }
 %token <double_value> NUMBER INT
 %token <string_value> STRING VAR
+
 %token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE POW LOG SQRT EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI DEFAULT FOR COMMA GLOBAL NONLOCAL INDENTA STOPN STOPF BLOCK FALSE TRUE
-%token NULL_token DEF RETURN CLASS POINT COLON
+%token NULL_token DEF RETURN CLASS POINT COLON TRY EXCEPT AS RAISE THROW
+
 %type <statement_value> base_value base_var_token base_var_ element second_number first_number zero_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
 %type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token for_exp for_block global_token nonlocal_token block_exp block_block call_number def_block def_exp return_exp return_token
-%type <statement_value> eq_number class_block class_exp slice_arguments_token
+%type <statement_value> eq_number class_block class_exp slice_arguments_token try_block try_exp try_token raise_exp
+
 %type <parameter_list> formal_parameter arguments slice_arguments
+
 %type <string_value> base_string
+
 %type <if_list_base> elif_exp
 %%
 command_block
@@ -129,6 +134,14 @@ command
         $$ = $1;
     }
     | class_block stop_token
+    {
+        $$ = $1;
+    }
+    | try_block stop_token
+    {
+        $$ = $1;
+    }
+    | raise_exp stop_token
     {
         $$ = $1;
     }
@@ -676,10 +689,63 @@ for_exp
     }
     ;
 
+raise_exp
+    : RAISE top_exp top_exp
+    {
+        statement *raise_tmp =  make_statement();
+        raise_tmp->type = raise_e;
+        raise_tmp->code.raise_e.done = $2;
+        raise_tmp->code.raise_e.info = $3;
+        $$ = raise_tmp;
+    }
+    | THROW top_exp
+    {
+        statement *raise_tmp =  make_statement();
+        raise_tmp->type = throw_e;
+        raise_tmp->code.throw_e.done = $2;
+        $$ = raise_tmp;
+    }
+    ;
+
+try_block
+    : try_exp block
+    {
+        statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
+        $$ = $1;
+    }
+    ;
+
+try_exp
+    : try_token block EXCEPT AS base_var_
+    {
+        statement_base = free_statement_list(statement_base);  // out statement_base (FILO)
+
+        $1->code.try_code.name = malloc(sizeof($5->code.base_var.var_name));
+        char *name_tmp = $1->code.try_code.name;
+        strcpy(name_tmp, $5->code.base_var.var_name);        
+
+        $1->code.try_code.except = make_statement();
+        statement_base = append_statement_list($1->code.try_code.except, statement_base);  // new statement_base (FILO)
+        $$ = $1;
+    }
+    ;
+
+try_token
+    : TRY
+    {
+        statement *try_tmp =  make_statement();
+        try_tmp->type = try_code;
+        try_tmp->code.try_code.try = make_statement();
+        statement_base = append_statement_list(try_tmp->code.try_code.try, statement_base);  // new statement_base (FILO)
+        $$ = try_tmp;
+    }
+    ;
+
 while_block
     : while_exp block
     {
         statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
+        $$ = $1;
     }
     ;
 

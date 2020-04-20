@@ -70,6 +70,11 @@
 <INITIAL>' {BEGIN STRING_TEXT;}
 <INITIAL>\" {BEGIN STRING_TEXT;}
 
+<INITIAL>"try" {return TRY;}
+<INITIAL>[\n]*except {return EXCEPT;}
+<INITIAL>"as" {return AS;}
+<INITIAL>"raise" {return RAISE;}
+<INITIAL>"throw" {return THROW;}
 <INITIAL>"true" {return TRUE;}
 <INITIAL>"false" {return FALSE;}
 <INITIAL>"True" {return TRUE;}

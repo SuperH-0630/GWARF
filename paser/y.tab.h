@@ -101,7 +101,12 @@ extern int yydebug;
     RETURN = 307,
     CLASS = 308,
     POINT = 309,
-    COLON = 310
+    COLON = 310,
+    TRY = 311,
+    EXCEPT = 312,
+    AS = 313,
+    RAISE = 314,
+    THROW = 315
   };
 #endif
 /* Tokens.  */
@@ -158,6 +163,11 @@ extern int yydebug;
 #define CLASS 308
 #define POINT 309
 #define COLON 310
+#define TRY 311
+#define EXCEPT 312
+#define AS 313
+#define RAISE 314
+#define THROW 315
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -172,7 +182,7 @@ union YYSTYPE
     struct if_list *if_list_base;
     struct parameter *parameter_list;
 
-#line 176 "y.tab.h"
+#line 186 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

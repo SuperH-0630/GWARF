@@ -21,7 +21,7 @@ bool is_space(GWARF_result *tmp){  // 使用指针是不想复制数据
 }
 
 bool is_error(GWARF_result *tmp){  // 判断是否为error
-    if(tmp->u == name_no_found){
+    if(tmp->u == error){
         return true;
     }
     return false;
@@ -211,10 +211,10 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 }
             }
             var *tmp = find_var(the_var, from, (the_statement->code).base_var.var_name);
-            if(tmp == NULL){  // 唯一会输出name_no_found的位置
-                return_value.u = name_no_found;  // nameerror
-                return_value.error_info = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
-                sprintf(return_value.error_info, "name not found [%s]\n", (the_statement->code).base_var.var_name);  // 记录错误信息
+            if(tmp == NULL){  // 输出name error[共两处会输出]
+                char *tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
+                sprintf(tmp, "name not found [%s]\n", the_statement->code.base_var.var_name);
+                return_value = to_error(tmp, "NameException", the_var);
             }
             else
             {
@@ -305,14 +305,12 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                     get.value = tmp->value;
                     get.father = &base_the_var;  // 设置father
                     return_value = call_back_core(get, the_var, pack_value_parameter(child_value.value));
-                    puts("DOWN");
                     goto the_break_down;
                 }
             }
 
             the_break_down: 
             return_value.value = to_object(return_value.value, the_var);  // call_back_core 返回值是object
-            printf("down = return_value.value.type = %d\n", return_value.value.type);
             break;
         }
         case def:{
@@ -686,6 +684,15 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             return_value = block_func(the_statement, the_var);
             puts("----stop block code----");
             break;
+        case try_code:
+            return_value = try_func(the_statement, the_var);
+            break;
+        case raise_e:
+            return_value = raise_func(the_statement, the_var, true);
+            break;
+        case throw_e:
+            return_value = raise_func(the_statement, the_var, false);
+            break;
         default:
             puts("default");
             break;
@@ -970,10 +977,122 @@ GWARF_result for_func(statement *the_statement, var_list *the_var){  // read the
     return value;
 }
 
+// -----------------raise func
+GWARF_result raise_func(statement *the_statement, var_list *the_var, bool not_class){  // read the statement list with case to run by func
+    GWARF_result error_value;
+    GWARF_value info;
+
+    if(not_class){  // raise
+        error_value = traverse(the_statement->code.raise_e.done, the_var, false);
+        info = to_str(traverse(the_statement->code.raise_e.info, the_var, false).value, the_var);
+    }
+    else{  // raise
+        GWARF_value tmp;
+        tmp.type = STRING_value;
+        tmp.value.string = "throw by user";
+        error_value = traverse(the_statement->code.throw_e.done, the_var, false);
+        info = to_str(tmp, the_var);
+    }
+
+    // restart操作[和continue效果相同]
+
+    if(is_error(&error_value)){  // 遇到错误->执行except语句[不需要再检查break...]
+        goto return_value;  // raise执行时发生错误
+    }
+    if(is_space(&error_value)){
+        goto return_value;
+    }
+
+    error_value.u = error;
+    error_value.error_info = info.value.string;
+
+    if(error_value.value.type == OBJECT_value){
+        ;  // 本身就是object
+    }
+    else if(error_value.value.type == CLASS_value && not_class){  // class类型
+        error_value.value = call_back_core(error_value, the_var, pack_value_parameter(info)).value;
+    }
+    else{
+        error_value.value = to_object(error_value.value, the_var);  // 直接返回
+    }
+
+    return_value: return error_value;
+}
+
+// -----------------try func
+GWARF_result try_func(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func
+    GWARF_result value;
+
+    var *tmp = make_var();  // base_var
+    the_var = append_var_list(tmp, the_var);
+
+    again: 
+    puts("----try----");
+    value = traverse(the_statement->code.try_code.try, the_var, false);
+    puts("----stop try----");
+
+    // restart操作[和continue效果相同]
+
+    if(is_error(&value)){  // 遇到错误->执行except语句[不需要再检查break...]
+        assigment_func(the_statement->code.try_code.name, value, the_var, 0);
+        puts("----except----");
+        value = traverse(the_statement->code.try_code.except, the_var, false);
+        puts("----stop except----");
+    }
+
+    if(value.u == code_restarted){
+        if(value.value.type != INT_value){
+            value.value.type = INT_value;
+            value.value.value.int_value = 0;
+        }
+        if(value.value.value.int_value <= 0){
+            puts("----restarted real----");
+            value.u = statement_end;
+            goto again;
+        }
+        else{
+            value.value.value.int_value -= 1;
+        }
+    }
+    
+    // continued操作
+    if(value.u == code_continued){
+        if(value.value.type != INT_value){
+            value.value.type = INT_value;
+            value.value.value.int_value = 0;
+        }
+        if(value.value.value.int_value <= 0){
+            puts("----block continue real----");
+            value.u = statement_end;
+            goto again;
+        }
+        else{
+            value.value.value.int_value -= 1;
+        }
+    }
+
+    // broken操作
+    if(value.u == code_broken){
+        if(value.value.type != INT_value){
+            value.value.type = INT_value;
+            value.value.value.int_value = 0;
+        }
+        if(value.value.value.int_value <= 0){
+            value.u = statement_end;  // 正常设置[正常语句结束]
+        }
+        else{
+            value.value.value.int_value -= 1;
+        }
+    }
+    the_var = free_var_list(the_var);  // free the new var
+    return value;
+}
+
+
 // -----------------block func
 
 GWARF_result block_func(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func
-    GWARF_result value, condition;
+    GWARF_result value;
     again: 
     puts("----block----");
     value = traverse(the_statement->code.code_block.done, the_var, true);
@@ -1116,7 +1235,6 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
     int func_type = the_statement->code.operation.type;
     if((func_type != ASSIGMENT_func) && (func_type != NEGATIVE_func)){  // don't run because I don't need[if it's and func ,it will be run twice]
         left_result = traverse((*the_statement).code.operation.left_exp, the_var, false);
-        printf("left_result.value.type = %d\n",left_result.value.type);
         if(is_error(&left_result)){  // Name Error错误
             // puts("STOP:: Name No Found!");
             return left_result;
@@ -1569,8 +1687,6 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
 
 // ---------  ADD
 GWARF_result add_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for add and call from read_statement_list
-    puts("come to add");
-    // printf("left_result.value.type = %d\n", left_result.value.type);
     GWARF_result return_value, get;  // the result by call read_statement_list with left and right; value is the result for add
     if(left_result.value.type == OBJECT_value){  // 调用左add方法
         GWARF_result get;
@@ -1582,7 +1698,6 @@ GWARF_result add_func(GWARF_result left_result, GWARF_result right_result, var_l
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
             return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
-            printf("return_value.value.type = %d\n", return_value.value.type);
             goto return_back;
         }
         // goto next if
@@ -2323,7 +2438,7 @@ GWARF_result traverse(statement *the_statement, var_list *the_var, bool new){  /
         result2 = read_statement_list(tmp, the_var);
 
         // 错误停止
-        if(result2.u == name_no_found){  // Name Error错误
+        if(result2.u == error){  // Name Error错误
             // puts("STOP:: Name No Found!");
             result = result2;
             break;
@@ -2360,7 +2475,7 @@ GWARF_result traverse_global(statement *the_statement, var_list *the_var){  // t
             break;  // off
         }
         result = read_statement_list(tmp, the_var);
-        if(result.u == name_no_found){  // Name Error错误
+        if(result.u == error){  // Name Error错误
             printf("%s", result.error_info);
             break;
         }
@@ -2377,5 +2492,6 @@ inter *get_inter(){
     return tmp;
 }
 
-// TODO::设置func和NULL均为object，设置object无__add___等方法时的操作:: NULL永远只有一个实例, object回调__call__   malloc返回值检查
+// TODO::设置func和NULL均为object，设置object无__add___等方法时的操作:: NULL永远只有一个实例, object回调__call__ malloc返回值检查
 // TODO::错误捕捉
+// TODO::使用Var的地方都允许使用层数

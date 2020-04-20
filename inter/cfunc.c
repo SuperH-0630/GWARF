@@ -46,13 +46,12 @@ int len_intx(unsigned int num){  // 16进制
 }
 
 GWARF_value to_object(GWARF_value value, var_list *the_var){  // 把GWARF_value封装成objct
-    GWARF_result return_value;
     if((value.type == CLASS_value) || (value.type == OBJECT_value) || (value.type == FUNC_value) || (value.type == NULL_value)){  // 可以直接返回
         return value;
     }
     GWARF_result func_result;
     func_result.u = statement_end;
-    func_result.value.type = INT_value;
+    func_result.value.type = NULL_value;
     func_result.value.value.int_value = 0;
     var *tmp;
     if(value.type == NUMBER_value){
@@ -83,13 +82,39 @@ GWARF_value to_object(GWARF_value value, var_list *the_var){  // 把GWARF_value�
         tmp = find_var(the_var, 0, "list");
         if(tmp != NULL){
             func_result.value = tmp->value;
-            puts("list");
         }
     }
     else{
         return value;
     }
     return call_back_core(func_result, the_var, pack_value_parameter(value)).value;
+}
+
+
+GWARF_result to_error(char *error_info, char *error_type, var_list *the_var){  // 把GWARF_value封装成error
+    GWARF_result func_result, return_result;
+    GWARF_value tmp_value;
+
+    tmp_value.type = STRING_value;
+    tmp_value.value.string = error_info;
+
+    func_result.u = statement_end;
+
+    return_result.u = error;
+    return_result.error_info = error_info;
+
+    var *tmp = find_var(the_var, 0, error_type);
+
+    if(tmp != NULL){
+        func_result.value = tmp->value;
+        return_result.value = call_back_core(func_result, the_var, pack_value_parameter(tmp_value)).value;
+    }
+    else{
+        printf("NameError * 2\n");
+        return_result.value.type = NULL_value;
+        return_result.value.value.int_value = 0;
+    }
+    return return_result;
 }
 
 
@@ -136,7 +161,7 @@ GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var, 
         }
         while(1){
             GWARF_result tmp = traverse(tmp_s->u.value, out_var, false);
-            if(tmp.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp)){  // Name Error错误
                 return_value = tmp;
                 goto return_result;
             }
@@ -195,9 +220,8 @@ class_object *object_login_official(var_list *the_var, GWARF_result (*paser)(fun
     // 创建对象[空对象]
     puts("----set class----");
     GWARF_result class_value;
-    class_object *class_tmp = malloc(sizeof(class_object));
-    class_tmp->the_var = make_var_base(make_var());  // make class var list
-    class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
+    class_object *class_tmp = make_object(the_var, NULL);
+
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
@@ -238,18 +262,111 @@ GWARF_result object_official_func(func *the_func, parameter *tmp_s, var_list *th
     return_result: return return_value;
 }
 
-class_object *gobject_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list){  // 内置对象继承的类
-    // 创建对象[空对象]
-    puts("----set class----");
-    GWARF_result class_value;
+class_object *make_object(var_list *the_var, var_list *father_var_list){
     class_object *class_tmp = malloc(sizeof(class_object));
 
     class_tmp->the_var = make_var_base(make_var());  // make class var list
     if(father_var_list != NULL){
-        append_by_var_list(class_tmp->the_var, father_var_list);  // 一切类都需要继承object类[包括set class如果tmp_s == NULL则需要继承object]
+        append_by_var_list(class_tmp->the_var, father_var_list);  // int、double、str等内置类需要继承gobject类
     }
 
     class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
+    return class_tmp;
+}
+
+class_object *BaseException_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assigment_func("BaseException", class_value, the_var, 0);  // 注册class 的 位置
+    puts("----stop set class----");
+
+    // 注册函数
+    int a[][2] = {{2,1}};
+    char *name[] = {"__init__"};
+
+    int lenth = sizeof(a)/sizeof(a[0]);
+    for(int i = 0;i < lenth;i+=1){
+        login_official_func(a[i][0], a[i][1], class_tmp->the_var, name[i], paser);
+    }
+    return class_tmp;
+}
+
+GWARF_result BaseException_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var){  // out_var是外部环境
+    GWARF_result return_value;
+    var_list *login_var;
+    return_value.u = return_def;
+    return_value.return_times = 0;
+    if(father.father->type == CLASS_value){  // is class so that can use "."
+        login_var = father.father->value.class_value->the_var;
+    }
+    else if(father.father->type == OBJECT_value){
+        login_var = father.father->value.object_value->the_var;
+    }
+    else{
+        printf("NO login, father type = %d\n", father.father->type);
+    }
+    switch (the_func->official_func)
+    {
+        case __init__func:{  // printf something
+            GWARF_result tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
+            if(is_error(&tmp_result)){  // Name Error错误
+                return_value = tmp_result;
+                goto return_result;
+            }
+            else if(is_space(&tmp_result)){
+                return_value = tmp_result;
+                goto return_result;
+            }
+            tmp.value = to_str(tmp_result.value, out_var);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+            assigment_func("ErrorInfo", tmp, login_var, 0);  // 注册到self -> ErrorInfo
+            return_value.u = statement_end;  // __init__没有return
+            break;
+        }
+        default:
+            break;
+    }
+    return_result: return return_value;
+}
+
+class_object *Exception_login_official(var_list *the_var, var_list *father_var_list){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assigment_func("Exception", class_value, the_var, 0);  // 注册class 的 位置
+    puts("----stop set class----");
+    return class_tmp;
+}
+
+class_object *NameException_login_official(var_list *the_var, var_list *father_var_list){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assigment_func("NameException", class_value, the_var, 0);  // 注册class 的 位置
+    puts("----stop set class----");
+    return class_tmp;
+}
+
+class_object *gobject_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list){  // 内置对象继承的类
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+    
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
@@ -305,7 +422,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __add__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -328,7 +445,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __sub__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -351,7 +468,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __subr__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -374,7 +491,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __mul__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -397,7 +514,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __div__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -420,7 +537,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __divr__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -443,7 +560,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __eq__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -466,7 +583,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __more__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -489,7 +606,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __less__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -512,7 +629,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __eqmore__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -535,7 +652,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __eqless__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -558,7 +675,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __noteq__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -581,7 +698,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __pow__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -604,7 +721,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __log__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -627,7 +744,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __sqrt__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -650,7 +767,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __powr__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -673,7 +790,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __logr__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -696,7 +813,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __sqrtr__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -736,20 +853,11 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
     return_result: return return_value;
 }
 
-// TODO: 设置反向函数, object的__add__等方法都定义为同一个
-
 class_object *int_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list){
     // 创建对象[空对象]
     puts("----set class----");
     GWARF_result class_value;
-    class_object *class_tmp = malloc(sizeof(class_object));
-
-    class_tmp->the_var = make_var_base(make_var());  // make class var list
-    if(father_var_list != NULL){
-        append_by_var_list(class_tmp->the_var, father_var_list);  // int、double、str等内置类需要继承gobject类
-    }
-
-    class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
+    class_object *class_tmp = make_object(the_var, father_var_list);
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
@@ -785,7 +893,7 @@ GWARF_result int_official_func(func *the_func, parameter *tmp_s, var_list *the_v
     {
         case __init__func:{  // printf something
             GWARF_result tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -839,14 +947,8 @@ class_object *double_login_official(var_list *the_var, GWARF_result (*paser)(fun
     // 创建对象[空对象]
     puts("----set class----");
     GWARF_result class_value;
-    class_object *class_tmp = malloc(sizeof(class_object));
+    class_object *class_tmp = make_object(the_var, father_var_list);
 
-    class_tmp->the_var = make_var_base(make_var());  // make class var list
-    if(father_var_list != NULL){
-        append_by_var_list(class_tmp->the_var, father_var_list);  // 一切类都需要继承object类[包括set class如果tmp_s == NULL则需要继承object]
-    }
-
-    class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
@@ -882,7 +984,7 @@ GWARF_result double_official_func(func *the_func, parameter *tmp_s, var_list *th
     {
         case __init__func:{  // printf something
             GWARF_result tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -934,13 +1036,8 @@ class_object *str_login_official(var_list *the_var, GWARF_result (*paser)(func *
     // 创建对象[空对象]
     puts("----set class----");
     GWARF_result class_value;
-    class_object *class_tmp = malloc(sizeof(class_object));
+    class_object *class_tmp = make_object(the_var, father_var_list);
 
-    class_tmp->the_var = make_var_base(make_var());  // make class var list
-    if(father_var_list != NULL){
-        append_by_var_list(class_tmp->the_var, father_var_list);  // 一切类都需要继承object类[包括set class如果tmp_s == NULL则需要继承object]
-    }
-    class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
@@ -976,7 +1073,7 @@ GWARF_result str_official_func(func *the_func, parameter *tmp_s, var_list *the_v
     {
         case __init__func:{  // printf something
             GWARF_result tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -1050,13 +1147,8 @@ class_object *bool_login_official(var_list *the_var, GWARF_result (*paser)(func 
     // 创建对象[空对象]
     puts("----set class----");
     GWARF_result class_value;
-    class_object *class_tmp = malloc(sizeof(class_object));
+    class_object *class_tmp = make_object(the_var, father_var_list);
 
-    class_tmp->the_var = make_var_base(make_var());  // make class var list
-    if(father_var_list != NULL){
-        append_by_var_list(class_tmp->the_var, father_var_list);  // 一切类都需要继承object类[包括set class如果tmp_s == NULL则需要继承object]
-    }
-    class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
@@ -1092,7 +1184,7 @@ GWARF_result bool_official_func(func *the_func, parameter *tmp_s, var_list *the_
     {
         case __init__func:{  // printf something
             GWARF_result tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-            if(tmp_result.u == name_no_found){  // Name Error错误
+            if(is_error(&tmp_result)){  // Name Error错误
                 return_value = tmp_result;
                 goto return_result;
             }
@@ -1134,13 +1226,8 @@ class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func 
     // 创建对象[空对象]
     puts("----set class----");
     GWARF_result class_value;
-    class_object *class_tmp = malloc(sizeof(class_object));
+    class_object *class_tmp = make_object(the_var, father_var_list);
 
-    class_tmp->the_var = make_var_base(make_var());  // make class var list
-    if(father_var_list != NULL){
-        append_by_var_list(class_tmp->the_var, father_var_list);  // 一切类都需要继承object类[包括set class如果tmp_s == NULL则需要继承object]
-    }
-    class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
@@ -1187,9 +1274,8 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 return_value.u = statement_end;  // __init__没有return
             }
             else{
-                puts("list.__init__");
                 GWARF_result tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
-                if(tmp_result.u == name_no_found){  // Name Error错误
+                if(is_error(&tmp_result)){  // Name Error错误
                     return_value = tmp_result;
                     goto return_result;
                 }
@@ -1219,7 +1305,7 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
             var *tmp = find_var(login_var, 0, "value");
             if(tmp != NULL){
                 GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false);
-                if(tmp_result.u == name_no_found){  // Name Error错误
+                if(is_error(&tmp_result)){  // Name Error错误
                     return_value = tmp_result;
                     goto return_result;
                 }
@@ -1245,7 +1331,7 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
             int start, end;
             if(tmp != NULL){
                 GWARF_result start_result = traverse(tmp_s->u.value, out_var, false), end_result;
-                if(start_result.u == name_no_found){  // Name Error错误
+                if(is_error(&start_result)){  // Name Error错误
                     return_value = start_result;
                     goto return_result;
                 }
@@ -1258,7 +1344,7 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 tmp_s = tmp_s->next;
                 if(tmp_s != NULL){
                     end_result = traverse(tmp_s->u.value, out_var, false);
-                    if(end_result.u == name_no_found){  // Name Error错误
+                    if(is_error(&end_result)){  // Name Error错误
                         return_value = end_result;
                         goto return_result;
                     }
@@ -1288,7 +1374,7 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
             var *tmp = find_var(login_var, 0, "value");
             if(tmp != NULL){
                 GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false);
-                if(tmp_result.u == name_no_found){  // Name Error错误
+                if(is_error(&tmp_result)){  // Name Error错误
                     return_value = tmp_result;
                     goto return_result;
                 }
@@ -1302,7 +1388,7 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
 
                 tmp_s = tmp_s->next;
                 GWARF_result new_value = traverse(tmp_s->u.value, out_var, false);
-                if(new_value.u == name_no_found){  // Name Error错误
+                if(is_error(&new_value)){  // Name Error错误
                     return_value = new_value;
                     goto return_result;
                 }
@@ -1379,7 +1465,7 @@ GWARF_value parameter_to_list(parameter *tmp_s, var_list *the_var){  // 把param
 
 GWARF_result get__value__(GWARF_value *base_the_var, var_list *the_var){  // 用于计算的get__value__统一核心
     GWARF_result tmp = run_func(base_the_var, the_var, "__value__");
-    if(tmp.u == name_no_found){
+    if(is_error(&tmp)){
         tmp.u = statement_end;
         tmp.value.type = NULL_value;
         tmp.value.value.int_value = 0;
@@ -1389,7 +1475,7 @@ GWARF_result get__value__(GWARF_value *base_the_var, var_list *the_var){  // 用
 
 GWARF_result get__bool__(GWARF_value *base_the_var, var_list *the_var){  // 用于计算的get__value__统一核心
     GWARF_result tmp = run_func(base_the_var, the_var, "__bool__");
-    if(tmp.u == name_no_found){
+    if(is_error(&tmp)){
         tmp.u = statement_end;
         tmp.value.type = BOOL_value;
         tmp.value.value.bool_value = true;
@@ -1424,7 +1510,9 @@ GWARF_result run_func(GWARF_value *base_the_var, var_list *the_var, char *name){
             base_the_var = &(reight_tmp.value);  // 重复获取__value__[直到类型不是object或class]
         }
         else{
-            reight_tmp.u = name_no_found;
+            char *tmp = malloc((size_t)( 21 + strlen(name)) );
+            sprintf(tmp, "name not found [%s]\n", name);
+            reight_tmp = to_error(tmp, "NameException", the_var);
             goto return_result;
         }
     }

@@ -30,6 +30,11 @@ int main(){
     bool_login_official(the_var, bool_official_func, tmp_gobject->the_var);  // 注册bool
     list_login_official(the_var, list_official_func, tmp_gobject->the_var);  // 注册list
 
+    // 注册错误类型
+    class_object *tmp_BaseException = BaseException_login_official(the_var, BaseException_official_func, tmp_object->the_var);  // 注册goobject
+    class_object *tmp_Exception = Exception_login_official(the_var, tmp_BaseException->the_var);  // 注册goobject
+    NameException_login_official(the_var, tmp_Exception->the_var);  // 注册goobject
+
     parser("/home/songzihuan/test.gwf");
     printf("----start run----\n");
     traverse_global(global_inter->global_code, the_var);

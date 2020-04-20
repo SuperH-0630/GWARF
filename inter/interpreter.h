@@ -1,7 +1,7 @@
 #ifndef _INTERPRETER_H
 #define _INTERPRETER_H
 
-// #define malloc(size) safe_malloc(size)
+#define malloc(size) safe_malloc(size)
 #define free(p) p=safe_free(p)
 #define realloc(p,size) safe_realloc(p,size)
 #define memcpy(p1,p2,size) safe_memcpy(p1,p2,size)
@@ -89,6 +89,9 @@ typedef struct statement{
         slice,
         return_code,
         set_class,  // class aaa; b = aaa() is ```call```
+        try_code,  // try to do something except to do something
+        raise_e,  // raise exception
+        throw_e,  // throw the object class func or NULL
     } type;  // the statement type
 
     union
@@ -228,6 +231,24 @@ typedef struct statement{
             parameter *father_list;  // 继承
         } set_class;
 
+        struct
+        {
+            struct statement *try;
+            struct statement *except;
+            char *name;  // as var
+        } try_code;
+
+        struct
+        {
+            struct statement *done;  // done to get exception object
+            struct statement *info;  // the info
+        } raise_e;
+
+        struct
+        {
+            struct statement *done;  // done to get exception object
+        } throw_e;
+
     } code;
     struct statement *next;
 } statement;
@@ -248,7 +269,7 @@ typedef struct GWARF_result{
         code_restarted,
         code_rego,
         code_rewent,
-        name_no_found,
+        error,
     } u;  // the result type[from where]
     int return_times;  // return用
     char *error_info;  // 输出的错误信息
@@ -361,6 +382,8 @@ GWARF_result for_func(statement *, var_list *);
 GWARF_result call_back(statement *, var_list *);
 GWARF_result call_back_core(GWARF_result, var_list *, parameter *);
 GWARF_result block_func(statement *, var_list *);
+GWARF_result try_func(statement *, var_list *);
+GWARF_result raise_func(statement *, var_list *, bool);
 
 GWARF_result add_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result sub_func(GWARF_result, GWARF_result, var_list *);
@@ -393,6 +416,7 @@ int len_double(double num);
 int len_int(int num);
 int len_intx(unsigned int num);
 GWARF_value to_object(GWARF_value, var_list *);
+class_object *make_object(var_list *the_var, var_list *father_var_list);
 
 void login_official_func(int type, int is_class, var_list *the_var, char *name, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *));
 void login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *));
@@ -427,6 +451,17 @@ GWARF_result bool_official_func(func *the_func, parameter *tmp_s, var_list *the_
 // list内置类
 class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list);
 GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var);
+
+// 错误内置类
+class_object *BaseException_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list);
+GWARF_result BaseException_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var);
+
+class_object *Exception_login_official(var_list *the_var, var_list *father_var_list);
+class_object *NameException_login_official(var_list *the_var, var_list *father_var_list);
+
+// 生成错误
+GWARF_result to_error(char *error_info, char *error_type, var_list *the_var);
+
 
 bool is_space(GWARF_result *);
 bool is_error(GWARF_result *tmp);
