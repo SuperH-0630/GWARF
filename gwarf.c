@@ -44,3 +44,7 @@ void login(var_list *the_var){
     class_object *tmp_Exception = Exception_login_official(the_var, tmp_BaseException->the_var);  // 注册goobject
     NameException_login_official(the_var, tmp_Exception->the_var);  // 注册goobject
 }
+
+// 编译指令：cd "/home/songzihuan/文档/CProject/gwarf/" && gcc gwarf.c -lm -o gwarf && "/home/songzihuan/文档/CProject/gwarf/"gwarf
+// yacc和lex：cd ./paser && yacc -d gwarf_yacc.y && lex gwarf_lex.l
+// 合并编译：cd "/home/songzihuan/文档/CProject/gwarf/" && cd ./paser && yacc -d gwarf_yacc.y && lex gwarf_lex.l && cd .. && gcc gwarf.c -lm -o gwarf && "/home/songzihuan/文档/CProject/gwarf/"gwarf

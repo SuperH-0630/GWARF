@@ -323,12 +323,6 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             func_tmp->done = the_statement->code.def.done;
             func_tmp->parameter_list = the_statement->code.def.parameter_list;
             func_tmp->the_var = copy_var_list(the_var);
-            if(find_var(func_tmp->the_var, 0,"int") == NULL){
-                puts("NOT FOUND");
-            }
-            else{
-                puts("FOUND");
-            }
             func_tmp->type = customize;  // func by user
             if(login_var != the_var){  // 定义为类方法
                 func_tmp->is_class = 1;
@@ -366,7 +360,6 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                     }
                 }
             }
-            printf("[tag 1]def address = %x\n", login_var);
             assigment_func(the_statement->code.def.name, func_value, login_var, from);  // 注册函数到指定的位置
             // 无返回值
             break;
@@ -1464,7 +1457,6 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
                     }
                 }
 
-                printf("[tag 3]name = %s, address = %x, from = %d\n", left, login_var, from);
                 value = assigment_func(left, right_result, login_var, from);
             }
             else if((the_statement->code.operation.left_exp)->type == point){  // 通过point赋值
@@ -1617,7 +1609,6 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
 
         if(func_->type == customize){  // 用户定义的方法
             if(tmp_x == NULL){
-                puts("No tmp_x");
                 goto no_tmp_x;  // 无形参
             }
             GWARF_result father;

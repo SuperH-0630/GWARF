@@ -2,13 +2,12 @@
 ## 语法结构
 ### 保留关键词
 ```
-import 'file'  导入模块
 import 'file' as xxx  导入模块并且明明为xxx
 include 'file' 包含模块，等同于python的 from xxx import *
 
 while  条件循环
 for  循环
-forin  遍历
+for i in xxx  遍历
 
 if  条件分支
 
@@ -16,11 +15,8 @@ block  普通代码块
 
 try  异常捕获
 except  异常捕获
-raise  诱发错误[抛出class时会转换为object, 需要指定ErrorInfo]
+raise  诱发错误[抛出class时会转换为object, 需要指定[ErrorInfo]
 throw  抛出错误
-
-as  引用[强引用]; 异常捕获
-link  引用[弱引用]
 
 break n  跳出n层循环代码快[无视for循环第三表达式]
 broken n  跳出n层代码块[无视for循环第三表达式]

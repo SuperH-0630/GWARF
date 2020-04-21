@@ -1307,11 +1307,11 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false);
                 if(is_error(&tmp_result)){  // Name Error错误
                     return_value = tmp_result;
-                    goto return_result;
+                    goto break_down;
                 }
                 else if(is_space(&tmp_result)){
                     return_value = tmp_result;
-                    goto return_result;
+                    goto break_down;
                 }
                 GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
                 get_value = get__value__(&base_the_var, the_var);
@@ -1323,7 +1323,7 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 return_value.value.type = NULL_value;
                 return_value.value.value.int_value = 0;
             }
-            break;
+            break_down: break;
         }
         case __slice__func:{  // return index
             var *tmp = find_var(login_var, 0, "value");

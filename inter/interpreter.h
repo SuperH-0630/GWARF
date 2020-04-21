@@ -21,7 +21,7 @@ typedef enum{
     FUNC_value,  // 函数 [6]
     CLASS_value,  // 对象 [7]
     OBJECT_value,  // 实例 [8]
-    LIST_value,  // 列表类型 [9]
+    LIST_value,  // 列表类型 [只允许系统使用] [9]
 } GWARF_value_type;
 
 // all value is GWARF_value
@@ -87,13 +87,14 @@ typedef struct statement{
         point,  // a.b  注：返回变量同时返回the_var链表[func 用于回调]
         down,  // a[b]  注：返回变量同时返回the_var链表[func 用于回调]
         slice,
-        return_code,
+        return_code,  // [26]
         set_class,  // class aaa; b = aaa() is ```call```
         try_code,  // try to do something except to do something
         raise_e,  // raise exception
         throw_e,  // throw the object class func or NULL
         import_class,   // import file
         include_import,  // include file
+        for_in_cycle,  // for i in a
     } type;  // the statement type
 
     union
@@ -264,6 +265,13 @@ typedef struct statement{
         {
             struct statement *file;  // get address for file
         } include_import;
+
+        struct
+        {
+            struct statement *name;  // for i in a -> i
+            struct statement *iter;  // for i in a -> a
+            struct statement *done;  // for while to do
+        } for_in_cycle;
 
     } code;
     struct statement *next;
