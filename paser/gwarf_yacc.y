@@ -695,22 +695,14 @@ for_exp
         statement_base = append_statement_list(for_tmp->code.for_cycle.done, statement_base);  // new statement_base (FILO)
         $$ = for_tmp;
     }
-    | FOR LB base_var_ IN top_exp RB
+    | FOR LB element IN top_exp RB
     {
         statement *for_tmp =  make_statement();
         for_tmp->type = for_in_cycle;
-        for_tmp->type = for_in_cycle;
         for_tmp->code.for_in_cycle.iter = $5;
-
-        for_tmp->code.for_in_cycle.name = malloc(sizeof($3->code.base_var.var_name));
-        char *name_tmp = for_tmp->code.for_in_cycle.name;
-        strcpy(name_tmp, $3->code.base_var.var_name);
-
+        for_tmp->code.for_in_cycle.var = $3;
         for_tmp->code.for_in_cycle.done = make_statement();
         statement_base = append_statement_list(for_tmp->code.for_in_cycle.done, statement_base);  // new statement_base (FILO)
-
-        free($3->code.base_var.var_name);  // 实际上会内存泄露[from没有被释放]
-        free($3);
         $$ = for_tmp;
     }
     ;
@@ -726,20 +718,13 @@ include_exp
     ;
 
 import_exp
-    : IMPORT top_exp AS base_var_
+    : IMPORT top_exp AS element
     {
         statement *import_tmp =  make_statement();
         import_tmp->type = import_class;
         import_tmp->code.import_class.file = $2;
 
-        import_tmp->code.import_class.name = malloc(sizeof($4->code.base_var.var_name));
-        char *name_tmp = import_tmp->code.import_class.name;
-        strcpy(name_tmp, $4->code.base_var.var_name);
-
-        import_tmp->code.import_class.from = $4->code.base_var.from;
-
-        free($4->code.base_var.var_name);  // 实际上会内存泄露[from没有被释放]
-        free($4);
+        import_tmp->code.import_class.var = $4;
 
         $$ = import_tmp;
     }
@@ -772,13 +757,11 @@ try_block
     ;
 
 try_exp
-    : try_token block EXCEPT AS base_var_
+    : try_token block EXCEPT AS element
     {
         statement_base = free_statement_list(statement_base);  // out statement_base (FILO)
 
-        $1->code.try_code.name = malloc(sizeof($5->code.base_var.var_name));
-        char *name_tmp = $1->code.try_code.name;
-        strcpy(name_tmp, $5->code.base_var.var_name);        
+        $1->code.try_code.var = $5;  
 
         $1->code.try_code.except = make_statement();
         statement_base = append_statement_list($1->code.try_code.except, statement_base);  // new statement_base (FILO)
@@ -825,42 +808,32 @@ class_block
     ;
 
 class_exp
-    : CLASS  base_var_ LB RB
+    : CLASS  element LB RB
     {   
         //无参数方法
         statement *class_tmp =  make_statement();
         class_tmp->type = set_class;
 
-        class_tmp->code.set_class.from = $2->code.base_var.from;
-        class_tmp->code.set_class.name = malloc(sizeof($2->code.base_var.var_name));
-        char *name_tmp = class_tmp->code.set_class.name;
-        strcpy(name_tmp, $2->code.base_var.var_name);
+        class_tmp->code.set_class.var = $2;
 
         class_tmp->code.set_class.father_list = NULL;
         class_tmp->code.set_class.done = make_statement();
         statement_base = append_statement_list(class_tmp->code.set_class.done, statement_base);  // new statement_base (FILO)
 
-        free($2->code.base_var.var_name);
-        free($2);
         $$ = class_tmp;
     }
-    | CLASS  base_var_ LB arguments RB
+    | CLASS  element LB arguments RB
     {   
         //无参数方法
         statement *class_tmp =  make_statement();
         class_tmp->type = set_class;
 
-        class_tmp->code.set_class.name = malloc(sizeof($2->code.base_var.var_name));
-        char *name_tmp = class_tmp->code.set_class.name;
-        strcpy(name_tmp, $2->code.base_var.var_name);
-        class_tmp->code.set_class.from = $2->code.base_var.from;
+        class_tmp->code.set_class.var = $2;
 
         class_tmp->code.set_class.done = make_statement();
         class_tmp->code.set_class.father_list = $4;  // set father
         statement_base = append_statement_list(class_tmp->code.set_class.done, statement_base);  // new statement_base (FILO)
 
-        free($2->code.base_var.var_name);
-        free($2);
         $$ = class_tmp;
     }
     ;
@@ -873,41 +846,29 @@ def_block
     ;
 
 def_exp
-    : DEF  base_var_ LB RB
+    : DEF  element LB RB
     {   
         //无参数方法
         statement *def_tmp =  make_statement();
         def_tmp->type = def;
 
-        def_tmp->code.def.name = malloc(sizeof($2->code.base_var.var_name));
-        char *name_tmp = def_tmp->code.def.name;
-        strcpy(name_tmp, $2->code.base_var.var_name);
-
-        def_tmp->code.def.from = $2->code.base_var.from;
+        def_tmp->code.def.var = $2;
         def_tmp->code.def.parameter_list = NULL;
         def_tmp->code.def.done = make_statement();
         statement_base = append_statement_list(def_tmp->code.def.done, statement_base);  // new statement_base (FILO)
 
-        free($2->code.base_var.var_name);  // 实际上会内存泄露[from没有被释放]
-        free($2);
         $$ = def_tmp;
     }
-    | DEF  base_var_ LB formal_parameter RB
+    | DEF  element LB formal_parameter RB
     {   
         statement *def_tmp =  make_statement();
         def_tmp->type = def;
 
-        def_tmp->code.def.name = malloc(sizeof($2->code.base_var.var_name));
-        char *name_tmp = def_tmp->code.def.name;
-        strcpy(name_tmp, $2->code.base_var.var_name);
-
-        def_tmp->code.def.from = $2->code.base_var.from;
+        def_tmp->code.def.var = $2;
         def_tmp->code.def.parameter_list = $4;
         def_tmp->code.def.done = make_statement();
         statement_base = append_statement_list(def_tmp->code.def.done, statement_base);  // new statement_base (FILO)
 
-        free($2->code.base_var.var_name);
-        free($2);
         $$ = def_tmp;
     }
     ;

@@ -215,10 +215,9 @@ typedef struct statement{
         } code_block;
 
         struct{
-            char *name;
             parameter *parameter_list;  // def parameter
             struct statement *done;  // def to do
-            struct statement *from;  // from where
+            struct statement *var;  // from where
         } def;
 
         struct{
@@ -232,17 +231,16 @@ typedef struct statement{
         } return_code;
 
         struct{
-            char *name;  // class name
             struct statement *done;  // class to do
             parameter *father_list;  // 继承
-            struct statement *from;  // from where [double->int]
+            struct statement *var;  // from where [double->int]
         } set_class;
 
         struct
         {
             struct statement *try;
             struct statement *except;
-            char *name;  // as var
+            struct statement *var;  // as var
         } try_code;
 
         struct
@@ -259,8 +257,7 @@ typedef struct statement{
         struct
         {
             struct statement *file;  // get address for file
-            char *name;  // as name
-            struct statement *from;  // from where
+            struct statement *var;  // as name
         } import_class;
 
         struct
@@ -270,7 +267,7 @@ typedef struct statement{
 
         struct
         {
-            char *name;  // for i in a -> i
+            struct statement *var;  // for i in a -> i
             struct statement *iter;  // for i in a -> a
             struct statement *done;  // for while to do
         } for_in_cycle;
@@ -426,6 +423,7 @@ GWARF_result sqrt_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result assigment_func(char *, GWARF_result, var_list *, int);
 GWARF_result equal_func(GWARF_result, GWARF_result, var_list *, int);
 GWARF_result negative_func(GWARF_result, var_list *);
+GWARF_result assigment_statement(statement *, var_list *, var_list *, GWARF_result);
 
 double sqrt_(double, double);
 double log_(double, double);
