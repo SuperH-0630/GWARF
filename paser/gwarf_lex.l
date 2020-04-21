@@ -41,6 +41,7 @@
 <INITIAL>"global" {return GLOBAL;}
 <INITIAL>"nonlocal" {return NONLOCAL;}
 <INITIAL>"block" {return BLOCK;}
+<INITIAL>"in" {return IN;}
 
 <INITIAL>"import" {return IMPORT;}
 <INITIAL>"include" {return INCLUDE;}

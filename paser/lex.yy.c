@@ -351,8 +351,8 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 80
-#define YY_END_OF_BUFFER 81
+#define YY_NUM_RULES 81
+#define YY_END_OF_BUFFER 82
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -362,31 +362,31 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[228] =
     {   0,
-        0,    0,    0,    0,    0,    0,    0,    0,   81,   72,
-       69,   71,   72,   49,   47,   48,   25,   26,   43,   41,
-       17,   42,   65,   44,   67,   67,   18,   70,   33,   35,
-       32,   68,   68,   68,   68,   45,   46,   37,   68,   68,
-       68,   68,   68,   68,   68,   68,   68,   68,   68,   68,
-       68,   68,   27,   28,   38,   71,   75,   73,   74,   79,
-       78,   77,   76,   80,    0,    0,    0,   27,    0,   31,
-       36,    0,   67,   30,   34,   29,   68,   68,   68,   68,
-       68,   52,   68,   68,   68,   68,   68,   68,   68,   68,
-       68,   68,    5,   68,   68,   68,   68,   68,   68,   68,
+        0,    0,    0,    0,    0,    0,    0,    0,   82,   73,
+       70,   72,   73,   50,   48,   49,   26,   27,   44,   42,
+       17,   43,   66,   45,   68,   68,   18,   71,   34,   36,
+       33,   69,   69,   69,   69,   46,   47,   38,   69,   69,
+       69,   69,   69,   69,   69,   69,   69,   69,   69,   69,
+       69,   69,   28,   29,   39,   72,   76,   74,   75,   80,
+       79,   78,   77,   81,    0,    0,    0,   28,    0,   32,
+       37,    0,   68,   31,   35,   30,   69,   69,   69,   69,
+       69,   53,   69,   69,   69,   69,   69,   69,   69,   69,
+       69,   69,    5,   69,   23,   69,   69,   69,   69,   69,
 
-       68,   68,   68,   68,   27,    0,    0,    0,    0,    0,
-       66,   68,   68,   68,   68,   68,   68,   68,   68,   68,
-       62,   68,   68,   68,   68,   16,   68,   68,   68,   39,
-       68,   68,   68,   68,   68,   68,   68,   68,   68,   68,
-       50,   68,    0,    0,    0,    0,    0,    3,   68,   60,
-       59,   57,   68,   68,   68,   68,   68,   68,    6,    7,
-       68,   68,   68,   68,   68,   68,   61,   68,   14,   68,
-       68,   68,   40,   68,   55,   68,    1,    2,    6,    7,
-        0,   58,   22,    8,   68,   64,   68,   68,    0,   68,
-       56,   68,   68,   68,   68,   53,   68,   68,   68,   54,
+       69,   69,   69,   69,   28,    0,    0,    0,    0,    0,
+       67,   69,   69,   69,   69,   69,   69,   69,   69,   69,
+       63,   69,   69,   69,   69,   16,   69,   69,   69,   40,
+       69,   69,   69,   69,   69,   69,   69,   69,   69,   69,
+       51,   69,    0,    0,    0,    0,    0,    3,   69,   61,
+       60,   58,   69,   69,   69,   69,   69,   69,    6,    7,
+       69,   69,   69,   69,   69,   69,   62,   69,   14,   69,
+       69,   69,   41,   69,   56,   69,    1,    2,    6,    7,
+        0,   59,   22,    8,   69,   65,   69,   69,    0,   69,
+       57,   69,   69,   69,   69,   54,   69,   69,   69,   55,
 
-        4,    2,    0,    9,   68,   68,    7,   51,   20,   23,
-       68,   68,   68,   63,   15,   51,   68,   19,   24,   68,
-       11,   10,   21,   68,   13,   12,    0
+        4,    2,    0,    9,   69,   69,    7,   52,   20,   24,
+       69,   69,   69,   64,   15,   52,   69,   19,   25,   69,
+       11,   10,   21,   69,   13,   12,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -1000,74 +1000,74 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 45 "gwarf_lex.l"
-{return IMPORT;}
+#line 44 "gwarf_lex.l"
+{return IN;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
 #line 46 "gwarf_lex.l"
-{return INCLUDE;}
+{return IMPORT;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 48 "gwarf_lex.l"
-{return LB;}
+#line 47 "gwarf_lex.l"
+{return INCLUDE;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
 #line 49 "gwarf_lex.l"
-{return RB;}
+{return LB;}
 	YY_BREAK
 case 27:
-/* rule 27 can match eol */
 YY_RULE_SETUP
 #line 50 "gwarf_lex.l"
-{return LP;}
+{return RB;}
 	YY_BREAK
 case 28:
+/* rule 28 can match eol */
 YY_RULE_SETUP
 #line 51 "gwarf_lex.l"
-{return RP;}
+{return LP;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 53 "gwarf_lex.l"
-{return MOREEQ;}
+#line 52 "gwarf_lex.l"
+{return RP;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
 #line 54 "gwarf_lex.l"
-{return LESSEQ;}
+{return MOREEQ;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
 #line 55 "gwarf_lex.l"
-{return NOTEQ;}
+{return LESSEQ;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
 #line 56 "gwarf_lex.l"
-{return MORE;}
+{return NOTEQ;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
 #line 57 "gwarf_lex.l"
-{return LESS;}
+{return MORE;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
 #line 58 "gwarf_lex.l"
-{return EQUAL;}
+{return LESS;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
 #line 59 "gwarf_lex.l"
-{return EQ;}
+{return EQUAL;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
 #line 60 "gwarf_lex.l"
-{return POW;}
+{return EQ;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
@@ -1077,57 +1077,57 @@ YY_RULE_SETUP
 case 38:
 YY_RULE_SETUP
 #line 62 "gwarf_lex.l"
-{return SQRT;}
+{return POW;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
 #line 63 "gwarf_lex.l"
-{return LOG;}
+{return SQRT;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
 #line 64 "gwarf_lex.l"
-{return SQRT;}
+{return LOG;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
 #line 65 "gwarf_lex.l"
-{return ADD;}
+{return SQRT;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
 #line 66 "gwarf_lex.l"
-{return SUB;}
+{return ADD;}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
 #line 67 "gwarf_lex.l"
-{return MUL;}
+{return SUB;}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
 #line 68 "gwarf_lex.l"
-{return DIV;}
+{return MUL;}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
 #line 69 "gwarf_lex.l"
-{return LI;}
+{return DIV;}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
 #line 70 "gwarf_lex.l"
-{return RI;}
+{return LI;}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 72 "gwarf_lex.l"
-{BEGIN COMMENT;}
+#line 71 "gwarf_lex.l"
+{return RI;}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
 #line 73 "gwarf_lex.l"
-{BEGIN STRING_TEXT;}
+{BEGIN COMMENT;}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
@@ -1136,54 +1136,54 @@ YY_RULE_SETUP
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 76 "gwarf_lex.l"
-{return TRY;}
+#line 75 "gwarf_lex.l"
+{BEGIN STRING_TEXT;}
 	YY_BREAK
 case 51:
-/* rule 51 can match eol */
 YY_RULE_SETUP
 #line 77 "gwarf_lex.l"
-{return EXCEPT;}
+{return TRY;}
 	YY_BREAK
 case 52:
+/* rule 52 can match eol */
 YY_RULE_SETUP
 #line 78 "gwarf_lex.l"
-{return AS;}
+{return EXCEPT;}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
 #line 79 "gwarf_lex.l"
-{return RAISE;}
+{return AS;}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
 #line 80 "gwarf_lex.l"
-{return THROW;}
+{return RAISE;}
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
 #line 81 "gwarf_lex.l"
-{return TRUE;}
+{return THROW;}
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
 #line 82 "gwarf_lex.l"
-{return FALSE;}
+{return TRUE;}
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
 #line 83 "gwarf_lex.l"
-{return TRUE;}
+{return FALSE;}
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
 #line 84 "gwarf_lex.l"
-{return FALSE;}
+{return TRUE;}
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
 #line 85 "gwarf_lex.l"
-{return NULL_token;}
+{return FALSE;}
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
@@ -1198,75 +1198,75 @@ YY_RULE_SETUP
 case 62:
 YY_RULE_SETUP
 #line 88 "gwarf_lex.l"
-{return DEF;}
+{return NULL_token;}
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
 #line 89 "gwarf_lex.l"
-{return RETURN;}
+{return DEF;}
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
 #line 90 "gwarf_lex.l"
-{return CLASS;}
+{return RETURN;}
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
 #line 91 "gwarf_lex.l"
-{return POINT;}
+{return CLASS;}
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 93 "gwarf_lex.l"
+#line 92 "gwarf_lex.l"
+{return POINT;}
+	YY_BREAK
+case 67:
+YY_RULE_SETUP
+#line 94 "gwarf_lex.l"
 {
     yylval.double_value = atof(yytext);
     return NUMBER;
     }
 	YY_BREAK
-case 67:
+case 68:
 YY_RULE_SETUP
-#line 97 "gwarf_lex.l"
+#line 98 "gwarf_lex.l"
 {
     yylval.double_value = atof(yytext);
     return INT;
     }
 	YY_BREAK
-case 68:
+case 69:
 YY_RULE_SETUP
-#line 101 "gwarf_lex.l"
+#line 102 "gwarf_lex.l"
 {
     yylval.string_value = yytext;
     return VAR;
     }
 	YY_BREAK
-case 69:
-/* rule 69 can match eol */
-YY_RULE_SETUP
-#line 105 "gwarf_lex.l"
-{return STOPN;}
-	YY_BREAK
 case 70:
+/* rule 70 can match eol */
 YY_RULE_SETUP
 #line 106 "gwarf_lex.l"
-{return STOPF;}
+{return STOPN;}
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
 #line 107 "gwarf_lex.l"
-;
+{return STOPF;}
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
 #line 108 "gwarf_lex.l"
-{printf("other text = [%s];\n", yytext);}
+;
 	YY_BREAK
 case 73:
-/* rule 73 can match eol */
 YY_RULE_SETUP
-#line 110 "gwarf_lex.l"
-{BEGIN INITIAL;}
+#line 109 "gwarf_lex.l"
+{printf("other text = [%s];\n", yytext);}
 	YY_BREAK
 case 74:
+/* rule 74 can match eol */
 YY_RULE_SETUP
 #line 111 "gwarf_lex.l"
 {BEGIN INITIAL;}
@@ -1274,12 +1274,12 @@ YY_RULE_SETUP
 case 75:
 YY_RULE_SETUP
 #line 112 "gwarf_lex.l"
-;
+{BEGIN INITIAL;}
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 114 "gwarf_lex.l"
-{BEGIN INITIAL;}
+#line 113 "gwarf_lex.l"
+;
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
@@ -1287,17 +1287,14 @@ YY_RULE_SETUP
 {BEGIN INITIAL;}
 	YY_BREAK
 case 78:
-/* rule 78 can match eol */
 YY_RULE_SETUP
 #line 116 "gwarf_lex.l"
-{
-    yylval.string_value = yytext;
-    return STRING;
-    }
+{BEGIN INITIAL;}
 	YY_BREAK
 case 79:
+/* rule 79 can match eol */
 YY_RULE_SETUP
-#line 120 "gwarf_lex.l"
+#line 117 "gwarf_lex.l"
 {
     yylval.string_value = yytext;
     return STRING;
@@ -1305,10 +1302,18 @@ YY_RULE_SETUP
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 124 "gwarf_lex.l"
+#line 121 "gwarf_lex.l"
+{
+    yylval.string_value = yytext;
+    return STRING;
+    }
+	YY_BREAK
+case 81:
+YY_RULE_SETUP
+#line 125 "gwarf_lex.l"
 ECHO;
 	YY_BREAK
-#line 1311 "lex.yy.c"
+#line 1316 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
 case YY_STATE_EOF(STRING_TEXT):
@@ -2319,7 +2324,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 124 "gwarf_lex.l"
+#line 125 "gwarf_lex.l"
 
 int yywrap(void) {
     return 1;

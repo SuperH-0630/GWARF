@@ -118,6 +118,15 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 return_value.value.value.int_value = 0;
             }
             break;
+        case for_in_cycle:
+            puts("----for code----");
+            return_value = forin_func(the_statement, the_var);
+            puts("----for while code----");
+            if(return_value.u == statement_end){  // while循环不需要返回值[避免GWARF_value 进入 the_var]
+                return_value.value.type = NULL_value;
+                return_value.value.value.int_value = 0;
+            }
+            break;
         case if_branch:
             puts("----if code----");
             return_value = if_func(the_statement->code.if_branch.done, the_var);
@@ -1304,6 +1313,96 @@ GWARF_result block_func(statement *the_statement, var_list *the_var){  // read t
             value.value.value.int_value -= 1;
         }
     }
+    return value;
+}
+
+// -----------------forin func
+
+GWARF_result forin_func(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func
+    GWARF_result value;
+    var *tmp = make_var();  // base_var
+    the_var = append_var_list(tmp, the_var);
+
+    char *name = the_statement->code.for_in_cycle.name;
+    
+    GWARF_result tmp_result = traverse(the_statement->code.for_in_cycle.iter, the_var, false);  // 取得迭代器
+    if(is_error(&tmp_result)){  // Name Error错误
+        // puts("STOP:: Name No Found!");
+        value = tmp_result;
+        goto return_value;
+    }
+    else if(is_space(&tmp_result)){
+        value = tmp_result;
+        goto return_value;
+    }
+    
+    // puts("[tag 1]goto for in");
+    GWARF_value iter_value = get__iter__(&(tmp_result.value), the_var).value;  // 获取迭代object，一般是返回self
+    while (1){
+        GWARF_result tmp_next = get__next__(&(iter_value), the_var);// 执行__next__的返回值
+        if(is_error(&tmp_next)){  // TODO:: 检查是否为IterException
+            value.u = statement_end;
+            value.value.type = NULL_value;
+            value.value.value.int_value = 0;
+            break;  // goto return_value;
+        }
+        else{
+            assigment_func(name, tmp_next, the_var, 0);  // 赋值
+        }
+        restart_again: 
+        puts("----for in----");
+        value = traverse(the_statement->code.for_in_cycle.done, the_var, false);
+        puts("----stop for in----");
+
+        // break的操作
+        if((value.u == cycle_break) || (value.u == code_broken)){
+            if(value.value.type != INT_value){
+                value.value.type = INT_value;
+                value.value.value.int_value = 0;
+            }
+            if(value.value.value.int_value <= 0){
+                value.u = statement_end;  // 正常设置[正常语句结束]
+            }
+            else{
+                value.value.value.int_value -= 1;
+            }
+            break;
+        }
+
+        // continue的操作
+        if((value.u == cycle_continue) || (value.u == code_continued)){
+            if(value.value.type != INT_value){
+                value.value.type = INT_value;
+                value.value.value.int_value = 0;
+            }
+            if(value.value.value.int_value <= 0){
+                value.u = statement_end;
+                continue;
+            }
+            else{
+                value.value.value.int_value -= 1;
+                break;
+            }
+        }
+
+        // restart的操作
+        if((value.u == cycle_restart) || (value.u == code_restarted)){
+            if(value.value.type != INT_value){
+                value.value.type = INT_value;
+                value.value.value.int_value = 0;
+            }
+            if(value.value.value.int_value <= 0){
+                value.u = statement_end;
+                goto restart_again;
+            }
+            else{
+                value.value.value.int_value -= 1;
+                break;
+            }
+        }
+    }
+    return_value: 
+    the_var = free_var_list(the_var);  // free the new var
     return value;
 }
 

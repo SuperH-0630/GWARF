@@ -9,7 +9,9 @@
 #define false 0
 #define true 1
 #define bool int
-#define read_statement_list(the_statement, the_var) read_statement(the_statement, the_var, NULL)
+
+#define read_statement_list(the_statement,the_var) read_statement(the_statement,the_var,NULL)
+#define run_func(base_the_var,the_var,name) run_func_core(base_the_var,the_var,name,false)
 
 // the type of data(GWARF_value)
 typedef enum{
@@ -268,7 +270,7 @@ typedef struct statement{
 
         struct
         {
-            struct statement *name;  // for i in a -> i
+            char *name;  // for i in a -> i
             struct statement *iter;  // for i in a -> a
             struct statement *done;  // for while to do
         } for_in_cycle;
@@ -370,6 +372,8 @@ typedef enum{
     __down__func = 24,
     __set__func = 25,
     __slice__func = 26,
+    __iter__func = 27,
+    __next__func = 28,
 } official_func_type;
 
 typedef struct func{
@@ -410,6 +414,7 @@ GWARF_result try_func(statement *, var_list *);
 GWARF_result raise_func(statement *, var_list *, bool);
 GWARF_result import_func(statement *, var_list *);
 GWARF_result include_func(statement *, var_list *);
+GWARF_result forin_func(statement *, var_list *);
 
 GWARF_result add_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result sub_func(GWARF_result, GWARF_result, var_list *);
@@ -435,7 +440,9 @@ bool to_bool(GWARF_value);
 
 GWARF_result get__value__(GWARF_value *, var_list *);
 GWARF_result get__bool__(GWARF_value *, var_list *);
-GWARF_result run_func(GWARF_value *, var_list *, char *);
+GWARF_result get__iter__(GWARF_value *, var_list *);
+GWARF_result get__next__(GWARF_value *, var_list *);
+GWARF_result run_func_core(GWARF_value *, var_list *, char *, bool);
 
 int len_only_double(double num);
 int len_double(double num);
@@ -484,6 +491,7 @@ GWARF_result BaseException_official_func(func *the_func, parameter *tmp_s, var_l
 
 class_object *Exception_login_official(var_list *the_var, var_list *father_var_list);
 class_object *NameException_login_official(var_list *the_var, var_list *father_var_list);
+class_object *IterException_login_official(var_list *the_var, var_list *father_var_list);
 
 // 生成错误
 GWARF_result to_error(char *error_info, char *error_type, var_list *the_var);

@@ -40,9 +40,10 @@ void login(var_list *the_var){
     list_login_official(the_var, list_official_func, tmp_gobject->the_var);  // 注册list
 
     // 注册错误类型
-    class_object *tmp_BaseException = BaseException_login_official(the_var, BaseException_official_func, tmp_object->the_var);  // 注册goobject
-    class_object *tmp_Exception = Exception_login_official(the_var, tmp_BaseException->the_var);  // 注册goobject
-    NameException_login_official(the_var, tmp_Exception->the_var);  // 注册goobject
+    class_object *tmp_BaseException = BaseException_login_official(the_var, BaseException_official_func, tmp_object->the_var);
+    class_object *tmp_Exception = Exception_login_official(the_var, tmp_BaseException->the_var);
+    NameException_login_official(the_var, tmp_Exception->the_var);
+    IterException_login_official(the_var, tmp_Exception->the_var);
 }
 
 // 编译指令：cd "/home/songzihuan/文档/CProject/gwarf/" && gcc gwarf.c -lm -o gwarf && "/home/songzihuan/文档/CProject/gwarf/"gwarf

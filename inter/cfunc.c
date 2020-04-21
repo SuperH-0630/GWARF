@@ -361,6 +361,20 @@ class_object *NameException_login_official(var_list *the_var, var_list *father_v
     return class_tmp;
 }
 
+class_object *IterException_login_official(var_list *the_var, var_list *father_var_list){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assigment_func("IterException", class_value, the_var, 0);  // 注册class 的 位置
+    puts("----stop set class----");
+    return class_tmp;
+}
+
 class_object *gobject_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list){  // 内置对象继承的类
     // 创建对象[空对象]
     puts("----set class----");
@@ -1235,8 +1249,8 @@ class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func 
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{2,1},{23,1},{24,1},{25,1},{26,1}};
-    char *name[] = {"__init__", "__len__", "__down__", "__set__", "__slice__"};  //  __len__是获取长度，__down__是获取下值，__set__是设置值，__slice__是切片
+    int a[][2] = {{2,1},{23,1},{24,1},{25,1},{26,1},{27,1},{28,1}};
+    char *name[] = {"__init__", "__len__", "__down__", "__set__", "__slice__", "__iter__", "__next__"};  //  __len__是获取长度，__down__是获取下值，__set__是设置值，__slice__是切片
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
@@ -1287,18 +1301,51 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 assigment_func("value", tmp, login_var, 0);  // 注册到self
                 return_value.u = statement_end;  // __init__没有return
             }
+            GWARF_result iter_value;
+            iter_value.value.type = INT_value;
+            iter_value.value.value.int_value = 0;
+            assigment_func("iter_value", iter_value, login_var, 0);  // 注册到self
             break;
         }
         case __len__func:{  // return index
             var *tmp = find_var(login_var, 0, "value");
-            if(tmp != NULL){
-                return_value.value.type = INT_value;
-                return_value.value.value.int_value = (int)(sizeof(tmp->value.value.list_value->list_value) / sizeof(GWARF_value));  // 获取长度
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = tmp->value.value.list_value->index;
+            break;
+        }
+        case __iter__func:{  // return self
+            GWARF_result iter_value;
+            iter_value.value.type = INT_value;
+            iter_value.value.value.int_value = 0;
+            assigment_func("iter_value", iter_value, login_var, 0);  // 注册到self
+
+            return_value.value = *(father.father);
+            break;
+        }
+        case __next__func:{  // return index
+            var *tmp = find_var(login_var, 0, "iter_value");
+            int iter_index, len;
+            if(tmp == NULL){
+                iter_index = 0;
             }
             else{
-                return_value.value.type = INT_value;
-                return_value.value.value.int_value = 0;
+                iter_index = to_int(tmp->value, out_var).value.int_value;
             }
+
+            tmp = find_var(login_var, 0, "value");
+            len = tmp->value.value.list_value->index;
+            printf("len = %d, iter_index = %d\n", len, iter_index);
+            if(iter_index >= len){  // 已经超出
+                return_value = to_error("Max Iter", "IterException", the_var);
+            }
+            else{
+                return_value.value = tmp->value.value.list_value->list_value[iter_index];
+                GWARF_result iter_value;
+                iter_value.value.type = INT_value;
+                iter_value.value.value.int_value = iter_index + 1;
+                assigment_func("iter_value", iter_value, login_var, 0);  // 注册到self
+            }
+
             break;
         }
         case __down__func:{  // return index
@@ -1327,7 +1374,7 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
         }
         case __slice__func:{  // return index
             var *tmp = find_var(login_var, 0, "value");
-            int len = (int)(sizeof(tmp->value.value.list_value->list_value) / sizeof(GWARF_value));
+            int len = tmp->value.value.list_value->index;
             int start, end;
             if(tmp != NULL){
                 GWARF_result start_result = traverse(tmp_s->u.value, out_var, false), end_result;
@@ -1362,7 +1409,7 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 return_value.value.value.list_value = malloc(sizeof(the_list));  // 申请list的空间
                 return_value.value.value.list_value->list_value = malloc((size_t)((end - start) * sizeof(GWARF_value)));
                 memcpy(return_value.value.value.list_value->list_value, (tmp->value.value.list_value->list_value + start), (size_t)((end - start) * sizeof(GWARF_value)));
-                return_value.value.value.list_value->index = (end - len) - 1;
+                return_value.value.value.list_value->index = (end - start) - 1;
             }
             else{
                 return_value.value.type = NULL_value;
@@ -1463,6 +1510,22 @@ GWARF_value parameter_to_list(parameter *tmp_s, var_list *the_var){  // 把param
 }
 
 
+GWARF_result get__next__(GWARF_value *base_the_var, var_list *the_var){  // 获取__next__
+    GWARF_result tmp = run_func_core(base_the_var, the_var, "__next__", true);
+    //  不需要捕获IterException[表示到达尽头]
+    return tmp;
+}
+
+GWARF_result get__iter__(GWARF_value *base_the_var, var_list *the_var){  // 获取__iter__
+    GWARF_result tmp = run_func_core(base_the_var, the_var, "__iter__", true);
+    if(is_error(&tmp)){
+        tmp.u = statement_end;
+        tmp.value.type = NULL_value;
+        tmp.value.value.int_value = 0;
+    }
+    return tmp;
+}
+
 GWARF_result get__value__(GWARF_value *base_the_var, var_list *the_var){  // 用于计算的get__value__统一核心
     GWARF_result tmp = run_func(base_the_var, the_var, "__value__");
     if(is_error(&tmp)){
@@ -1473,9 +1536,9 @@ GWARF_result get__value__(GWARF_value *base_the_var, var_list *the_var){  // 用
     return tmp;
 }
 
-GWARF_result get__bool__(GWARF_value *base_the_var, var_list *the_var){  // 用于计算的get__value__统一核心
+GWARF_result get__bool__(GWARF_value *base_the_var, var_list *the_var){  // 获取__bool__  [所有转换为bool的object都执行这个]
     GWARF_result tmp = run_func(base_the_var, the_var, "__bool__");
-    if(is_error(&tmp)){
+    if(is_error(&tmp)){  // 检查是否为name_error
         tmp.u = statement_end;
         tmp.value.type = BOOL_value;
         tmp.value.value.bool_value = true;
@@ -1483,7 +1546,7 @@ GWARF_result get__bool__(GWARF_value *base_the_var, var_list *the_var){  // 用�
     return tmp;
 }
 
-GWARF_result run_func(GWARF_value *base_the_var, var_list *the_var, char *name){  // 无参数func->直到返回GWARF_value[not class]
+GWARF_result run_func_core(GWARF_value *base_the_var, var_list *the_var, char *name, bool only){  // 无参数func->直到返回GWARF_value[not class]
     GWARF_result reight_tmp, get;
     reight_tmp.u = statement_end;
     int times = 0;
@@ -1506,8 +1569,13 @@ GWARF_result run_func(GWARF_value *base_the_var, var_list *the_var, char *name){
             get.value = tmp_var->value;  // TODO:: 需要检查__value__是否存在
             get.father = base_the_var;  // 设置father
             reight_tmp = call_back_core(get, the_var, NULL);
-            times = reight_tmp.return_times;
-            base_the_var = &(reight_tmp.value);  // 重复获取__value__[直到类型不是object或class]
+            if(only){  // 不需要重复获取，比如__iter__，__next__
+                goto return_result;
+            }
+            else{
+                times = reight_tmp.return_times;
+                base_the_var = &(reight_tmp.value);  // 重复获取__value__[直到类型不是object或class]
+            }
         }
         else{
             char *tmp = malloc((size_t)( 21 + strlen(name)) );
