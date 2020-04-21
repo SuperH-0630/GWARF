@@ -121,6 +121,8 @@ typedef struct statement{
                 AND_func,  // -a
                 OR_func,  // -a
                 NOT_func,  // -a
+                MOD_func,
+                INTDIV_func,
             } type;
             struct statement *right_exp;  // the right exp
             struct statement *left_exp;  // the left exp
@@ -374,6 +376,10 @@ typedef enum{
     __slice__func = 26,
     __iter__func = 27,
     __next__func = 28,
+    __idiv__func = 29,
+    __idivr__func = 30,
+    __mod__func = 31,
+    __modr__func = 32,
 } official_func_type;
 
 typedef struct func{
@@ -430,6 +436,8 @@ GWARF_result assigment_statement(statement *, var_list *, var_list *, GWARF_resu
 GWARF_result not_func(GWARF_result, var_list *);
 GWARF_result or_func(statement *, statement *, var_list *);
 GWARF_result and_func(statement *, statement *, var_list *);
+GWARF_result int_div_func(GWARF_result, GWARF_result, var_list *);
+GWARF_result mod_func(GWARF_result, GWARF_result, var_list *);
 
 double sqrt_(double, double);
 double log_(double, double);

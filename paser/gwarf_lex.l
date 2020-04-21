@@ -66,6 +66,8 @@
 <INITIAL>"+" {return ADD;}
 <INITIAL>"-" {return SUB;}
 <INITIAL>"*" {return MUL;}
+<INITIAL>"%" {return MOD;}
+<INITIAL>"//" {return INTDIV;}
 <INITIAL>"/" {return DIV;}
 <INITIAL>"[" {return LI;}
 <INITIAL>"]" {return RI;}

@@ -388,9 +388,9 @@ class_object *gobject_login_official(var_list *the_var, GWARF_result (*paser)(fu
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{2,1}, {3,1}, {4,1}, {5,1}, {6,1}, {7,1}, {8,1}, {9,1}, {10,1}, {11,1}, {12,1}, {13,1}, {14,1}, {15,1}, {16,1}, {17,1}, {3,1}, {21,1}, {22,1}, {18,1}, {19,1}, {20,1}};
+    int a[][2] = {{2,1}, {3,1}, {4,1}, {5,1}, {6,1}, {7,1}, {8,1}, {9,1}, {10,1}, {11,1}, {12,1}, {13,1}, {14,1}, {15,1}, {16,1}, {17,1}, {3,1}, {21,1}, {22,1}, {18,1}, {19,1}, {20,1}, {29,1}, {30,1}, {31,1}, {32,1}};
     char *name[] = {"__init__", "__value__", "__add__", "__sub__", "__mul__","__div__","__eq__", "__more__", "__less__", "__eqmore__", "__eqless__","__noteq__", "__pow__", "__log__","__sqrt__","__negative__","__bool__","__subr__",
-                    "__divr__", "__powr__", "__logr__","__sqrtr__"};
+                    "__divr__", "__powr__", "__logr__","__sqrtr__", "__idiv__","__idivr__", "__mod__","__modr__"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
@@ -861,6 +861,98 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             return_value = negative_func(left_tmp, out_var);
             break;
         }
+        case __idiv__func:{
+            GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
+            if(is_error(&tmp_result)){  // Name Error错误
+                return_value = tmp_result;
+                goto return_result;
+            }
+            else if(is_space(&tmp_result)){
+                return_value = tmp_result;
+                goto return_result;
+            }
+            GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            var *tmp = find_var(login_var, 0, "value");
+            if(tmp != NULL){
+                left_tmp.value = tmp->value;
+            }
+            else{
+                left_tmp.value.type = NULL_value;
+                left_tmp.value.value.int_value = 0;
+            }
+            return_value = int_div_func(left_tmp, reight_tmp, out_var);
+            break;
+        }
+        case __idivr__func:{
+            GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
+            if(is_error(&tmp_result)){  // Name Error错误
+                return_value = tmp_result;
+                goto return_result;
+            }
+            else if(is_space(&tmp_result)){
+                return_value = tmp_result;
+                goto return_result;
+            }
+            GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            var *tmp = find_var(login_var, 0, "value");
+            if(tmp != NULL){
+                left_tmp.value = tmp->value;
+            }
+            else{
+                left_tmp.value.type = NULL_value;
+                left_tmp.value.value.int_value = 0;
+            }
+            return_value = int_div_func(reight_tmp, left_tmp, out_var);
+            break;
+        }
+        case __mod__func:{
+            GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
+            if(is_error(&tmp_result)){  // Name Error错误
+                return_value = tmp_result;
+                goto return_result;
+            }
+            else if(is_space(&tmp_result)){
+                return_value = tmp_result;
+                goto return_result;
+            }
+            GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            var *tmp = find_var(login_var, 0, "value");
+            if(tmp != NULL){
+                left_tmp.value = tmp->value;
+            }
+            else{
+                left_tmp.value.type = NULL_value;
+                left_tmp.value.value.int_value = 0;
+            }
+            return_value = mod_func(left_tmp, reight_tmp, out_var);
+            break;
+        }
+        case __modr__func:{
+            GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
+            if(is_error(&tmp_result)){  // Name Error错误
+                return_value = tmp_result;
+                goto return_result;
+            }
+            else if(is_space(&tmp_result)){
+                return_value = tmp_result;
+                goto return_result;
+            }
+            GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
+            reight_tmp = get__value__(&base_the_var, the_var);
+            var *tmp = find_var(login_var, 0, "value");
+            if(tmp != NULL){
+                left_tmp.value = tmp->value;
+            }
+            else{
+                left_tmp.value.type = NULL_value;
+                left_tmp.value.value.int_value = 0;
+            }
+            return_value = mod_func(reight_tmp, left_tmp, out_var);
+            break;
+        }
         default:
             break;
     }
@@ -1151,7 +1243,7 @@ GWARF_value to_str(GWARF_value value, var_list *the_var){
             snprintf(return_number.value.string, size, "<-class on %u->", value.value.class_value);
         }
         else{
-            printf("var value = other\n");
+            return_number.value.string = "other";
         }
     }
     return return_number;
