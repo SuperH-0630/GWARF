@@ -956,6 +956,7 @@ slice_arguments_token
 
 block
     : LP command_list RP
+    | LP block RP
     ;
 
 return_exp
