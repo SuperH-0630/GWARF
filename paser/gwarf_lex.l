@@ -79,16 +79,15 @@
 <INITIAL>"as" {return AS;}
 <INITIAL>"raise" {return RAISE;}
 <INITIAL>"throw" {return THROW;}
-<INITIAL>"true" {return TRUE;}
-<INITIAL>"false" {return FALSE;}
 <INITIAL>"True" {return TRUE;}
 <INITIAL>"False" {return FALSE;}
 <INITIAL>"None" {return NULL_token;}
-<INITIAL>"NULL" {return NULL_token;}
-<INITIAL>"null" {return NULL_token;}
 <INITIAL>"def" {return DEF;}
 <INITIAL>"return" {return RETURN;}
 <INITIAL>"class" {return CLASS;}
+<INITIAL>"&&" {return AND;}
+<INITIAL>"||" {return OR;}
+<INITIAL>"!" {return NOT;}
 <INITIAL>"." {return POINT;}
 
 <INITIAL>[1-9][0-9]*\.[0-9]+ {

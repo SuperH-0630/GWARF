@@ -1410,18 +1410,19 @@ GWARF_result while_func(statement *the_statement, var_list *the_var){  // read t
 GWARF_result operation_func(statement *the_statement, var_list *the_var, var_list *login_var){  // read the statement list with case to run by func
     GWARF_result value, left_result, right_result;
     int func_type = the_statement->code.operation.type;
-    if((func_type != ASSIGMENT_func) && (func_type != NEGATIVE_func)){  // don't run because I don't need[if it's and func ,it will be run twice]
-        left_result = traverse((*the_statement).code.operation.left_exp, the_var, false);
-        if(is_error(&left_result)){  // Name Error错误
-            // puts("STOP:: Name No Found!");
+    if(func_type != ASSIGMENT_func && func_type != AND_func && func_type != OR_func)
+    {
+        left_result = traverse(the_statement->code.operation.left_exp, the_var, false);  // NEGATIVE_func等的left为NULL相当与不执行
+        if(is_error(&left_result)){
             return left_result;
         }
         else if(is_space(&left_result)){
             return left_result;
         }
     }
-    right_result = traverse((*the_statement).code.operation.right_exp, the_var, false);
-    if(is_error(&right_result)){  // Name Error错误
+    right_result = traverse(the_statement->code.operation.right_exp, the_var, false);
+    if(is_error(&right_result))
+    {
         return right_result;
     }
     else if(right_result.u != return_def && is_space(&right_result)){
@@ -1475,6 +1476,15 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
             break;
         case SQRT_func:
             value = sqrt_func(left_result, right_result, the_var);
+            break;
+        case AND_func:
+            value = and_func(the_statement->code.operation.left_exp, the_statement->code.operation.right_exp, the_var);
+            break;
+        case OR_func:
+            value = or_func(the_statement->code.operation.left_exp, the_statement->code.operation.right_exp, the_var);
+            break;
+        case NOT_func:
+            value = not_func(right_result, the_var);
             break;
         default:
             break;
@@ -1869,6 +1879,66 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
         }
     }
     return result;
+}
+
+// ---------  AND
+GWARF_result and_func(statement *left_statement, statement *right_statement, var_list *the_var){  // the func for add and call from read_statement_list
+    GWARF_result return_value, get;  // the result by call read_statement_list with left and right; value is the result for and
+    return_value.u = statement_end;
+    return_value.value.type = BOOL_value;
+
+    bool left = to_bool(traverse(left_statement, the_var, false).value), right;
+    if(left){
+        right = to_bool(traverse(right_statement, the_var, false).value);
+        if(right){
+            return_value.value.value.bool_value = true;
+        }
+        else{
+            return_value.value.value.bool_value = false;
+        }
+    }
+    else{
+        return_value.value.value.bool_value = false;
+    }
+    return_back: return return_value;
+}
+
+// ---------  OR
+GWARF_result or_func(statement *left_statement, statement *right_statement, var_list *the_var){  // the func for add and call from read_statement_list
+    GWARF_result return_value, get;  // the result by call read_statement_list with left and right; value is the result for and
+    return_value.u = statement_end;
+    return_value.value.type = BOOL_value;
+
+    bool left = to_bool(traverse(left_statement, the_var, false).value), right;
+    if(left){
+        return_value.value.value.bool_value = true;
+    }
+    else{
+        right = to_bool(traverse(right_statement, the_var, false).value);
+        if(right){
+            return_value.value.value.bool_value = true;
+        }
+        else{
+            return_value.value.value.bool_value = false;
+        }
+    }
+    return_back: return return_value;
+}
+
+// ---------  NOT
+GWARF_result not_func(GWARF_result right_result, var_list *the_var){  // the func for add and call from read_statement_list
+    GWARF_result return_value, get;  // the result by call read_statement_list with left and right; value is the result for and
+    return_value.u = statement_end;
+    return_value.value.type = BOOL_value;
+    bool right = to_bool(right_result.value);
+    if(right)
+    {
+        return_value.value.value.bool_value = false;
+    }
+    else{
+        return_value.value.value.bool_value = true;
+    }
+    return_back: return return_value;
 }
 
 // ---------  ADD

@@ -23,11 +23,11 @@
 %token <string_value> STRING VAR
 
 %token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE POW LOG SQRT EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI DEFAULT FOR COMMA GLOBAL NONLOCAL INDENTA STOPN STOPF BLOCK FALSE TRUE
-%token NULL_token DEF RETURN CLASS POINT COLON TRY EXCEPT AS RAISE THROW IMPORT INCLUDE IN
+%token NULL_token DEF RETURN CLASS POINT COLON TRY EXCEPT AS RAISE THROW IMPORT INCLUDE IN AND OR NOT
 
 %type <statement_value> base_value base_var_token base_var_ element second_number first_number zero_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
 %type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token for_exp for_block global_token nonlocal_token block_exp block_block call_number def_block def_exp return_exp return_token
-%type <statement_value> eq_number class_block class_exp slice_arguments_token try_block try_exp try_token raise_exp import_exp include_exp
+%type <statement_value> eq_number class_block class_exp slice_arguments_token try_block try_exp try_token raise_exp import_exp include_exp bool_number
 
 %type <parameter_list> formal_parameter arguments slice_arguments
 
@@ -163,12 +163,44 @@ top_exp
     ;
 
 eq_number
-    : third_number
-    | eq_number EQ third_number
+    : bool_number
+    | eq_number EQ bool_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
         code_tmp->code.operation.type = ASSIGMENT_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    ;
+
+bool_number
+    : third_number
+    | NOT third_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = NOT_func;
+        code_tmp->code.operation.left_exp = NULL;
+        code_tmp->code.operation.right_exp = $2;
+        puts("NOT FUNC");
+        $$ = code_tmp;
+    }
+    | bool_number AND third_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = AND_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    | bool_number OR third_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = OR_func;
         code_tmp->code.operation.left_exp = $1;
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;

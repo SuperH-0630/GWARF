@@ -118,6 +118,9 @@ typedef struct statement{
                 LOG_func,  // <>
                 SQRT_func,  // <>
                 NEGATIVE_func,  // -a
+                AND_func,  // -a
+                OR_func,  // -a
+                NOT_func,  // -a
             } type;
             struct statement *right_exp;  // the right exp
             struct statement *left_exp;  // the left exp
@@ -424,6 +427,9 @@ GWARF_result assigment_func(char *, GWARF_result, var_list *, int);
 GWARF_result equal_func(GWARF_result, GWARF_result, var_list *, int);
 GWARF_result negative_func(GWARF_result, var_list *);
 GWARF_result assigment_statement(statement *, var_list *, var_list *, GWARF_result);
+GWARF_result not_func(GWARF_result, var_list *);
+GWARF_result or_func(statement *, statement *, var_list *);
+GWARF_result and_func(statement *, statement *, var_list *);
 
 double sqrt_(double, double);
 double log_(double, double);

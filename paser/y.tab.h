@@ -109,7 +109,10 @@ extern int yydebug;
     THROW = 315,
     IMPORT = 316,
     INCLUDE = 317,
-    IN = 318
+    IN = 318,
+    AND = 319,
+    OR = 320,
+    NOT = 321
   };
 #endif
 /* Tokens.  */
@@ -174,6 +177,9 @@ extern int yydebug;
 #define IMPORT 316
 #define INCLUDE 317
 #define IN 318
+#define AND 319
+#define OR 320
+#define NOT 321
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -188,7 +194,7 @@ union YYSTYPE
     struct if_list *if_list_base;
     struct parameter *parameter_list;
 
-#line 192 "y.tab.h"
+#line 198 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
