@@ -121,8 +121,19 @@ typedef struct statement{
                 AND_func,  // -a
                 OR_func,  // -a
                 NOT_func,  // -a
-                MOD_func,
-                INTDIV_func,
+                MOD_func,  // %
+                INTDIV_func,  // //
+                AADD_func,  // +=
+                ASUB_func,  // -=
+                ADIV_func,  // /=
+                AMUL_func,  // *=
+                AMOD_func,  // %=
+                AINTDIV_func,  // //=
+                FADD_func,  // a++
+                LADD_func,  // ++a
+                FSUB_func,  // a--
+                LSUB_func,  // --a
+                APOW_func,  // ^=
             } type;
             struct statement *right_exp;  // the right exp
             struct statement *left_exp;  // the left exp

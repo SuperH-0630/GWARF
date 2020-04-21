@@ -1443,6 +1443,53 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
         case DIV_func:
             value = div_func(left_result, right_result, the_var);
             break;
+        case AADD_func:
+            value = assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, add_func(left_result, right_result, the_var));
+            break;
+        case ASUB_func:
+            value = assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, sub_func(left_result, right_result, the_var));
+            break;
+        case AMUL_func:
+            value = assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, mul_func(left_result, right_result, the_var));
+            break;
+        case ADIV_func:
+            value = assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, div_func(left_result, right_result, the_var));
+            break;
+        case AMOD_func:
+            value = assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, mod_func(left_result, right_result, the_var));
+            break;
+        case AINTDIV_func:
+            value = assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, int_div_func(left_result, right_result, the_var));
+            break;
+        case APOW_func:
+            value = assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, pow_func(left_result, right_result, the_var));
+            break;
+        case LADD_func:  // a++
+            right_result.u = statement_end;
+            right_result.value.type = INT_value;
+            right_result.value.value.int_value = 1;
+            assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, add_func(left_result, right_result, the_var));
+            value = left_result;  // 先返回值，后自增
+            break;
+        case FADD_func:  // ++a
+            left_result.u = statement_end;
+            left_result.value.type = INT_value;
+            left_result.value.value.int_value = 1;
+            value = assigment_statement(the_statement->code.operation.right_exp, the_var, login_var, add_func(left_result, right_result, the_var));  // 先自增，后返回值
+            break;
+        case LSUB_func:  // a--
+            right_result.u = statement_end;
+            right_result.value.type = INT_value;
+            right_result.value.value.int_value = 1;
+            assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, sub_func(left_result, right_result, the_var));
+            value = left_result;  // 先返回值，后自增
+            break;
+        case FSUB_func:  // --a
+            left_result.u = statement_end;
+            left_result.value.type = INT_value;
+            left_result.value.value.int_value = 1;
+            value = assigment_statement(the_statement->code.operation.right_exp, the_var, login_var, sub_func(right_result, left_result, the_var));  // 先自增，后返回值
+            break;
         case NEGATIVE_func:
             value = negative_func(right_result, the_var);
             break;

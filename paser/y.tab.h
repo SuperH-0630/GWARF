@@ -114,7 +114,16 @@ extern int yydebug;
     OR = 320,
     NOT = 321,
     MOD = 322,
-    INTDIV = 323
+    INTDIV = 323,
+    AADD = 324,
+    ASUB = 325,
+    AMUL = 326,
+    ADIV = 327,
+    AMOD = 328,
+    AINTDIV = 329,
+    FADD = 330,
+    FSUB = 331,
+    APOW = 332
   };
 #endif
 /* Tokens.  */
@@ -184,6 +193,15 @@ extern int yydebug;
 #define NOT 321
 #define MOD 322
 #define INTDIV 323
+#define AADD 324
+#define ASUB 325
+#define AMUL 326
+#define ADIV 327
+#define AMOD 328
+#define AINTDIV 329
+#define FADD 330
+#define FSUB 331
+#define APOW 332
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -198,7 +216,7 @@ union YYSTYPE
     struct if_list *if_list_base;
     struct parameter *parameter_list;
 
-#line 202 "y.tab.h"
+#line 220 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
