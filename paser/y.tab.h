@@ -129,7 +129,8 @@ extern int yydebug;
     BITNOT = 335,
     BITNOTOR = 336,
     BITRIGHT = 337,
-    BITLEFT = 338
+    BITLEFT = 338,
+    PASS = 339
   };
 #endif
 /* Tokens.  */
@@ -214,6 +215,7 @@ extern int yydebug;
 #define BITNOTOR 336
 #define BITRIGHT 337
 #define BITLEFT 338
+#define PASS 339
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -228,7 +230,7 @@ union YYSTYPE
     struct if_list *if_list_base;
     struct parameter *parameter_list;
 
-#line 232 "y.tab.h"
+#line 234 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
