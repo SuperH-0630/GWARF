@@ -23,11 +23,11 @@
 %token <string_value> STRING VAR
 
 %token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE POW LOG SQRT EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI DEFAULT FOR COMMA GLOBAL NONLOCAL INDENTA STOPN STOPF BLOCK FALSE TRUE
-%token NULL_token DEF RETURN CLASS POINT COLON TRY EXCEPT AS RAISE THROW IMPORT INCLUDE IN AND OR NOT MOD INTDIV AADD ASUB AMUL ADIV AMOD AINTDIV FADD FSUB APOW BITAND BITOR BITNOT BITNOTOR BITRIGHT BITLEFT PASS DO
+%token NULL_token DEF RETURN CLASS POINT COLON TRY EXCEPT AS RAISE THROW IMPORT INCLUDE IN AND OR NOT MOD INTDIV AADD ASUB AMUL ADIV AMOD AINTDIV FADD FSUB APOW BITAND BITOR BITNOT BITNOTOR BITRIGHT BITLEFT PASS DO LAMBDA ASSERT
 
 %type <statement_value> base_value base_var_token base_var_ element second_number first_number zero_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
 %type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token for_exp for_block global_token nonlocal_token block_exp block_block call_number def_block def_exp return_exp return_token
-%type <statement_value> eq_number class_block class_exp slice_arguments_token try_block try_exp try_token raise_exp import_exp include_exp bool_number bit_number bit_move do_while_block
+%type <statement_value> eq_number class_block class_exp slice_arguments_token try_block try_exp try_token raise_exp import_exp include_exp bool_number bit_number bit_move do_while_block lambda_exp
 
 %type <parameter_list> formal_parameter arguments slice_arguments
 
@@ -167,8 +167,8 @@ top_exp
     ;
 
 eq_number
-    : bit_number
-    | eq_number EQ bit_number
+    : lambda_exp
+    | lambda_exp EQ eq_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -177,7 +177,7 @@ eq_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | eq_number AADD bit_number
+    | lambda_exp AADD eq_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -186,7 +186,7 @@ eq_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | eq_number ASUB bit_number
+    | lambda_exp ASUB eq_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -195,7 +195,7 @@ eq_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | eq_number AMUL bit_number
+    | lambda_exp AMUL eq_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -204,7 +204,7 @@ eq_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | eq_number ADIV bit_number
+    | lambda_exp ADIV eq_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -213,7 +213,7 @@ eq_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | eq_number AMOD bit_number
+    | lambda_exp AMOD eq_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -222,7 +222,7 @@ eq_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | eq_number AINTDIV bit_number
+    | lambda_exp AINTDIV eq_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -231,7 +231,7 @@ eq_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | eq_number APOW bit_number
+    | lambda_exp APOW eq_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -240,7 +240,7 @@ eq_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | eq_number FADD
+    | lambda_exp FADD
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -249,7 +249,7 @@ eq_number
         code_tmp->code.operation.right_exp = NULL;
         $$ = code_tmp;
     }
-    | FADD eq_number
+    | FADD lambda_exp
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -258,7 +258,7 @@ eq_number
         code_tmp->code.operation.right_exp = $2;
         $$ = code_tmp;
     }
-    | eq_number FSUB
+    | lambda_exp FSUB
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -267,7 +267,7 @@ eq_number
         code_tmp->code.operation.right_exp = NULL;
         $$ = code_tmp;
     }
-    | FSUB eq_number
+    | FSUB lambda_exp
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -275,6 +275,30 @@ eq_number
         code_tmp->code.operation.left_exp = NULL;
         code_tmp->code.operation.right_exp = $2;
         $$ = code_tmp;
+    }
+    ;
+
+lambda_exp
+    : bit_number
+    | LB RB LAMBDA bit_number
+    {
+        statement *lambda_tmp =  make_statement();
+        lambda_tmp->type = lambda_func;
+
+        lambda_tmp->code.lambda_func.parameter_list = NULL;
+        lambda_tmp->code.lambda_func.done = $4;
+
+        $$ = lambda_tmp;
+    }
+    | LB formal_parameter RB LAMBDA bit_number
+    {
+        statement *lambda_tmp =  make_statement();
+        lambda_tmp->type = lambda_func;
+
+        lambda_tmp->code.lambda_func.parameter_list = $2;
+        lambda_tmp->code.lambda_func.done = $5;
+
+        $$ = lambda_tmp;
     }
     ;
 
@@ -962,6 +986,14 @@ raise_exp
         statement *raise_tmp =  make_statement();
         raise_tmp->type = throw_e;
         raise_tmp->code.throw_e.done = $2;
+        $$ = raise_tmp;
+    }
+    | ASSERT top_exp top_exp
+    {
+        statement *raise_tmp =  make_statement();
+        raise_tmp->type = assert_e;
+        raise_tmp->code.assert_e.condition = $2;
+        raise_tmp->code.assert_e.info = $3;
         $$ = raise_tmp;
     }
     ;

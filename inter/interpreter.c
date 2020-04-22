@@ -334,17 +334,33 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             func_tmp->the_var = copy_var_list(the_var);
             func_tmp->type = customize;  // func by user
             if(login_var != the_var){  // 定义为类方法
-                func_tmp->is_class = 1;
+                func_tmp->is_class = true;
             }
             else{
-                func_tmp->is_class = 0;
+                func_tmp->is_class = false;
             }
+            func_tmp->is_lambda = false;
 
             func_value.value.type = FUNC_value;
             func_value.value.value.func_value = func_tmp;
 
             assignment_statement(the_statement->code.def.var, the_var, login_var, func_value);  // 注册函数到指定的位置
             // 无返回值
+            break;
+        }
+        case lambda_func:{
+            func *func_tmp = malloc(sizeof(func));
+
+            func_tmp->done = the_statement->code.lambda_func.done;
+            func_tmp->parameter_list = the_statement->code.lambda_func.parameter_list;
+            func_tmp->the_var = copy_var_list(the_var);
+            func_tmp->type = customize;  // func by user
+            func_tmp->is_class = false;
+            func_tmp->is_lambda = true;
+
+            return_value.value.type = FUNC_value;
+            return_value.value.value.func_value = func_tmp;
+            return_value.u = statement_end;
             break;
         }
         case set_class:{
@@ -711,6 +727,9 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
         case include_import:  // import xxx as xxx 语句
             return_value = include_func(the_statement, the_var);
             break;
+        case assert_e:  // import xxx as xxx 语句
+            return_value = assert_func(the_statement, the_var);
+            break;
         default:
             puts("default");
             break;
@@ -1064,6 +1083,44 @@ GWARF_result for_func(statement *the_statement, var_list *the_var){  // read the
     return_value: 
     the_var = free_var_list(the_var);  // free the new var
     return value;
+}
+
+// -----------------assert func
+GWARF_result assert_func(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func
+    GWARF_result error_value;
+    GWARF_value info;
+
+    GWARF_result tmp_result = traverse(the_statement->code.assert_e.condition, the_var, false);
+    if(is_error(&tmp_result)){  // Name Error错误
+        error_value = tmp_result;
+        goto return_value;
+    }
+    else if(is_space(&tmp_result)){
+        error_value = tmp_result;
+        goto return_value;
+    }
+    if(to_bool(tmp_result.value)){
+        error_value.u = statement_end;
+        error_value.value.type = NULL_value;
+        error_value.value.value.int_value = 0;
+        goto return_value;
+    }
+
+    GWARF_result tmp_info = traverse(the_statement->code.assert_e.info, the_var, false);
+    if(is_error(&tmp_info)){  // 遇到错误->执行except语句[不需要再检查break...]
+        error_value = tmp_info;
+        goto return_value;  // raise执行时发生错误
+    }
+    if(is_space(&tmp_info)){
+        error_value = tmp_info;
+        goto return_value;
+    }
+
+    info = to_str(tmp_info.value, the_var);
+    error_value = to_error(info.value.string , "AssertException", the_var);
+    error_value.u = error;
+
+    return_value: return error_value;
 }
 
 // -----------------raise func
@@ -1873,7 +1930,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
         if(func_->type == customize){  // 用户定义的方法
             // 赋值self
             GWARF_result father;
-            if(func_->is_class  == 1){
+            if(func_->is_class){
                 if(get.father != NULL){
                     father.value = *(get.father);
                     assignment_func(tmp_x->u.name, father, the_var, 0);
@@ -1900,6 +1957,11 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
             else if(is_space(&result)){
                 the_var = free_var_list(the_var);  // free the new var
                 return result;
+            }
+
+            if(func_->is_lambda){
+                result.return_times = 0;
+                result.u = return_def;
             }
             puts("----stop start func----");
         }
@@ -2010,21 +2072,23 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                 }
 
                 puts("----start func----");
-                {
-                    GWARF_result tmp = traverse(func_->done, the_var, false);  // 执行func_value->done
-                    if(is_error(&tmp)){  // Name Error错误
-                        // puts("STOP:: Name No Found!");\
-                        the_var = free_var_list(the_var);  // free the new var
-                        return tmp;
-                    }
-                    else if(is_space(&tmp)){
-                        the_var = free_var_list(the_var);  // free the new var
-                        return tmp;
-                    }
+                result = traverse(func_->done, the_var, false);  // 执行func_value->done
+                if(is_error(&result)){  // Name Error错误
+                    the_var = free_var_list(the_var);  // free the new var
+                    return result;
+                }
+                else if(is_space(&result)){
+                    the_var = free_var_list(the_var);  // free the new var
+                    return result;
+                }
+
+                if(func_->is_lambda){
+                    result.return_times = 0;
+                    result.u = return_def;
                 }
                 puts("----stop start func----");
             }
-            else{
+            else{  // 官方方法
                 GWARF_result tmp_get;
                 GWARF_value father;
                 father.type = OBJECT_value;

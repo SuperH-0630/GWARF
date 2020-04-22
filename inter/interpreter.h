@@ -94,6 +94,7 @@ typedef struct statement{
         set_nonlocal,
         code_block,
         def,  // func
+        lambda_func,  // lambda x:x**2
         call,  // func()
         point,  // a.b  注：返回变量同时返回the_var链表[func 用于回调]
         down,  // a[b]  注：返回变量同时返回the_var链表[func 用于回调]
@@ -106,6 +107,7 @@ typedef struct statement{
         import_class,   // import file
         include_import,  // include file
         for_in_cycle,  // for i in a
+        assert_e,
     } type;  // the statement type
 
     union
@@ -253,6 +255,11 @@ typedef struct statement{
         } def;
 
         struct{
+            parameter *parameter_list;  // lambda parameter
+            struct statement *done;  // lambda to do
+        } lambda_func;
+
+        struct{
             parameter *parameter_list;  // def parameter
             struct statement *func;  // get func value
         } call;
@@ -303,6 +310,12 @@ typedef struct statement{
             struct statement *iter;  // for i in a -> a
             struct statement *done;  // for while to do
         } for_in_cycle;
+
+        struct
+        {
+            struct statement *condition;  // for i in a -> i
+            struct statement *info;  // for while to do
+        } assert_e;
 
     } code;
     struct statement *next;
@@ -425,7 +438,8 @@ typedef struct func{
     struct parameter *parameter_list;  // def parameter
     struct statement *done;  // def to do
     struct var_list *the_var;  // func会记录the_var，因为不同地方调用var如果var链不统一那就会很乱
-    int is_class; 
+    bool is_class; 
+    bool is_lambda;
 } func;
 
 typedef struct class_object{
@@ -457,6 +471,7 @@ GWARF_result raise_func(statement *, var_list *, bool);
 GWARF_result import_func(statement *, var_list *);
 GWARF_result include_func(statement *, var_list *);
 GWARF_result forin_func(statement *, var_list *);
+GWARF_result assert_func(statement *, var_list *);
 
 GWARF_result add_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result sub_func(GWARF_result, GWARF_result, var_list *);
@@ -547,6 +562,7 @@ GWARF_result BaseException_official_func(func *the_func, parameter *tmp_s, var_l
 class_object *Exception_login_official(var_list *the_var, var_list *father_var_list);
 class_object *NameException_login_official(var_list *the_var, var_list *father_var_list);
 class_object *IterException_login_official(var_list *the_var, var_list *father_var_list);
+class_object *AssertException_login_official(var_list *the_var, var_list *father_var_list);
 
 // 生成错误
 GWARF_result to_error(char *error_info, char *error_type, var_list *the_var);

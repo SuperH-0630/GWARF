@@ -131,7 +131,9 @@ extern int yydebug;
     BITRIGHT = 337,
     BITLEFT = 338,
     PASS = 339,
-    DO = 340
+    DO = 340,
+    LAMBDA = 341,
+    ASSERT = 342
   };
 #endif
 /* Tokens.  */
@@ -218,6 +220,8 @@ extern int yydebug;
 #define BITLEFT 338
 #define PASS 339
 #define DO 340
+#define LAMBDA 341
+#define ASSERT 342
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -232,7 +236,7 @@ union YYSTYPE
     struct if_list *if_list_base;
     struct parameter *parameter_list;
 
-#line 236 "y.tab.h"
+#line 240 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

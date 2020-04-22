@@ -128,6 +128,7 @@ void login_official_func(int type, int is_class, var_list *the_var, char *name, 
     func_tmp->type = official;
     func_tmp->official_func = type;
     func_tmp->is_class = is_class;
+    func_tmp->is_lambda = false;
     func_tmp->paser = paser;
 
     func_value.value.type = FUNC_value;
@@ -346,6 +347,20 @@ class_object *Exception_login_official(var_list *the_var, var_list *father_var_l
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("Exception", class_value, the_var, 0);  // 注册class 的 位置
+    puts("----stop set class----");
+    return class_tmp;
+}
+
+class_object *AssertException_login_official(var_list *the_var, var_list *father_var_list){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assignment_func("AssertException", class_value, the_var, 0);  // 注册class 的 位置
     puts("----stop set class----");
     return class_tmp;
 }

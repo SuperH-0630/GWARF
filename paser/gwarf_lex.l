@@ -96,6 +96,8 @@
 <INITIAL>"def" {return DEF;}
 <INITIAL>"return" {return RETURN;}
 <INITIAL>"class" {return CLASS;}
+<INITIAL>"assert" {return ASSERT;}
+<INITIAL>"->" {return LAMBDA;}
 <INITIAL>"&&" {return AND;}
 <INITIAL>"||" {return OR;}
 <INITIAL>"!" {return NOT;}
