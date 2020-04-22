@@ -172,7 +172,7 @@ eq_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
-        code_tmp->code.operation.type = ASSIGMENT_func;
+        code_tmp->code.operation.type = ASSIGnMENT_func;
         code_tmp->code.operation.left_exp = $1;
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;

@@ -2071,7 +2071,7 @@ yyreduce:
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
-        code_tmp->code.operation.type = ASSIGMENT_func;
+        code_tmp->code.operation.type = ASSIGnMENT_func;
         code_tmp->code.operation.left_exp = (yyvsp[-2].statement_value);
         code_tmp->code.operation.right_exp = (yyvsp[0].statement_value);
         (yyval.statement_value) = code_tmp;

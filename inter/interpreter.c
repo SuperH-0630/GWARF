@@ -343,7 +343,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             func_value.value.type = FUNC_value;
             func_value.value.value.func_value = func_tmp;
 
-            assigment_statement(the_statement->code.def.var, the_var, login_var, func_value);  // 注册函数到指定的位置
+            assignment_statement(the_statement->code.def.var, the_var, login_var, func_value);  // 注册函数到指定的位置
             // 无返回值
             break;
         }
@@ -406,7 +406,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 tmp = tmp->next;
             }
 
-            assigment_statement(the_statement->code.set_class.var, the_var,login_var, class_value);  // 注册class 的 位置
+            assignment_statement(the_statement->code.set_class.var, the_var,login_var, class_value);  // 注册class 的 位置
             puts("----stop set class----");
             // 无返回值
             break;
@@ -781,7 +781,7 @@ GWARF_result import_func(statement *the_statement, var_list *the_var){
     class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
 
     import_result.value.value.class_value = class_tmp;
-    assigment_statement(the_statement->code.import_class.var, the_var, the_var, import_result);
+    assignment_statement(the_statement->code.import_class.var, the_var, the_var, import_result);
 
     return_value.u = statement_end;
     return_value.value.type = NULL_value;
@@ -1123,7 +1123,7 @@ GWARF_result try_func(statement *the_statement, var_list *the_var){  // read the
     // restart操作[和continue效果相同]
 
     if(is_error(&value)){  // 遇到错误->执行except语句[不需要再检查break...]
-        assigment_statement(the_statement->code.try_code.var, the_var, the_var, value);
+        assignment_statement(the_statement->code.try_code.var, the_var, the_var, value);
         puts("----except----");
         value = traverse(the_statement->code.try_code.except, the_var, false);
         puts("----stop except----");
@@ -1264,7 +1264,7 @@ GWARF_result forin_func(statement *the_statement, var_list *the_var){  // read t
             break;  // goto return_value;
         }
         else{
-            assigment_statement(the_statement->code.for_in_cycle.var, the_var, the_var,tmp_next);  // 赋值
+            assignment_statement(the_statement->code.for_in_cycle.var, the_var, the_var,tmp_next);  // 赋值
         }
         restart_again: 
         puts("----for in----");
@@ -1417,7 +1417,7 @@ GWARF_result while_func(statement *the_statement, var_list *the_var){  // read t
 GWARF_result operation_func(statement *the_statement, var_list *the_var, var_list *login_var){  // read the statement list with case to run by func
     GWARF_result value, left_result, right_result;
     int func_type = the_statement->code.operation.type;
-    if(func_type != ASSIGMENT_func && func_type != AND_func && func_type != OR_func)
+    if(func_type != ASSIGnMENT_func && func_type != AND_func && func_type != OR_func)
     {
         left_result = traverse(the_statement->code.operation.left_exp, the_var, false);  // NEGATIVE_func等的left为NULL相当与不执行
         if(is_error(&left_result)){
@@ -1451,57 +1451,57 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
             value = div_func(left_result, right_result, the_var);
             break;
         case AADD_func:
-            value = assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, add_func(left_result, right_result, the_var));
+            value = assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, add_func(left_result, right_result, the_var));
             break;
         case ASUB_func:
-            value = assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, sub_func(left_result, right_result, the_var));
+            value = assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, sub_func(left_result, right_result, the_var));
             break;
         case AMUL_func:
-            value = assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, mul_func(left_result, right_result, the_var));
+            value = assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, mul_func(left_result, right_result, the_var));
             break;
         case ADIV_func:
-            value = assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, div_func(left_result, right_result, the_var));
+            value = assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, div_func(left_result, right_result, the_var));
             break;
         case AMOD_func:
-            value = assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, mod_func(left_result, right_result, the_var));
+            value = assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, mod_func(left_result, right_result, the_var));
             break;
         case AINTDIV_func:
-            value = assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, int_div_func(left_result, right_result, the_var));
+            value = assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, int_div_func(left_result, right_result, the_var));
             break;
         case APOW_func:
-            value = assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, pow_func(left_result, right_result, the_var));
+            value = assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, pow_func(left_result, right_result, the_var));
             break;
         case LADD_func:  // a++
             right_result.u = statement_end;
             right_result.value.type = INT_value;
             right_result.value.value.int_value = 1;
-            assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, add_func(left_result, right_result, the_var));
+            assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, add_func(left_result, right_result, the_var));
             value = left_result;  // 先返回值，后自增
             break;
         case FADD_func:  // ++a
             left_result.u = statement_end;
             left_result.value.type = INT_value;
             left_result.value.value.int_value = 1;
-            value = assigment_statement(the_statement->code.operation.right_exp, the_var, login_var, add_func(left_result, right_result, the_var));  // 先自增，后返回值
+            value = assignment_statement(the_statement->code.operation.right_exp, the_var, login_var, add_func(left_result, right_result, the_var));  // 先自增，后返回值
             break;
         case LSUB_func:  // a--
             right_result.u = statement_end;
             right_result.value.type = INT_value;
             right_result.value.value.int_value = 1;
-            assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, sub_func(left_result, right_result, the_var));
+            assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, sub_func(left_result, right_result, the_var));
             value = left_result;  // 先返回值，后自增
             break;
         case FSUB_func:  // --a
             left_result.u = statement_end;
             left_result.value.type = INT_value;
             left_result.value.value.int_value = 1;
-            value = assigment_statement(the_statement->code.operation.right_exp, the_var, login_var, sub_func(right_result, left_result, the_var));  // 先自增，后返回值
+            value = assignment_statement(the_statement->code.operation.right_exp, the_var, login_var, sub_func(right_result, left_result, the_var));  // 先自增，后返回值
             break;
         case NEGATIVE_func:
             value = negative_func(right_result, the_var);
             break;
-        case ASSIGMENT_func:{  // because the var char, we should ues a {} to make a block[name space] for the tmp var;
-            value = assigment_statement(the_statement->code.operation.left_exp, the_var, login_var, right_result);
+        case ASSIGnMENT_func:{  // because the var char, we should ues a {} to make a block[name space] for the tmp var;
+            value = assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, right_result);
             break;
         }
         case EQUAL_func:
@@ -1572,12 +1572,20 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
     return value;
 }
 
-GWARF_result assigment_statement(statement *the_statement, var_list *the_var, var_list *login_var, GWARF_result right_result){
+GWARF_result assignment_statement(statement *the_statement, var_list *the_var, var_list *login_var, GWARF_result right_result){
     GWARF_result value;
     value.u = statement_end;
     value.value.type = NULL_value;
     value.value.value.int_value = 0;
-
+    if(right_result.value.type == OBJECT_value || right_result.value.type == CLASS_value){
+        right_result = get__assignment__(&(right_result.value), the_var);
+        if(is_error(&right_result)){  // Name Error错误
+            return right_result;
+        }
+        else if(is_space(&right_result)){
+            return right_result;
+        }
+    }
 
     if(the_statement->type == base_var){  // 通过base_var赋值
         char *left = the_statement->code.base_var.var_name;  // get var name but not value
@@ -1606,7 +1614,7 @@ GWARF_result assigment_statement(statement *the_statement, var_list *the_var, va
             }
         }
 
-        value = assigment_func(left, right_result, login_var, from);
+        value = assignment_func(left, right_result, login_var, from);
     }
     else if(the_statement->type == point){  // 通过point赋值
         GWARF_result tmp_result = traverse(the_statement->code.point.base_var, the_var, false);  // 不用取value
@@ -1644,7 +1652,7 @@ GWARF_result assigment_statement(statement *the_statement, var_list *the_var, va
                     from = 0;
                 }
             }
-            value = assigment_func(left, right_result, base_the_var.value.object_value->the_var, from);
+            value = assignment_func(left, right_result, base_the_var.value.object_value->the_var, from);
         }
         else{
             goto the_else;
@@ -1689,7 +1697,7 @@ GWARF_result assigment_statement(statement *the_statement, var_list *the_var, va
         }
     }
     else{ 
-        the_else: puts("Bad Assigment");
+        the_else: puts("Bad Assignment");
     }
     return value;
 }
@@ -1729,7 +1737,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
             GWARF_result father;
             if(func_->is_class  == 1){
                 father.value = *(get.father);
-                assigment_func(tmp_x->u.name, father, the_var, 0);
+                assignment_func(tmp_x->u.name, father, the_var, 0);
                 if (tmp_x->next == NULL){  // the last
                     goto no_tmp_x;
                 }
@@ -1746,7 +1754,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                     the_var = free_var_list(the_var);  // free the new var
                     return tmp;
                 }
-                assigment_func(tmp_x->u.name, tmp, the_var, 0);
+                assignment_func(tmp_x->u.name, tmp, the_var, 0);
                 if ((tmp_x->next == NULL)||(tmp_s->next == NULL)){  // the last
                     break;
                 }
@@ -1802,7 +1810,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                 father.value.type = OBJECT_value;
                 father.value.value.object_value = object_tmp;
                 if(func_->is_class  == 1){
-                    assigment_func(tmp_x->u.name, father, the_var, 0);
+                    assignment_func(tmp_x->u.name, father, the_var, 0);
                     if (tmp_x->next == NULL){  // the last
                         goto no_tmp_x_init;
                     }
@@ -1819,7 +1827,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                         the_var = free_var_list(the_var);  // free the new var
                         return tmp;
                     }
-                    assigment_func(tmp_x->u.name, tmp, the_var, 0);
+                    assignment_func(tmp_x->u.name, tmp, the_var, 0);
                     if ((tmp_x->next == NULL)||(tmp_s->next == NULL)){  // the last
                         break;
                     }
@@ -1888,7 +1896,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                 father.value.type = OBJECT_value;
                 father.value.value.object_value = get.value.value.object_value;
                 if(func_->is_class  == 1){
-                    assigment_func(tmp_x->u.name, father, the_var, 0);
+                    assignment_func(tmp_x->u.name, father, the_var, 0);
                     if (tmp_x->next == NULL){  // the last
                         goto no_tmp_x_call;
                     }
@@ -1905,7 +1913,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                         the_var = free_var_list(the_var);  // free the new var
                         return tmp;
                     }
-                    assigment_func(tmp_x->u.name, tmp, the_var, 0);
+                    assignment_func(tmp_x->u.name, tmp, the_var, 0);
                     if ((tmp_x->next == NULL)||(tmp_s->next == NULL)){  // the last
                         break;
                     }
@@ -3152,8 +3160,8 @@ GWARF_result sqrt_func(GWARF_result left_result, GWARF_result right_result, var_
     return_back: return return_value;
 }
 
-// ---------  ASSIGMENT
-GWARF_result assigment_func(char *left, GWARF_result right_result, var_list *the_var, int from){  // the func for assigment and call from read_statement_list
+// ---------  ASSIGnMENT
+GWARF_result assignment_func(char *left, GWARF_result right_result, var_list *the_var, int from){  // the func for assignment and call from read_statement_list
     add_var(the_var, from, left, right_result.value);
     return right_result;
 }

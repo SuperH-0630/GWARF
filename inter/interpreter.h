@@ -107,7 +107,7 @@ typedef struct statement{
                 SUB_func,  // -
                 DIV_func,  // /
                 MUL_func,  // *
-                ASSIGMENT_func, // =
+                ASSIGnMENT_func, // =
                 EQUAL_func,  // ==
                 MORE_func,  // >
                 LESS_func,  // <
@@ -406,6 +406,7 @@ typedef enum{
     __bitright__func = 38,
     __bitrightr__func = 39,
     __bitnot__func = 40,
+    __assignment__func = 41,
 } official_func_type;
 
 typedef struct func{
@@ -455,10 +456,10 @@ GWARF_result div_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result pow_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result log_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result sqrt_func(GWARF_result, GWARF_result, var_list *);
-GWARF_result assigment_func(char *, GWARF_result, var_list *, int);
+GWARF_result assignment_func(char *, GWARF_result, var_list *, int);
 GWARF_result equal_func(GWARF_result, GWARF_result, var_list *, int);
 GWARF_result negative_func(GWARF_result, var_list *);
-GWARF_result assigment_statement(statement *, var_list *, var_list *, GWARF_result);
+GWARF_result assignment_statement(statement *, var_list *, var_list *, GWARF_result);
 GWARF_result not_func(GWARF_result, var_list *);
 GWARF_result or_func(statement *, statement *, var_list *);
 GWARF_result and_func(statement *, statement *, var_list *);
@@ -486,6 +487,7 @@ GWARF_result get__value__(GWARF_value *, var_list *);
 GWARF_result get__bool__(GWARF_value *, var_list *);
 GWARF_result get__iter__(GWARF_value *, var_list *);
 GWARF_result get__next__(GWARF_value *, var_list *);
+GWARF_result get__assignment__(GWARF_value *, var_list *);
 GWARF_result run_func_core(GWARF_value *, var_list *, char *, bool);
 
 int len_only_double(double num);

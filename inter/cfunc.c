@@ -132,7 +132,7 @@ void login_official_func(int type, int is_class, var_list *the_var, char *name, 
 
     func_value.value.type = FUNC_value;
     func_value.value.value.func_value = func_tmp;
-    assigment_func(name, func_value, the_var, 0);  // 注册函数到指定的位置
+    assignment_func(name, func_value, the_var, 0);  // 注册函数到指定的位置
 }
 
 void login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *)){
@@ -225,7 +225,7 @@ class_object *object_login_official(var_list *the_var, GWARF_result (*paser)(fun
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
-    assigment_func("object", class_value, the_var, 0);  // 注册class 的 位置
+    assignment_func("object", class_value, the_var, 0);  // 注册class 的 位置
     puts("----stop set class----");
 
 
@@ -258,6 +258,9 @@ GWARF_result object_official_func(func *the_func, parameter *tmp_s, var_list *th
             return_value.value = to_str(*(father.father), out_var);
             break;
         }
+        case __assignment__func:
+            return_value.value = *(father.father);  // 返回原值
+            break;
     }
     return_result: return return_value;
 }
@@ -282,7 +285,7 @@ class_object *BaseException_login_official(var_list *the_var, GWARF_result (*pas
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
-    assigment_func("BaseException", class_value, the_var, 0);  // 注册class 的 位置
+    assignment_func("BaseException", class_value, the_var, 0);  // 注册class 的 位置
     puts("----stop set class----");
 
     // 注册函数
@@ -323,7 +326,7 @@ GWARF_result BaseException_official_func(func *the_func, parameter *tmp_s, var_l
                 goto return_result;
             }
             tmp.value = to_str(tmp_result.value, out_var);  // 只有一个参数[要针对不同数据类型对此处作出处理]
-            assigment_func("ErrorInfo", tmp, login_var, 0);  // 注册到self -> ErrorInfo
+            assignment_func("ErrorInfo", tmp, login_var, 0);  // 注册到self -> ErrorInfo
             return_value.u = statement_end;  // __init__没有return
             break;
         }
@@ -342,7 +345,7 @@ class_object *Exception_login_official(var_list *the_var, var_list *father_var_l
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
-    assigment_func("Exception", class_value, the_var, 0);  // 注册class 的 位置
+    assignment_func("Exception", class_value, the_var, 0);  // 注册class 的 位置
     puts("----stop set class----");
     return class_tmp;
 }
@@ -356,7 +359,7 @@ class_object *NameException_login_official(var_list *the_var, var_list *father_v
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
-    assigment_func("NameException", class_value, the_var, 0);  // 注册class 的 位置
+    assignment_func("NameException", class_value, the_var, 0);  // 注册class 的 位置
     puts("----stop set class----");
     return class_tmp;
 }
@@ -370,7 +373,7 @@ class_object *IterException_login_official(var_list *the_var, var_list *father_v
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
-    assigment_func("IterException", class_value, the_var, 0);  // 注册class 的 位置
+    assignment_func("IterException", class_value, the_var, 0);  // 注册class 的 位置
     puts("----stop set class----");
     return class_tmp;
 }
@@ -384,7 +387,7 @@ class_object *gobject_login_official(var_list *the_var, GWARF_result (*paser)(fu
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
-    assigment_func("gobject", class_value, the_var, 0);  // 注册class 的 位置
+    assignment_func("gobject", class_value, the_var, 0);  // 注册class 的 位置
     puts("----stop set class----");
 
     // 注册函数
@@ -420,7 +423,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             GWARF_result tmp;
             tmp.value.type = INT_value;
             tmp.value.value.int_value = 0;
-            assigment_func("value", tmp, login_var, 0);  // 注册到self
+            assignment_func("value", tmp, login_var, 0);  // 注册到self
             return_value.u = statement_end;  // __init__没有return
             break;
         }
@@ -1144,12 +1147,12 @@ class_object *int_login_official(var_list *the_var, GWARF_result (*paser)(func *
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
-    assigment_func("int", class_value, the_var, 0);  // 注册class 的 位置
+    assignment_func("int", class_value, the_var, 0);  // 注册class 的 位置
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{2,1}};
-    char *name[] = {"__init__"};
+    int a[][2] = {{2,1}, {__assignment__func, 1}};
+    char *name[] = {"__init__", "__assignment__"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
@@ -1186,8 +1189,35 @@ GWARF_result int_official_func(func *the_func, parameter *tmp_s, var_list *the_v
             }
             GWARF_value base_the_var = tmp.value;  // 只有一个参数
             tmp.value = to_int(tmp_result.value, out_var);  // 只有一个参数[要针对不同数据类型对此处作出处理]
-            assigment_func("value", tmp, login_var, 0);  // 注册到self
+            assignment_func("value", tmp, login_var, 0);  // 注册到self
             return_value.u = statement_end;  // __init__没有return
+            break;
+        }
+        case __assignment__func:{
+            // 不使用to_object，要保证赋值前后类型一致[to_object会受class重写的影响]
+            if(father.father->type == OBJECT_value){
+                the_object *object_tmp = malloc(sizeof(the_object));  // 生成object的空间
+                object_tmp->cls = father.father->value.object_value->cls;
+                object_tmp->the_var = append_by_var_list(make_var_base(make_var()), object_tmp->cls);  // 生成实例
+
+                // 执行__init__
+                GWARF_result self_value;
+                var *tmp = find_var(login_var, 0, "value");
+                if(tmp != NULL){
+                    self_value.value = to_int(tmp->value, out_var);
+                }
+                else{
+                    self_value.value.type = INT_value;
+                    self_value.value.value.int_value = 0;
+                }
+                assignment_func("value", self_value, object_tmp->the_var, 0);  // 注册到新的object
+
+                return_value.value.type = OBJECT_value;
+                return_value.value.value.object_value = object_tmp;
+            }
+            else{
+                return_value.value = *(father.father);  // 返回原值
+            }
             break;
         }
         default:
@@ -1235,12 +1265,12 @@ class_object *double_login_official(var_list *the_var, GWARF_result (*paser)(fun
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
-    assigment_func("double", class_value, the_var, 0);  // 注册class 的 位置
+    assignment_func("double", class_value, the_var, 0);  // 注册class 的 位置
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{2,1}};
-    char *name[] = {"__init__"};
+    int a[][2] = {{2,1}, {__assignment__func, 1}};
+    char *name[] = {"__init__", "__assignment__"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
@@ -1276,8 +1306,35 @@ GWARF_result double_official_func(func *the_func, parameter *tmp_s, var_list *th
                 goto return_result;
             }
             tmp.value = to_double(tmp_result.value, out_var);  // 只有一个参数[要针对不同数据类型对此处作出处理]
-            assigment_func("value", tmp, login_var, 0);  // 注册到self
+            assignment_func("value", tmp, login_var, 0);  // 注册到self
             return_value.u = statement_end;  // __init__没有return
+            break;
+        }
+        case __assignment__func:{
+            // 不使用to_object，要保证赋值前后类型一致[to_object会受class重写的影响]
+            if(father.father->type == OBJECT_value){
+                the_object *object_tmp = malloc(sizeof(the_object));  // 生成object的空间
+                object_tmp->cls = father.father->value.object_value->cls;
+                object_tmp->the_var = append_by_var_list(make_var_base(make_var()), object_tmp->cls);  // 生成实例
+
+                // 执行__init__
+                GWARF_result self_value;
+                var *tmp = find_var(login_var, 0, "value");
+                if(tmp != NULL){
+                    self_value.value = to_int(tmp->value, out_var);
+                }
+                else{
+                    self_value.value.type = NUMBER_value;
+                    self_value.value.value.double_value = 0;
+                }
+                assignment_func("value", self_value, object_tmp->the_var, 0);  // 注册到新的object
+
+                return_value.value.type = OBJECT_value;
+                return_value.value.value.object_value = object_tmp;
+            }
+            else{
+                return_value.value = *(father.father);  // 返回原值
+            }
             break;
         }
         default:
@@ -1324,7 +1381,7 @@ class_object *str_login_official(var_list *the_var, GWARF_result (*paser)(func *
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
-    assigment_func("str", class_value, the_var, 0);  // 注册class 的 位置
+    assignment_func("str", class_value, the_var, 0);  // 注册class 的 位置
     puts("----stop set class----");
 
     // 注册函数
@@ -1365,7 +1422,7 @@ GWARF_result str_official_func(func *the_func, parameter *tmp_s, var_list *the_v
                 goto return_result;
             }
             tmp.value = to_str(tmp_result.value, out_var);  // 只有一个参数[要针对不同数据类型对此处作出处理]
-            assigment_func("value", tmp, login_var, 0);  // 注册到self
+            assignment_func("value", tmp, login_var, 0);  // 注册到self
             return_value.u = statement_end;  // __init__没有return
             break;
         }
@@ -1435,12 +1492,12 @@ class_object *bool_login_official(var_list *the_var, GWARF_result (*paser)(func 
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
-    assigment_func("bool", class_value, the_var, 0);  // 注册class 的 位置
+    assignment_func("bool", class_value, the_var, 0);  // 注册class 的 位置
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{2,1}};
-    char *name[] = {"__init__"};
+    int a[][2] = {{2,1}, {__assignment__func, 1}};
+    char *name[] = {"__init__", "__assignment__"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
@@ -1476,8 +1533,35 @@ GWARF_result bool_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 goto return_result;
             }
             tmp.value = to_bool_(tmp_result.value, out_var);  // 只有一个参数[要针对不同数据类型对此处作出处理]
-            assigment_func("value", tmp, login_var, 0);  // 注册到self
+            assignment_func("value", tmp, login_var, 0);  // 注册到self
             return_value.u = statement_end;  // __init__没有return
+            break;
+        }
+        case __assignment__func:{
+            // 不使用to_object，要保证赋值前后类型一致[to_object会受class重写的影响]
+            if(father.father->type == OBJECT_value){
+                the_object *object_tmp = malloc(sizeof(the_object));  // 生成object的空间
+                object_tmp->cls = father.father->value.object_value->cls;
+                object_tmp->the_var = append_by_var_list(make_var_base(make_var()), object_tmp->cls);  // 生成实例
+
+                // 执行__init__
+                GWARF_result self_value;
+                var *tmp = find_var(login_var, 0, "value");
+                if(tmp != NULL){
+                    self_value.value = to_bool_(tmp->value, out_var);
+                }
+                else{
+                    self_value.value.type = BOOL_value;
+                    self_value.value.value.double_value = false;
+                }
+                assignment_func("value", self_value, object_tmp->the_var, 0);  // 注册到新的object
+
+                return_value.value.type = OBJECT_value;
+                return_value.value.value.object_value = object_tmp;
+            }
+            else{
+                return_value.value = *(father.father);  // 返回原值
+            }
             break;
         }
         default:
@@ -1514,7 +1598,7 @@ class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func 
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
-    assigment_func("list", class_value, the_var, 0);  // 注册class 的 位置
+    assignment_func("list", class_value, the_var, 0);  // 注册class 的 位置
     puts("----stop set class----");
 
     // 注册函数
@@ -1553,7 +1637,7 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 list_tmp.value.list_value->index = 0;
                 list_tmp.value.list_value->list_value = malloc((size_t)0);
                 tmp_result.value = list_tmp;
-                assigment_func("value", tmp_result, login_var, 0);  // 注册到self
+                assignment_func("value", tmp_result, login_var, 0);  // 注册到self
                 return_value.u = statement_end;  // __init__没有return
             }
             else{
@@ -1567,13 +1651,13 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
                     goto return_result;
                 }
                 tmp.value = to_list(tmp_result.value, out_var);  // 只有一个参数[要针对不同数据类型对此处作出处理]
-                assigment_func("value", tmp, login_var, 0);  // 注册到self
+                assignment_func("value", tmp, login_var, 0);  // 注册到self
                 return_value.u = statement_end;  // __init__没有return
             }
             GWARF_result iter_value;
             iter_value.value.type = INT_value;
             iter_value.value.value.int_value = 0;
-            assigment_func("iter_value", iter_value, login_var, 0);  // 注册到self
+            assignment_func("iter_value", iter_value, login_var, 0);  // 注册到self
             break;
         }
         case __len__func:{  // return index
@@ -1586,7 +1670,7 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
             GWARF_result iter_value;
             iter_value.value.type = INT_value;
             iter_value.value.value.int_value = 0;
-            assigment_func("iter_value", iter_value, login_var, 0);  // 注册到self
+            assignment_func("iter_value", iter_value, login_var, 0);  // 注册到self
 
             return_value.value = *(father.father);
             break;
@@ -1612,7 +1696,7 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 GWARF_result iter_value;
                 iter_value.value.type = INT_value;
                 iter_value.value.value.int_value = iter_index + 1;
-                assigment_func("iter_value", iter_value, login_var, 0);  // 注册到self
+                assignment_func("iter_value", iter_value, login_var, 0);  // 注册到self
             }
 
             break;
@@ -1778,6 +1862,14 @@ GWARF_value parameter_to_list(parameter *tmp_s, var_list *the_var){  // 把param
     return return_list;
 }
 
+GWARF_result get__assignment__(GWARF_value *base_the_var, var_list *the_var){  // 获取__assignment__
+    GWARF_result tmp = run_func_core(base_the_var, the_var, "__assignment__", true);
+    if(is_error(&tmp) || is_space(&tmp)){
+        tmp.u = statement_end;
+        tmp.value = *base_the_var;  // 返回原值
+    }
+    return tmp;
+}
 
 GWARF_result get__next__(GWARF_value *base_the_var, var_list *the_var){  // 获取__next__
     GWARF_result tmp = run_func_core(base_the_var, the_var, "__next__", true);
