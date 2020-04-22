@@ -1716,6 +1716,146 @@ GWARF_result call_back(statement *the_statement, var_list *the_var){  // the fun
     return result;
 }
 
+GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp_x, parameter *tmp_s){
+    GWARF_result return_result;
+    return_result.u = statement_end;
+    return_result.value.type = NULL_value;
+    return_result.value.value.int_value = 0;
+
+    int assignment_type = 0;  // 0-根据tmp_x进行赋值，1-根据tmp_s赋值
+    var_list *tmp_var = make_var_base(make_var());  // 为1-模式准备
+
+    while(1){
+        if ((tmp_x == NULL)&&(tmp_s == NULL)){  // the last
+            break;
+        }
+        if(assignment_type == 0){  // 对位赋值
+            if ((tmp_x == NULL)&&(tmp_s != NULL)){  // 参数过多
+                printf("Warning!!!\n");
+                break;
+            }
+            else if ((tmp_x != NULL)&&(tmp_s == NULL)){  // 使用默认值
+                while(1){  // 如果是name_value类型则继续赋值
+                    if(tmp_x == NULL){
+                        break;
+                    }
+                    else if(tmp_x->type == name_value){
+                        GWARF_result tmp = traverse(tmp_x->u.value, the_var, false);  // 执行形参
+                        if(is_error(&tmp) || is_space(&tmp)){
+                            return tmp;
+                        }
+                        assignment_func(tmp_x->u.name, tmp, the_var, 0);
+                        tmp_x = tmp_x->next;  // get the next to iter
+                    }
+                    else if(tmp_x->type == put_args){  // args默认为[]
+                        GWARF_result func_result;
+                        var *list_init;
+                        func_result.u = statement_end;
+                        list_init = find_var(old_var_list, 0, "list");
+                        if(list_init != NULL){
+                            func_result.value = list_init->value;
+                        }
+                        assignment_func(tmp_x->u.name, call_back_core(func_result, old_var_list, NULL), the_var, 0);
+                        tmp_x = tmp_x->next;  // get the next to iter
+                    }
+                    else{
+                        printf("warning!!!\n");
+                        break;
+                    }
+
+                }
+                break;
+            }
+        }
+        else if(assignment_type == 1){  // 根据实参  a = b 来赋值
+            if ((tmp_x != NULL)&&(tmp_s == NULL)){  // 实参录入完毕
+                while(1){
+                    if(tmp_x == NULL){
+                        break;  // 形参录入完毕
+                    }
+                    var *tmp_x_var = find_var(tmp_var, 0, tmp_x->u.name);
+                    if(tmp_x_var != NULL){
+                        GWARF_result tmp_result;
+                        tmp_result.value = tmp_x_var->value;
+                        assignment_func(tmp_x->u.name, tmp_result, the_var, 0);
+                    }
+                    else if(tmp_x->type == name_value){
+                        GWARF_result tmp = traverse(tmp_x->u.value, the_var, false);  // 执行形参
+                        if(is_error(&tmp) || is_space(&tmp)){
+                            return tmp;
+                        }
+                        assignment_func(tmp_x->u.name, tmp, the_var, 0);
+                    }
+                    else{
+                        printf("Warning!!!");
+                        break;
+                    }
+                    tmp_x = tmp_x->next;
+                }
+                break;
+            }
+        }
+
+        GWARF_result tmp = traverse(tmp_s->u.value, old_var_list, false);  // 不需要取__value__
+        if(is_error(&tmp)){
+            return tmp;
+        }
+        else if(is_space(&tmp)){
+            return tmp;
+        }
+
+        if(assignment_type == 1 || tmp_s->type == name_value){
+            if(tmp_s->type != name_value){
+                printf("Warning!!!");  // 进入了模式1, 但不是name_value
+                break;
+            }
+            assignment_type = 1;
+            assignment_func(tmp_s->u.name, tmp, tmp_var, 0);  // 先赋值到tmp_var上
+            tmp_s = tmp_s->next;
+        }
+        else if(tmp_s->type == put_args){  // assignment_type不在1模式
+            parameter *before = tmp_s, *after = tmp_s->next;
+            GWARF_value iter_value = get__iter__(&(tmp.value), old_var_list).value;  // 获取迭代object，一般是返回self
+            while (1){
+                GWARF_result tmp_next = get__next__(&(iter_value), old_var_list);// 执行__next__的返回值
+                if(is_error(&tmp_next)){  // TODO:: 检查是否为IterException
+                    break;  // goto return_value;
+                }
+                if(is_space(&tmp_next)){  // TODO:: 检查是否为IterException
+                    return tmp_next;
+                }
+                before->next = pack_value_parameter(tmp_next.value);
+                before = before->next;
+            }
+            before->next = after;
+            tmp_s = tmp_s->next;  // 实参去下一位, 形参不变
+        }
+        else if(assignment_type == 0 && tmp_x->type == put_args){
+            // 放入list中
+            GWARF_result list_tmp;
+            list_tmp.value = to_object(parameter_to_list(tmp_s, old_var_list), old_var_list);
+            assignment_func(tmp_x->u.name, list_tmp, the_var, 0);
+            assignment_type = 1;  // 进入根据实参赋值模式
+            tmp_x = tmp_x->next;
+            while(1){
+                if(tmp_s == NULL){
+                    break;
+                }
+                if(tmp_s->type != only_value){
+                    break;
+                }
+                tmp_s = tmp_s->next;
+            }
+        }
+        else if(assignment_type == 0){
+            assignment_func(tmp_x->u.name, tmp, the_var, 0);
+            tmp_x = tmp_x->next;  // get the next to iter
+            tmp_s = tmp_s->next;
+        }
+    }
+    return return_result;
+}
+
 GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_s){  // the func for add and call from read_statement_list
     GWARF_result result;
     var_list *old_var_list = the_var;
@@ -1731,41 +1871,29 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
         // printf("----new address = %d----\n", the_var);
 
         if(func_->type == customize){  // 用户定义的方法
-            if(tmp_x == NULL){
-                goto no_tmp_x;  // 无形参
-            }
+            // 赋值self
             GWARF_result father;
             if(func_->is_class  == 1){
-                father.value = *(get.father);
-                assignment_func(tmp_x->u.name, father, the_var, 0);
-                if (tmp_x->next == NULL){  // the last
-                    goto no_tmp_x;
+                if(get.father != NULL){
+                    father.value = *(get.father);
+                    assignment_func(tmp_x->u.name, father, the_var, 0);
+                    tmp_x = tmp_x->next;  // get the next to iter
                 }
-                tmp_x = tmp_x->next;  // get the next to iter
+                else{
+                    printf("Warning!!!\n");
+                    // TODO:: 抛出错误
+                }
             }
-            while(1){
-                GWARF_result tmp = traverse(tmp_s->u.value, the_var, false);  // 不需要取__value__
-                if(is_error(&tmp)){  // Name Error错误
-                    // puts("STOP:: Name No Found!");
-                    the_var = free_var_list(the_var);  // free the new var
-                    return tmp;
-                }
-                else if(is_space(&tmp)){
-                    the_var = free_var_list(the_var);  // free the new var
-                    return tmp;
-                }
-                assignment_func(tmp_x->u.name, tmp, the_var, 0);
-                if ((tmp_x->next == NULL)||(tmp_s->next == NULL)){  // the last
-                    break;
-                }
-                tmp_x = tmp_x->next;  // get the next to iter
-                tmp_s = tmp_s->next;
+
+            GWARF_result tmp_return = login_var(the_var, old_var_list, tmp_x, tmp_s);
+            if(tmp_return.u != statement_end){
+                the_var = free_var_list(the_var);  // free the new var
+                return tmp_return;
             }
-            no_tmp_x: 
+
             puts("----start func----");
             result = traverse(func_->done, the_var, false);  // 执行func_value->done
             if(is_error(&result)){  // Name Error错误
-                // puts("STOP:: Name No Found!");
                 the_var = free_var_list(the_var);  // free the new var
                 return result;
             }
@@ -1796,45 +1924,24 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
             the_var = func_->the_var;
             // tmp_x:形参，tmp_s:实参
 
-            // // printf("----address = %d----\n", the_var);
             var *tmp = make_var();  // base_var
             the_var = append_var_list(tmp, the_var);
-            // // printf("----new address = %d----\n", the_var);
 
             if(func_->type == customize){  // 用户定义的方法
-                if(tmp_x == NULL){
-                    puts("No tmp_x");
-                    goto no_tmp_x_init;  // 无形参
-                }
                 GWARF_result father;
                 father.value.type = OBJECT_value;
                 father.value.value.object_value = object_tmp;
                 if(func_->is_class  == 1){
                     assignment_func(tmp_x->u.name, father, the_var, 0);
-                    if (tmp_x->next == NULL){  // the last
-                        goto no_tmp_x_init;
-                    }
                     tmp_x = tmp_x->next;  // get the next to iter
                 }
-                while(1){
-                    GWARF_result tmp = traverse(tmp_s->u.value, the_var, false);
-                    if(is_error(&tmp)){  // Name Error错误
-                        // puts("STOP:: Name No Found!");
-                        the_var = free_var_list(the_var);  // free the new var
-                        return tmp;
-                    }
-                    else if(is_space(&tmp)){
-                        the_var = free_var_list(the_var);  // free the new var
-                        return tmp;
-                    }
-                    assignment_func(tmp_x->u.name, tmp, the_var, 0);
-                    if ((tmp_x->next == NULL)||(tmp_s->next == NULL)){  // the last
-                        break;
-                    }
-                    tmp_x = tmp_x->next;  // get the next to iter
-                    tmp_s = tmp_s->next;
+
+                GWARF_result tmp_return = login_var(the_var, old_var_list, tmp_x, tmp_s);
+                if(tmp_return.u != statement_end){
+                    the_var = free_var_list(the_var);  // free the new var
+                    return tmp_return;
                 }
-                no_tmp_x_init: 
+
                 puts("----start func----");
                 {
                     GWARF_result tmp = traverse(func_->done, the_var, false);  // 执行func_value->done
@@ -1888,39 +1995,20 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
             // // printf("----new address = %d----\n", the_var);
 
             if(func_->type == customize){  // 用户定义的方法
-                if(tmp_x == NULL){
-                    puts("No tmp_x");
-                    goto no_tmp_x_call;  // 无形参
-                }
                 GWARF_result father;
                 father.value.type = OBJECT_value;
                 father.value.value.object_value = get.value.value.object_value;
                 if(func_->is_class  == 1){
                     assignment_func(tmp_x->u.name, father, the_var, 0);
-                    if (tmp_x->next == NULL){  // the last
-                        goto no_tmp_x_call;
-                    }
                     tmp_x = tmp_x->next;  // get the next to iter
                 }
-                while(1){
-                    GWARF_result tmp = traverse(tmp_s->u.value, the_var, false);
-                    if(is_error(&tmp)){  // Name Error错误
-                        // puts("STOP:: Name No Found!");
-                        the_var = free_var_list(the_var);  // free the new var
-                        return tmp;
-                    }
-                    else if(is_space(&tmp)){
-                        the_var = free_var_list(the_var);  // free the new var
-                        return tmp;
-                    }
-                    assignment_func(tmp_x->u.name, tmp, the_var, 0);
-                    if ((tmp_x->next == NULL)||(tmp_s->next == NULL)){  // the last
-                        break;
-                    }
-                    tmp_x = tmp_x->next;  // get the next to iter
-                    tmp_s = tmp_s->next;
+
+                GWARF_result tmp_return = login_var(the_var, old_var_list, tmp_x, tmp_s);
+                if(tmp_return.u != statement_end){
+                    the_var = free_var_list(the_var);  // free the new var
+                    return tmp_return;
                 }
-                no_tmp_x_call: 
+
                 puts("----start func----");
                 {
                     GWARF_result tmp = traverse(func_->done, the_var, false);  // 执行func_value->done

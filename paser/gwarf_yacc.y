@@ -1111,24 +1111,85 @@ formal_parameter
     : base_var_
     {
         $$ = make_parameter_name($1->code.base_var.var_name);
+        $$->type = only_name;
+        free($1->code.base_var.var_name);
+        free($1);
+    }
+    | MUL base_var_
+    {
+        $$ = make_parameter_name($2->code.base_var.var_name);
+        $$->type = put_args;
+        free($2->code.base_var.var_name);
+        free($2);
+    }
+    | base_var_ EQ top_exp
+    {
+        $$ = make_parameter_name($1->code.base_var.var_name);
+        $$->u.value = $3;
+        $$->type = name_value;
         free($1->code.base_var.var_name);
         free($1);
     }
     | formal_parameter COMMA base_var_
     {
-        append_parameter_name($3->code.base_var.var_name, $1);
+        parameter *tmp = append_parameter_name($3->code.base_var.var_name, $1);
+        tmp->type = only_name;
         $$ = $1;
+        free($3->code.base_var.var_name);
+        free($3);
     }
+    | formal_parameter COMMA MUL base_var_
+    {
+        parameter *tmp = append_parameter_name($4->code.base_var.var_name, $1);
+        tmp->type = put_args;
+        $$ = $1;
+        free($4->code.base_var.var_name);
+        free($4);
+    }
+    | formal_parameter COMMA base_var_ EQ top_exp
+    {
+        parameter *tmp = append_parameter_name($3->code.base_var.var_name, $1);
+        tmp->u.value = $5;
+        tmp->type = name_value;
+        $$ = $1;
+        free($3->code.base_var.var_name);
+        free($3);
+    }
+    ;
 
 arguments
     : top_exp
     {
         $$ = make_parameter_value($1);
+        $$->type = only_value;
     }
     | arguments COMMA top_exp
     {
-        append_parameter_value($3, $1);
+        parameter *tmp = append_parameter_value($3, $1);
+        tmp->type = only_value;
         $$ = $1;
+    }
+    | base_var_ EQ top_exp
+    {
+        $$ = make_parameter_name($1->code.base_var.var_name);
+        $$->u.value = $3;
+        $$->type = name_value;
+        free($1->code.base_var.var_name);
+        free($1);
+    }
+    | arguments COMMA base_var_ EQ top_exp
+    {
+        parameter *tmp = append_parameter_name($3->code.base_var.var_name, $1);
+        tmp->u.value = $5;
+        tmp->type = name_value;
+        $$ = $1;
+        free($3->code.base_var.var_name);
+        free($3);
+    }
+    | MUL top_exp
+    {
+        $$ = make_parameter_value($2);
+        $$->type = put_args;
     }
     ;
 

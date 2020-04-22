@@ -44,11 +44,20 @@ typedef struct GWARF_value{
 
 // ------------------------- parameter for def
 typedef struct parameter{
-    union
+    struct
     {
         char *name;  // var name
-        struct statement *value;  // or value
+        struct statement *value;  // var value
     } u;
+    enum {
+        only_name,  // 形参
+        only_value,  // 实参
+        name_value,  // 形参/实参
+        put_args,
+        // put_kwargs,
+        // get_args,
+        // get_kwargs,
+    } type;
     struct parameter *next;  // for list
 } parameter;
 
@@ -578,10 +587,10 @@ void add_var(var_list *,int , char *, GWARF_value);
 var_list *copy_var_list(var_list *);
 
 parameter *make_parameter_name(char *);
-void append_parameter_name(char *, parameter *);
+parameter *append_parameter_name(char *, parameter *);
 
 parameter *make_parameter_value(statement *);
-void append_parameter_value(statement *, parameter *);
+parameter *append_parameter_value(statement *, parameter *);
 parameter *add_parameter_value(statement *, parameter *);
 
 parameter *pack_value_parameter(GWARF_value);

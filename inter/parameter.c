@@ -7,11 +7,12 @@ parameter *make_parameter_name(char *name){
     tmp = malloc(sizeof(parameter));  // get an address for base var
     tmp->next = NULL;
     tmp->u.name = malloc(sizeof(name));
+    tmp->type = only_name;
     strcpy(tmp->u.name, name);
     return tmp;
 }
 
-void append_parameter_name(char *name, parameter *parameter_base){
+parameter *append_parameter_name(char *name, parameter *parameter_base){
     parameter *tmp = parameter_base;  // iter var
     while(1){
         if (tmp->next == NULL){  // the last
@@ -21,6 +22,7 @@ void append_parameter_name(char *name, parameter *parameter_base){
     }
     parameter *new_tmp = make_parameter_name(name);
     tmp->next = new_tmp;
+    return new_tmp;
 }
 
 // ---- parameter func[实参]
@@ -28,11 +30,12 @@ parameter *make_parameter_value(statement *value){
     parameter *tmp;
     tmp = malloc(sizeof(parameter));  // get an address for base var
     tmp->next = NULL;
+    tmp->type = only_value;
     tmp->u.value = value;
     return tmp;
 }
 
-void append_parameter_value(statement *value, parameter *parameter_base){  // add at last
+parameter *append_parameter_value(statement *value, parameter *parameter_base){  // add at last
     parameter *tmp = parameter_base;  // iter var
     while(1){
         if (tmp->next == NULL){  // the last
@@ -42,6 +45,7 @@ void append_parameter_value(statement *value, parameter *parameter_base){  // ad
     }
     parameter *new_tmp = make_parameter_value(value);
     tmp->next = new_tmp;
+    return new_tmp;
 }
 
 parameter *add_parameter_value(statement *value, parameter *parameter_base){  // add at first
@@ -54,6 +58,7 @@ parameter *pack_value_parameter(GWARF_value value){  // 把value封装成参数
     parameter *tmp;
     tmp = malloc(sizeof(parameter));  // get an address for base var
     tmp->next = NULL;
+    tmp->type = only_value;
     statement *statement_tmp = make_statement();
     statement_tmp->type = base_value;
     statement_tmp->code.base_value.value = value;

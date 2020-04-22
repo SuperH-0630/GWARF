@@ -230,8 +230,8 @@ class_object *object_login_official(var_list *the_var, GWARF_result (*paser)(fun
 
 
     // 注册函数
-    int a[][2] = {{3,1}};
-    char *name[] = {"__value__"};
+    int a[][2] = {{3,1}, {__assignment__func, 1}};
+    char *name[] = {"__value__", "__assignment__"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
@@ -1845,6 +1845,9 @@ GWARF_value parameter_to_list(parameter *tmp_s, var_list *the_var){  // 把param
     while(1){
         if(tmp_s == NULL){
             break;
+        }
+        if(tmp_s->type != only_value){
+            goto next;  // 跳过这一个
         }
         result_tmp = traverse(tmp_s->u.value, the_var, false);  // 不需要取__value__
         if(is_error(&result_tmp)){  // Name Error错误
