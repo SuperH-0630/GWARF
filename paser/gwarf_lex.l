@@ -51,7 +51,7 @@
 <INITIAL>[\n]*\{[\n]* {return LP;}
 <INITIAL>"}" {return RP;}
 
-<INITIAL>"^=" {return APOW;}
+<INITIAL>"**=" {return APOW;}
 <INITIAL>"++" {return FADD;}
 <INITIAL>"--" {return FSUB;}
 <INITIAL>"+=" {return AADD;}
@@ -68,7 +68,6 @@
 <INITIAL>"==" {return EQUAL;}
 <INITIAL>"=" {return EQ;}
 <INITIAL>"**" {return POW;}
-<INITIAL>"^" {return POW;}
 <INITIAL>"log" {return LOG;}
 <INITIAL>"sqrt" {return SQRT;}
 <INITIAL>"+" {return ADD;}
@@ -101,10 +100,10 @@
 
 <INITIAL>"&" {return BITAND;}
 <INITIAL>"|" {return BITOR;}
-<INITIAL>"|" {return BITNOTOR;}
+<INITIAL>"^" {return BITNOTOR;}
 <INITIAL>"~" {return BITNOT;}
-<INITIAL>"<<" {return BITRIGHT;}
-<INITIAL>">>" {return BITLEFT;}
+<INITIAL>"<<" {return BITLEFT;}
+<INITIAL>">>" {return BITRIGHT;}
 
 <INITIAL>"." {return POINT;}
 

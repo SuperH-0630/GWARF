@@ -1539,6 +1539,24 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
         case INTDIV_func:
             value = int_div_func(left_result, right_result, the_var);
             break;
+        case BITAND_func:
+            value = bit_and_func(left_result, right_result, the_var);
+            break;
+        case BITOR_func:
+            value = bit_or_func(left_result, right_result, the_var);
+            break;
+        case BITNOTOR_func:
+            value = bit_notor_func(left_result, right_result, the_var);
+            break;
+        case BITRIGHT_func:
+            value = bit_right_func(left_result, right_result, the_var);
+            break;
+        case BITLEFT_func:
+            value = bit_left_func(left_result, right_result, the_var);
+            break;
+        case BITNOT_func:
+            value = bit_not_func(right_result, the_var);
+            break;
         default:
             break;
     }
@@ -1992,6 +2010,408 @@ GWARF_result not_func(GWARF_result right_result, var_list *the_var){  // the fun
         return_value.value.value.bool_value = true;
     }
     return_back: return return_value;
+}
+
+// ---------  BITAND &
+GWARF_result bit_and_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for add and call from read_statement_list
+    GWARF_result return_value, get;  // the result by call read_statement_list with left and right; value is the result for add
+    if(left_result.value.type == OBJECT_value){  // 调用左add方法
+        GWARF_result get;
+        GWARF_value base_the_var = left_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        var *tmp = find_var(call_var, 0, "__bitand__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+            goto return_back;
+        }
+        // goto next if
+    }
+    if(right_result.value.type == OBJECT_value){  // 调用右add方法
+        GWARF_result get;
+        GWARF_value base_the_var = right_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        var *tmp = find_var(call_var, 0, "__bitand__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        }
+        else{
+            return_value.u = statement_end;
+            return_value.value = left_result.value;
+        }
+        goto return_back;
+    }
+
+    {
+        // 理论上用户是不可以直接调用下面的基类的，计算过程中万物皆类
+        if(left_result.value.type == NULL_value){
+            left_result.value.type = INT_value;  // NULL相当于0
+            left_result.value.value.int_value = 0;  // NULL相当于0
+        }
+        else if(right_result.value.type == NULL_value){
+            right_result.value.type = INT_value;  // NULL相当于0
+            right_result.value.value.int_value = 0;  // NULL相当于0
+        }
+
+        if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = left_result.value.value.int_value & right_result.value.value.int_value;
+        }
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = (int)left_result.value.value.double_value & (int)right_result.value.value.double_value;
+        }
+        else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = left_result.value.value.int_value & (int)right_result.value.value.double_value;
+        }
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = (int)left_result.value.value.double_value & right_result.value.value.int_value;
+        }
+    }
+    return_back: return return_value;
+}
+
+// ---------  BITOR |
+GWARF_result bit_or_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for add and call from read_statement_list
+    GWARF_result return_value, get;  // the result by call read_statement_list with left and right; value is the result for add
+    if(left_result.value.type == OBJECT_value){  // 调用左add方法
+        GWARF_result get;
+        GWARF_value base_the_var = left_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        var *tmp = find_var(call_var, 0, "__bitor__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+            goto return_back;
+        }
+        // goto next if
+    }
+    if(right_result.value.type == OBJECT_value){  // 调用右add方法
+        GWARF_result get;
+        GWARF_value base_the_var = right_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        var *tmp = find_var(call_var, 0, "__bitor__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        }
+        else{
+            return_value.u = statement_end;
+            return_value.value = left_result.value;
+        }
+        goto return_back;
+    }
+
+    {
+        // 理论上用户是不可以直接调用下面的基类的，计算过程中万物皆类
+        if(left_result.value.type == NULL_value){
+            left_result.value.type = INT_value;  // NULL相当于0
+            left_result.value.value.int_value = 0;  // NULL相当于0
+        }
+        else if(right_result.value.type == NULL_value){
+            right_result.value.type = INT_value;  // NULL相当于0
+            right_result.value.value.int_value = 0;  // NULL相当于0
+        }
+
+        if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = left_result.value.value.int_value | right_result.value.value.int_value;
+        }
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = (int)left_result.value.value.double_value | (int)right_result.value.value.double_value;
+        }
+        else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = left_result.value.value.int_value | (int)right_result.value.value.double_value;
+        }
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = (int)left_result.value.value.double_value | right_result.value.value.int_value;
+        }
+    }
+    return_back: return return_value;
+}
+
+
+// ---------  BITNOTOR ^
+GWARF_result bit_notor_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for add and call from read_statement_list
+    GWARF_result return_value, get;  // the result by call read_statement_list with left and right; value is the result for add
+    if(left_result.value.type == OBJECT_value){  // 调用左add方法
+        GWARF_result get;
+        GWARF_value base_the_var = left_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        var *tmp = find_var(call_var, 0, "__bitnotor__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+            goto return_back;
+        }
+        // goto next if
+    }
+    if(right_result.value.type == OBJECT_value){  // 调用右add方法
+        GWARF_result get;
+        GWARF_value base_the_var = right_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        var *tmp = find_var(call_var, 0, "__bitnotor__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        }
+        else{
+            return_value.u = statement_end;
+            return_value.value = left_result.value;
+        }
+        goto return_back;
+    }
+
+    {
+        // 理论上用户是不可以直接调用下面的基类的，计算过程中万物皆类
+        if(left_result.value.type == NULL_value){
+            left_result.value.type = INT_value;  // NULL相当于0
+            left_result.value.value.int_value = 0;  // NULL相当于0
+        }
+        else if(right_result.value.type == NULL_value){
+            right_result.value.type = INT_value;  // NULL相当于0
+            right_result.value.value.int_value = 0;  // NULL相当于0
+        }
+
+        if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = left_result.value.value.int_value ^ right_result.value.value.int_value;
+        }
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = (int)left_result.value.value.double_value ^ (int)right_result.value.value.double_value;
+        }
+        else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = left_result.value.value.int_value ^ (int)right_result.value.value.double_value;
+        }
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = (int)left_result.value.value.double_value ^ right_result.value.value.int_value;
+        }
+    }
+    return_back: return return_value;
+}
+
+// ---------  BITLEFT <<
+GWARF_result bit_left_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for add and call from read_statement_list
+    GWARF_result return_value, get;  // the result by call read_statement_list with left and right; value is the result for add
+    if(left_result.value.type == OBJECT_value){  // 调用左add方法
+        GWARF_result get;
+        GWARF_value base_the_var = left_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        var *tmp = find_var(call_var, 0, "__bitleft__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+            goto return_back;
+        }
+        // goto next if
+    }
+    if(right_result.value.type == OBJECT_value){  // 调用右add方法
+        GWARF_result get;
+        GWARF_value base_the_var = right_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        var *tmp = find_var(call_var, 0, "__bitleftr__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        }
+        else{
+            return_value.u = statement_end;
+            return_value.value = left_result.value;
+        }
+        goto return_back;
+    }
+
+    {
+        // 理论上用户是不可以直接调用下面的基类的，计算过程中万物皆类
+        if(left_result.value.type == NULL_value){
+            left_result.value.type = INT_value;  // NULL相当于0
+            left_result.value.value.int_value = 0;  // NULL相当于0
+        }
+        else if(right_result.value.type == NULL_value){
+            right_result.value.type = INT_value;  // NULL相当于0
+            right_result.value.value.int_value = 0;  // NULL相当于0
+        }
+
+        if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = left_result.value.value.int_value << right_result.value.value.int_value;
+        }
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = (int)left_result.value.value.double_value << (int)right_result.value.value.double_value;
+        }
+        else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = left_result.value.value.int_value << (int)right_result.value.value.double_value;
+        }
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = (int)left_result.value.value.double_value << right_result.value.value.int_value;
+        }
+    }
+    return_back: return return_value;
+}
+
+// ---------  BITRIGHT >>
+GWARF_result bit_right_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var){  // the func for add and call from read_statement_list
+    GWARF_result return_value, get;  // the result by call read_statement_list with left and right; value is the result for add
+    if(left_result.value.type == OBJECT_value){  // 调用左add方法
+        GWARF_result get;
+        GWARF_value base_the_var = left_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        var *tmp = find_var(call_var, 0, "__bitright__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+            goto return_back;
+        }
+        // goto next if
+    }
+    if(right_result.value.type == OBJECT_value){  // 调用右add方法
+        GWARF_result get;
+        GWARF_value base_the_var = right_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        var *tmp = find_var(call_var, 0, "__bitrightr__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value));
+        }
+        else{
+            return_value.u = statement_end;
+            return_value.value = left_result.value;
+        }
+        goto return_back;
+    }
+
+    {
+        // 理论上用户是不可以直接调用下面的基类的，计算过程中万物皆类
+        if(left_result.value.type == NULL_value){
+            left_result.value.type = INT_value;  // NULL相当于0
+            left_result.value.value.int_value = 0;  // NULL相当于0
+        }
+        else if(right_result.value.type == NULL_value){
+            right_result.value.type = INT_value;  // NULL相当于0
+            right_result.value.value.int_value = 0;  // NULL相当于0
+        }
+
+        if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = left_result.value.value.int_value >> right_result.value.value.int_value;
+        }
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = (int)left_result.value.value.double_value >> (int)right_result.value.value.double_value;
+        }
+        else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = left_result.value.value.int_value >> (int)right_result.value.value.double_value;
+        }
+        else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = (int)left_result.value.value.double_value >> right_result.value.value.int_value;
+        }
+    }
+    return_back: return return_value;
+}
+
+// ---------  BITNOT ~
+GWARF_result bit_not_func(GWARF_result right_result, var_list *the_var){  // the func for negative and call from read_statement_list
+    GWARF_result return_value;  // the result by call read_statement_list with left and right; value is the result for negative
+    if(right_result.value.type == OBJECT_value){  // 调用右sub方法
+        GWARF_result get;
+        GWARF_value base_the_var = right_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        var *tmp = find_var(call_var, 0, "__bitnot__");
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value));
+        }
+        else{
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.bool_value = 1;
+        }
+    }
+    else{
+        if(right_result.value.type == NULL_value){  // 返回bool true
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = 1;
+        }
+        else if(right_result.value.type == INT_value){  // all is INT
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = ~right_result.value.value.int_value;
+        }
+        else if(right_result.value.type == BOOL_value){
+            return_value.u = statement_end;
+            return_value.value.type = BOOL_value;
+            if(right_result.value.value.bool_value)
+            {
+                return_value.value.value.bool_value = false;
+            }
+            else{
+                return_value.value.value.bool_value = true;
+            }
+        }
+        else if(right_result.value.type == NUMBER_value){  // all is NUMBER
+            return_value.u = statement_end;
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = ~((int)right_result.value.value.double_value);
+        }
+    }
+    return return_value;
 }
 
 // ---------  ADD

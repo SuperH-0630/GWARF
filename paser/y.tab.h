@@ -123,7 +123,13 @@ extern int yydebug;
     AINTDIV = 329,
     FADD = 330,
     FSUB = 331,
-    APOW = 332
+    APOW = 332,
+    BITAND = 333,
+    BITOR = 334,
+    BITNOT = 335,
+    BITNOTOR = 336,
+    BITRIGHT = 337,
+    BITLEFT = 338
   };
 #endif
 /* Tokens.  */
@@ -202,6 +208,12 @@ extern int yydebug;
 #define FADD 330
 #define FSUB 331
 #define APOW 332
+#define BITAND 333
+#define BITOR 334
+#define BITNOT 335
+#define BITNOTOR 336
+#define BITRIGHT 337
+#define BITLEFT 338
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -216,7 +228,7 @@ union YYSTYPE
     struct if_list *if_list_base;
     struct parameter *parameter_list;
 
-#line 220 "y.tab.h"
+#line 232 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

@@ -27,7 +27,7 @@
 
 %type <statement_value> base_value base_var_token base_var_ element second_number first_number zero_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
 %type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token for_exp for_block global_token nonlocal_token block_exp block_block call_number def_block def_exp return_exp return_token
-%type <statement_value> eq_number class_block class_exp slice_arguments_token try_block try_exp try_token raise_exp import_exp include_exp bool_number
+%type <statement_value> eq_number class_block class_exp slice_arguments_token try_block try_exp try_token raise_exp import_exp include_exp bool_number bit_number bit_move
 
 %type <parameter_list> formal_parameter arguments slice_arguments
 
@@ -163,8 +163,8 @@ top_exp
     ;
 
 eq_number
-    : bool_number
-    | eq_number EQ bool_number
+    : bit_number
+    | eq_number EQ bit_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -173,7 +173,7 @@ eq_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | eq_number AADD bool_number
+    | eq_number AADD bit_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -182,7 +182,7 @@ eq_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | eq_number ASUB bool_number
+    | eq_number ASUB bit_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -191,7 +191,7 @@ eq_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | eq_number AMUL bool_number
+    | eq_number AMUL bit_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -200,7 +200,7 @@ eq_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | eq_number ADIV bool_number
+    | eq_number ADIV bit_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -209,7 +209,7 @@ eq_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | eq_number AMOD bool_number
+    | eq_number AMOD bit_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -218,7 +218,7 @@ eq_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | eq_number AINTDIV bool_number
+    | eq_number AINTDIV bit_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -227,7 +227,7 @@ eq_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | eq_number APOW bool_number
+    | eq_number APOW bit_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -270,6 +270,71 @@ eq_number
         code_tmp->code.operation.type = FSUB_func;
         code_tmp->code.operation.left_exp = NULL;
         code_tmp->code.operation.right_exp = $2;
+        $$ = code_tmp;
+    }
+    ;
+
+bit_number
+    : bit_move
+    | bit_number BITAND bit_move
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = BITAND_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        puts("NOT FUNC");
+        $$ = code_tmp;
+    }
+    | bit_number BITOR bit_move
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = BITOR_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    | bit_number BITNOTOR bit_move
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = BITNOTOR_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        puts("NOT FUNC");
+        $$ = code_tmp;
+    }
+    | BITNOT bit_move
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = BITNOT_func;
+        code_tmp->code.operation.left_exp = NULL;
+        code_tmp->code.operation.right_exp = $2;
+        $$ = code_tmp;
+    }
+    ;
+
+bit_move
+    : bool_number
+    | bit_move BITRIGHT bool_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = BITRIGHT_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        puts("NOT FUNC");
+        $$ = code_tmp;
+    }
+    | bit_move BITLEFT bool_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = BITLEFT_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
     ;

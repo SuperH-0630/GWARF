@@ -134,6 +134,12 @@ typedef struct statement{
                 FSUB_func,  // a--
                 LSUB_func,  // --a
                 APOW_func,  // ^=
+                BITAND_func,
+                BITOR_func,
+                BITNOTOR_func,
+                BITRIGHT_func,
+                BITLEFT_func,
+                BITNOT_func,
             } type;
             struct statement *right_exp;  // the right exp
             struct statement *left_exp;  // the left exp
@@ -391,6 +397,14 @@ typedef enum{
     __idivr__func = 30,
     __mod__func = 31,
     __modr__func = 32,
+    __bitand__func = 33,
+    __bitor__func = 34,
+    __bitnotor__func = 35,
+    __bitleft__func = 36,
+    __bitleftr__func = 37,
+    __bitright__func = 38,
+    __bitrightr__func = 39,
+    __bitnot__func = 40,
 } official_func_type;
 
 typedef struct func{
@@ -449,6 +463,12 @@ GWARF_result or_func(statement *, statement *, var_list *);
 GWARF_result and_func(statement *, statement *, var_list *);
 GWARF_result int_div_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result mod_func(GWARF_result, GWARF_result, var_list *);
+GWARF_result bit_not_func(GWARF_result, var_list *);
+GWARF_result bit_right_func(GWARF_result, GWARF_result, var_list *);
+GWARF_result bit_left_func(GWARF_result, GWARF_result, var_list *);
+GWARF_result bit_notor_func(GWARF_result, GWARF_result, var_list *);
+GWARF_result bit_or_func(GWARF_result, GWARF_result, var_list *);
+GWARF_result bit_and_func(GWARF_result, GWARF_result, var_list *);
 
 double sqrt_(double, double);
 double log_(double, double);
