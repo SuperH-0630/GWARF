@@ -108,6 +108,7 @@ typedef struct statement{
         include_import,  // include file
         for_in_cycle,  // for i in a
         assert_e,
+        chose_exp,
     } type;  // the statement type
 
     union
@@ -155,6 +156,12 @@ typedef struct statement{
             struct statement *right_exp;  // the right exp
             struct statement *left_exp;  // the left exp
         } operation;
+
+        struct{
+            struct statement *condition;  // xxx if yyy else zzz -> xxx
+            struct statement *true_do;  // xxx if yyy else zzz -> yyy
+            struct statement *false_do;  // xxx if yyy else zzz -> zzz
+        } chose_exp;
 
         struct{
             struct statement *condition;  // when to while 

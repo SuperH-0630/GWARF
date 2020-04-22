@@ -97,6 +97,27 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             }
             puts("----stop code----");
             break;
+        case chose_exp:{
+            GWARF_result tmp_result = traverse(the_statement->code.chose_exp.condition, the_var, false);
+            if(is_error(&tmp_result)){  // Name Error错误
+                return_value = tmp_result;
+                break;
+            }
+            else if(is_space(&tmp_result)){
+                return_value = tmp_result;
+                break;
+            }
+            if(to_bool(tmp_result.value)){
+                return_value = traverse(the_statement->code.chose_exp.true_do, the_var, false);
+            }
+            else{
+                return_value = traverse(the_statement->code.chose_exp.false_do, the_var, false);
+            }
+            if(!(is_error(&return_value) || is_space(&return_value))){  // Name Error错误
+                return_value.value = to_object(return_value.value, the_var);
+            }
+            break;
+        }
         case call:
             return_value = call_back(the_statement, the_var);
             break;

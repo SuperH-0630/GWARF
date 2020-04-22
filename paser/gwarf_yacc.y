@@ -27,7 +27,7 @@
 
 %type <statement_value> base_value base_var_token base_var_ element second_number first_number zero_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
 %type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token for_exp for_block global_token nonlocal_token block_exp block_block call_number def_block def_exp return_exp return_token
-%type <statement_value> eq_number class_block class_exp slice_arguments_token try_block try_exp try_token raise_exp import_exp include_exp bool_number bit_number bit_move do_while_block lambda_exp
+%type <statement_value> eq_number class_block class_exp slice_arguments_token try_block try_exp try_token raise_exp import_exp include_exp bool_number bit_number bit_move do_while_block lambda_exp chose_exp
 
 %type <parameter_list> formal_parameter arguments slice_arguments
 
@@ -279,8 +279,8 @@ eq_number
     ;
 
 lambda_exp
-    : bit_number
-    | LB RB LAMBDA bit_number
+    : chose_exp
+    | LB RB LAMBDA chose_exp
     {
         statement *lambda_tmp =  make_statement();
         lambda_tmp->type = lambda_func;
@@ -290,7 +290,7 @@ lambda_exp
 
         $$ = lambda_tmp;
     }
-    | LB formal_parameter RB LAMBDA bit_number
+    | LB formal_parameter RB LAMBDA chose_exp
     {
         statement *lambda_tmp =  make_statement();
         lambda_tmp->type = lambda_func;
@@ -299,6 +299,21 @@ lambda_exp
         lambda_tmp->code.lambda_func.done = $5;
 
         $$ = lambda_tmp;
+    }
+    ;
+
+chose_exp
+    : bit_number
+    | chose_exp IF chose_exp ELSE chose_exp
+    {
+        statement *chose_tmp =  make_statement();
+        chose_tmp->type = chose_exp;
+
+        chose_tmp->code.chose_exp.condition = $3;
+        chose_tmp->code.chose_exp.true_do = $1;
+        chose_tmp->code.chose_exp.false_do = $5;
+
+        $$ = chose_tmp;
     }
     ;
 
