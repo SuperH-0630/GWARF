@@ -148,6 +148,7 @@ typedef struct statement{
         struct{
             struct statement *condition;  // when to while 
             struct statement *done;  // while to do
+            bool first_do;  // do_while = true, while = false
         } while_cycle;
 
         struct{

@@ -1327,27 +1327,34 @@ GWARF_result forin_func(statement *the_statement, var_list *the_var){  // read t
 
 GWARF_result while_func(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func
     GWARF_result value;
-    // printf("----address = %d----\n", the_var);
+    bool do_while = the_statement->code.while_cycle.first_do;  // 如果是do_while 则返回true
+
     var *tmp = make_var();  // base_var
     the_var = append_var_list(tmp, the_var);
-    // printf("----new address = %d----\n", the_var);
+
     bool condition;
     while (1){
-        GWARF_result tmp_result = traverse(the_statement->code.while_cycle.condition, the_var, false);
-        if(is_error(&tmp_result)){  // Name Error错误
-            // puts("STOP:: Name No Found!");
-            value = tmp_result;
-            goto return_value;
+        if(!do_while){  // do_while 为 true的时候跳过条件检查
+            GWARF_result tmp_result = traverse(the_statement->code.while_cycle.condition, the_var, false);
+            if(is_error(&tmp_result)){  // Name Error错误
+                // puts("STOP:: Name No Found!");
+                value = tmp_result;
+                goto return_value;
+            }
+            else if(is_space(&tmp_result)){
+                value = tmp_result;
+                goto return_value;
+            }
+            condition = to_bool(tmp_result.value);
+            printf("while condition = %d\n", condition);
+            if(!condition){
+                break;
+            }
         }
-        else if(is_space(&tmp_result)){
-            value = tmp_result;
-            goto return_value;
+        else{
+            do_while = false;  // 只有第一次循环可以跳过检查
         }
-        condition = to_bool(tmp_result.value);
-        printf("while condition = %d\n", condition);
-        if(!condition){
-            break;
-        }
+        
         restart_again: 
         puts("----while----");
         value = traverse(the_statement->code.while_cycle.done, the_var, false);

@@ -23,11 +23,11 @@
 %token <string_value> STRING VAR
 
 %token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE POW LOG SQRT EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI DEFAULT FOR COMMA GLOBAL NONLOCAL INDENTA STOPN STOPF BLOCK FALSE TRUE
-%token NULL_token DEF RETURN CLASS POINT COLON TRY EXCEPT AS RAISE THROW IMPORT INCLUDE IN AND OR NOT MOD INTDIV AADD ASUB AMUL ADIV AMOD AINTDIV FADD FSUB APOW BITAND BITOR BITNOT BITNOTOR BITRIGHT BITLEFT PASS
+%token NULL_token DEF RETURN CLASS POINT COLON TRY EXCEPT AS RAISE THROW IMPORT INCLUDE IN AND OR NOT MOD INTDIV AADD ASUB AMUL ADIV AMOD AINTDIV FADD FSUB APOW BITAND BITOR BITNOT BITNOTOR BITRIGHT BITLEFT PASS DO
 
 %type <statement_value> base_value base_var_token base_var_ element second_number first_number zero_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
 %type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token for_exp for_block global_token nonlocal_token block_exp block_block call_number def_block def_exp return_exp return_token
-%type <statement_value> eq_number class_block class_exp slice_arguments_token try_block try_exp try_token raise_exp import_exp include_exp bool_number bit_number bit_move
+%type <statement_value> eq_number class_block class_exp slice_arguments_token try_block try_exp try_token raise_exp import_exp include_exp bool_number bit_number bit_move do_while_block
 
 %type <parameter_list> formal_parameter arguments slice_arguments
 
@@ -150,6 +150,10 @@ command
         $$ = $1;
     }
     | include_exp stop_token
+    {
+        $$ = $1;
+    }
+    | do_while_block stop_token
     {
         $$ = $1;
     }
@@ -994,10 +998,26 @@ try_token
     }
     ;
 
+do_while_block
+    : DO block while_exp
+    {
+        statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
+        $3->code.while_cycle.first_do = true;
+        $$ = $3;
+    }
+    | DO block stop_token while_exp
+    {
+        statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
+        $4->code.while_cycle.first_do = true;
+        $$ = $4;
+    }
+    ;
+
 while_block
     : while_exp block
     {
         statement_base = free_statement_list(statement_base);  // new statement_base (FILO)
+        $1->code.while_cycle.first_do = false;
         $$ = $1;
     }
     ;
