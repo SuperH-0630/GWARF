@@ -269,7 +269,7 @@ GWARF_result object_official_func(func *the_func, parameter *tmp_s, var_list *th
 class_object *make_object(var_list *the_var, var_list *father_var_list){
     class_object *class_tmp = malloc(sizeof(class_object));
 
-    class_tmp->the_var = make_var_base(make_var());  // make class var list
+    class_tmp->the_var = make_var_base(make_hash_var());  // make class var list
     if(father_var_list != NULL){
         append_by_var_list(class_tmp->the_var, father_var_list);  // int、double、str等内置类需要继承gobject类
     }
@@ -1213,7 +1213,7 @@ GWARF_result int_official_func(func *the_func, parameter *tmp_s, var_list *the_v
             if(father.father->type == OBJECT_value){
                 the_object *object_tmp = malloc(sizeof(the_object));  // 生成object的空间
                 object_tmp->cls = father.father->value.object_value->cls;
-                object_tmp->the_var = append_by_var_list(make_var_base(make_var()), object_tmp->cls);  // 生成实例
+                object_tmp->the_var = append_by_var_list(make_var_base(make_hash_var()), object_tmp->cls);  // 生成实例
 
                 // 执行__init__
                 GWARF_result self_value;
@@ -1330,7 +1330,7 @@ GWARF_result double_official_func(func *the_func, parameter *tmp_s, var_list *th
             if(father.father->type == OBJECT_value){
                 the_object *object_tmp = malloc(sizeof(the_object));  // 生成object的空间
                 object_tmp->cls = father.father->value.object_value->cls;
-                object_tmp->the_var = append_by_var_list(make_var_base(make_var()), object_tmp->cls);  // 生成实例
+                object_tmp->the_var = append_by_var_list(make_var_base(make_hash_var()), object_tmp->cls);  // 生成实例
 
                 // 执行__init__
                 GWARF_result self_value;
@@ -1557,7 +1557,7 @@ GWARF_result bool_official_func(func *the_func, parameter *tmp_s, var_list *the_
             if(father.father->type == OBJECT_value){
                 the_object *object_tmp = malloc(sizeof(the_object));  // 生成object的空间
                 object_tmp->cls = father.father->value.object_value->cls;
-                object_tmp->the_var = append_by_var_list(make_var_base(make_var()), object_tmp->cls);  // 生成实例
+                object_tmp->the_var = append_by_var_list(make_var_base(make_hash_var()), object_tmp->cls);  // 生成实例
 
                 // 执行__init__
                 GWARF_result self_value;

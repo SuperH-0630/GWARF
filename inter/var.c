@@ -2,6 +2,8 @@
 
 #include "interpreter.h"
 
+// --------------var[存储在hash_var节点上]
+
 var *make_var(){  // make var with base
     var *tmp;
     tmp = malloc(sizeof(var));  // get an address for base var
@@ -11,8 +13,10 @@ var *make_var(){  // make var with base
 }
 
 void append_var(char *name, GWARF_value value, var *base_var){
+
     int break_ = 1;  // get var[2] or not[1]
     var *tmp = base_var;  // iter var
+
     while(1){
         if (!strcmp(tmp->name, name)){
             break_ = 2;
@@ -28,11 +32,13 @@ void append_var(char *name, GWARF_value value, var *base_var){
         tmp->value = value;
         return;
     }
+
     var *new_tmp = make_var();
     tmp->next = new_tmp;
     new_tmp->name = malloc(sizeof(name));
     strcpy(new_tmp->name, name);
     new_tmp->value = value;
+
 }
 
 void free_var(var *base_var){  // free the address
@@ -79,7 +85,55 @@ void del_var(char *name, var *base_var){  // free an address
     }
 }
 
-// --------------default_var
+// --------------hash_var[存储在var_list节点上]
+
+hash_var *make_hash_var(){  // 生成并初始化
+    hash_var *tmp = NULL;
+
+    tmp = malloc(sizeof(hash_var));
+    tmp->hash = malloc((size_t)(sizeof(var) * MAX_SIZE));
+    
+    for(int i = 0; i < MAX_SIZE; i++){
+        tmp->hash[i] = NULL;  // 初始化
+    }
+    return tmp;
+}
+
+unsigned int time33(char *key){
+    unsigned int hash = 5381;
+    while(*key){
+        hash += (hash << 5 ) + (*key++);
+    }
+    return (hash & 0x7FFFFFFF) % MAX_SIZE;
+}
+
+int login_node(char *name, GWARF_value value, hash_var *the_hash_var){
+    unsigned int index = time33(name);
+    var *base_node = the_hash_var->hash[index];  // 根据下标拿base节点
+
+    if(base_node == NULL){  // 生成基本节点
+        the_hash_var->hash[index] = make_var();
+        base_node = the_hash_var->hash[index];
+    }
+    append_var(name, value, base_node);
+    return 0;
+}
+
+var *find_node(char *name, hash_var *the_hash_var){
+    if(the_hash_var == NULL){
+        return NULL;
+    }
+
+    unsigned int index = time33(name);
+    var *base_node = the_hash_var->hash[index];  // 根据下标拿base节点
+
+    if(base_node == NULL){  // 没有节点
+        return NULL;
+    }
+    return get_var(name, base_node);
+}
+
+// --------------default_var[存储在var_list节点上]
 
 default_var *make_default_var(){  // make_default_var
     default_var *tmp;
@@ -129,25 +183,27 @@ int get_default(char *name, default_var *base_default_var){  // get the address
     }
 }
 
+//  --------------var_list[保存default_var和hash_var]
+
 var_list *make_var_list(){  // make a empty var_list node
     var_list *tmp;
     tmp = malloc(sizeof(var_list));  // get an address for base var
     tmp->next = NULL;
-    tmp->var_base = NULL;
+    tmp->hash_var_base = NULL;
     tmp->default_list = make_default_var_base();
     return tmp;
 }
 
-var_list *make_var_base(var *gloabl_var){  // make the base for global_var
+var_list *make_var_base(hash_var *global_hash_var){  // make the base for global_var
     var_list *tmp = make_var_list();
-    tmp->var_base = gloabl_var;
+    tmp->hash_var_base = global_hash_var;
     return tmp;
 }
 
 
-var_list *append_var_list(var *var_base, var_list *var_list_base){  // make var_list[FILO]
+var_list *append_var_list(hash_var *global_hash_var, var_list *var_list_base){  // make var_list[FILO]
     var_list *tmp = make_var_list();
-    tmp->var_base = var_base;
+    tmp->hash_var_base = global_hash_var;
     tmp->next = var_list_base;
     return tmp;
 }
@@ -199,7 +255,7 @@ var *find_var(var_list *var_base,int from, char *name){  // find var by func get
     // printf("name = %s, from = %d, address = %x\n", name, from, start->var_base);
     while (1)
     {
-        return_var = get_var(name, start->var_base);
+        return_var = find_node(name, start->hash_var_base);
         if((return_var == NULL) && (start->next == NULL)){  // don't get the var and not next
             return NULL;
         }
@@ -222,8 +278,7 @@ void add_var(var_list *var_base,int from, char *name, GWARF_value value){  // ad
         }
         start = start->next;
     }
-    // printf("----var add address = %d----\n", start);
-    append_var(name, value, start->var_base);
+    login_node(name, value, start->hash_var_base);
 }
 
 var_list *copy_var_list(var_list *var_list_base){  // 复制一条var链到另一个内存地址上[base不复制]

@@ -389,7 +389,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             GWARF_result class_value;
             class_object *class_tmp = malloc(sizeof(class_object));
 
-            class_tmp->the_var = make_var_base(make_var());  // make class var list
+            class_tmp->the_var = make_var_base(make_hash_var());  // make class var list
             class_value.value.type = CLASS_value;
             class_value.value.value.class_value = class_tmp;
 
@@ -771,7 +771,7 @@ GWARF_result include_func(statement *the_statement, var_list *the_var){
 
     global_inter = get_inter();  // 拿全局解释器[并声明全局变量]
     free(global_inter->global_var);  // 不需要新的the_var
-    global_inter->global_var = the_var->var_base;
+    global_inter->global_var = the_var->hash_var_base;
     statement_base = make_statement_base(global_inter->global_code);
     
     parser(file.value.string);
@@ -1001,7 +1001,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var){  // read the statemen
 // -----------------for func
 GWARF_result for_func(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func
     GWARF_result value;
-    var *tmp = make_var();  // base_var
+    hash_var *tmp = make_hash_var();  // base_var
     the_var = append_var_list(tmp, the_var);
     bool condition;
     if(the_statement->code.for_cycle.first != NULL){
@@ -1190,7 +1190,7 @@ GWARF_result raise_func(statement *the_statement, var_list *the_var, bool not_cl
 GWARF_result try_func(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func
     GWARF_result value;
 
-    var *tmp = make_var();  // base_var
+    hash_var *tmp = make_hash_var();  // base_var
     the_var = append_var_list(tmp, the_var);
 
     again: 
@@ -1317,7 +1317,7 @@ GWARF_result block_func(statement *the_statement, var_list *the_var){  // read t
 
 GWARF_result forin_func(statement *the_statement, var_list *the_var){  // read the statement list with case to run by func
     GWARF_result value;
-    var *tmp = make_var();  // base_var
+    hash_var *tmp = make_hash_var();  // base_var
     the_var = append_var_list(tmp, the_var);
     
     GWARF_result tmp_result = traverse(the_statement->code.for_in_cycle.iter, the_var, false);  // 取得迭代器
@@ -1407,7 +1407,7 @@ GWARF_result while_func(statement *the_statement, var_list *the_var){  // read t
     GWARF_result value;
     bool do_while = the_statement->code.while_cycle.first_do;  // 如果是do_while 则返回true
 
-    var *tmp = make_var();  // base_var
+    hash_var *tmp = make_hash_var();  // base_var
     the_var = append_var_list(tmp, the_var);
 
     bool condition;
@@ -1801,7 +1801,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
     return_result.value.value.int_value = 0;
 
     int assignment_type = 0;  // 0-根据tmp_x进行赋值，1-根据tmp_s赋值
-    var_list *tmp_var = make_var_base(make_var());  // 为1-模式准备
+    var_list *tmp_var = make_var_base(make_hash_var());  // 为1-模式准备
 
     while(1){
         if ((tmp_x == NULL)&&(tmp_s == NULL)){  // the last
@@ -1944,7 +1944,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
         // tmp_x:形参，tmp_s:实参
 
         // printf("----address = %d----\n", the_var);
-        var *tmp = make_var();  // base_var
+        hash_var *tmp = make_hash_var();  // base_var
         the_var = append_var_list(tmp, the_var);
         // printf("----new address = %d----\n", the_var);
 
@@ -1994,7 +1994,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
     else if(get.value.type == CLASS_value){  // 生成实例
         the_object *object_tmp = malloc(sizeof(the_object));  // 生成object的空间
         object_tmp->cls = get.value.value.class_value->the_var;
-        object_tmp->the_var = append_by_var_list(make_var_base(make_var()), object_tmp->cls);
+        object_tmp->the_var = append_by_var_list(make_var_base(make_hash_var()), object_tmp->cls);
         GWARF_value tmp;
         tmp.type = OBJECT_value;
         tmp.value.object_value = object_tmp;
@@ -2007,7 +2007,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
             the_var = func_->the_var;
             // tmp_x:形参，tmp_s:实参
 
-            var *tmp = make_var();  // base_var
+            hash_var *tmp = make_hash_var();  // base_var
             the_var = append_var_list(tmp, the_var);
 
             if(func_->type == customize){  // 用户定义的方法
@@ -2073,7 +2073,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
             // tmp_x:形参，tmp_s:实参
 
             // // printf("----address = %d----\n", the_var);
-            var *tmp = make_var();  // base_var
+            hash_var *tmp = make_hash_var();  // base_var
             the_var = append_var_list(tmp, the_var);
             // // printf("----new address = %d----\n", the_var);
 
@@ -3480,7 +3480,7 @@ GWARF_result traverse(statement *the_statement, var_list *the_var, bool new){  /
     }
     bool lock = false;
     if(new){  // need to make new var
-        var *tmp = make_var();  // base_var
+        hash_var *tmp = make_hash_var();  // base_var
         the_var = append_var_list(tmp, the_var);
     }
     while(1){
@@ -3542,7 +3542,7 @@ GWARF_result traverse_global(statement *the_statement, var_list *the_var){  // t
 inter *get_inter(){
     inter *tmp;
     tmp = malloc(sizeof(inter));  // get an address for base var
-    tmp->global_var = make_var();
+    tmp->global_var = make_hash_var();
     tmp->global_code = make_statement();
     return tmp;
 }

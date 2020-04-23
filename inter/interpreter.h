@@ -1,5 +1,6 @@
 #ifndef _INTERPRETER_H
 #define _INTERPRETER_H
+#define MAX_SIZE (1024 ^ 2)
 
 #define malloc(size) safe_malloc(size)
 #define free(p) p=safe_free(p)
@@ -68,6 +69,11 @@ typedef struct var{
     GWARF_value value;
     struct var *next;  // for list
 } var;
+
+// ------------------------- hash_var
+typedef struct hash_var{
+    struct var **hash;  // 这是一个指针数组
+} hash_var;
 
 // ------------------------- statement
 
@@ -360,8 +366,8 @@ typedef struct default_var{
 // ------------------------- var base list [记录每一层变量base的链表]
 
 typedef struct var_list{
-    var *var_base;
-    default_var *default_list;
+    struct hash_var *hash_var_base;
+    struct default_var *default_list;
     struct var_list *next;
 } var_list;
 
@@ -384,7 +390,7 @@ typedef struct if_list{
 // ------------------------- inter
 
 typedef struct{
-    var *global_var;  // global var链表
+    hash_var *global_var;  // global var链表
     statement *global_code;  // global code链表
 } inter;
 
@@ -600,14 +606,19 @@ default_var *make_default_var_base();
 void append_default_var_base(char * ,int , default_var *);
 int get_default(char *, default_var *);
 var_list *make_var_list();
-var_list *make_var_base(var *);
-var_list *append_var_list(var *, var_list *);
+var_list *make_var_base(hash_var *);
+var_list *append_var_list(hash_var *, var_list *);
 var_list *append_by_var_list(var_list *, var_list *);
 var_list *free_var_list(var_list *);
 int get_var_list_len(var_list *);
 var *find_var(var_list *,int , char *);
 void add_var(var_list *,int , char *, GWARF_value);
 var_list *copy_var_list(var_list *);
+
+hash_var *make_hash_var();
+unsigned int time33(char *);
+int login_node(char *, GWARF_value, hash_var *);
+var *find_node(char *, hash_var *);
 
 parameter *make_parameter_name(char *);
 parameter *append_parameter_name(char *, parameter *);
