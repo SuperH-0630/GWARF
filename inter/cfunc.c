@@ -84,6 +84,12 @@ GWARF_value to_object(GWARF_value value, var_list *the_var){  // 把GWARF_value�
             func_result.value = tmp->value;
         }
     }
+    else if(value.type == DICT_value){
+        tmp = find_var(the_var, 0, "dict");
+        if(tmp != NULL){
+            func_result.value = tmp->value;
+        }
+    }
     else{
         return value;
     }
@@ -1824,11 +1830,33 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
         default:
             break;
     }
-    if(the_func->official_func == __slice__func){
-    }
     return_result: return return_value;
 }
 
+
+GWARF_value to_dict(GWARF_value value, var_list *the_var){
+    if((value.type == DICT_value)){
+        return value;  // 直接返回数据
+    }
+
+    GWARF_value return_number;
+    return_number.type = DICT_value;
+
+    if(value.type == OBJECT_value){  // 调用__value__方法
+        return_number = to_list(get__value__(&value, the_var).value, the_var);  // 递归
+    }
+    else{
+        // 生成一个空的DICT
+        return_number.type = DICT_value;
+        return_number.value.dict_value = malloc(sizeof(the_dict));
+        return_number.value.dict_value->index = 0;
+        return_number.value.dict_value->dict_value = make_hash_var();
+        return_number.value.dict_value->name_list = malloc(sizeof(dict_key));
+        return_number.value.dict_value->name_list->key = "";
+        return_number.value.dict_value->name_list->next = NULL;
+    }
+    return return_number;
+}
 
 GWARF_value to_list(GWARF_value value, var_list *the_var){
     if((value.type == LIST_value)){
@@ -1878,6 +1906,270 @@ GWARF_value parameter_to_list(parameter *tmp_s, var_list *the_var){  // 把param
     }
     return_list.value.list_value->index = index;
     return return_list;
+}
+
+GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var){  // 把parameter转换为list
+    GWARF_value return_dict;
+    return_dict.type = DICT_value;
+    return_dict.value.dict_value = malloc(sizeof(the_dict));
+    return_dict.value.dict_value->index = 0;
+    return_dict.value.dict_value->dict_value = make_hash_var();
+    return_dict.value.dict_value->name_list = malloc(sizeof(dict_key));
+    return_dict.value.dict_value->name_list->key = "";
+    return_dict.value.dict_value->name_list->next = NULL;
+    
+    int index = 0;
+    GWARF_result result_tmp;
+    while(1){
+        if(tmp_s == NULL){
+            break;
+        }
+        if(tmp_s->type != name_value){
+            goto next;  // 跳过这一个
+        }
+        result_tmp = traverse(tmp_s->u.value, the_var, false);  // 不需要取__value__
+        if(is_error(&result_tmp)){  // Name Error错误
+            goto next;  // 直接指向下一个
+        }
+        else if(is_space(&result_tmp)){
+            goto next;
+        }
+
+        int status = login_node(tmp_s->u.name, result_tmp.value, return_dict.value.dict_value->dict_value);  // 插入
+        dict_key *tmp_dict_name = return_dict.value.dict_value->name_list;
+        while (1){  // 迭代
+            if(!strcmp(tmp_dict_name->key, tmp_s->u.name)){  // 已经存在
+                break;
+            }
+            else if(tmp_dict_name->next == NULL){
+                tmp_dict_name->next = malloc(sizeof(dict_key));
+                tmp_dict_name->next->next = NULL;
+                tmp_dict_name->next->key = malloc(sizeof(tmp_s->u.name));
+                strcpy(tmp_dict_name->next->key, tmp_s->u.name);  // 复制key
+                index += 1;  // 不存在才+1
+                break;
+            }
+            tmp_dict_name = tmp_dict_name->next;
+        }
+        next: tmp_s = tmp_s->next;  // 指向下一个
+    }
+    return_dict.value.dict_value->index = index;
+    return return_dict;
+}
+
+class_object *dict_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assignment_func("dict", class_value, the_var, 0);  // 注册class 的 位置
+    puts("----stop set class----");
+
+    // 注册函数
+    int a[][2] = {{2,1},{23,1},{24,1},{25,1},{27,1},{28,1}};
+    char *name[] = {"__init__", "__len__", "__down__", "__set__", "__iter__", "__next__"};  //  __len__是获取长度，__down__是获取下值，__set__是设置值，__slice__是切片
+
+    int lenth = sizeof(a)/sizeof(a[0]);
+    for(int i = 0;i < lenth;i+=1){
+        login_official_func(a[i][0], a[i][1], class_tmp->the_var, name[i], paser);
+    }
+    return class_tmp;
+}
+
+GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var){  // out_var是外部环境, the_var是self内部环境
+    GWARF_result return_value;
+    var_list *login_var;
+    return_value.u = return_def;
+    return_value.return_times = 0;
+    if(father.father->type == CLASS_value){  // is class so that can use "."
+        login_var = father.father->value.class_value->the_var;
+    }
+    else if(father.father->type == OBJECT_value){
+        login_var = father.father->value.object_value->the_var;
+    }
+    else{
+        printf("NO login, father type = %d\n", father.father->type);
+    }
+    switch (the_func->official_func)
+    {
+        case __init__func:{  // printf something
+            if(tmp_s == NULL){  // 生成空列表
+                GWARF_result tmp_result;
+                GWARF_value dict_tmp;
+                dict_tmp.type = DICT_value;
+                dict_tmp.value.dict_value = malloc(sizeof(the_dict));
+                dict_tmp.value.dict_value->index = 0;
+                dict_tmp.value.dict_value->dict_value = make_hash_var();
+                dict_tmp.value.dict_value->name_list = malloc(sizeof(dict_key));
+                dict_tmp.value.dict_value->name_list->key = "";
+                dict_tmp.value.dict_value->name_list->next = NULL;
+                tmp_result.value = dict_tmp;
+                assignment_func("value", tmp_result, login_var, 0);  // 注册到self
+                return_value.u = statement_end;  // __init__没有return
+            }
+            else{
+                GWARF_result tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
+                if(is_error(&tmp_result)){  // Name Error错误
+                    return_value = tmp_result;
+                    goto return_result;
+                }
+                else if(is_space(&tmp_result)){
+                    return_value = tmp_result;
+                    goto return_result;
+                }
+                tmp.value = to_dict(tmp_result.value, out_var);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+                assignment_func("value", tmp, login_var, 0);  // 注册到self
+                return_value.u = statement_end;  // __init__没有return
+            }
+
+            GWARF_result iter_value;
+            iter_value.value.type = INT_value;
+            iter_value.value.value.int_value = 0;
+            assignment_func("iter_value", iter_value, login_var, 0);  // 注册到self
+            break;
+        }
+        case __len__func:{  // return index
+            var *tmp = find_var(login_var, 0, "value");
+            return_value.value.type = INT_value;
+            return_value.value.value.int_value = tmp->value.value.list_value->index;
+            break;
+        }
+        case __iter__func:{  // return self
+            GWARF_result iter_value;
+            iter_value.value.type = INT_value;
+            iter_value.value.value.int_value = 0;
+            assignment_func("iter_value", iter_value, login_var, 0);  // 注册到self
+
+            return_value.value = *(father.father);
+            break;
+        }
+        case __next__func:{  // return index
+            var *tmp = find_var(login_var, 0, "iter_value");
+            int iter_index, len;
+            if(tmp == NULL){
+                iter_index = 0;
+            }
+            else{
+                iter_index = to_int(tmp->value, out_var).value.int_value;
+            }
+
+            tmp = find_var(login_var, 0, "value");
+            len = tmp->value.value.dict_value->index;
+            if(iter_index >= len){
+                return_value = to_error("Max Iter", "IterException", the_var);
+            }
+            else{
+                dict_key *tmp_dict_key = tmp->value.value.dict_value->name_list->next;  // 忽略第一个点
+                for(int i = 0;i < iter_index;i += 1){
+                    if(tmp_dict_key == NULL){  // to_error
+                        return_value = to_error("Max Iter", "IterException", the_var);
+                        goto next_break;  // 
+                    }
+                    tmp_dict_key = tmp_dict_key->next;
+                }
+
+                var *find_var = find_node(tmp_dict_key->key, tmp->value.value.dict_value->dict_value);
+                if(find_var == NULL){  // not found
+                    printf("key = '%s'\n", tmp_dict_key->key);
+                    return_value = to_error("Dict key Not Found", "NameException", out_var);
+                }
+                else{
+                    return_value.value = find_var->value;
+                    GWARF_result iter_value;
+                    iter_value.value.type = INT_value;
+                    iter_value.value.value.int_value = iter_index + 1;
+                    assignment_func("iter_value", iter_value, login_var, 0);  // 注册到self
+                }
+            }
+
+            next_break: break;
+        }
+        case __down__func:{  // return index
+            var *tmp = find_var(login_var, 0, "value");
+            if(tmp != NULL){
+                GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false);
+                if(is_error(&tmp_result)){  // Name Error错误
+                    return_value = tmp_result;
+                    goto break_down;
+                }
+                else if(is_space(&tmp_result)){
+                    return_value = tmp_result;
+                    goto break_down;
+                }
+                GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
+                get_value = get__value__(&base_the_var, the_var);
+                get_value.value = to_str(get_value.value, out_var);
+                
+                var *find_var = find_node(get_value.value.value.string, tmp->value.value.dict_value->dict_value);
+                if(find_var == NULL){  // not found
+                    return_value = to_error("Dict key Not Found", "NameException", out_var);
+                }
+                else{
+                    return_value.value = find_var->value;
+                }
+            }
+            else{
+                return_value.value.type = NULL_value;
+                return_value.value.value.int_value = 0;
+            }
+            break_down: break;
+        }
+        case __set__func:{  // return index
+            var *tmp = find_var(login_var, 0, "value");
+            if(tmp != NULL){
+                GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false);
+                if(is_error(&tmp_result)){  // Name Error错误
+                    return_value = tmp_result;
+                    goto return_result;
+                }
+                else if(is_space(&tmp_result)){
+                    return_value = tmp_result;
+                    goto return_result;
+                }
+                GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
+                get_value = get__value__(&base_the_var, the_var);
+                get_value.value = to_str(get_value.value, out_var);
+
+                tmp_s = tmp_s->next;
+                GWARF_result new_value = traverse(tmp_s->u.value, out_var, false);
+                if(is_error(&new_value)){  // Name Error错误
+                    return_value = new_value;
+                    goto return_result;
+                }
+                else if(is_space(&new_value)){
+                    return_value = new_value;
+                    goto return_result;
+                }
+                login_node(get_value.value.value.string, new_value.value, tmp->value.value.dict_value->dict_value);  // 插入
+                dict_key *tmp_dict_name = tmp->value.value.dict_value->name_list;
+                while (1){  // 迭代
+                    if(!strcmp(tmp_dict_name->key, get_value.value.value.string)){  // 已经存在
+                        break;
+                    }
+                    else if(tmp_dict_name->next == NULL){
+                        tmp_dict_name->next = malloc(sizeof(dict_key));
+                        tmp_dict_name->next->next = NULL;
+                        tmp_dict_name->next->key = malloc(sizeof(get_value.value.value.string));
+                        strcpy(tmp_dict_name->next->key, get_value.value.value.string);  // 复制key
+                        tmp->value.value.dict_value->index += 1;  // 不存在才+1
+                        break;
+                    }
+                    tmp_dict_name = tmp_dict_name->next;
+                }
+                
+            }
+            return_value.value.type = NULL_value;
+            return_value.value.value.int_value = 0;
+            break;
+        }
+        default:
+            break;
+    }
+    return_result: return return_value;
 }
 
 GWARF_result get__assignment__(GWARF_value *base_the_var, var_list *the_var){  // 获取__assignment__

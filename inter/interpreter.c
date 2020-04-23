@@ -179,6 +179,9 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
         case base_list:  // get value[所有字面量均为这个表达式]
             return_value.value = parameter_to_list(the_statement->code.base_list.value, the_var);  // code
             break;
+        case base_dict:  // get value[所有字面量均为这个表达式]
+            return_value.value = parameter_to_dict(the_statement->code.base_dict.value, the_var);  // code
+            break;
         case slice:{  // get value[所有字面量均为这个表达式]
             GWARF_result tmp_result = traverse((the_statement->code).slice.base_var, the_var, false), get;  // 把a[1:2:3]的a取出来
             if(is_error(&tmp_result)){  // Name Error错误
@@ -1767,6 +1770,8 @@ GWARF_result assignment_statement(statement *the_statement, var_list *the_var, v
                 parameter *tmp = pack_value_parameter(child_value.value);
                 tmp->next = pack_value_parameter(right_result.value);
                 value = call_back_core(get, the_var, tmp);
+            }
+            else{
                 goto the_else;
             }
         }

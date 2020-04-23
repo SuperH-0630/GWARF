@@ -1,6 +1,6 @@
 #ifndef _INTERPRETER_H
 #define _INTERPRETER_H
-#define MAX_SIZE (1024 ^ 2)
+#define MAX_SIZE (1024)
 
 #define malloc(size) safe_malloc(size)
 #define free(p) p=safe_free(p)
@@ -25,6 +25,7 @@ typedef enum{
     CLASS_value,  // 对象 [7]
     OBJECT_value,  // 实例 [8]
     LIST_value,  // 列表类型 [只允许系统使用] [9]
+    DICT_value,  // 字典类型 [只允许系统使用] [10]
 } GWARF_value_type;
 
 // all value is GWARF_value
@@ -40,6 +41,7 @@ typedef struct GWARF_value{
         struct class_object *class_value;
         struct the_object *object_value;
         struct the_list *list_value;
+        struct the_dict *dict_value;
     } value;
 } GWARF_value;
 
@@ -84,6 +86,7 @@ typedef struct statement{
         base_var,  // return var value by name
         base_value,  // return an GWARF_value
         base_list,  // return an GWARF_value->LIST_value
+        base_dict,  // return an GWARF_value->DICT_value
         while_cycle,  // while
         for_cycle,
         if_branch,  // if
@@ -208,6 +211,10 @@ typedef struct statement{
         struct{
             parameter *value;  // [1,2,3,4] -> to_list
         } base_list;
+
+        struct{
+            parameter *value;  // [1,2,3,4] -> to_list
+        } base_dict;
 
         struct{
             struct statement *base_var;  // a[1:2:3] -> a
@@ -471,6 +478,19 @@ typedef struct the_list  // 列表类型
     int index;  // the max index
 } the_list;
 
+typedef struct the_dict  // 列表类型
+{
+    struct hash_var *dict_value;  // 列表类型
+    int index;  // the max index
+    struct dict_key *name_list;  // 值插入的顺序
+} the_dict;
+
+typedef struct dict_key  // dict的key类型
+{
+    char *key;
+    struct dict_key *next;
+} dict_key;
+
 // 函数声明
 GWARF_result operation_func(statement *, var_list *, var_list *);
 GWARF_result while_func(statement *, var_list *);
@@ -517,7 +537,9 @@ GWARF_value to_double(GWARF_value value, var_list *the_var);
 GWARF_value to_str(GWARF_value value, var_list *the_var);
 GWARF_value to_bool_(GWARF_value value, var_list *the_var);
 GWARF_value to_list(GWARF_value value, var_list *the_var);
+GWARF_value to_dict(GWARF_value value, var_list *the_var);
 GWARF_value parameter_to_list(parameter *tmp_s, var_list *the_var);
+GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var);
 bool to_bool(GWARF_value);
 
 GWARF_result get__value__(GWARF_value *, var_list *);
@@ -567,6 +589,10 @@ GWARF_result bool_official_func(func *the_func, parameter *tmp_s, var_list *the_
 // list内置类
 class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list);
 GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var);
+
+// dict内置类
+class_object *dict_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list);
+GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var);
 
 // 错误内置类
 class_object *BaseException_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list);

@@ -110,7 +110,6 @@ unsigned int time33(char *key){
 int login_node(char *name, GWARF_value value, hash_var *the_hash_var){
     unsigned int index = time33(name);
     var *base_node = the_hash_var->hash[index];  // 根据下标拿base节点
-
     if(base_node == NULL){  // 生成基本节点
         the_hash_var->hash[index] = make_var();
         base_node = the_hash_var->hash[index];

@@ -38,6 +38,7 @@ void login(var_list *the_var){
     str_login_official(the_var, str_official_func, tmp_gobject->the_var);  // 注册str
     bool_login_official(the_var, bool_official_func, tmp_gobject->the_var);  // 注册bool
     list_login_official(the_var, list_official_func, tmp_gobject->the_var);  // 注册list
+    dict_login_official(the_var, dict_official_func, tmp_gobject->the_var);  // 注册dict
 
     // 注册错误类型
     class_object *tmp_BaseException = BaseException_login_official(the_var, BaseException_official_func, tmp_object->the_var);
