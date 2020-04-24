@@ -178,7 +178,7 @@ top_exp
 
 eq_number
     : call_number
-    | eq_number EQ call_number
+    | call_number EQ eq_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -187,105 +187,105 @@ eq_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    // | call_number AADD eq_number
-    // {
-    //     statement *code_tmp =  make_statement();
-    //     code_tmp->type = operation;
-    //     code_tmp->code.operation.type = AADD_func;
-    //     code_tmp->code.operation.left_exp = $1;
-    //     code_tmp->code.operation.right_exp = $3;
-    //     $$ = code_tmp;
-    // }
-    // | call_number ASUB eq_number
-    // {
-    //     statement *code_tmp =  make_statement();
-    //     code_tmp->type = operation;
-    //     code_tmp->code.operation.type = ASUB_func;
-    //     code_tmp->code.operation.left_exp = $1;
-    //     code_tmp->code.operation.right_exp = $3;
-    //     $$ = code_tmp;
-    // }
-    // | call_number AMUL eq_number
-    // {
-    //     statement *code_tmp =  make_statement();
-    //     code_tmp->type = operation;
-    //     code_tmp->code.operation.type = AMUL_func;
-    //     code_tmp->code.operation.left_exp = $1;
-    //     code_tmp->code.operation.right_exp = $3;
-    //     $$ = code_tmp;
-    // }
-    // | call_number ADIV eq_number
-    // {
-    //     statement *code_tmp =  make_statement();
-    //     code_tmp->type = operation;
-    //     code_tmp->code.operation.type = ADIV_func;
-    //     code_tmp->code.operation.left_exp = $1;
-    //     code_tmp->code.operation.right_exp = $3;
-    //     $$ = code_tmp;
-    // }
-    // | call_number AMOD eq_number
-    // {
-    //     statement *code_tmp =  make_statement();
-    //     code_tmp->type = operation;
-    //     code_tmp->code.operation.type = AMOD_func;
-    //     code_tmp->code.operation.left_exp = $1;
-    //     code_tmp->code.operation.right_exp = $3;
-    //     $$ = code_tmp;
-    // }
-    // | call_number AINTDIV eq_number
-    // {
-    //     statement *code_tmp =  make_statement();
-    //     code_tmp->type = operation;
-    //     code_tmp->code.operation.type = AINTDIV_func;
-    //     code_tmp->code.operation.left_exp = $1;
-    //     code_tmp->code.operation.right_exp = $3;
-    //     $$ = code_tmp;
-    // }
-    // | call_number APOW eq_number
-    // {
-    //     statement *code_tmp =  make_statement();
-    //     code_tmp->type = operation;
-    //     code_tmp->code.operation.type = APOW_func;
-    //     code_tmp->code.operation.left_exp = $1;
-    //     code_tmp->code.operation.right_exp = $3;
-    //     $$ = code_tmp;
-    // }
-    // | call_number FADD
-    // {
-    //     statement *code_tmp =  make_statement();
-    //     code_tmp->type = operation;
-    //     code_tmp->code.operation.type = LADD_func;
-    //     code_tmp->code.operation.left_exp = $1;
-    //     code_tmp->code.operation.right_exp = NULL;
-    //     $$ = code_tmp;
-    // }
-    // | FADD call_number
-    // {
-    //     statement *code_tmp =  make_statement();
-    //     code_tmp->type = operation;
-    //     code_tmp->code.operation.type = FADD_func;
-    //     code_tmp->code.operation.left_exp = NULL;
-    //     code_tmp->code.operation.right_exp = $2;
-    //     $$ = code_tmp;
-    // }
-    // | call_number FSUB
-    // {
-    //     statement *code_tmp =  make_statement();
-    //     code_tmp->type = operation;
-    //     code_tmp->code.operation.type = LSUB_func;
-    //     code_tmp->code.operation.left_exp = $1;
-    //     code_tmp->code.operation.right_exp = NULL;
-    //     $$ = code_tmp;
-    // }
-    // | FSUB call_number
-    // {
-    //     statement *code_tmp =  make_statement();
-    //     code_tmp->type = operation;
-    //     code_tmp->code.operation.type = FSUB_func;
-    //     code_tmp->code.operation.left_exp = NULL;
-    //     code_tmp->code.operation.right_exp = $2;
-    //     $$ = code_tmp;
-    // }
+    | call_number AADD eq_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = AADD_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    | call_number ASUB eq_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = ASUB_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    | call_number AMUL eq_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = AMUL_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    | call_number ADIV eq_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = ADIV_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    | call_number AMOD eq_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = AMOD_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    | call_number AINTDIV eq_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = AINTDIV_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    | call_number APOW eq_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = APOW_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    | call_number FADD
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = LADD_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = NULL;
+        $$ = code_tmp;
+    }
+    | FADD call_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = FADD_func;
+        code_tmp->code.operation.left_exp = NULL;
+        code_tmp->code.operation.right_exp = $2;
+        $$ = code_tmp;
+    }
+    | call_number FSUB
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = LSUB_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = NULL;
+        $$ = code_tmp;
+    }
+    | FSUB call_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = FSUB_func;
+        code_tmp->code.operation.left_exp = NULL;
+        code_tmp->code.operation.right_exp = $2;
+        $$ = code_tmp;
+    }
     ;
 
 formal_parameter
