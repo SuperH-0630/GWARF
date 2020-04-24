@@ -535,6 +535,7 @@ double log_(double, double);
 GWARF_value to_int(GWARF_value, var_list *the_var);
 GWARF_value to_double(GWARF_value value, var_list *the_var);
 GWARF_value to_str(GWARF_value value, var_list *the_var);
+GWARF_value to_str_dict(GWARF_value value, var_list *the_var);
 GWARF_value to_bool_(GWARF_value value, var_list *the_var);
 GWARF_value to_list(GWARF_value value, var_list *the_var);
 GWARF_value to_dict(GWARF_value value, var_list *the_var);
