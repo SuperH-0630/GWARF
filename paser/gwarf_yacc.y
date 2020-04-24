@@ -25,20 +25,28 @@
 %token ADD SUB DIV MUL EQ LESS MORE RB LB RP LP WHILE POW LOG SQRT EQUAL MOREEQ LESSEQ NOTEQ BREAK IF ELSE ELIF BROKEN CONTINUE CONTINUED RESTART RESTARTED REGO REWENT RI LI DEFAULT FOR COMMA GLOBAL NONLOCAL INDENTA STOPN STOPF BLOCK FALSE TRUE
 %token NULL_token DEF RETURN CLASS POINT COLON TRY EXCEPT AS RAISE THROW IMPORT INCLUDE IN AND OR NOT MOD INTDIV AADD ASUB AMUL ADIV AMOD AINTDIV FADD FSUB APOW BITAND BITOR BITNOT BITNOTOR BITRIGHT BITLEFT PASS DO LAMBDA ASSERT
 
-%type <statement_value> base_value base_var_token base_var_ element second_number first_number zero_number top_exp command third_number while_block while_exp break_exp if_block if_exp broken_exp break_token broken_token continue_token continue_exp
-%type <statement_value> continued_exp continued_token restart_exp restart_token restarted_exp restarted_token default_token for_exp for_block global_token nonlocal_token block_exp block_block call_number def_block def_exp return_exp return_token
-%type <statement_value> eq_number class_block class_exp slice_arguments_token try_block try_exp try_token raise_exp import_exp include_exp bool_number bit_number bit_move do_while_block lambda_exp chose_exp
+// 结构语句
+%type <statement_value> command while_block while_exp if_block if_exp for_exp for_block block_exp block_block def_block def_exp class_block class_exp try_block try_exp try_token do_while_block
+// 结构语句控制
+%type <statement_value> break_exp broken_exp break_token broken_token continue_token continue_exp continued_exp continued_token restart_exp restart_token restarted_exp restarted_token return_exp return_token import_exp include_exp raise_exp
+//  变量操作
+%type <statement_value> default_token global_token nonlocal_token
+// 计算
+%type <statement_value> base_value base_var_token base_var_ element iter_value call_slice call_down attribute bit_not negative bit_move bit_and bit_or bit_or_not bool_not bool_and bool_or
+%type <statement_value> second_number first_number zero_number top_exp third_number eq_number chose_exp lambda_exp call_number 
 
-%type <parameter_list> formal_parameter arguments slice_arguments
-
+%type <statement_value> slice_arguments_token
+%type <parameter_list> formal_parameter arguments slice_arguments dict_arguments list_arguments
 %type <string_value> base_string
-
 %type <if_list_base> elif_exp
 %%
+
+// command_block  所有的token最终上升到这个层次
 command_block
     : command_list
     ;
 
+// command的列表
 command_list
     : command
     {
@@ -56,6 +64,7 @@ command_list
     }
     ;
 
+// 每一行代码
 command
     : top_exp stop_token
     {
@@ -159,6 +168,7 @@ command
     }
     ;
 
+// 顶级表达式[权限最低]
 top_exp
     : eq_number
     {
@@ -167,8 +177,8 @@ top_exp
     ;
 
 eq_number
-    : lambda_exp
-    | lambda_exp EQ eq_number
+    : call_number
+    | eq_number EQ call_number
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -177,103 +187,218 @@ eq_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | lambda_exp AADD eq_number
+    // | call_number AADD eq_number
+    // {
+    //     statement *code_tmp =  make_statement();
+    //     code_tmp->type = operation;
+    //     code_tmp->code.operation.type = AADD_func;
+    //     code_tmp->code.operation.left_exp = $1;
+    //     code_tmp->code.operation.right_exp = $3;
+    //     $$ = code_tmp;
+    // }
+    // | call_number ASUB eq_number
+    // {
+    //     statement *code_tmp =  make_statement();
+    //     code_tmp->type = operation;
+    //     code_tmp->code.operation.type = ASUB_func;
+    //     code_tmp->code.operation.left_exp = $1;
+    //     code_tmp->code.operation.right_exp = $3;
+    //     $$ = code_tmp;
+    // }
+    // | call_number AMUL eq_number
+    // {
+    //     statement *code_tmp =  make_statement();
+    //     code_tmp->type = operation;
+    //     code_tmp->code.operation.type = AMUL_func;
+    //     code_tmp->code.operation.left_exp = $1;
+    //     code_tmp->code.operation.right_exp = $3;
+    //     $$ = code_tmp;
+    // }
+    // | call_number ADIV eq_number
+    // {
+    //     statement *code_tmp =  make_statement();
+    //     code_tmp->type = operation;
+    //     code_tmp->code.operation.type = ADIV_func;
+    //     code_tmp->code.operation.left_exp = $1;
+    //     code_tmp->code.operation.right_exp = $3;
+    //     $$ = code_tmp;
+    // }
+    // | call_number AMOD eq_number
+    // {
+    //     statement *code_tmp =  make_statement();
+    //     code_tmp->type = operation;
+    //     code_tmp->code.operation.type = AMOD_func;
+    //     code_tmp->code.operation.left_exp = $1;
+    //     code_tmp->code.operation.right_exp = $3;
+    //     $$ = code_tmp;
+    // }
+    // | call_number AINTDIV eq_number
+    // {
+    //     statement *code_tmp =  make_statement();
+    //     code_tmp->type = operation;
+    //     code_tmp->code.operation.type = AINTDIV_func;
+    //     code_tmp->code.operation.left_exp = $1;
+    //     code_tmp->code.operation.right_exp = $3;
+    //     $$ = code_tmp;
+    // }
+    // | call_number APOW eq_number
+    // {
+    //     statement *code_tmp =  make_statement();
+    //     code_tmp->type = operation;
+    //     code_tmp->code.operation.type = APOW_func;
+    //     code_tmp->code.operation.left_exp = $1;
+    //     code_tmp->code.operation.right_exp = $3;
+    //     $$ = code_tmp;
+    // }
+    // | call_number FADD
+    // {
+    //     statement *code_tmp =  make_statement();
+    //     code_tmp->type = operation;
+    //     code_tmp->code.operation.type = LADD_func;
+    //     code_tmp->code.operation.left_exp = $1;
+    //     code_tmp->code.operation.right_exp = NULL;
+    //     $$ = code_tmp;
+    // }
+    // | FADD call_number
+    // {
+    //     statement *code_tmp =  make_statement();
+    //     code_tmp->type = operation;
+    //     code_tmp->code.operation.type = FADD_func;
+    //     code_tmp->code.operation.left_exp = NULL;
+    //     code_tmp->code.operation.right_exp = $2;
+    //     $$ = code_tmp;
+    // }
+    // | call_number FSUB
+    // {
+    //     statement *code_tmp =  make_statement();
+    //     code_tmp->type = operation;
+    //     code_tmp->code.operation.type = LSUB_func;
+    //     code_tmp->code.operation.left_exp = $1;
+    //     code_tmp->code.operation.right_exp = NULL;
+    //     $$ = code_tmp;
+    // }
+    // | FSUB call_number
+    // {
+    //     statement *code_tmp =  make_statement();
+    //     code_tmp->type = operation;
+    //     code_tmp->code.operation.type = FSUB_func;
+    //     code_tmp->code.operation.left_exp = NULL;
+    //     code_tmp->code.operation.right_exp = $2;
+    //     $$ = code_tmp;
+    // }
+    ;
+
+formal_parameter
+    : top_exp
+    {
+        $$ = make_parameter_name($1);
+        $$->type = only_name;
+    }
+    | MUL top_exp
+    {
+        $$ = make_parameter_name($2);
+        $$->type = put_args;
+    }
+    | top_exp EQ top_exp
+    {
+        $$ = make_parameter_name($1);
+        $$->u.value = $3;
+        $$->type = name_value;
+    }
+    | formal_parameter COMMA top_exp
+    {
+        parameter *tmp = append_parameter_name($3, $1);
+        tmp->type = only_name;
+        $$ = $1;
+    }
+    | formal_parameter COMMA MUL top_exp
+    {
+        parameter *tmp = append_parameter_name($4, $1);
+        tmp->type = put_args;
+        $$ = $1;
+    }
+    | formal_parameter COMMA top_exp EQ top_exp
+    {
+        parameter *tmp = append_parameter_name($3, $1);
+        tmp->u.value = $5;
+        tmp->type = name_value;
+        $$ = $1;
+    }
+    ;
+
+arguments
+    : top_exp
+    {
+        $$ = make_parameter_value($1);
+        $$->type = only_value;
+    }
+    | arguments COMMA top_exp
+    {
+        parameter *tmp = append_parameter_value($3, $1);
+        tmp->type = only_value;
+        $$ = $1;
+    }
+    | base_var_ EQ top_exp
+    {
+        $$ = make_parameter_name($1);
+        $$->u.value = $3;
+        $$->type = name_value;
+    }
+    | arguments COMMA base_var_ EQ top_exp
+    {
+        parameter *tmp = append_parameter_name($3, $1);
+        tmp->u.value = $5;
+        tmp->type = name_value;
+        $$ = $1;
+    }
+    | MUL top_exp
+    {
+        $$ = make_parameter_value($2);
+        $$->type = put_args;
+    }
+    ;
+
+slice_arguments
+    : slice_arguments_token
+    {
+        $$ = make_parameter_value($1);
+    }
+    | slice_arguments slice_arguments_token
+    {
+        append_parameter_value($2, $1);
+        $$ = $1;
+    }
+    | slice_arguments top_exp
+    {
+        append_parameter_value($2, $1);
+        $$ = $1;
+    }
+    ;
+
+slice_arguments_token
+    : top_exp COLON
+    {
+        $$ = $1;
+    }
+    ;
+
+
+call_number
+    : lambda_exp
+    | call_number LB RB
     {
         statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = AADD_func;
-        code_tmp->code.operation.left_exp = $1;
-        code_tmp->code.operation.right_exp = $3;
+        code_tmp->type = call;
+        code_tmp->code.call.func = $1;
+        code_tmp->code.call.parameter_list = NULL;
         $$ = code_tmp;
     }
-    | lambda_exp ASUB eq_number
+    | call_number LB arguments RB
     {
         statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = ASUB_func;
-        code_tmp->code.operation.left_exp = $1;
-        code_tmp->code.operation.right_exp = $3;
-        $$ = code_tmp;
-    }
-    | lambda_exp AMUL eq_number
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = AMUL_func;
-        code_tmp->code.operation.left_exp = $1;
-        code_tmp->code.operation.right_exp = $3;
-        $$ = code_tmp;
-    }
-    | lambda_exp ADIV eq_number
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = ADIV_func;
-        code_tmp->code.operation.left_exp = $1;
-        code_tmp->code.operation.right_exp = $3;
-        $$ = code_tmp;
-    }
-    | lambda_exp AMOD eq_number
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = AMOD_func;
-        code_tmp->code.operation.left_exp = $1;
-        code_tmp->code.operation.right_exp = $3;
-        $$ = code_tmp;
-    }
-    | lambda_exp AINTDIV eq_number
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = AINTDIV_func;
-        code_tmp->code.operation.left_exp = $1;
-        code_tmp->code.operation.right_exp = $3;
-        $$ = code_tmp;
-    }
-    | lambda_exp APOW eq_number
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = APOW_func;
-        code_tmp->code.operation.left_exp = $1;
-        code_tmp->code.operation.right_exp = $3;
-        $$ = code_tmp;
-    }
-    | lambda_exp FADD
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = LADD_func;
-        code_tmp->code.operation.left_exp = $1;
-        code_tmp->code.operation.right_exp = NULL;
-        $$ = code_tmp;
-    }
-    | FADD lambda_exp
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = FADD_func;
-        code_tmp->code.operation.left_exp = NULL;
-        code_tmp->code.operation.right_exp = $2;
-        $$ = code_tmp;
-    }
-    | lambda_exp FSUB
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = LSUB_func;
-        code_tmp->code.operation.left_exp = $1;
-        code_tmp->code.operation.right_exp = NULL;
-        $$ = code_tmp;
-    }
-    | FSUB lambda_exp
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = FSUB_func;
-        code_tmp->code.operation.left_exp = NULL;
-        code_tmp->code.operation.right_exp = $2;
+        code_tmp->type = call;
+        code_tmp->code.call.func = $1;
+        code_tmp->code.call.parameter_list = $3;
         $$ = code_tmp;
     }
     ;
@@ -303,7 +428,7 @@ lambda_exp
     ;
 
 chose_exp
-    : bit_number
+    : bool_or
     | chose_exp IF chose_exp ELSE chose_exp
     {
         statement *chose_tmp =  make_statement();
@@ -317,72 +442,33 @@ chose_exp
     }
     ;
 
-bit_number
-    : bit_move
-    | bit_number BITAND bit_move
+bool_or
+    : bool_and
+    | bool_or OR bool_and
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
-        code_tmp->code.operation.type = BITAND_func;
-        code_tmp->code.operation.left_exp = $1;
-        code_tmp->code.operation.right_exp = $3;
-        puts("NOT FUNC");
-        $$ = code_tmp;
-    }
-    | bit_number BITOR bit_move
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = BITOR_func;
-        code_tmp->code.operation.left_exp = $1;
-        code_tmp->code.operation.right_exp = $3;
-        $$ = code_tmp;
-    }
-    | bit_number BITNOTOR bit_move
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = BITNOTOR_func;
-        code_tmp->code.operation.left_exp = $1;
-        code_tmp->code.operation.right_exp = $3;
-        puts("NOT FUNC");
-        $$ = code_tmp;
-    }
-    | BITNOT bit_move
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = BITNOT_func;
-        code_tmp->code.operation.left_exp = NULL;
-        code_tmp->code.operation.right_exp = $2;
-        $$ = code_tmp;
-    }
-    ;
-
-bit_move
-    : bool_number
-    | bit_move BITRIGHT bool_number
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = BITRIGHT_func;
-        code_tmp->code.operation.left_exp = $1;
-        code_tmp->code.operation.right_exp = $3;
-        puts("NOT FUNC");
-        $$ = code_tmp;
-    }
-    | bit_move BITLEFT bool_number
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = BITLEFT_func;
+        code_tmp->code.operation.type = OR_func;
         code_tmp->code.operation.left_exp = $1;
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
     ;
 
-bool_number
+bool_and
+    : bool_not
+    | bool_and AND bool_not
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = AND_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    ;
+
+bool_not
     : third_number
     | NOT third_number
     {
@@ -394,29 +480,11 @@ bool_number
         puts("NOT FUNC");
         $$ = code_tmp;
     }
-    | bool_number AND third_number
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = AND_func;
-        code_tmp->code.operation.left_exp = $1;
-        code_tmp->code.operation.right_exp = $3;
-        $$ = code_tmp;
-    }
-    | bool_number OR third_number
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = OR_func;
-        code_tmp->code.operation.left_exp = $1;
-        code_tmp->code.operation.right_exp = $3;
-        $$ = code_tmp;
-    }
     ;
 
 third_number
-    : second_number
-    | third_number EQUAL second_number
+    : bit_or_not
+    | third_number EQUAL bit_or_not
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -425,7 +493,7 @@ third_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | third_number MORE second_number
+    | third_number MORE bit_or_not
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -434,7 +502,7 @@ third_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | third_number LESS second_number
+    | third_number LESS bit_or_not
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -443,7 +511,7 @@ third_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | third_number MOREEQ second_number
+    | third_number MOREEQ bit_or_not
         {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -452,7 +520,7 @@ third_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | third_number LESSEQ second_number
+    | third_number LESSEQ bit_or_not
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -461,11 +529,75 @@ third_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | third_number NOTEQ second_number
+    | third_number NOTEQ bit_or_not
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
         code_tmp->code.operation.type = NOTEQ_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    ;
+
+bit_or_not
+    : bit_or
+    | bit_or_not BITNOTOR bit_or
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = BITNOTOR_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        puts("NOT FUNC");
+        $$ = code_tmp;
+    }
+    ;
+
+bit_or
+    : bit_and
+    | bit_or BITOR bit_and
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = BITOR_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        $$ = code_tmp;
+    }
+    ;
+
+bit_and
+    : bit_move
+    | bit_and BITAND bit_move
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = BITAND_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        puts("NOT FUNC");
+        $$ = code_tmp;
+    }
+    ;
+
+bit_move
+    : second_number
+    | bit_move BITRIGHT second_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = BITRIGHT_func;
+        code_tmp->code.operation.left_exp = $1;
+        code_tmp->code.operation.right_exp = $3;
+        puts("NOT FUNC");
+        $$ = code_tmp;
+    }
+    | bit_move BITLEFT second_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = BITLEFT_func;
         code_tmp->code.operation.left_exp = $1;
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
@@ -495,8 +627,8 @@ second_number
     ;
 
 first_number
-    : zero_number
-    | first_number MUL zero_number
+    : negative
+    | first_number MUL negative
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -505,7 +637,7 @@ first_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | first_number DIV zero_number
+    | first_number DIV negative
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -514,7 +646,7 @@ first_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | first_number MOD zero_number
+    | first_number MOD negative
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -523,7 +655,7 @@ first_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | first_number INTDIV zero_number
+    | first_number INTDIV negative
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -534,9 +666,39 @@ first_number
     }
     ;
 
+// 取反[负数]
+negative
+    : bit_not
+    | SUB bit_not
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = NEGATIVE_func;
+        code_tmp->code.operation.left_exp = NULL;
+        code_tmp->code.operation.right_exp = $2;
+        $$ = code_tmp;
+    }
+    ;
+
+
+// ~ 按位翻转
+bit_not
+    : zero_number
+    | BITNOT zero_number
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = BITNOT_func;
+        code_tmp->code.operation.left_exp = NULL;
+        code_tmp->code.operation.right_exp = $2;
+        $$ = code_tmp;
+    }
+    ;
+
+
 zero_number
-    : call_number
-    | zero_number POW call_number
+    : attribute
+    | zero_number POW attribute
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -545,7 +707,7 @@ zero_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | zero_number LOG call_number
+    | zero_number LOG attribute
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -554,7 +716,7 @@ zero_number
         code_tmp->code.operation.right_exp = $3;
         $$ = code_tmp;
     }
-    | zero_number SQRT call_number
+    | zero_number SQRT attribute
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -565,25 +727,36 @@ zero_number
     }
     ;
 
-call_number
-    : element
-    | element LB RB
+attribute
+    : call_down
+    | attribute POINT call_down
     {
         statement *code_tmp =  make_statement();
-        code_tmp->type = call;
-        code_tmp->code.call.func = $1;
-        code_tmp->code.call.parameter_list = NULL;
-        $$ = code_tmp;
+        code_tmp->type = point;
+        code_tmp->code.point.base_var = $1;
+        code_tmp->code.point.child_var = $3;
+        $$ = code_tmp; 
     }
-    | element LB arguments RB
+    ;
+
+
+// 下标
+call_down
+    : call_slice
+    | call_slice LI top_exp RI
     {
         statement *code_tmp =  make_statement();
-        code_tmp->type = call;
-        code_tmp->code.call.func = $1;
-        code_tmp->code.call.parameter_list = $3;
-        $$ = code_tmp;
+        code_tmp->type = down;
+        code_tmp->code.down.base_var = $1;
+        code_tmp->code.down.child_var = $3;
+        $$ = code_tmp; 
     }
-    | element LI slice_arguments RI
+    ;
+
+// 切片
+call_slice
+    : iter_value
+    | call_slice LI slice_arguments RI
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = slice;
@@ -593,34 +766,79 @@ call_number
     }
     ;
 
+// 列表、字典
+iter_value
+    : element
+    | LI list_arguments RI
+    {
+        parameter *tmp;
+        tmp = malloc(sizeof(parameter));  // get an address for base var
+        tmp->next = NULL;
+        statement *statement_tmp = malloc(sizeof(statement));
+        statement_tmp->type = base_list;
+        statement_tmp->code.base_list.value = $2;
+        tmp->u.value = statement_tmp;
+
+        statement *code_tmp =  make_statement();
+        code_tmp->type = call;
+        code_tmp->code.call.func = pack_call_name("list", NULL);
+        code_tmp->code.call.parameter_list = tmp;
+
+        $$ = code_tmp;
+    }
+    | LP dict_arguments RP
+    {
+        parameter *tmp;
+        tmp = malloc(sizeof(parameter));  // get an address for base var
+        tmp->next = NULL;
+        statement *statement_tmp = malloc(sizeof(statement));
+        statement_tmp->type = base_dict;
+        statement_tmp->code.base_dict.value = $2;
+        tmp->u.value = statement_tmp;
+
+        statement *code_tmp =  make_statement();
+        code_tmp->type = call;
+        code_tmp->code.call.func = pack_call_name("dict", NULL);
+        code_tmp->code.call.parameter_list = tmp;
+
+        $$ = code_tmp;
+    }
+    ;
+
+list_arguments
+    : top_exp
+    {
+        $$ = make_parameter_value($1);
+        $$->type = only_value;
+        puts("Fss");
+    }
+    | list_arguments COMMA top_exp
+    {
+        parameter *tmp = append_parameter_value($3, $1);
+        tmp->type = only_value;
+        $$ = $1;
+    }
+    ;
+
+dict_arguments
+    : element EQ element
+    {
+        $$ = make_parameter_name($1);
+        $$->u.value = $3;
+        $$->type = name_value;
+    }
+    | dict_arguments COMMA element EQ element
+    {
+        parameter *tmp = append_parameter_name($3, $1);
+        tmp->u.value = $5;
+        tmp->type = name_value;
+        $$ = $1;
+    }
+    ;
+
 element
     : base_value
     | base_var_
-    | SUB element
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = operation;
-        code_tmp->code.operation.type = NEGATIVE_func;
-        code_tmp->code.operation.left_exp = NULL;
-        code_tmp->code.operation.right_exp = $2;
-        $$ = code_tmp;
-    }
-    | element POINT element
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = point;
-        code_tmp->code.point.base_var = $1;
-        code_tmp->code.point.child_var = $3;
-        $$ = code_tmp; 
-    }
-    | element LI element RI
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = down;
-        code_tmp->code.down.base_var = $1;
-        code_tmp->code.down.child_var = $3;
-        $$ = code_tmp; 
-    }
     | LB top_exp RB
     {
         $$ = $2;
@@ -687,40 +905,6 @@ base_value
         code_tmp->type = call;
         code_tmp->code.call.func = pack_call_name("bool", NULL);
         code_tmp->code.call.parameter_list = pack_value_parameter(tmp_value);
-        $$ = code_tmp;
-    }
-    | LI arguments RI
-    {
-        parameter *tmp;
-        tmp = malloc(sizeof(parameter));  // get an address for base var
-        tmp->next = NULL;
-        statement *statement_tmp = malloc(sizeof(statement));
-        statement_tmp->type = base_list;
-        statement_tmp->code.base_list.value = $2;
-        tmp->u.value = statement_tmp;
-
-        statement *code_tmp =  make_statement();
-        code_tmp->type = call;
-        code_tmp->code.call.func = pack_call_name("list", NULL);
-        code_tmp->code.call.parameter_list = tmp;
-
-        $$ = code_tmp;
-    }
-    | LP arguments RP
-    {
-        parameter *tmp;
-        tmp = malloc(sizeof(parameter));  // get an address for base var
-        tmp->next = NULL;
-        statement *statement_tmp = malloc(sizeof(statement));
-        statement_tmp->type = base_dict;
-        statement_tmp->code.base_dict.value = $2;
-        tmp->u.value = statement_tmp;
-
-        statement *code_tmp =  make_statement();
-        code_tmp->type = call;
-        code_tmp->code.call.func = pack_call_name("dict", NULL);
-        code_tmp->code.call.parameter_list = tmp;
-
         $$ = code_tmp;
     }
     | NULL_token
@@ -811,6 +995,145 @@ default_token
         strcpy(name_tmp, $2->code.base_var.var_name);
         free($2->code.base_var.var_name);
         free($2);
+        $$ = code_tmp;
+    }
+    ;
+
+return_exp
+    : return_token
+    | return_token top_exp
+    {
+        $1->code.return_code.value = $2;
+        $$ = $1;
+    }
+    | return_token top_exp element
+    {
+        $1->code.return_code.value = $2;
+        $1->code.return_code.times = $3;
+        $$ = $1;
+    }
+    ;
+
+return_token
+    : RETURN
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = return_code;
+        code_tmp->code.return_code.times = NULL;
+        code_tmp->code.return_code.value = NULL;
+        $$ = code_tmp;
+    }
+    ;
+
+restarted_exp
+    : restarted_token
+    | restarted_token element
+    {
+        $1->code.restarted.times = $2;
+        $$ = $1;
+    }
+    ;
+
+restarted_token
+    : RESTARTED
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = restarted;
+        code_tmp->code.restarted.times = NULL;
+        $$ = code_tmp;
+    }
+    ;
+
+restart_exp
+    : restart_token
+    | restart_token element
+    {
+        $1->code.restart.times = $2;
+        $$ = $1;
+    }
+    ;
+
+restart_token
+    : RESTART
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = restart;
+        code_tmp->code.restart.times = NULL;
+        $$ = code_tmp;
+    }
+    ;
+
+continued_exp
+    : continued_token
+    | continued_token element
+    {
+        $1->code.continued.times = $2;
+        $$ = $1;
+    }
+    ;
+
+continued_token
+    : CONTINUED
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = continued;
+        code_tmp->code.continued.times = NULL;
+        $$ = code_tmp;
+    }
+    ;
+
+continue_exp
+    : continue_token
+    | continue_token element
+    {
+        $1->code.continue_cycle.times = $2;
+        $$ = $1;
+    }
+    ;
+
+continue_token
+    : CONTINUE
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = continue_cycle;
+        code_tmp->code.continue_cycle.times = NULL;
+        $$ = code_tmp;
+    }
+    ;
+
+break_exp
+    : break_token
+    | break_token element
+    {
+        $1->code.break_cycle.times = $2;
+        $$ = $1;
+    }
+    ;
+
+break_token
+    : BREAK
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = break_cycle;
+        code_tmp->code.break_cycle.times = NULL;
+        $$ = code_tmp;
+    }
+    ;
+
+broken_exp
+    : broken_token
+    | broken_token element
+    {
+        $1->code.broken.times = $2;
+        $$ = $1;
+    }
+
+broken_token
+    : BROKEN
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = broken;
+        code_tmp->code.broken.times = NULL;
         $$ = code_tmp;
     }
     ;
@@ -1171,260 +1494,12 @@ def_exp
     }
     ;
 
-formal_parameter
-    : base_var_
-    {
-        $$ = make_parameter_name($1->code.base_var.var_name);
-        $$->type = only_name;
-        free($1->code.base_var.var_name);
-        free($1);
-    }
-    | MUL base_var_
-    {
-        $$ = make_parameter_name($2->code.base_var.var_name);
-        $$->type = put_args;
-        free($2->code.base_var.var_name);
-        free($2);
-    }
-    | base_var_ EQ top_exp
-    {
-        $$ = make_parameter_name($1->code.base_var.var_name);
-        $$->u.value = $3;
-        $$->type = name_value;
-        free($1->code.base_var.var_name);
-        free($1);
-    }
-    | formal_parameter COMMA base_var_
-    {
-        parameter *tmp = append_parameter_name($3->code.base_var.var_name, $1);
-        tmp->type = only_name;
-        $$ = $1;
-        free($3->code.base_var.var_name);
-        free($3);
-    }
-    | formal_parameter COMMA MUL base_var_
-    {
-        parameter *tmp = append_parameter_name($4->code.base_var.var_name, $1);
-        tmp->type = put_args;
-        $$ = $1;
-        free($4->code.base_var.var_name);
-        free($4);
-    }
-    | formal_parameter COMMA base_var_ EQ top_exp
-    {
-        parameter *tmp = append_parameter_name($3->code.base_var.var_name, $1);
-        tmp->u.value = $5;
-        tmp->type = name_value;
-        $$ = $1;
-        free($3->code.base_var.var_name);
-        free($3);
-    }
-    ;
-
-arguments
-    : top_exp
-    {
-        $$ = make_parameter_value($1);
-        $$->type = only_value;
-    }
-    | arguments COMMA top_exp
-    {
-        parameter *tmp = append_parameter_value($3, $1);
-        tmp->type = only_value;
-        $$ = $1;
-    }
-    | base_var_ EQ top_exp
-    {
-        $$ = make_parameter_name($1->code.base_var.var_name);
-        $$->u.value = $3;
-        $$->type = name_value;
-        free($1->code.base_var.var_name);
-        free($1);
-    }
-    | arguments COMMA base_var_ EQ top_exp
-    {
-        parameter *tmp = append_parameter_name($3->code.base_var.var_name, $1);
-        tmp->u.value = $5;
-        tmp->type = name_value;
-        $$ = $1;
-        free($3->code.base_var.var_name);
-        free($3);
-    }
-    | MUL top_exp
-    {
-        $$ = make_parameter_value($2);
-        $$->type = put_args;
-    }
-    ;
-
-slice_arguments
-    : slice_arguments_token
-    {
-        $$ = make_parameter_value($1);
-    }
-    | slice_arguments slice_arguments_token
-    {
-        append_parameter_value($2, $1);
-        $$ = $1;
-    }
-    | slice_arguments top_exp
-    {
-        append_parameter_value($2, $1);
-        $$ = $1;
-    }
-    ;
-
-slice_arguments_token
-    : top_exp COLON
-    {
-        $$ = $1;
-    }
-    ;
-
 block
     : LP command_list RP
     | LP block RP
     | LP PASS RP
     ;
 
-return_exp
-    : return_token
-    | return_token top_exp
-    {
-        $1->code.return_code.value = $2;
-        $$ = $1;
-    }
-    | return_token top_exp element
-    {
-        $1->code.return_code.value = $2;
-        $1->code.return_code.times = $3;
-        $$ = $1;
-    }
-    ;
-
-return_token
-    : RETURN
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = return_code;
-        code_tmp->code.return_code.times = NULL;
-        code_tmp->code.return_code.value = NULL;
-        $$ = code_tmp;
-    }
-    ;
-
-restarted_exp
-    : restarted_token
-    | restarted_token element
-    {
-        $1->code.restarted.times = $2;
-        $$ = $1;
-    }
-    ;
-
-restarted_token
-    : RESTARTED
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = restarted;
-        code_tmp->code.restarted.times = NULL;
-        $$ = code_tmp;
-    }
-    ;
-
-restart_exp
-    : restart_token
-    | restart_token element
-    {
-        $1->code.restart.times = $2;
-        $$ = $1;
-    }
-    ;
-
-restart_token
-    : RESTART
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = restart;
-        code_tmp->code.restart.times = NULL;
-        $$ = code_tmp;
-    }
-    ;
-
-continued_exp
-    : continued_token
-    | continued_token element
-    {
-        $1->code.continued.times = $2;
-        $$ = $1;
-    }
-    ;
-
-continued_token
-    : CONTINUED
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = continued;
-        code_tmp->code.continued.times = NULL;
-        $$ = code_tmp;
-    }
-    ;
-
-continue_exp
-    : continue_token
-    | continue_token element
-    {
-        $1->code.continue_cycle.times = $2;
-        $$ = $1;
-    }
-    ;
-
-continue_token
-    : CONTINUE
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = continue_cycle;
-        code_tmp->code.continue_cycle.times = NULL;
-        $$ = code_tmp;
-    }
-    ;
-
-break_exp
-    : break_token
-    | break_token element
-    {
-        $1->code.break_cycle.times = $2;
-        $$ = $1;
-    }
-    ;
-
-break_token
-    : BREAK
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = break_cycle;
-        code_tmp->code.break_cycle.times = NULL;
-        $$ = code_tmp;
-    }
-    ;
-
-broken_exp
-    : broken_token
-    | broken_token element
-    {
-        $1->code.broken.times = $2;
-        $$ = $1;
-    }
-
-broken_token
-    : BROKEN
-    {
-        statement *code_tmp =  make_statement();
-        code_tmp->type = broken;
-        code_tmp->code.broken.times = NULL;
-        $$ = code_tmp;
-    }
-    ;
 
 stop_token
     : STOPN

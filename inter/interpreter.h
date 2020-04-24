@@ -49,7 +49,7 @@ typedef struct GWARF_value{
 typedef struct parameter{
     struct
     {
-        char *name;  // var name
+        struct statement *var;  // the_var
         struct statement *value;  // var value
     } u;
     enum {
@@ -647,8 +647,8 @@ unsigned int time33(char *);
 int login_node(char *, GWARF_value, hash_var *);
 var *find_node(char *, hash_var *);
 
-parameter *make_parameter_name(char *);
-parameter *append_parameter_name(char *, parameter *);
+parameter *make_parameter_name(statement *);
+parameter *append_parameter_name(statement *, parameter *);
 
 parameter *make_parameter_value(statement *);
 parameter *append_parameter_value(statement *, parameter *);

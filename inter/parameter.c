@@ -2,17 +2,16 @@
 
 #include "interpreter.h"
 
-parameter *make_parameter_name(char *name){
+parameter *make_parameter_name(statement *var){
     parameter *tmp;
     tmp = malloc(sizeof(parameter));  // get an address for base var
     tmp->next = NULL;
-    tmp->u.name = malloc(sizeof(name));
+    tmp->u.var = var;
     tmp->type = only_name;
-    strcpy(tmp->u.name, name);
     return tmp;
 }
 
-parameter *append_parameter_name(char *name, parameter *parameter_base){
+parameter *append_parameter_name(statement *var, parameter *parameter_base){
     parameter *tmp = parameter_base;  // iter var
     while(1){
         if (tmp->next == NULL){  // the last
@@ -20,7 +19,7 @@ parameter *append_parameter_name(char *name, parameter *parameter_base){
         }
         tmp = tmp->next;  // get the next to iter
     }
-    parameter *new_tmp = make_parameter_name(name);
+    parameter *new_tmp = make_parameter_name(var);
     tmp->next = new_tmp;
     return new_tmp;
 }

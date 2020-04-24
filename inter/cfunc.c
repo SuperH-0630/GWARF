@@ -1504,7 +1504,7 @@ GWARF_value to_str(GWARF_value value, var_list *the_var){
     return return_number;
 }
 
-// to str[底层实现]
+// dict key 带有类型的前缀
 GWARF_value to_str_dict(GWARF_value value, var_list *the_var){
     GWARF_value return_number;
     return_number.type = STRING_value;
@@ -1900,7 +1900,7 @@ GWARF_value to_dict(GWARF_value value, var_list *the_var){
     return_number.type = DICT_value;
 
     if(value.type == OBJECT_value){  // 调用__value__方法
-        return_number = to_list(get__value__(&value, the_var).value, the_var);  // 递归
+        return_number = to_dict(get__value__(&value, the_var).value, the_var);  // 递归
     }
     else{
         // 生成一个空的DICT
@@ -1974,7 +1974,7 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var){  // 把param
     return_dict.value.dict_value->name_list = malloc(sizeof(dict_key));
     return_dict.value.dict_value->name_list->key = "";
     return_dict.value.dict_value->name_list->next = NULL;
-    
+
     int index = 0;
     GWARF_result result_tmp;
     while(1){
@@ -1982,6 +1982,7 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var){  // 把param
             break;
         }
         if(tmp_s->type != name_value){
+            printf("tmp_s->type = %d\n", tmp_s->type);
             goto next;  // 跳过这一个
         }
         result_tmp = traverse(tmp_s->u.value, the_var, false);  // 不需要取__value__
@@ -1992,12 +1993,10 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var){  // 把param
             goto next;
         }
 
-        char *key;;
-        size_t size = (size_t)(5 + strlen(tmp_s->u.name));
-        key = (char *)malloc(size);
-        snprintf(key, size,"str_%s", tmp_s->u.name);
+        GWARF_result key_tmp = traverse(tmp_s->u.var, the_var, 0);
+        char *key = to_str_dict(key_tmp.value, the_var).value.string;
 
-        int status = login_node(key, result_tmp.value, return_dict.value.dict_value->dict_value);  // 插入
+        login_node(key, result_tmp.value, return_dict.value.dict_value->dict_value);  // 插入
         dict_key *tmp_dict_name = return_dict.value.dict_value->name_list;
         while (1){  // 迭代
             if(!strcmp(tmp_dict_name->key, key)){  // 已经存在
@@ -2165,7 +2164,7 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
                 get_value = get__value__(&base_the_var, the_var);
                 get_value.value = to_str_dict(get_value.value, out_var);
-                
+                printf("get_value.value.value.string = %s\n", get_value.value.value.string);
                 var *find_var = find_node(get_value.value.value.string, tmp->value.value.dict_value->dict_value);
                 if(find_var == NULL){  // not found
                     return_value = to_error("Dict key Not Found", "NameException", out_var);
