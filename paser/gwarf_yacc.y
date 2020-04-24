@@ -299,6 +299,11 @@ formal_parameter
         $$ = make_parameter_name($2);
         $$->type = put_args;
     }
+    | POW top_exp
+    {
+        $$ = make_parameter_name($2);
+        $$->type = put_kwargs;
+    }
     | top_exp EQ top_exp
     {
         $$ = make_parameter_name($1);
@@ -315,6 +320,12 @@ formal_parameter
     {
         parameter *tmp = append_parameter_name($4, $1);
         tmp->type = put_args;
+        $$ = $1;
+    }
+    | formal_parameter COMMA POW top_exp
+    {
+        parameter *tmp = append_parameter_name($4, $1);
+        tmp->type = put_kwargs;
         $$ = $1;
     }
     | formal_parameter COMMA top_exp EQ top_exp
@@ -343,6 +354,7 @@ arguments
         $$ = make_parameter_name($1);
         $$->u.value = $3;
         $$->type = name_value;
+        puts("SSSS");
     }
     | arguments COMMA base_var_ EQ top_exp
     {
@@ -355,6 +367,23 @@ arguments
     {
         $$ = make_parameter_value($2);
         $$->type = put_args;
+    }
+    | arguments COMMA MUL top_exp
+    {
+        parameter *tmp = append_parameter_value($4, $1);
+        tmp->type = put_args;
+        $$ = $1;
+    }
+    | POW top_exp
+    {
+        $$ = make_parameter_value($2);
+        $$->type = put_kwargs;
+    }
+    | arguments COMMA POW top_exp
+    {
+        parameter *tmp = append_parameter_value($4, $1);
+        tmp->type = put_kwargs;
+        $$ = $1;
     }
     ;
 
@@ -821,13 +850,13 @@ list_arguments
     ;
 
 dict_arguments
-    : element EQ element
+    : element COLON element
     {
         $$ = make_parameter_name($1);
         $$->u.value = $3;
         $$->type = name_value;
     }
-    | dict_arguments COMMA element EQ element
+    | dict_arguments COMMA element COLON element
     {
         parameter *tmp = append_parameter_name($3, $1);
         tmp->u.value = $5;

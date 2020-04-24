@@ -57,7 +57,7 @@ typedef struct parameter{
         only_value,  // 实参
         name_value,  // 形参/实参
         put_args,
-        // put_kwargs,
+        put_kwargs,
         // get_args,
         // get_kwargs,
     } type;
@@ -541,6 +541,11 @@ GWARF_value to_list(GWARF_value value, var_list *the_var);
 GWARF_value to_dict(GWARF_value value, var_list *the_var);
 GWARF_value parameter_to_list(parameter *tmp_s, var_list *the_var);
 GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var);
+
+bool start_with(char *, char *);
+char *del_start(char *, char *);
+GWARF_value key_to_str(char *);
+
 bool to_bool(GWARF_value);
 
 GWARF_result get__value__(GWARF_value *, var_list *);

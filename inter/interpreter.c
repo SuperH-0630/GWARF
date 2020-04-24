@@ -1658,6 +1658,9 @@ GWARF_result assignment_statement(statement *the_statement, var_list *the_var, v
     value.u = statement_end;
     value.value.type = NULL_value;
     value.value.value.int_value = 0;
+    if(the_statement->type != base_var && the_statement->type != point && the_statement->type != down){
+        goto the_else;  // 非法的赋值语句
+    }
     if(right_result.value.type == OBJECT_value || right_result.value.type == CLASS_value){
         right_result = get__assignment__(&(right_result.value), the_var);
         if(is_error(&right_result)){  // Name Error错误
@@ -1780,7 +1783,8 @@ GWARF_result assignment_statement(statement *the_statement, var_list *the_var, v
         }
     }
     else{ 
-        the_else: puts("Bad Assignment");
+        the_else: value = to_error("Bad Assignment", "__AssignmentException__", the_var);
+        puts("Bad Assignment");
     }
     return value;
 }
@@ -1884,8 +1888,43 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
         else if(is_space(&tmp)){
             return tmp;
         }
+        if(tmp_s->type == put_kwargs){  // 实参出现**kwargs
+            parameter *before = tmp_s, *after = tmp_s->next;
+            GWARF_value iter_value = get__iter__(&(tmp.value), old_var_list).value;  // 获取迭代object，一般是返回self
+            while (1){
+                GWARF_result tmp_next = get__next__(&(iter_value), old_var_list), tmp_next_down;// 执行__next__的返回值
+                if(is_error(&tmp_next)){  // TODO:: 检查是否为IterException
+                    break;  // goto return_value;
+                }
+                if(is_space(&tmp_next)){  // TODO:: 检查是否为IterException
+                    return tmp_next;
+                }
 
-        if(assignment_type == 1 || tmp_s->type == name_value){
+                GWARF_result get;
+                GWARF_value base_the_var = tmp.value;  // 只有一个参数
+                var_list *call_var = base_the_var.value.object_value->the_var;
+
+                var *__down__tmp = find_var(call_var, 0, "__down__");
+                if(__down__tmp != NULL){
+                    get.value = __down__tmp->value;
+                    get.father = &base_the_var;  // 设置father
+                    tmp_next_down = call_back_core(get, the_var, pack_value_parameter(tmp_next.value));
+                }
+
+                before->next = pack_value_parameter(tmp_next_down.value);
+                before->next->u.var = make_statement();
+                before->next->u.var->type = base_var;
+                before->next->u.var->code.base_var.var_name = to_str(tmp_next.value, old_var_list).value.string;
+                before->next->u.var->code.base_var.from = NULL;
+                before->next->type = name_value;
+                before = before->next;
+            }
+            before->next = after;
+            tmp_s = tmp_s->next;  // 实参去下一位, 形参不变
+
+            assignment_type = 1;
+        }
+        else if(assignment_type == 1 || tmp_s->type == name_value){
             if(tmp_s->type != name_value){
                 printf("Warning!!!");  // 进入了模式1, 但不是name_value
                 break;
@@ -1911,7 +1950,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
             before->next = after;
             tmp_s = tmp_s->next;  // 实参去下一位, 形参不变
         }
-        else if(assignment_type == 0 && tmp_x->type == put_args){
+        else if(assignment_type == 0 && tmp_x->type == put_args){  // 形参出现了*args，收归所有无默认值的实参
             // 放入list中
             GWARF_result list_tmp;
             list_tmp.value = to_object(parameter_to_list(tmp_s, old_var_list), old_var_list);

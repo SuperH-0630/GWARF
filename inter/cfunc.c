@@ -1511,16 +1511,14 @@ GWARF_value to_str_dict(GWARF_value value, var_list *the_var){
 
     if((value.type == STRING_value)){
         size_t size = (size_t)(5 + strlen(value.value.string));
-        return_number.value.string = (char *)malloc(size);
+        return_number.value.string = calloc(sizeof(char), size);
         snprintf(return_number.value.string, size, "str_%s", value.value.string);
-        goto return_value;
     }
-
-    if(value.type == OBJECT_value){  // 调用__value__方法
+    else if(value.type == OBJECT_value){  // 调用__value__方法
         GWARF_value tmp_str = to_str_dict(get__value__(&value, the_var).value, the_var);  // 递归
-        size_t size = (size_t)(20 + strlen(tmp_str.value.string));
-        return_number.value.string = (char *)malloc(size);
-        snprintf(return_number.value.string, size, "object_%s", tmp_str.value.string);
+        size_t size = strlen(tmp_str.value.string) + 2;
+        return_number.value.string = calloc(sizeof(char), size);
+        snprintf(return_number.value.string, size, "%s", tmp_str.value.string);
     }
     else{
         if(value.type == BOOL_value){
@@ -1533,32 +1531,86 @@ GWARF_value to_str_dict(GWARF_value value, var_list *the_var){
         }
         else if(value.type == INT_value){
             size_t size = (size_t)(6 + len_int(value.value.int_value));
-            return_number.value.string = (char *)malloc(size);
+            return_number.value.string = calloc(sizeof(char), size);
             snprintf(return_number.value.string, size, "int_%d", value.value.int_value);
         }
         else if(value.type == NUMBER_value){
             size_t size = (size_t)(10 + len_double(value.value.double_value));
-            return_number.value.string = (char *)malloc(size);
+            return_number.value.string = calloc(sizeof(char), size);
             snprintf(return_number.value.string, size, "double_%f", value.value.double_value);
-        }
-        else if(value.type == NULL_value){
-            return_number.value.string = "none_<-None->";
         }
         else if(value.type == FUNC_value){
             size_t size = (size_t)(29 + len_intx((unsigned long int)value.value.func_value));  // 转换为无符号整形数字
-            return_number.value.string = (char *)malloc(size);
-            snprintf(return_number.value.string, size, "function_<-function on %u->", value.value.func_value);
+            return_number.value.string = calloc(sizeof(char), size);
+            snprintf(return_number.value.string, size, "str_<-function on %u->", value.value.func_value);
         }
         else if(value.type == CLASS_value){
             size_t size = (size_t)(22 + len_intx((unsigned long int)value.value.class_value));
-            return_number.value.string = (char *)malloc(size);
-            snprintf(return_number.value.string, size, "class_<-class on %u->", value.value.class_value);
+            return_number.value.string = calloc(sizeof(char), size);
+            snprintf(return_number.value.string, size, "str_<-class on %u->", value.value.class_value);
         }
         else{
-            return_number.value.string = "other_other";
+            return_number.value.string = "none_<-None->";
         }
     }
-    return_value: return return_number;
+    return_value: 
+    return return_number;
+}
+
+bool start_with(char *str, char *start){
+   int a = strlen(str),b = strlen(start);
+   if(a <= b){ // 长度相等也不用检查
+      return false;
+   }
+   else{
+      for(int i = 0;i < b; i += 1){
+         if(str[i] != start[i]){
+            return false;
+         }
+      }
+   }
+   return true;
+}
+
+char *del_start(char *str, char *start){
+   int a = strlen(str),b = strlen(start);
+   if(a <= b){ // 长度相等也不用检查
+      return NULL;
+   }
+   else{
+      char *new = (char *)calloc(sizeof(char) ,a - b + 1);  // 预留一个空位
+      strncpy(new, str+b, (a - b));
+      return new;
+   }
+}
+
+GWARF_value key_to_str(char *key){  // 复原key
+    GWARF_value return_value;
+    if(start_with(key, "str_")){
+        return_value.type = STRING_value;
+        return_value.value.string = del_start(key, "str_");
+    }
+    else if(start_with(key, "int_")){
+        return_value.type = INT_value;
+        return_value.value.int_value = atoi(del_start(key, "int_"));
+    }
+    else if(start_with(key, "double_")){
+        return_value.type = NUMBER_value;
+        return_value.value.double_value = atof(del_start(key, "double_"));
+    }
+    else if(!strcmp(key, "bool_true")){
+        return_value.type = BOOL_value;
+        return_value.value.bool_value = true;
+    }
+    else if(!strcmp(key, "bool_false")){
+        return_value.type = BOOL_value;
+        return_value.value.bool_value = false;
+    }
+    else{
+        return_value.type = NULL_value;
+        return_value.value.int_value = 0;
+    }
+    return return_value;
 }
 
 class_object *bool_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list){
@@ -1718,7 +1770,7 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 assignment_func("value", tmp_result, login_var, 0);  // 注册到self
                 return_value.u = statement_end;  // __init__没有return
             }
-            else{
+            else if(tmp_s->next == NULL){  // 只有一个参数
                 GWARF_result tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
                 if(is_error(&tmp_result)){  // Name Error错误
                     return_value = tmp_result;
@@ -1730,6 +1782,15 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 }
                 tmp.value = to_list(tmp_result.value, out_var);  // 只有一个参数[要针对不同数据类型对此处作出处理]
                 assignment_func("value", tmp, login_var, 0);  // 注册到self
+                return_value.u = statement_end;  // __init__没有return
+            }
+            else{
+                GWARF_result tmp_result;
+                GWARF_value list_tmp;
+                list_tmp.type = LIST_value;
+                list_tmp.value.list_value = parameter_to_list(tmp_s, out_var).value.list_value;
+                tmp_result.value = list_tmp;
+                assignment_func("value", tmp_result, login_var, 0);  // 注册到self
                 return_value.u = statement_end;  // __init__没有return
             }
             GWARF_result iter_value;
@@ -1977,12 +2038,12 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var){  // 把param
 
     int index = 0;
     GWARF_result result_tmp;
+    var_list *tmp_var_list = make_var_base(return_dict.value.dict_value->dict_value);
     while(1){
         if(tmp_s == NULL){
             break;
         }
         if(tmp_s->type != name_value){
-            printf("tmp_s->type = %d\n", tmp_s->type);
             goto next;  // 跳过这一个
         }
         result_tmp = traverse(tmp_s->u.value, the_var, false);  // 不需要取__value__
@@ -1993,9 +2054,16 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var){  // 把param
             goto next;
         }
 
-        GWARF_result key_tmp = traverse(tmp_s->u.var, the_var, 0);
-        char *key = to_str_dict(key_tmp.value, the_var).value.string;
-
+        char *key;
+        if(tmp_s->u.var->type == base_var){
+            size_t size = (size_t)(13 + strlen(tmp_s->u.var->code.base_var.var_name));
+            key = (char *)malloc(size);
+            snprintf(key, size, "str_%s", tmp_s->u.var->code.base_var.var_name);
+        }
+        else{
+            GWARF_result key_tmp = traverse(tmp_s->u.var, the_var, 0);
+            key = to_str_dict(key_tmp.value, the_var).value.string;
+        }
         login_node(key, result_tmp.value, return_dict.value.dict_value->dict_value);  // 插入
         dict_key *tmp_dict_name = return_dict.value.dict_value->name_list;
         while (1){  // 迭代
@@ -2005,7 +2073,7 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var){  // 把param
             else if(tmp_dict_name->next == NULL){
                 tmp_dict_name->next = malloc(sizeof(dict_key));
                 tmp_dict_name->next->next = NULL;
-                tmp_dict_name->next->key = malloc(sizeof(key));
+                tmp_dict_name->next->key = malloc(strlen(key));
                 strcpy(tmp_dict_name->next->key, key);  // 复制key
                 index += 1;  // 不存在才+1
                 break;
@@ -2072,7 +2140,7 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 assignment_func("value", tmp_result, login_var, 0);  // 注册到self
                 return_value.u = statement_end;  // __init__没有return
             }
-            else{
+            else if(tmp_s->next == NULL){  // 只有一个参数
                 GWARF_result tmp, tmp_result = traverse(tmp_s->u.value, out_var, false);
                 if(is_error(&tmp_result)){  // Name Error错误
                     return_value = tmp_result;
@@ -2084,6 +2152,15 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 }
                 tmp.value = to_dict(tmp_result.value, out_var);  // 只有一个参数[要针对不同数据类型对此处作出处理]
                 assignment_func("value", tmp, login_var, 0);  // 注册到self
+                return_value.u = statement_end;  // __init__没有return
+            }
+            else{  // 有多个实参
+                GWARF_result tmp_result;
+                GWARF_value dict_tmp;
+                dict_tmp.type = DICT_value;
+                dict_tmp.value.dict_value = parameter_to_dict(tmp_s, out_var).value.dict_value;
+                tmp_result.value = dict_tmp;
+                assignment_func("value", tmp_result, login_var, 0);  // 注册到self
                 return_value.u = statement_end;  // __init__没有return
             }
 
@@ -2133,18 +2210,11 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
                     tmp_dict_key = tmp_dict_key->next;
                 }
 
-                var *find_var = find_node(tmp_dict_key->key, tmp->value.value.dict_value->dict_value);
-                if(find_var == NULL){  // not found
-                    printf("key = '%s'\n", tmp_dict_key->key);
-                    return_value = to_error("Dict key Not Found", "NameException", out_var);
-                }
-                else{
-                    return_value.value = find_var->value;
-                    GWARF_result iter_value;
-                    iter_value.value.type = INT_value;
-                    iter_value.value.value.int_value = iter_index + 1;
-                    assignment_func("iter_value", iter_value, login_var, 0);  // 注册到self
-                }
+                GWARF_result iter_value;
+                iter_value.value.type = INT_value;
+                iter_value.value.value.int_value = iter_index + 1;
+                assignment_func("iter_value", iter_value, login_var, 0);  // 注册到self
+                return_value.value = key_to_str(tmp_dict_key->key);
             }
 
             next_break: break;
