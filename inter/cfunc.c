@@ -2161,10 +2161,7 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
                     return_value = tmp_result;
                     goto break_down;
                 }
-                GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
-                get_value = get__value__(&base_the_var, the_var);
-                get_value.value = to_str_dict(get_value.value, out_var);
-                printf("get_value.value.value.string = %s\n", get_value.value.value.string);
+                get_value.value = to_str_dict(tmp_result.value, out_var);
                 var *find_var = find_node(get_value.value.value.string, tmp->value.value.dict_value->dict_value);
                 if(find_var == NULL){  // not found
                     return_value = to_error("Dict key Not Found", "NameException", out_var);
@@ -2191,9 +2188,7 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
                     return_value = tmp_result;
                     goto return_result;
                 }
-                GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
-                get_value = get__value__(&base_the_var, the_var);
-                get_value.value = to_str_dict(get_value.value, out_var);
+                get_value.value = to_str_dict(tmp_result.value, out_var);
 
                 tmp_s = tmp_s->next;
                 GWARF_result new_value = traverse(tmp_s->u.value, out_var, false);
