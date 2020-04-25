@@ -415,6 +415,20 @@ class_object *IterException_login_official(var_list *the_var, var_list *father_v
     return class_tmp;
 }
 
+class_object *AssignmentException_login_official(var_list *the_var, var_list *father_var_list){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assignment_func("AssignmentException", class_value, the_var, 0);  // 注册class 的 位置
+    puts("----stop set class----");
+    return class_tmp;
+}
+
 class_object *gobject_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list){  // 内置对象继承的类
     // 创建对象[空对象]
     puts("----set class----");

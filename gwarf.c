@@ -46,6 +46,7 @@ void login(var_list *the_var){
     NameException_login_official(the_var, tmp_Exception->the_var);
     IterException_login_official(the_var, tmp_Exception->the_var);
     AssertException_login_official(the_var, tmp_Exception->the_var);
+    AssignmentException_login_official(the_var, tmp_Exception->the_var);
 }
 
 // 编译指令：cd "/home/songzihuan/文档/CProject/gwarf/" && gcc gwarf.c -lm -o gwarf && "/home/songzihuan/文档/CProject/gwarf/"gwarf

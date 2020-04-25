@@ -1782,7 +1782,7 @@ GWARF_result assignment_statement(statement *the_statement, var_list *the_var, v
         }
     }
     else{ 
-        the_else: value = to_error("Bad Assignment", "__AssignmentException__", the_var);
+        the_else: value = to_error("Bad Assignment", "AssignmentException", the_var);  // 赋值错误
         puts("Bad Assignment");
     }
     return value;

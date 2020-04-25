@@ -609,6 +609,7 @@ class_object *Exception_login_official(var_list *the_var, var_list *father_var_l
 class_object *NameException_login_official(var_list *the_var, var_list *father_var_list);
 class_object *IterException_login_official(var_list *the_var, var_list *father_var_list);
 class_object *AssertException_login_official(var_list *the_var, var_list *father_var_list);
+class_object *AssignmentException_login_official(var_list *the_var, var_list *father_var_list);
 
 // 生成错误
 GWARF_result to_error(char *error_info, char *error_type, var_list *the_var);
