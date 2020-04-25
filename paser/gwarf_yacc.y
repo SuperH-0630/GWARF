@@ -326,7 +326,6 @@ formal_parameter
     {
         parameter *tmp = append_parameter_name($4, $1);
         tmp->type = put_kwargs;
-        puts("WSSDD");
         $$ = $1;
     }
     | formal_parameter COMMA top_exp EQ top_exp
@@ -354,6 +353,7 @@ arguments
     {
         $$ = make_parameter_name($1);
         $$->u.value = $3;
+        puts("SW");
         $$->type = name_value;
     }
     | arguments COMMA base_var_ EQ top_exp
@@ -361,6 +361,7 @@ arguments
         parameter *tmp = append_parameter_name($3, $1);
         tmp->u.value = $5;
         tmp->type = name_value;
+        puts("SW");
         $$ = $1;
     }
     | MUL top_exp
@@ -378,11 +379,13 @@ arguments
     {
         $$ = make_parameter_value($2);
         $$->type = put_kwargs;
+        puts("SW");
     }
     | arguments COMMA POW top_exp
     {
         parameter *tmp = append_parameter_value($4, $1);
         tmp->type = put_kwargs;
+        puts("SW");
         $$ = $1;
     }
     ;
@@ -847,6 +850,17 @@ list_arguments
         tmp->type = only_value;
         $$ = $1;
     }
+    | MUL top_exp
+    {
+        $$ = make_parameter_value($2);
+        $$->type = put_args;
+    }
+    | list_arguments COMMA MUL top_exp
+    {
+        parameter *tmp = append_parameter_value($4, $1);
+        tmp->type = put_args;
+        $$ = $1;
+    }
     ;
 
 dict_arguments
@@ -861,6 +875,17 @@ dict_arguments
         parameter *tmp = append_parameter_name($3, $1);
         tmp->u.value = $5;
         tmp->type = name_value;
+        $$ = $1;
+    }
+    | POW top_exp
+    {
+        $$ = make_parameter_value($2);
+        $$->type = put_kwargs;
+    }
+    | dict_arguments COMMA POW top_exp
+    {
+        parameter *tmp = append_parameter_value($4, $1);
+        tmp->type = put_kwargs;
         $$ = $1;
     }
     ;

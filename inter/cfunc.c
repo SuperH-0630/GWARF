@@ -2023,15 +2023,30 @@ GWARF_value parameter_to_list(parameter *tmp_s, var_list *the_var){  // 把param
         if(tmp_s == NULL){
             break;
         }
+        if(tmp_s->type == put_args){  // 解包
+            parameter *before = tmp_s, *after = tmp_s->next;
+
+            GWARF_result tmp = traverse(tmp_s->u.value, the_var, false);  // 不会和下面发生重复计算
+            GWARF_value iter_value = get__iter__(&(tmp.value), the_var).value;
+            while (1){
+                GWARF_result tmp_next = get__next__(&(iter_value), the_var);
+                if(is_error(&tmp_next) || is_space(&tmp_next)){  // TODO:: 检查是否为IterException
+                    break;
+                }
+                before->next = pack_value_parameter(tmp_next.value);
+                before = before->next;
+            }
+            before->next = after;
+            // 此处不需要“tmp_s = tmp_s->next;”  goto next已经包含
+            goto next;
+        }
         if(tmp_s->type != only_value){
             goto next;  // 跳过这一个
         }
+        
         result_tmp = traverse(tmp_s->u.value, the_var, false);  // 不需要取__value__
-        if(is_error(&result_tmp)){  // Name Error错误
+        if(is_error(&result_tmp) || is_space(&result_tmp)){  // Name Error错误
             goto next;  // 直接指向下一个
-        }
-        else if(is_space(&result_tmp)){
-            goto next;
         }
         index += 1;
         return_list.value.list_value->list_value = realloc(return_list.value.list_value->list_value, sizeof(GWARF_value) * index);  // 申请新空间
@@ -2058,6 +2073,37 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var){  // 把param
     while(1){
         if(tmp_s == NULL){
             break;
+        }
+        if(tmp_s->type == put_kwargs){
+            parameter *before = tmp_s, *after = tmp_s->next;
+            GWARF_result get, tmp = traverse(tmp_s->u.value, the_var, false);  // 不会和下面发生重复计算
+            GWARF_value iter_value = get__iter__(&(tmp.value), the_var).value;  // 获取迭代object，一般是返回self
+            while (1){
+                GWARF_result tmp_next = get__next__(&(iter_value), the_var), tmp_next_down;// 执行__next__的返回值
+                if(is_error(&tmp_next) || is_space(&tmp_next)){  // TODO:: 检查是否为IterException
+                    goto next;  // goto return_value;
+                }
+
+                GWARF_result get;  // 不会和下面发生重复计算
+                var_list *call_var = tmp.value.value.object_value->the_var;
+
+                var *__down__tmp = find_var(call_var, 0, "__down__");
+                if(__down__tmp != NULL){
+                    get.value = __down__tmp->value;
+                    get.father = &(tmp.value);  // 设置father
+                    tmp_next_down = call_back_core(get, the_var, pack_value_parameter(tmp_next.value));
+                }
+
+                before->next = pack_value_parameter(tmp_next_down.value);
+                before->next->u.var = make_statement();
+                before->next->u.var->type = base_var;
+                before->next->u.var->code.base_var.var_name = to_str(tmp_next.value, the_var).value.string;
+                before->next->u.var->code.base_var.from = NULL;
+                before->next->type = name_value;
+                before = before->next;
+            }
+            before->next = after;
+            goto next;  // 跳过这一个
         }
         if(tmp_s->type != name_value){
             goto next;  // 跳过这一个

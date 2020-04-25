@@ -1978,7 +1978,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
         }
         else if(assignment_type == 1 || tmp_s->type == name_value){  // 根据tmp_s赋值，同时也是进入assignment_type == 1模式的入口，进入前提是：tmp_x不是put_kwargs[否则直接全部赋值到put_kwargs上即可]
             if(tmp_s->type != name_value){
-                printf("Warning!!!");  // 进入了模式1, 但不是name_value 
+                printf("[%d]::Warning!!!\n", tmp_s->type);  // 进入了模式1, 但不是name_value 
                 break;
             }
             assignment_type = 1;
@@ -1986,6 +1986,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
             tmp_s = tmp_s->next;
         }
         else if(tmp_s->type == put_args){  // assignment_type不在1模式 -> 把tmp_s列表解释为参数
+            printf("put_args\n");
             parameter *before = tmp_s, *after = tmp_s->next;
             GWARF_value iter_value = get__iter__(&(tmp.value), old_var_list).value;  // 获取迭代object，一般是返回self
             while (1){
@@ -2013,9 +2014,10 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                 if(tmp_s == NULL){
                     break;
                 }
-                if(tmp_s->type != only_value){
+                if(tmp_s->type != only_value && tmp_s->type != put_args){
                     break;
                 }
+                puts("GO");
                 tmp_s = tmp_s->next;  // tmp_s迭代到only_value的最后一个
             }
         }
