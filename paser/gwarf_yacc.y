@@ -33,10 +33,10 @@
 %type <statement_value> default_token global_token nonlocal_token
 // 计算
 %type <statement_value> base_value base_var_token base_var_ element iter_value call_slice call_down attribute bit_not negative bit_move bit_and bit_or bit_or_not bool_not bool_and bool_or
-%type <statement_value> second_number first_number zero_number top_exp third_number eq_number chose_exp lambda_exp call_number 
+%type <statement_value> second_number first_number zero_number top_exp third_number eq_number chose_exp lambda_exp call_number pack_eq_exp
 
 %type <statement_value> slice_arguments_token
-%type <parameter_list> formal_parameter arguments slice_arguments dict_arguments list_arguments
+%type <parameter_list> formal_parameter slice_arguments
 %type <string_value> base_string
 %type <if_list_base> elif_exp
 %%
@@ -166,6 +166,21 @@ command
     {
         $$ = $1;
     }
+    | pack_eq_exp stop_token
+    {
+        $$ = $1;
+    }
+    ;
+
+pack_eq_exp
+    : formal_parameter EQ formal_parameter
+    {
+        statement *code_tmp =  make_statement();
+        code_tmp->type = pack_eq;
+        code_tmp->code.pack_eq.right = $3;
+        code_tmp->code.pack_eq.left = $1;
+        $$ = code_tmp;
+    }
     ;
 
 // 顶级表达式[权限最低]
@@ -175,6 +190,7 @@ top_exp
         $$ = $1;
     }
     ;
+
 
 eq_number
     : call_number
@@ -291,20 +307,23 @@ eq_number
 formal_parameter
     : top_exp
     {
-        $$ = make_parameter_name($1);
-        $$->type = only_name;
+        $$ = make_parameter_value($1);
+        $$->u.var = $$->u.value;
+        $$->type = only_value;
     }
     | MUL top_exp
     {
-        $$ = make_parameter_name($2);
+        $$ = make_parameter_value($2);
+        $$->u.var = $$->u.value;
         $$->type = put_args;
     }
     | POW top_exp
     {
-        $$ = make_parameter_name($2);
+        $$ = make_parameter_value($2);
+        $$->u.var = $$->u.value;
         $$->type = put_kwargs;
     }
-    | top_exp EQ top_exp
+    | top_exp COLON top_exp
     {
         $$ = make_parameter_name($1);
         $$->u.value = $3;
@@ -312,23 +331,26 @@ formal_parameter
     }
     | formal_parameter COMMA top_exp
     {
-        parameter *tmp = append_parameter_name($3, $1);
-        tmp->type = only_name;
+        parameter *tmp = append_parameter_value($3, $1);
+        tmp->type = only_value;
+        tmp->u.var = tmp->u.value;
         $$ = $1;
     }
     | formal_parameter COMMA MUL top_exp
     {
-        parameter *tmp = append_parameter_name($4, $1);
+        parameter *tmp = append_parameter_value($4, $1);
         tmp->type = put_args;
+        tmp->u.var = tmp->u.value;
         $$ = $1;
     }
     | formal_parameter COMMA POW top_exp
     {
-        parameter *tmp = append_parameter_name($4, $1);
+        parameter *tmp = append_parameter_value($4, $1);
         tmp->type = put_kwargs;
+        tmp->u.var = tmp->u.value;
         $$ = $1;
     }
-    | formal_parameter COMMA top_exp EQ top_exp
+    | formal_parameter COMMA top_exp COLON top_exp
     {
         parameter *tmp = append_parameter_name($3, $1);
         tmp->u.value = $5;
@@ -337,58 +359,6 @@ formal_parameter
     }
     ;
 
-arguments
-    : top_exp
-    {
-        $$ = make_parameter_value($1);
-        $$->type = only_value;
-    }
-    | arguments COMMA top_exp
-    {
-        parameter *tmp = append_parameter_value($3, $1);
-        tmp->type = only_value;
-        $$ = $1;
-    }
-    | base_var_ EQ top_exp
-    {
-        $$ = make_parameter_name($1);
-        $$->u.value = $3;
-        puts("SW");
-        $$->type = name_value;
-    }
-    | arguments COMMA base_var_ EQ top_exp
-    {
-        parameter *tmp = append_parameter_name($3, $1);
-        tmp->u.value = $5;
-        tmp->type = name_value;
-        puts("SW");
-        $$ = $1;
-    }
-    | MUL top_exp
-    {
-        $$ = make_parameter_value($2);
-        $$->type = put_args;
-    }
-    | arguments COMMA MUL top_exp
-    {
-        parameter *tmp = append_parameter_value($4, $1);
-        tmp->type = put_args;
-        $$ = $1;
-    }
-    | POW top_exp
-    {
-        $$ = make_parameter_value($2);
-        $$->type = put_kwargs;
-        puts("SW");
-    }
-    | arguments COMMA POW top_exp
-    {
-        parameter *tmp = append_parameter_value($4, $1);
-        tmp->type = put_kwargs;
-        puts("SW");
-        $$ = $1;
-    }
-    ;
 
 slice_arguments
     : slice_arguments_token
@@ -425,7 +395,7 @@ call_number
         code_tmp->code.call.parameter_list = NULL;
         $$ = code_tmp;
     }
-    | call_number LB arguments RB
+    | call_number LB formal_parameter RB
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = call;
@@ -801,92 +771,37 @@ call_slice
 // 列表、字典
 iter_value
     : element
-    | LI list_arguments RI
+    | LI RI
     {
-        parameter *tmp;
-        tmp = malloc(sizeof(parameter));  // get an address for base var
-        tmp->next = NULL;
+        statement *statement_tmp = malloc(sizeof(statement));
+        statement_tmp->type = base_list;
+        statement_tmp->code.base_list.value = NULL;
+
+        $$ = statement_tmp;
+    }
+    | LI formal_parameter RI
+    {
         statement *statement_tmp = malloc(sizeof(statement));
         statement_tmp->type = base_list;
         statement_tmp->code.base_list.value = $2;
-        tmp->u.value = statement_tmp;
 
-        statement *code_tmp =  make_statement();
-        code_tmp->type = call;
-        code_tmp->code.call.func = pack_call_name("list", NULL);
-        code_tmp->code.call.parameter_list = tmp;
-
-        $$ = code_tmp;
+        $$ = statement_tmp;
     }
-    | LP dict_arguments RP
+    | LP RP
     {
-        parameter *tmp;
-        tmp = malloc(sizeof(parameter));  // get an address for base var
-        tmp->next = NULL;
+        statement *statement_tmp = malloc(sizeof(statement));
+        statement_tmp->type = base_dict;
+        statement_tmp->code.base_dict.value = NULL;
+
+        $$ = statement_tmp;
+    }
+    | LP formal_parameter RP
+    {
         statement *statement_tmp = malloc(sizeof(statement));
         statement_tmp->type = base_dict;
         statement_tmp->code.base_dict.value = $2;
-        tmp->u.value = statement_tmp;
 
-        statement *code_tmp =  make_statement();
-        code_tmp->type = call;
-        code_tmp->code.call.func = pack_call_name("dict", NULL);
-        code_tmp->code.call.parameter_list = tmp;
-
-        $$ = code_tmp;
-    }
-    ;
-
-list_arguments
-    : top_exp
-    {
-        $$ = make_parameter_value($1);
-        $$->type = only_value;
-        puts("Fss");
-    }
-    | list_arguments COMMA top_exp
-    {
-        parameter *tmp = append_parameter_value($3, $1);
-        tmp->type = only_value;
-        $$ = $1;
-    }
-    | MUL top_exp
-    {
-        $$ = make_parameter_value($2);
-        $$->type = put_args;
-    }
-    | list_arguments COMMA MUL top_exp
-    {
-        parameter *tmp = append_parameter_value($4, $1);
-        tmp->type = put_args;
-        $$ = $1;
-    }
-    ;
-
-dict_arguments
-    : element COLON element
-    {
-        $$ = make_parameter_name($1);
-        $$->u.value = $3;
-        $$->type = name_value;
-    }
-    | dict_arguments COMMA element COLON element
-    {
-        parameter *tmp = append_parameter_name($3, $1);
-        tmp->u.value = $5;
-        tmp->type = name_value;
-        $$ = $1;
-    }
-    | POW top_exp
-    {
-        $$ = make_parameter_value($2);
-        $$->type = put_kwargs;
-    }
-    | dict_arguments COMMA POW top_exp
-    {
-        parameter *tmp = append_parameter_value($4, $1);
-        tmp->type = put_kwargs;
-        $$ = $1;
+        $$ = statement_tmp;
     }
     ;
 
@@ -1497,7 +1412,7 @@ class_exp
 
         $$ = class_tmp;
     }
-    | CLASS  element LB arguments RB
+    | CLASS  element LB formal_parameter RB
     {   
         //无参数方法
         statement *class_tmp =  make_statement();

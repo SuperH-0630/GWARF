@@ -59,9 +59,9 @@ bool to_bool(GWARF_value value){
 }
 
 
-GWARF_result read_statement(statement *the_statement, var_list *the_var, var_list *login_var){  // read the statement list with case to run by func
-    if(login_var == NULL){
-        login_var = the_var;
+GWARF_result read_statement(statement *the_statement, var_list *the_var, var_list *the_login_var){  // read the statement list with case to run by func
+    if(the_login_var == NULL){
+        the_login_var = the_var;
     }
     GWARF_result return_value;
     return_value.u = statement_end;  // 正常设置[正常语句结束]
@@ -71,7 +71,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
     {
         case operation:  // 表达式运算
             puts("----code----");
-            return_value = operation_func(the_statement, the_var, login_var);
+            return_value = operation_func(the_statement, the_var, the_login_var);
             if((return_value.value.type == INT_value)){
                 printf("operation value = %d\n", return_value.value.value.int_value);
             }
@@ -157,6 +157,9 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 return_value.value.value.int_value = 0;
             }
             break;
+        case pack_eq:
+            login_var(the_login_var, the_var, the_statement->code.pack_eq.left, the_statement->code.pack_eq.right);
+            break;
         case base_value:  // get value[所有字面量均为这个表达式]
             return_value.value = (the_statement->code).base_value.value;  // code
             if((return_value.value.type == INT_value) || (return_value.value.type == BOOL_value)){
@@ -177,10 +180,10 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             // base_value返回字面量 -> 主要返回object类型，还会返回GWARF_value的其他类型供生成object类型
             break;
         case base_list:  // get value[所有字面量均为这个表达式]
-            return_value.value = parameter_to_list(the_statement->code.base_list.value, the_var);  // code
+            return_value.value = to_object(parameter_to_list(the_statement->code.base_list.value, the_var), the_var);  // code
             break;
         case base_dict:  // get value[所有字面量均为这个表达式]
-            return_value.value = parameter_to_dict(the_statement->code.base_dict.value, the_var);  // code
+            return_value.value = to_object(parameter_to_dict(the_statement->code.base_dict.value, the_var), the_var);  // code
             break;
         case slice:{  // get value[所有字面量均为这个表达式]
             GWARF_result tmp_result = traverse((the_statement->code).slice.base_var, the_var, false), get;  // 把a[1:2:3]的a取出来
@@ -356,7 +359,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             func_tmp->parameter_list = the_statement->code.def.parameter_list;
             func_tmp->the_var = copy_var_list(the_var);
             func_tmp->type = customize;  // func by user
-            if(login_var != the_var){  // 定义为类方法
+            if(the_login_var != the_var){  // 定义为类方法
                 func_tmp->is_class = true;
             }
             else{
@@ -367,7 +370,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             func_value.value.type = FUNC_value;
             func_value.value.value.func_value = func_tmp;
 
-            assignment_statement(the_statement->code.def.var, the_var, login_var, func_value);  // 注册函数到指定的位置
+            assignment_statement(the_statement->code.def.var, the_var, the_login_var, func_value);  // 注册函数到指定的位置
             // 无返回值
             break;
         }
@@ -445,7 +448,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 tmp = tmp->next;
             }
 
-            assignment_statement(the_statement->code.set_class.var, the_var,login_var, class_value);  // 注册class 的 位置
+            assignment_statement(the_statement->code.set_class.var, the_var,the_login_var, class_value);  // 注册class 的 位置
             puts("----stop set class----");
             // 无返回值
             break;
@@ -1969,6 +1972,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
         }
         else if(assignment_type == 0 && tmp_x->type == put_kwargs){  // tmp_s还没到根据name_value的阶段, 遇到了**kwargs，则把后面的所有直接变成dict
             // 放入list中
+            puts("[tag 1]");
             GWARF_result dict_tmp;
             dict_tmp.value = to_object(parameter_to_dict(tmp_s, old_var_list), old_var_list);  // 把所有name_value变成dict
             assignment_statement(tmp_x->u.var, old_var_list, the_var, dict_tmp);

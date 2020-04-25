@@ -7,7 +7,7 @@ parameter *make_parameter_name(statement *var){
     tmp = malloc(sizeof(parameter));  // get an address for base var
     tmp->next = NULL;
     tmp->u.var = var;
-    tmp->type = only_name;
+    tmp->type = only_value;
     return tmp;
 }
 

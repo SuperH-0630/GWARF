@@ -53,13 +53,10 @@ typedef struct parameter{
         struct statement *value;  // var value
     } u;
     enum {
-        only_name,  // 形参
-        only_value,  // 实参
+        only_value,
         name_value,  // 形参/实参
         put_args,
         put_kwargs,
-        // get_args,
-        // get_kwargs,
     } type;
     struct parameter *next;  // for list
 } parameter;
@@ -118,6 +115,7 @@ typedef struct statement{
         for_in_cycle,  // for i in a
         assert_e,
         chose_exp,
+        pack_eq,
     } type;  // the statement type
 
     union
@@ -211,6 +209,11 @@ typedef struct statement{
         struct{
             parameter *value;  // [1,2,3,4] -> to_list
         } base_list;
+
+        struct{
+            parameter *right;  // 实参
+            parameter *left;  // 形参
+        } pack_eq;
 
         struct{
             parameter *value;  // [1,2,3,4] -> to_list
@@ -497,6 +500,7 @@ GWARF_result while_func(statement *, var_list *);
 GWARF_result if_func(if_list *, var_list *);
 GWARF_result for_func(statement *, var_list *);
 GWARF_result call_back(statement *, var_list *);
+GWARF_result login_var(var_list *, var_list *, parameter *, parameter *);
 GWARF_result call_back_core(GWARF_result, var_list *, parameter *);
 GWARF_result block_func(statement *, var_list *);
 GWARF_result try_func(statement *, var_list *);

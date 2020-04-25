@@ -2084,11 +2084,13 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var){  // 把param
     int index = 0;
     GWARF_result result_tmp;
     var_list *tmp_var_list = make_var_base(return_dict.value.dict_value->dict_value);
+    puts("[tag 2]");
     while(1){
         if(tmp_s == NULL){
             break;
         }
         if(tmp_s->type == put_kwargs){
+            puts("[tag 3]");
             parameter *before = tmp_s, *after = tmp_s->next;
             GWARF_result get, tmp = traverse(tmp_s->u.value, the_var, false);  // 不会和下面发生重复计算
             GWARF_value iter_value = get__iter__(&(tmp.value), the_var).value;  // 获取迭代object，一般是返回self
@@ -2119,7 +2121,9 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var){  // 把param
             before->next = after;
             goto next;  // 跳过这一个
         }
+        puts("[tag 7]");
         if(tmp_s->type != name_value){
+            puts("[tag 4]");
             goto next;  // 跳过这一个
         }
         result_tmp = traverse(tmp_s->u.value, the_var, false);  // 不需要取__value__
@@ -2129,18 +2133,24 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var){  // 把param
         else if(is_space(&result_tmp)){
             goto next;
         }
-
         char *key;
         if(tmp_s->u.var->type == base_var){
+            puts("[tag 11.2]");
             size_t size = (size_t)(13 + strlen(tmp_s->u.var->code.base_var.var_name));
             key = (char *)malloc(size);
             snprintf(key, size, "str_%s", tmp_s->u.var->code.base_var.var_name);
+            puts("[tag 8.1]");
         }
         else{
+            puts("[tag 10.2]");
             GWARF_result key_tmp = traverse(tmp_s->u.var, the_var, 0);
             key = to_str_dict(key_tmp.value, the_var).value.string;
+            puts("[tag 8.2]");
         }
+        puts("[tag 9]");
+        printf("result_tmp.value.type = %d\n",result_tmp.value.type);
         login_node(key, result_tmp.value, return_dict.value.dict_value->dict_value);  // 插入
+        printf("NEW KEY = %s, type = %d\n", key, result_tmp.value.type);
         dict_key *tmp_dict_name = return_dict.value.dict_value->name_list;
         while (1){  // 迭代
             if(!strcmp(tmp_dict_name->key, key)){  // 已经存在
@@ -2159,6 +2169,7 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var){  // 把param
         next: tmp_s = tmp_s->next;  // 指向下一个
     }
     return_dict.value.dict_value->index = index;
+    puts("[tag 8]");
     return return_dict;
 }
 
