@@ -560,6 +560,7 @@ int len_double(double num);
 int len_int(int num);
 int len_intx(unsigned int num);
 GWARF_value to_object(GWARF_value, var_list *);
+GWARF_result get_object(parameter *, char *, var_list *);
 class_object *make_object(var_list *the_var, var_list *father_var_list);
 
 void login_official_func(int type, int is_class, var_list *the_var, char *name, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *));
@@ -645,12 +646,14 @@ var_list *free_var_list(var_list *);
 int get_var_list_len(var_list *);
 var *find_var(var_list *,int , char *);
 void add_var(var_list *,int , char *, GWARF_value);
+void del_var_var_list(var_list *,int, char *);
 var_list *copy_var_list(var_list *);
 
 hash_var *make_hash_var();
 unsigned int time33(char *);
 int login_node(char *, GWARF_value, hash_var *);
 var *find_node(char *, hash_var *);
+void del_var_node(char *, hash_var *);
 
 parameter *make_parameter_name(statement *);
 parameter *append_parameter_name(statement *, parameter *);

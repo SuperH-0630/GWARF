@@ -703,7 +703,7 @@ static const yytype_int16 yyrline[] =
      133,   137,   141,   145,   149,   153,   157,   161,   165,   173,
      180,   181,   190,   199,   208,   217,   226,   235,   244,   253,
      262,   271,   280,   292,   297,   302,   307,   313,   319,   325,
-     331,   341,   346,   352,   359,   366,   371,   377,   382,   391,
+     332,   342,   347,   353,   359,   366,   371,   377,   382,   391,
      395,   400,   408,   416,   417,   425,   436,   437,   447,   460,
      461,   475,   476,   488,   489,   501,   502,   515,   516,   525,
      534,   543,   552,   561,   573,   574,   587,   588,   600,   601,
@@ -2373,48 +2373,48 @@ yyreduce:
     {
         parameter *tmp = append_parameter_name((yyvsp[0].statement_value), (yyvsp[-3].parameter_list));
         tmp->type = put_kwargs;
+        puts("WSSDD");
         (yyval.parameter_list) = (yyvsp[-3].parameter_list);
     }
-#line 2379 "y.tab.c"
+#line 2380 "y.tab.c"
     break;
 
   case 50:
-#line 332 "gwarf_yacc.y"
+#line 333 "gwarf_yacc.y"
     {
         parameter *tmp = append_parameter_name((yyvsp[-2].statement_value), (yyvsp[-4].parameter_list));
         tmp->u.value = (yyvsp[0].statement_value);
         tmp->type = name_value;
         (yyval.parameter_list) = (yyvsp[-4].parameter_list);
     }
-#line 2390 "y.tab.c"
+#line 2391 "y.tab.c"
     break;
 
   case 51:
-#line 342 "gwarf_yacc.y"
+#line 343 "gwarf_yacc.y"
     {
         (yyval.parameter_list) = make_parameter_value((yyvsp[0].statement_value));
         (yyval.parameter_list)->type = only_value;
     }
-#line 2399 "y.tab.c"
+#line 2400 "y.tab.c"
     break;
 
   case 52:
-#line 347 "gwarf_yacc.y"
+#line 348 "gwarf_yacc.y"
     {
         parameter *tmp = append_parameter_value((yyvsp[0].statement_value), (yyvsp[-2].parameter_list));
         tmp->type = only_value;
         (yyval.parameter_list) = (yyvsp[-2].parameter_list);
     }
-#line 2409 "y.tab.c"
+#line 2410 "y.tab.c"
     break;
 
   case 53:
-#line 353 "gwarf_yacc.y"
+#line 354 "gwarf_yacc.y"
     {
         (yyval.parameter_list) = make_parameter_name((yyvsp[-2].statement_value));
         (yyval.parameter_list)->u.value = (yyvsp[0].statement_value);
         (yyval.parameter_list)->type = name_value;
-        puts("SSSS");
     }
 #line 2420 "y.tab.c"
     break;

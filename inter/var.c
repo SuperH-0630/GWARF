@@ -70,7 +70,7 @@ var *get_var(char *name, var *base_var){  // get the address
 void del_var(char *name, var *base_var){  // free an address
     var *tmp = base_var, *last_tmp=NULL;  // iter var
     while(1){
-        if (tmp->name == name){
+        if (!strcmp(tmp->name, name)){
             if(last_tmp != NULL){
                 last_tmp->next = tmp->next;  // if tmp->next is NULL last_tmp->next is NULL too
             }
@@ -80,8 +80,8 @@ void del_var(char *name, var *base_var){  // free an address
         if (tmp->next == NULL){  // not var name *name
             return;
         }
-        tmp = tmp->next;  // get the next to iter
         last_tmp = tmp;
+        tmp = tmp->next;  // get the next to iter
     }
 }
 
@@ -132,8 +132,22 @@ var *find_node(char *name, hash_var *the_hash_var){
     return get_var(name, base_node);
 }
 
-// --------------default_var[存储在var_list节点上]
+void del_var_node(char *name, hash_var *the_hash_var){  // 删除某个var
+    if(the_hash_var == NULL){
+        return;
+    }
 
+    unsigned int index = time33(name);
+    var *base_node = the_hash_var->hash[index];  // 根据下标拿base节点
+
+    if(base_node == NULL){  // 没有节点
+        return;
+    }
+    del_var(name, base_node);
+}
+
+// --------------default_var[存储在var_list节点上]
+// TODO:: default_var也应该删除对应的var
 default_var *make_default_var(){  // make_default_var
     default_var *tmp;
     tmp = malloc(sizeof(default_var));  // get an address for default_var
@@ -198,7 +212,6 @@ var_list *make_var_base(hash_var *global_hash_var){  // make the base for global
     tmp->hash_var_base = global_hash_var;
     return tmp;
 }
-
 
 var_list *append_var_list(hash_var *global_hash_var, var_list *var_list_base){  // make var_list[FILO]
     var_list *tmp = make_var_list();
@@ -278,6 +291,19 @@ void add_var(var_list *var_base,int from, char *name, GWARF_value value){  // ad
         start = start->next;
     }
     login_node(name, value, start->hash_var_base);
+}
+
+void del_var_var_list(var_list *var_base,int from, char *name){
+    var_list *start = var_base;
+    var *return_var;
+    from += get_default(name, var_base->default_list);
+    for(int i = 0;i < from;i+= 1){
+        if(start->next == NULL){
+            break;
+        }
+        start = start->next;
+    }
+    del_var_node(name, start->hash_var_base);
 }
 
 var_list *copy_var_list(var_list *var_list_base){  // 复制一条var链到另一个内存地址上[base不复制]

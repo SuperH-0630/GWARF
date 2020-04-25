@@ -18,6 +18,7 @@ void *safe_malloc(size_t size){
 
 void *safe_free(void *p){  // 安全的释放
     if(p == NULL){
+        puts("free Wrong!");
         return p;  // p已经释放了
     }
     free(p);

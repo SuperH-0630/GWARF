@@ -326,6 +326,7 @@ formal_parameter
     {
         parameter *tmp = append_parameter_name($4, $1);
         tmp->type = put_kwargs;
+        puts("WSSDD");
         $$ = $1;
     }
     | formal_parameter COMMA top_exp EQ top_exp
@@ -354,7 +355,6 @@ arguments
         $$ = make_parameter_name($1);
         $$->u.value = $3;
         $$->type = name_value;
-        puts("SSSS");
     }
     | arguments COMMA base_var_ EQ top_exp
     {

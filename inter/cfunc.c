@@ -97,6 +97,22 @@ GWARF_value to_object(GWARF_value value, var_list *the_var){  // 把GWARF_value�
 }
 
 
+GWARF_result get_object(parameter *tmp_s, char *name, var_list *the_var){  // 生成一个object
+    GWARF_result func_result;
+    func_result.u = statement_end;
+    func_result.value.type = NULL_value;
+    func_result.value.value.int_value = 0;
+    var *tmp = find_var(the_var, 0, name);
+    if(tmp != NULL){
+        func_result.value = tmp->value;
+    }
+    else{
+        return to_error("Object Name Not Found", "NameException", the_var);
+    }
+    return call_back_core(func_result, the_var, tmp_s);
+}
+
+
 GWARF_result to_error(char *error_info, char *error_type, var_list *the_var){  // 把GWARF_value封装成error
     GWARF_result func_result, return_result;
     GWARF_value tmp_value;
