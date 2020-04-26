@@ -173,13 +173,14 @@ command
     ;
 
 pack_eq_exp
-    : formal_parameter EQ formal_parameter
+    : LB formal_parameter RB EQ formal_parameter
     {
         statement *code_tmp =  make_statement();
         code_tmp->type = pack_eq;
-        code_tmp->code.pack_eq.right = $3;
-        code_tmp->code.pack_eq.left = $1;
+        code_tmp->code.pack_eq.right = $5;
+        code_tmp->code.pack_eq.left = $2;
         $$ = code_tmp;
+        puts("SSS");
     }
     ;
 
