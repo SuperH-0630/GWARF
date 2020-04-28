@@ -1,6 +1,13 @@
-void *safe_malloc(size_t size){
+#undef malloc
+#undef calloc
+#undef free
+#undef realloc
+#undef memcpy
+
+
+void *safe_calloc(size_t size, size_t num){
     void *tmp;
-    tmp = calloc(size, 1);
+    tmp = calloc(size, num);
     if(tmp != NULL){
         return tmp;
     }

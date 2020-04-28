@@ -1,4 +1,5 @@
-#define malloc(size) safe_malloc(size)
+#define malloc(size) safe_calloc(size, 1)
+#define calloc(size,n) safe_calloc(size, n)
 #define free(p) p=safe_free(p)
 #define realloc(p,size) safe_realloc(p,size)
 #define memcpy(p1,p2,size) safe_memcpy(p1,p2,size)

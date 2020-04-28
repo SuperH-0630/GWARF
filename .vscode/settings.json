@@ -39,7 +39,8 @@
         "valarray": "c",
         "interpreter.h": "c",
         "cstring": "c",
-        "cstdlib": "c"
+        "cstdlib": "c",
+        "mem.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
