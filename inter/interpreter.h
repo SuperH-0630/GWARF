@@ -11,6 +11,12 @@
 #define read_statement_list(the_statement,the_var) read_statement(the_statement,the_var,NULL)
 #define run_func(base_the_var,the_var,name) run_func_core(base_the_var,the_var,name,false)
 
+#define push_statement(base,token) \
+do{ \
+statement *tmp = find_statement_list(0, base); \
+append_statement(tmp, token.data.statement_value); \
+}while(0);
+
 // the type of data(GWARF_value)
 typedef enum{
     NUMBER_value = 1,  // [只允许系统使用] [1]

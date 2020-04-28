@@ -71,6 +71,8 @@ int paser(int *index){
         // 执行解析器
         match_int(p, global_paser[INT_PASER]);
         match_double(p, global_paser[DOUBLE_PASER]);
+
+        // 常规文本解析器
         match_text(p, global_paser[ENTER_PASER], "\n");
         match_text(p, global_paser[SPACE_PASER], " ");
         match_text(p, global_paser[ADD_PASER], "+");
@@ -79,6 +81,9 @@ int paser(int *index){
         match_text(p, global_paser[DIV_PASER], "/");
         match_text(p, global_paser[LB_PASER], "(");
         match_text(p, global_paser[RB_PASER], ")");
+        match_text(p, global_paser[WHILE_PASER], "while");
+        match_text(p, global_paser[LP_PASER], "{");
+        match_text(p, global_paser[RP_PASER], "}");
 
         *index = check_list(global_paser);  // 检查解析结果
 

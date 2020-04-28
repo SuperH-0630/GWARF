@@ -3,7 +3,7 @@
 
 #include "../inter/interpreter.h"
 
-#define MAX_PASER_SIZE 10
+#define MAX_PASER_SIZE 13
 #define INT_PASER 0
 #define DOUBLE_PASER 1
 #define ENTER_PASER 2
@@ -14,6 +14,9 @@
 #define DIV_PASER 7
 #define LB_PASER 8
 #define RB_PASER 9
+#define WHILE_PASER 10
+#define LP_PASER 11
+#define RP_PASER 12
 
 // 获取并返回一个token
 #define get_pop_token(status,list,new_token) \
@@ -46,6 +49,18 @@ add_node(list, new_token); \
 back_token(list); \
 }while(0);
 
+#define get_stop_token()  \
+do{ \
+token stop; \
+get_pop_token(status, list, stop); \
+if(stop.type != ENTER_PASER && stop.type != EOF_token){ \
+    paser_error("Don't get stop token or EOF"); \
+} \
+if(stop.type == EOF_token){ \
+    back_one_token(list, stop); \
+} \
+}while(0);
+
 // 非终结符
 #define NonTerminator -1
 
@@ -61,6 +76,11 @@ typedef enum token_type
     DIV = DIV_PASER,
     LB = LB_PASER,
     RB = RB_PASER,
+    WHILE = WHILE_PASER,
+    LP = LP_PASER,
+    RP = RP_PASER,
+
+    // 特殊符号
     BAD_token = -2,
     EOF_token = -3,
 
@@ -70,6 +90,8 @@ typedef enum token_type
     NON_polynomial = -7,
     NON_command = -8,
     NON_command_list = -9,
+    NON_while = -10,
+    NON_block = -11,
 } token_type;
 
 typedef union token_data
