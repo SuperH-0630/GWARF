@@ -5,8 +5,7 @@
 
 void *safe_malloc(size_t size){
     void *tmp;
-    tmp = malloc(size);
-    memset(tmp, 0, size);  // 初始化[避免因为其他东西溢出，所以要初始化了]
+    tmp = calloc(size,1);
     if(tmp != NULL){
         return tmp;
     }
