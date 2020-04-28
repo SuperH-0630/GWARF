@@ -1,11 +1,6 @@
-#include "mem.h"
+// #include "mem.h"
 #include "lex.h"
 #include "token.h"
-
-#define malloc(size) safe_malloc(size)
-#define free(p) p=safe_free(p)
-#define realloc(p,size) safe_realloc(p,size)
-#define memcpy(p1,p2,size) safe_memcpy(p1,p2,size)
 
 void match_int(char, word_paser *);
 void match_double(char, word_paser *);

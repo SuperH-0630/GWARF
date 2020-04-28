@@ -1,6 +1,6 @@
 #include"token.h"
 #include"lex.h"
-#include "mem.h"
+#include"../inter/interpreter.h"
 
 void factor(int *status, token_node *list);
 void number(int *status, token_node *list);

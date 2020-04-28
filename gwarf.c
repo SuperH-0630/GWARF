@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "mem/mem.c"
-#include "paser/y.tab.c"
+#include "paser/paser.c"
 #include "inter/branch.c"
 #include "inter/cfunc.c"
 #include "inter/parameter.c"
@@ -21,9 +21,9 @@ int main(){
     login(the_var);
 
     parser("/home/songzihuan/test.gwf");
-    printf("----start run----\n");
-    traverse_global(global_inter->global_code, the_var);
-    printf("code end...\n");
+    // printf("----start run----\n");
+    // traverse_global(global_inter->global_code, the_var);
+    // printf("code end...\n");
     return 0;
 }
 
@@ -49,7 +49,4 @@ void login(var_list *the_var){
     AssignmentException_login_official(the_var, tmp_Exception->the_var);
 }
 
-// 编译指令：cd "/home/songzihuan/文档/CProject/gwarf/" && gcc gwarf.c -lm -o gwarf && "/home/songzihuan/文档/CProject/gwarf/"gwarf
-// yacc和lex：cd ./paser && yacc -d gwarf_yacc.y && lex gwarf_lex.l
-// 合并编译：cd "/home/songzihuan/文档/CProject/gwarf/" && cd ./paser && yacc --verbose -d gwarf_yacc.y && lex gwarf_lex.l && cd .. && gcc gwarf.c -lm -o gwarf && "/home/songzihuan/文档/CProject/gwarf/"gwarf
-// --verbose 用于yacc生成.output文件
+// 合并编译：cd "/home/songzihuan/文档/CProject/gwarf/" && gcc gwarf.c -lm -o gwarf && "/home/songzihuan/文档/CProject/gwarf/"gwarf

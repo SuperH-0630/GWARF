@@ -1,5 +1,4 @@
 #include"token.h"
-#include "mem.h"
 
 token_node *make_token_node(){
     token_node *tmp = (token_node *)malloc(sizeof(tmp));
