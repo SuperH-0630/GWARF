@@ -7,6 +7,7 @@ void match_double(char, word_paser *);
 void match_text(char, word_paser *, char *);
 
 int is_in(int);
+extern void paser_error(char *);
 
 token get_token(int *paser_status){
     token return_token;
@@ -16,12 +17,21 @@ token get_token(int *paser_status){
         *paser_status = paser(&index);  // 解析
     }while(is_in(index));
 
-    return_token.type = index;
-    return_token.data_type = text;
-    return_token.data.text = malloc(strlen(global_paser[index]->text));
-    strcpy(return_token.data.text, global_paser[index]->text);
-    fprintf(debug, "[debug]token type = %d\n\n", index);
-
+    if(!(*paser_status)){  // 匹配到eof
+        return_token.type = EOF_token;
+        return_token.data_type = empty;
+        fprintf(debug, "[debug]token type = <EOF>\n\n");
+    }
+    else if(index == -2){
+        paser_error("lexical token error");
+    }
+    else{
+        return_token.type = index;
+        return_token.data_type = text;
+        return_token.data.text = malloc(strlen(global_paser[index]->text));
+        strcpy(return_token.data.text, global_paser[index]->text);
+        fprintf(debug, "[debug]token type = %d\n\n", index);
+    }
     return return_token;
 }
 
@@ -38,8 +48,8 @@ int is_in(int element){  // 检查某个值是否在数组中
 
 int paser(int *index){
     char p;
-    int status = 1;
-    int is_eof = 0;
+    int status = 1;  // 是否还有继续
+    int is_eof = 0;  // 考虑用status取代is_eof
     while(1){
         p = read_p();
         if(p == EOF){  // 遇到EOF[先不break]

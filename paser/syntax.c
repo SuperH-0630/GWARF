@@ -5,8 +5,89 @@
 void factor(int *status, token_node *list);
 void number(int *status, token_node *list);
 void polynomial(int *status, token_node *list);
+void command(int *status, token_node *list);
 
 void paser_error(char *text);
+
+/*
+command_list : command
+             | command_list command
+*/
+void command_list(int *status, token_node *list){  // 多项式
+    fprintf(status_log, "[info][grammar]  mode status: polynomial\n", text);
+    token left, right, new_token;
+
+    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
+    if(left.type == NON_command_list){  // 模式2
+        fprintf(status_log, "[info][grammar]  (command_list)reduce right\n");
+        get_right_token(status, list, command, right);  // 回调右边
+        
+        if(right.type == NON_command){
+            new_token.type = NON_command_list;
+            new_token.data_type = empty;
+            add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+            return command_list(status, list);  // 回调自己
+        }
+        else{  // 递归跳出[EOF_token]
+            fprintf(debug, "[info][grammar]  (command_list)out\n");
+            back_one_token(list, left);  // 理论上不back也可以
+            return;
+        }
+    }
+    else if(left.type == EOF_token){  // 递归跳出的条件
+        fprintf(debug, "[info][grammar]  (command_list)out\n");
+        return;
+    }
+    else{  // 模式1
+        fprintf(status_log, "[info][grammar]  (command_list)back one token to (command)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, command, new_token);
+
+        new_token.type = NON_command_list;
+        add_node(list, new_token);
+        return command_list(status, list);  // 回调自己
+    }
+}
+
+/*
+command : polynomial <ENTER>
+*/
+void command(int *status, token_node *list){  // 多项式
+    fprintf(status_log, "[info][grammar]  mode status: polynomial\n", text);
+    token left, stop, new_token;
+
+    new_token.type = NON_command;
+    new_token.data_type = statement_value;
+    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
+    if(left.type == ENTER_PASER){
+        fprintf(status_log, "[info][grammar]  (command)back <ENTER>\n");
+    }
+    else if(left.type == EOF_token){
+        fprintf(status_log, "[info][grammar]  (command)back <EOF>\n");
+        back_one_token(list, left);
+        goto return_back;
+    }
+    else{
+        fprintf(status_log, "[info][grammar]  (command)back one token to (polynomial)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, polynomial, new_token);
+
+        get_pop_token(status, list, stop);
+        if(stop.type != ENTER_PASER && stop.type != EOF_token){
+            paser_error("Don't get stop token or EOF");
+        }
+        if(stop.type == EOF_token){
+            back_one_token(list, stop);
+        }
+
+        statement *tmp = find_statement_list(0, statement_base);
+        append_statement(tmp, new_token.data.statement_value);
+    }
+    add_node(list, new_token);
+
+    return_back: 
+    return;  // 回调自己
+}
 
 /*
 polynomial : factor
@@ -19,7 +100,7 @@ void polynomial(int *status, token_node *list){  // 多项式
 
     left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
     if(left.type == NON_polynomial){  // 模式2/3
-        fprintf(status_log, "[info][grammar]  (factor)reduce right\n");
+        fprintf(status_log, "[info][grammar]  (polynomial)reduce right\n");
         get_pop_token(status, list, symbol);
         if(symbol.type == ADD_PASER || symbol.type == SUB_PASER){  // 模式2/3
             get_right_token(status, list, factor, right);  // 回调右边
@@ -44,10 +125,6 @@ void polynomial(int *status, token_node *list){  // 多项式
         }
         else{  // 递归跳出
             fprintf(debug, "[info][grammar]  (polynomial)out\n");
-
-            statement *tmp = find_statement_list(0, statement_base);
-            append_statement(tmp, left.data.statement_value);
-
             back_one_token(list, left);
             back_again(list, symbol);
             return;
@@ -161,16 +238,16 @@ void number(int *status, token_node *list){  // 数字归约
 
         fprintf(status_log, "[info][grammar]  (number)get double number: %f\n", new_token.data.d_number);
     }
-    // else if(gett.type == LB_PASER){  // 模式3
-    //     fprintf(status_log, "[info][grammar]  (number)get LB\n");
-    //     get_right_token(status, list, polynomial, new_token);
-    //     new_token.type = NON_dou;
-    //     token rb;
-    //     get_pop_token(status, list ,rb);
-    //     if(rb.type != RB_PASER){  // 匹配失败
-    //         paser_error("Don't get ')'");
-    //     }
-    // }
+    else if(gett.type == LB_PASER){  // 模式3
+        fprintf(status_log, "[info][grammar]  (number)get LB\n");
+        get_right_token(status, list, polynomial, new_token);
+        new_token.type = NON_base_value;
+        token rb;
+        get_pop_token(status, list ,rb);
+        if(rb.type != RB_PASER){  // 匹配失败
+            paser_error("Don't get ')'");
+        }
+    }
     else{  // 不是期望值
         fprintf(status_log, "[info][grammar]  (number)back one token\n");
         back_one_token(list, gett);

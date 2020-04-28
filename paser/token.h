@@ -68,6 +68,8 @@ typedef enum token_type
     NON_base_value = -4,
     NON_factor = -6,
     NON_polynomial = -7,
+    NON_command = -8,
+    NON_command_list = -9,
 } token_type;
 
 typedef union token_data
@@ -91,6 +93,7 @@ typedef struct token
         statement_value,
         if_list_base,
         parameter_list,
+        empty,
     } data_type;  // data的数据类型
     token_data data;
 } token;

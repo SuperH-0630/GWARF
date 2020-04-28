@@ -17,7 +17,7 @@ int parser(char *file_address){
     atexit(*do_exit);
     setup(file_address);
     safe_get_token(&paser_status, global_token_node);
-    polynomial(&paser_status, global_token_node);
+    command_list(&paser_status, global_token_node);
     return 0;
 }
 
