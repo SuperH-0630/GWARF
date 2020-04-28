@@ -21,9 +21,9 @@ int main(){
     login(the_var);
 
     parser("/home/songzihuan/test.gwf");
-    // printf("----start run----\n");
-    // traverse_global(global_inter->global_code, the_var);
-    // printf("code end...\n");
+    printf("----start run----\n");
+    traverse_global(global_inter->global_code, the_var);
+    printf("code end...\n");
     return 0;
 }
 

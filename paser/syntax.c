@@ -25,23 +25,29 @@ void polynomial(int *status, token_node *list){  // 多项式
             get_right_token(status, list, factor, right);  // 回调右边
 
             new_token.type = NON_polynomial;
-            new_token.data_type = d_number;
-
-            // 逻辑处理
-            double l_num = left.data.d_number, r_num = right.data.d_number;
+            new_token.data_type = statement_value;
+            statement *code_tmp =  make_statement();
+            code_tmp->type = operation;
 
             if(symbol.type == ADD_PASER){
-                new_token.data.d_number = l_num + r_num;
+                code_tmp->code.operation.type = ADD_func;
             }
             else{
-                new_token.data.d_number = l_num - r_num;
+                code_tmp->code.operation.type = SUB_func;
             }
+            code_tmp->code.operation.left_exp = left.data.statement_value;
+            code_tmp->code.operation.right_exp = right.data.statement_value;
+            new_token.data.statement_value = code_tmp;
+
             add_node(list, new_token);  // 压入节点[弹出3个压入1个]
             return polynomial(status, list);  // 回调自己
         }
         else{  // 递归跳出
-            printf("left.data.d_number = %f\n", left.data.d_number);
             fprintf(debug, "[info][grammar]  (polynomial)out\n");
+
+            statement *tmp = find_statement_list(0, statement_base);
+            append_statement(tmp, left.data.statement_value);
+
             back_one_token(list, left);
             back_again(list, symbol);
             return;
@@ -75,24 +81,21 @@ void factor(int *status, token_node *list){  // 因试分解
         if(symbol.type == MUL_PASER || symbol.type == DIV_PASER){  // 模式2/3
             get_right_token(status, list, number, right);  // 回调右边
 
-            new_token.type = NON_factor;
-            new_token.data_type = d_number;
-
             // 逻辑操作
-            double l_num = left.data.d_number, r_num;
-            if(right.type == NON_dou){
-                r_num = right.data.d_number;
-            }
-            else if(right.type == NON_int){
-                r_num = (double)right.data.i_number;
-            }
+            new_token.type = NON_factor;
+            new_token.data_type = statement_value;
+            statement *code_tmp =  make_statement();
+            code_tmp->type = operation;
 
             if(symbol.type == MUL_PASER){
-                new_token.data.d_number = l_num * r_num;
+                code_tmp->code.operation.type = MUL_func;
             }
             else{
-                new_token.data.d_number = l_num / r_num;
+                code_tmp->code.operation.type = DIV_func;
             }
+            code_tmp->code.operation.left_exp = left.data.statement_value;
+            code_tmp->code.operation.right_exp = right.data.statement_value;
+            new_token.data.statement_value = code_tmp;
             add_node(list, new_token);  // 压入节点[弹出3个压入1个]
             return factor(status, list);  // 回调自己
         }
@@ -109,9 +112,6 @@ void factor(int *status, token_node *list){  // 因试分解
         back_one_token(list, left);
         get_base_token(status, list, number, new_token);
 
-        if(new_token.type == NON_int){
-            new_token.data.d_number = (double)new_token.data.i_number;
-        }
         new_token.type = NON_factor;
         add_node(list, new_token);
         return factor(status, list);  // 回调自己
@@ -130,27 +130,47 @@ void number(int *status, token_node *list){  // 数字归约
     gett = pop_node(list);  // 取得一个token
 
     if(gett.type == INT_PASER){  // int类型
-        new_token.type = NON_int;
-        new_token.data_type = i_number;
-        new_token.data.i_number = atoi(gett.data.text);
-        fprintf(status_log, "[info][grammar]  (number)get int number: %d\n", new_token.data.i_number);
+        new_token.type = NON_base_value;
+
+        GWARF_value tmp_value;
+        tmp_value.type = INT_value;
+        tmp_value.value.int_value = atoi(gett.data.text);
+
+        statement *code_tmp =  make_statement();
+        code_tmp->type = call;
+        code_tmp->code.call.func = pack_call_name("int", NULL);
+        code_tmp->code.call.parameter_list = pack_value_parameter(tmp_value);
+        new_token.data.statement_value = code_tmp;
+        new_token.data_type = statement_value;
+
+        fprintf(status_log, "[info][grammar]  (number)get int number: %d\n", tmp_value.value.int_value);
     }
     else if(gett.type == DOUBLE_PASER){
-        new_token.type = NON_dou;
-        new_token.data_type = d_number;
-        new_token.data.d_number = atof(gett.data.text);
+        new_token.type = NON_base_value;
+
+        GWARF_value tmp_value;
+        tmp_value.type = NUMBER_value;
+        tmp_value.value.double_value = atof(gett.data.text);
+
+        statement *code_tmp =  make_statement();
+        code_tmp->type = call;
+        code_tmp->code.call.func = pack_call_name("double", NULL);
+        code_tmp->code.call.parameter_list = pack_value_parameter(tmp_value);
+        new_token.data.statement_value = code_tmp;
+        new_token.data_type = statement_value;
+
         fprintf(status_log, "[info][grammar]  (number)get double number: %f\n", new_token.data.d_number);
     }
-    else if(gett.type == LB_PASER){  // 模式3
-        fprintf(status_log, "[info][grammar]  (number)get LB\n");
-        get_right_token(status, list, polynomial, new_token);
-        new_token.type = NON_dou;
-        token rb;
-        get_pop_token(status, list ,rb);
-        if(rb.type != RB_PASER){  // 匹配失败
-            paser_error("Don't get ')'");
-        }
-    }
+    // else if(gett.type == LB_PASER){  // 模式3
+    //     fprintf(status_log, "[info][grammar]  (number)get LB\n");
+    //     get_right_token(status, list, polynomial, new_token);
+    //     new_token.type = NON_dou;
+    //     token rb;
+    //     get_pop_token(status, list ,rb);
+    //     if(rb.type != RB_PASER){  // 匹配失败
+    //         paser_error("Don't get ')'");
+    //     }
+    // }
     else{  // 不是期望值
         fprintf(status_log, "[info][grammar]  (number)back one token\n");
         back_one_token(list, gett);

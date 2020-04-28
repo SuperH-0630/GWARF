@@ -1,9 +1,7 @@
 #ifndef TOKN_INCLUED
 #define TOKN_INCLUED
 
-#define bool int
-#define true 1
-#define false 0
+#include "../inter/interpreter.h"
 
 #define MAX_PASER_SIZE 10
 #define INT_PASER 0
@@ -67,8 +65,7 @@ typedef enum token_type
     EOF_token = -3,
 
     // 终结符
-    NON_int = -4,
-    NON_dou = -5,
+    NON_base_value = -4,
     NON_factor = -6,
     NON_polynomial = -7,
 } token_type;
@@ -78,6 +75,9 @@ typedef union token_data
     char *text;
     int i_number;
     double d_number;
+    struct statement *statement_value;
+    struct if_list *if_list_base;
+    struct parameter *parameter_list;
 } token_data;
 
 
@@ -88,6 +88,9 @@ typedef struct token
         text,
         d_number,
         i_number,
+        statement_value,
+        if_list_base,
+        parameter_list,
     } data_type;  // data的数据类型
     token_data data;
 } token;
