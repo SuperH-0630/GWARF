@@ -103,6 +103,12 @@ int paser(int *index){
         match_text(p, global_paser[BITAND_PASER], "&");
         match_text(p, global_paser[BITOR_PASER], "|");
         match_text(p, global_paser[BITNOTOR_PASER], "^");
+        match_text_s(p, global_paser[MORE_PASER], ">");
+        match_text_s(p, global_paser[LESS_PASER], "<");
+        match_text_s(p, global_paser[NOTEQ_PASER], "!=");
+        match_text_s(p, global_paser[EQEQ_PASER], "==");
+        match_text_s(p, global_paser[MOREEQ_PASER], ">=");
+        match_text_s(p, global_paser[LESSEQ_PASER], "<=");
 
         *index = check_list(global_paser);  // 检查解析结果
 

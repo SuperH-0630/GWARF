@@ -21,6 +21,7 @@ void bit_not(int *status, token_node *list);
 void bit_notor(int *status, token_node *list);
 void bit_or(int *status, token_node *list);
 void bit_and(int *status, token_node *list);
+void compare(int *status, token_node *list);
 
 void paser_error(char *text);
 
@@ -413,14 +414,79 @@ top_exp : polynomial
 void top_exp(int *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: top_exp\n");
     token exp;
-    get_base_token(status,list,bit_notor,exp);
-    if(exp.type != NON_bit_notor){
+    get_base_token(status,list,compare,exp);
+    if(exp.type != NON_compare){
         back_one_token(list, exp);
         return;
     }
     exp.type = NON_top_exp;
     add_node(list, exp);  // 压入节点
     return;
+}
+
+void compare(int *status, token_node *list){  // 多项式
+    fprintf(status_log, "[info][grammar]  mode status: polynomial\n");
+    token left, right, symbol, new_token;
+
+    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
+    if(left.type == NON_compare){  // 模式2/3
+        fprintf(status_log, "[info][grammar]  (polynomial)reduce right\n");
+        get_pop_token(status, list, symbol);
+        if(symbol.type == EQEQ_PASER || symbol.type == MOREEQ_PASER || symbol.type == LESSEQ_PASER ||
+           symbol.type == MORE_PASER || symbol.type == LESS_PASER || symbol.type == NOTEQ_PASER){  // 模式2/3
+            get_right_token(status, list, bit_notor, right);  // 回调右边
+            if(right.type != NON_bit_notor){
+                paser_error("Don't get a bit_notor");
+            }
+            new_token.type = NON_compare;
+            new_token.data_type = statement_value;
+            statement *code_tmp =  make_statement();
+            code_tmp->type = operation;
+
+            if(symbol.type == EQEQ_PASER){
+                code_tmp->code.operation.type = EQUAL_func;
+            }
+            else if(symbol.type == MOREEQ_PASER){
+                code_tmp->code.operation.type = MOREEQ_func;
+            }
+            else if(symbol.type == LESSEQ_PASER){
+                code_tmp->code.operation.type = LESSEQ_func;
+            }
+            else if(symbol.type == MORE_PASER){
+                code_tmp->code.operation.type = MORE_func;
+            }
+            else if(symbol.type == LESS_PASER){
+                code_tmp->code.operation.type = LESS_func;
+            }
+            else{
+                code_tmp->code.operation.type = NOTEQ_func;
+            }
+            code_tmp->code.operation.left_exp = left.data.statement_value;
+            code_tmp->code.operation.right_exp = right.data.statement_value;
+            new_token.data.statement_value = code_tmp;
+
+            add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+            return compare(status, list);  // 回调自己
+        }
+        else{  // 递归跳出
+            fprintf(status_log, "[info][grammar]  (polynomial)out\n");
+            back_one_token(list, left);
+            back_again(list, symbol);
+            return;
+        }
+    }
+    else{  // 模式1
+        fprintf(status_log, "[info][grammar]  (polynomial)back one token to (factor)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, bit_notor, new_token);
+        if(new_token.type != NON_bit_notor){
+            back_one_token(list, new_token);  // 往回[不匹配类型]
+            return;
+        }
+        new_token.type = NON_compare;
+        add_node(list, new_token);
+        return compare(status, list);  // 回调自己
+    }
 }
 
 /*
