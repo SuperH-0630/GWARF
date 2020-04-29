@@ -3,7 +3,7 @@
 
 #include "../inter/interpreter.h"
 
-#define MAX_PASER_SIZE 18
+#define MAX_PASER_SIZE 30
 #define INT_PASER 0
 #define DOUBLE_PASER 1
 #define ENTER_PASER 2
@@ -22,6 +22,18 @@
 #define ELSE_PASER 15
 #define COMMA_PASER 16
 #define FOR_PASER 17
+#define VAR_PASER 18
+#define LI_PASER 19
+#define RI_PASER 20
+#define POW_PASER 21
+#define LOG_PASER 22
+#define SQRT_PASER 23
+#define BITNOT_PASER 24
+#define BITRIGHT_PASER 25
+#define BITLEFT_PASER 26
+#define BITAND_PASER 27
+#define BITOR_PASER 28
+#define BITNOTOR_PASER 29
 
 // 获取并返回一个token
 #define get_pop_token(status,list,new_token) \
@@ -89,6 +101,13 @@ typedef enum token_type
     ELIF = ELIF_PASER,
     ELSE = ELSE_PASER,
     COMMA = COMMA_PASER,
+    VAR = VAR_PASER,
+    BITNOT = BITNOT_PASER,
+    BITRIGHT = BITRIGHT_PASER,
+    BITLEFT = BITLEFT_PASER,
+    BITAND = BITAND_PASER,
+    BITOR = BITOR_PASER,
+    BITNOTOR = BITNOTOR_PASER,
 
     // 特殊符号
     BAD_token = -2,
@@ -108,6 +127,14 @@ typedef enum token_type
     NON_else = -15,
     NON_for = -16,
     NON_element = -17,
+    NON_base_var = -18,
+    NON_power = -19,
+    NON_bit_not = -20,
+    NON_negative = -21,
+    NON_bit_move = -22,
+    NON_bit_and = -23,
+    NON_bit_or = -24,
+    NON_bit_notor = -25,
 } token_type;
 
 typedef union token_data

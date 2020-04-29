@@ -1518,7 +1518,6 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
     else if(right_result.u != return_def && is_space(&right_result)){
         return right_result;
     }
-
     switch (func_type)  // 获取运算类型
     {
         case ADD_func:

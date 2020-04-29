@@ -4,7 +4,7 @@
 // 定义lex需要使用的宏
 #define NO_MATCH(paser) \
     do{ \
-        if((paser->status  == START)){ \
+        if((paser->status == START)){ \
             paser->status = NOTMATCH; \
         } \
         else{ \
@@ -41,10 +41,10 @@
     } \
     } while(0)
 
-#define USE paser->status != NOTMATCH && paser->status != END && paser->status != WAIT_END
+#define USE paser->status != NOTMATCH && paser->status != END && paser->status != WAIT_END && paser->status != S_END
 
 #define UNUSE_SET \
-    else if(paser->status == END){ \
+    else if(paser->status == END || paser->status == S_END){ \
         paser->status = NOTMATCH; \
     } \
     else if(paser->status == WAIT_END){ \
@@ -54,8 +54,10 @@
 // 定义匹配器的状态
 #define STATUS int
 #define NOTMATCH -1
-#define END -2
-#define WAIT_END -3
+#define WAIT_END -2
+#define END -3
+// S_END 二级合并
+#define S_END -4
 #define START 0
 
 // 设置mode

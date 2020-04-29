@@ -3,9 +3,12 @@
 #include"../inter/interpreter.h"
 
 void factor(int *status, token_node *list);
+void power(int *status, token_node *list);
 void number(int *status, token_node *list);
 void element(int *status, token_node *list);
+void var_token(int *status, token_node *list);
 void polynomial(int *status, token_node *list);
+void bit_move(int *status, token_node *list);
 void command(int *status, token_node *list);
 void while_(int *status, token_node *list);
 void if_(int *status, token_node *list);
@@ -13,6 +16,12 @@ void for_(int *status, token_node *list);
 void elif_(int *status, token_node *list);
 void block_(int *status, token_node *list);
 void top_exp(int *status, token_node *list);
+void negative(int *status, token_node *list);
+void bit_not(int *status, token_node *list);
+void bit_notor(int *status, token_node *list);
+void bit_or(int *status, token_node *list);
+void bit_and(int *status, token_node *list);
+
 void paser_error(char *text);
 
 /*
@@ -302,7 +311,7 @@ void for_(int *status, token_node *list){
 
         get_right_token(status,list,block_,block_t);
         if(block_t.type != NON_block){  // 不是表达式
-            paser_error("Don't get '{'[s]");
+            paser_error("Don't get '{'");
         }
 
         statement *for_tmp =  make_statement();
@@ -404,8 +413,8 @@ top_exp : polynomial
 void top_exp(int *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: top_exp\n");
     token exp;
-    get_base_token(status,list,polynomial,exp);
-    if(exp.type != NON_polynomial){
+    get_base_token(status,list,bit_notor,exp);
+    if(exp.type != NON_bit_notor){
         back_one_token(list, exp);
         return;
     }
@@ -413,6 +422,228 @@ void top_exp(int *status, token_node *list){
     add_node(list, exp);  // 压入节点
     return;
 }
+
+/*
+bit_notor : bit_or
+          | bit_notor BITOR bit_or
+*/
+void bit_notor(int *status, token_node *list){  // 因试分解
+    fprintf(status_log, "[info][grammar]  mode status: bit_or\n");
+    token left, right, symbol, new_token;
+
+    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
+    if(left.type == NON_bit_notor){  // 模式2/3
+        fprintf(status_log, "[info][grammar]  (bit_or)reduce right\n");
+        get_pop_token(status, list, symbol);
+
+        if(symbol.type == BITNOTOR_PASER){  // 模式2/3
+            get_right_token(status, list, bit_or, right);  // 回调右边
+            if(right.type != NON_bit_or){
+                paser_error("Don't get a bit_or");
+            }
+            // 逻辑操作
+            new_token.type = NON_bit_notor;
+            new_token.data_type = statement_value;
+
+            statement *code_tmp =  make_statement();
+            code_tmp->type = operation;
+            code_tmp->code.operation.type = BITNOTOR_func;
+            code_tmp->code.operation.left_exp = left.data.statement_value;
+            code_tmp->code.operation.right_exp = right.data.statement_value;
+            
+            new_token.data.statement_value = code_tmp;
+            add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+            return bit_notor(status, list);  // 回调自己
+        }
+        else{  // 递归跳出
+            // 回退，也就是让下一次pop的时候读取到的是left而不是symbol
+            fprintf(status_log, "[info][grammar]  (bit_notor)out\n");
+            back_one_token(list, left);
+            back_again(list, symbol);
+            return;
+        }
+    }
+    else{  // 模式1
+        fprintf(status_log, "[info][grammar]  (bit_or)back one token to (bit_and)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, bit_or, new_token);
+        if(new_token.type != NON_bit_or){
+            back_one_token(list, new_token);  // 往回[不匹配类型]
+            return;
+        }
+        new_token.type = NON_bit_notor;
+        add_node(list, new_token);
+        return bit_notor(status, list);  // 回调自己
+    }
+}
+
+/*
+bit_or : bit_and
+       | bit_or BITOR bit_and
+*/
+void bit_or(int *status, token_node *list){  // 因试分解
+    fprintf(status_log, "[info][grammar]  mode status: bit_or\n");
+    token left, right, symbol, new_token;
+
+    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
+    if(left.type == NON_bit_or){  // 模式2/3
+        fprintf(status_log, "[info][grammar]  (bit_or)reduce right\n");
+        get_pop_token(status, list, symbol);
+
+        if(symbol.type == BITOR_PASER){  // 模式2/3
+            get_right_token(status, list, bit_and, right);  // 回调右边
+            if(right.type != NON_bit_and){
+                paser_error("Don't get a bit_and");
+            }
+            // 逻辑操作
+            new_token.type = NON_bit_or;
+            new_token.data_type = statement_value;
+
+            statement *code_tmp =  make_statement();
+            code_tmp->type = operation;
+            code_tmp->code.operation.type = BITOR_func;
+            code_tmp->code.operation.left_exp = left.data.statement_value;
+            code_tmp->code.operation.right_exp = right.data.statement_value;
+            
+            new_token.data.statement_value = code_tmp;
+            add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+            return bit_or(status, list);  // 回调自己
+        }
+        else{  // 递归跳出
+            // 回退，也就是让下一次pop的时候读取到的是left而不是symbol
+            fprintf(status_log, "[info][grammar]  (bit_or)out\n");
+            back_one_token(list, left);
+            back_again(list, symbol);
+            return;
+        }
+    }
+    else{  // 模式1
+        fprintf(status_log, "[info][grammar]  (bit_or)back one token to (bit_and)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, bit_and, new_token);
+        if(new_token.type != NON_bit_and){
+            back_one_token(list, new_token);  // 往回[不匹配类型]
+            return;
+        }
+        new_token.type = NON_bit_or;
+        add_node(list, new_token);
+        return bit_or(status, list);  // 回调自己
+    }
+}
+
+/*
+bit_and : bit_move
+        | bit_and BITAND bit_move
+*/
+void bit_and(int *status, token_node *list){  // 因试分解
+    fprintf(status_log, "[info][grammar]  mode status: bit_and\n");
+    token left, right, symbol, new_token;
+
+    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
+    if(left.type == NON_bit_and){  // 模式2/3
+        fprintf(status_log, "[info][grammar]  (factor)reduce right\n");
+        get_pop_token(status, list, symbol);
+
+        if(symbol.type == BITAND_PASER){  // 模式2/3
+            get_right_token(status, list, bit_move, right);  // 回调右边
+            if(right.type != NON_bit_move){
+                paser_error("Don't get a bit_move");
+            }
+            // 逻辑操作
+            new_token.type = NON_bit_and;
+            new_token.data_type = statement_value;
+
+            statement *code_tmp =  make_statement();
+            code_tmp->type = operation;
+            code_tmp->code.operation.type = BITAND_func;
+            code_tmp->code.operation.left_exp = left.data.statement_value;
+            code_tmp->code.operation.right_exp = right.data.statement_value;
+            
+            new_token.data.statement_value = code_tmp;
+            add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+            return bit_and(status, list);  // 回调自己
+        }
+        else{  // 递归跳出
+            // 回退，也就是让下一次pop的时候读取到的是left而不是symbol
+            fprintf(status_log, "[info][grammar]  (bit_and)out\n");
+            back_one_token(list, left);
+            back_again(list, symbol);
+            return;
+        }
+    }
+    else{  // 模式1
+        fprintf(status_log, "[info][grammar]  (bit_move)back one token to (factor)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, bit_move, new_token);
+        if(new_token.type != NON_bit_move){
+            back_one_token(list, new_token);  // 往回[不匹配类型]
+            return;
+        }
+        new_token.type = NON_bit_and;
+        add_node(list, new_token);
+        return bit_and(status, list);  // 回调自己
+    }
+}
+
+/*
+bit_move : power
+         | bit_move BITRIGHT factor
+         | bit_move BITLEFT factor
+*/
+void bit_move(int *status, token_node *list){  // 因试分解
+    fprintf(status_log, "[info][grammar]  mode status: factor\n");
+    token left, right, symbol, new_token;
+
+    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
+    if(left.type == NON_bit_move){  // 模式2/3
+        fprintf(status_log, "[info][grammar]  (factor)reduce right\n");
+        get_pop_token(status, list, symbol);
+
+        if(symbol.type == BITRIGHT_PASER || symbol.type == BITLEFT_PASER){  // 模式2/3
+            get_right_token(status, list, polynomial, right);  // 回调右边
+            if(right.type != NON_polynomial){
+                paser_error("Don't get a polynomial");
+            }
+            // 逻辑操作
+            new_token.type = NON_bit_move;
+            new_token.data_type = statement_value;
+            statement *code_tmp =  make_statement();
+            code_tmp->type = operation;
+
+            if(symbol.type == BITRIGHT_PASER){
+                code_tmp->code.operation.type = BITRIGHT_func;
+            }
+            else{
+                code_tmp->code.operation.type = BITLEFT_func;
+            }
+            code_tmp->code.operation.left_exp = left.data.statement_value;
+            code_tmp->code.operation.right_exp = right.data.statement_value;
+            new_token.data.statement_value = code_tmp;
+            add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+            return bit_move(status, list);  // 回调自己
+        }
+        else{  // 递归跳出
+            // 回退，也就是让下一次pop的时候读取到的是left而不是symbol
+            fprintf(status_log, "[info][grammar]  (bit_move)out\n");
+            back_one_token(list, left);
+            back_again(list, symbol);
+            return;
+        }
+    }
+    else{  // 模式1
+        fprintf(status_log, "[info][grammar]  (bit_move)back one token to (factor)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, polynomial, new_token);
+        if(new_token.type != NON_polynomial){
+            back_one_token(list, new_token);  // 往回[不匹配类型]
+            return;
+        }
+        new_token.type = NON_bit_move;
+        add_node(list, new_token);
+        return bit_move(status, list);  // 回调自己
+    }
+}
+
 
 /*
 polynomial : factor
@@ -472,9 +703,9 @@ void polynomial(int *status, token_node *list){  // 多项式
 }
 
 /*
-factor : element
-       | factor MUL element
-       | factor DIV element
+factor : power
+       | factor MUL power
+       | factor DIV power
 */
 void factor(int *status, token_node *list){  // 因试分解
     fprintf(status_log, "[info][grammar]  mode status: factor\n");
@@ -486,8 +717,8 @@ void factor(int *status, token_node *list){  // 因试分解
         get_pop_token(status, list, symbol);
 
         if(symbol.type == MUL_PASER || symbol.type == DIV_PASER){  // 模式2/3
-            get_right_token(status, list, element, right);  // 回调右边
-            if(right.type != NON_element){
+            get_right_token(status, list, negative, right);  // 回调右边
+            if(right.type != NON_negative){
                 paser_error("Don't get a value");
             }
             // 逻辑操作
@@ -519,14 +750,163 @@ void factor(int *status, token_node *list){  // 因试分解
     else{  // 模式1
         fprintf(status_log, "[info][grammar]  (factor)back one token to (element)\n");
         back_one_token(list, left);
-        get_base_token(status, list, element, new_token);
-        if(new_token.type != NON_element){
+        get_base_token(status, list, negative, new_token);
+        if(new_token.type != NON_negative){
             back_one_token(list, new_token);  // 往回[不匹配类型]
             return;
         }
         new_token.type = NON_factor;
         add_node(list, new_token);
         return factor(status, list);  // 回调自己
+    }
+}
+
+/*
+negative : bit_not
+         | BITNOT bit_not
+*/
+void negative(int *status, token_node *list){
+    fprintf(status_log, "[info][grammar]  mode status: negative\n");
+    token left, right, new_token;
+
+    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
+    if(left.type == SUB_PASER){  // 模式2
+        fprintf(status_log, "[info][grammar]  (bit_not)reduce right\n");
+
+        get_right_token(status, list, bit_not, right);  // 回调右边
+        if(right.type != NON_bit_not){
+            paser_error("Don't get a bit_not");
+        }
+        // 逻辑操作
+        new_token.type = NON_negative;
+        new_token.data_type = statement_value;
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = NEGATIVE_func;
+
+        code_tmp->code.operation.left_exp = NULL;
+        code_tmp->code.operation.right_exp = right.data.statement_value;
+        new_token.data.statement_value = code_tmp;
+        add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+        return;  // 回调自己
+    }
+    else{  // 模式1
+        fprintf(status_log, "[info][grammar]  (negative)back one token to (bit_not)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, bit_not, new_token);
+        if(new_token.type != NON_bit_not){
+            back_one_token(list, new_token);  // 往回[不匹配类型]
+            return;
+        }
+        new_token.type = NON_negative;
+        add_node(list, new_token);
+        return;
+    }
+}
+
+/*
+bit_not : power
+        | BITNOT power
+*/
+void bit_not(int *status, token_node *list){
+    fprintf(status_log, "[info][grammar]  mode status: bit_not\n");
+    token left, right, new_token;
+
+    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
+    if(left.type == BITNOT_PASER){  // 模式2
+        fprintf(status_log, "[info][grammar]  (bit_not)reduce right\n");
+
+        get_right_token(status, list, power, right);  // 回调右边
+        if(right.type != NON_power){
+            paser_error("Don't get a power");
+        }
+        // 逻辑操作
+        new_token.type = NON_bit_not;
+        new_token.data_type = statement_value;
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = BITNOT_func;
+
+        code_tmp->code.operation.left_exp = NULL;
+        code_tmp->code.operation.right_exp = right.data.statement_value;
+        new_token.data.statement_value = code_tmp;
+        add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+        return;  // 回调自己
+    }
+    else{  // 模式1
+        fprintf(status_log, "[info][grammar]  (bit_not)back one token to (power)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, power, new_token);
+        if(new_token.type != NON_power){
+            back_one_token(list, new_token);  // 往回[不匹配类型]
+            return;
+        }
+        new_token.type = NON_bit_not;
+        add_node(list, new_token);
+        return;
+    }
+}
+
+/*
+power : element
+      | power POW element
+      | power LOG element
+      | power SQRT element
+*/
+void power(int *status, token_node *list){
+    fprintf(status_log, "[info][grammar]  mode status: power\n");
+    token left, right, symbol, new_token;
+
+    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
+    if(left.type == NON_power){  // 模式2/3
+        fprintf(status_log, "[info][grammar]  (power)reduce right\n");
+        get_pop_token(status, list, symbol);
+
+        if(symbol.type == POW_PASER || symbol.type == LOG_PASER || symbol.type == SQRT_PASER){  // 模式2/3/4
+            get_right_token(status, list, element, right);  // 回调右边
+            if(right.type != NON_element){
+                paser_error("Don't get a value");
+            }
+            // 逻辑操作
+            new_token.type = NON_power;
+            new_token.data_type = statement_value;
+            statement *code_tmp =  make_statement();
+            code_tmp->type = operation;
+
+            if(symbol.type == POW_PASER){
+                code_tmp->code.operation.type = POW_func;
+            }
+            else if(symbol.type == LOG_PASER){
+                code_tmp->code.operation.type = LOG_func;
+            }
+            else{
+                code_tmp->code.operation.type = SQRT_func;
+            }
+            code_tmp->code.operation.left_exp = left.data.statement_value;
+            code_tmp->code.operation.right_exp = right.data.statement_value;
+            new_token.data.statement_value = code_tmp;
+            add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+            return power(status, list);  // 回调自己
+        }
+        else{  // 递归跳出
+            // 回退，也就是让下一次pop的时候读取到的是left而不是symbol
+            fprintf(status_log, "[info][grammar]  (power)out\n");
+            back_one_token(list, left);
+            back_again(list, symbol);
+            return;
+        }
+    }
+    else{  // 模式1
+        fprintf(status_log, "[info][grammar]  (power)back one token to (element)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, element, new_token);
+        if(new_token.type != NON_element){
+            back_one_token(list, new_token);  // 往回[不匹配类型]
+            return;
+        }
+        new_token.type = NON_power;
+        add_node(list, new_token);
+        return power(status, list);  // 回调自己
     }
 }
 
@@ -545,13 +925,48 @@ void element(int *status, token_node *list){  // 数字归约
         if(new_token.type != NON_top_exp){
             paser_error("Don't get 'top_exp'");            
         }
-        new_token.type = NON_element;
         token rb;
         get_pop_token(status, list ,rb);
         if(rb.type != RB_PASER){  // 匹配失败
             paser_error("Don't get ')'");
         }
+        new_token.type = NON_element;
         add_node(list, new_token);  // 压入节点
+        return;
+    }
+    else if(gett.type == VAR_PASER){  // a
+        back_one_token(list, gett);
+        get_base_token(status, list, var_token, new_token);
+        if(new_token.type != NON_base_var){
+            back_one_token(list, new_token);  // 往回[不匹配类型]
+            return;
+        }
+        new_token.type = NON_element;
+        add_node(list, new_token);
+        return;
+    }
+    else if(gett.type == LI_PASER){  // [1]a或[1]列表或[1,2,3,4]列表
+        back_one_token(list, gett);
+        token exp_token, rb, tmp_var;
+        get_right_token(status, list, top_exp, exp_token);
+        if(exp_token.type != NON_top_exp){
+            paser_error("Don't get 'top_exp'");            
+        }
+        get_pop_token(status, list ,rb);
+        if(rb.type != RI_PASER){  // 匹配失败  TODO:: 检查是不是[1,2,3,4]的列表类型
+            paser_error("Don't get ']'");
+        }
+        get_pop_token(status, list ,tmp_var);
+        if(tmp_var.type == VAR_PASER){  // a
+            back_one_token(list, tmp_var);
+            get_base_token(status, list, var_token, new_token);
+            if(new_token.type != NON_base_var){
+                paser_error("Don't get var");
+            }
+            new_token.data.statement_value->code.base_var.from = exp_token.data.statement_value;
+        }
+        new_token.type = NON_element;
+        add_node(list, new_token);
         return;
     }
     else{
@@ -566,6 +981,39 @@ void element(int *status, token_node *list){  // 数字归约
         add_node(list, new_token);
         return;
 
+    }
+}
+/*
+var_token : VAR
+*/
+void var_token(int *status, token_node *list){  // 数字归约
+    fprintf(status_log, "[info][grammar]  mode status: var_token\n");
+    token gett, new_token;
+
+    gett = pop_node(list);  // 取得一个token
+    if(gett.type == VAR_PASER){  // var类型
+        new_token.type = NON_base_var;
+
+        GWARF_value tmp_value;
+        tmp_value.type = INT_value;
+        tmp_value.value.int_value = atoi(gett.data.text);
+
+        statement *code_tmp =  make_statement();
+        code_tmp->type = base_var;
+        code_tmp->code.base_var.var_name = gett.data.text;
+        code_tmp->code.base_var.from = NULL;
+        
+        new_token.data.statement_value = code_tmp;
+        new_token.data_type = statement_value;
+
+        fprintf(status_log, "[info][grammar]  (var_token)out\n");
+        add_node(list, new_token);  // 压入节点
+        return;
+    }
+    else{  // 不是期望值
+        fprintf(status_log, "[info][grammar]  (var_token)back one token\n");
+        back_one_token(list, gett);
+        return;
     }
 }
 
