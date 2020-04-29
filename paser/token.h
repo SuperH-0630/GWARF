@@ -3,7 +3,7 @@
 
 #include "../inter/interpreter.h"
 
-#define MAX_PASER_SIZE 13
+#define MAX_PASER_SIZE 18
 #define INT_PASER 0
 #define DOUBLE_PASER 1
 #define ENTER_PASER 2
@@ -17,6 +17,11 @@
 #define WHILE_PASER 10
 #define LP_PASER 11
 #define RP_PASER 12
+#define IF_PASER 13
+#define ELIF_PASER 14
+#define ELSE_PASER 15
+#define COMMA_PASER 16
+#define FOR_PASER 17
 
 // 获取并返回一个token
 #define get_pop_token(status,list,new_token) \
@@ -53,6 +58,7 @@ back_token(list); \
 do{ \
 token stop; \
 get_pop_token(status, list, stop); \
+printf("stop.type = %d\n", stop.type); \
 if(stop.type != ENTER_PASER && stop.type != EOF_token){ \
     paser_error("Don't get stop token or EOF"); \
 } \
@@ -79,6 +85,10 @@ typedef enum token_type
     WHILE = WHILE_PASER,
     LP = LP_PASER,
     RP = RP_PASER,
+    IF = IF_PASER,
+    ELIF = ELIF_PASER,
+    ELSE = ELSE_PASER,
+    COMMA = COMMA_PASER,
 
     // 特殊符号
     BAD_token = -2,
@@ -92,6 +102,12 @@ typedef enum token_type
     NON_command_list = -9,
     NON_while = -10,
     NON_block = -11,
+    NON_top_exp = -12,
+    NON_if = -13,
+    NON_elif = -14,
+    NON_else = -15,
+    NON_for = -16,
+    NON_element = -17,
 } token_type;
 
 typedef union token_data

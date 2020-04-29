@@ -84,6 +84,11 @@ int paser(int *index){
         match_text(p, global_paser[WHILE_PASER], "while");
         match_text(p, global_paser[LP_PASER], "{");
         match_text(p, global_paser[RP_PASER], "}");
+        match_text(p, global_paser[IF_PASER], "if");
+        match_text(p, global_paser[ELIF_PASER], "elif");
+        match_text(p, global_paser[ELSE_PASER], "else");
+        match_text(p, global_paser[COMMA_PASER], ";");
+        match_text(p, global_paser[FOR_PASER], "for");
 
         *index = check_list(global_paser);  // 检查解析结果
 
