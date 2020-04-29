@@ -33,13 +33,14 @@ command_list : command
              | command_list command
 */
 void command_list(int *status, token_node *list){  // 多项式
-    fprintf(status_log, "[info][grammar]  mode status: top_exp\n", text);
+    fprintf(status_log, "[info][grammar]  mode status: command_list\n", text);
     token left, right, new_token;
 
     left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
     if(left.type == NON_command_list){  // 模式2
         fprintf(status_log, "[info][grammar]  (command_list)reduce right\n");
         get_right_token(status, list, command, right);  // 回调右边
+        fprintf(status_log, "[info][grammar]  (command_list)reduce right STOP\n");
         if(right.type == NON_command){
             new_token.type = NON_command_list;
             new_token.data_type = empty;
@@ -55,7 +56,8 @@ void command_list(int *status, token_node *list){  // 多项式
         }
     }
     else if(left.type == EOF_token){  // 递归跳出的条件
-        fprintf(status_log, "[info][grammar]  (command_list)out\n");
+        fprintf(status_log, "[info][grammar]  (command_list)out again\n");
+        back_one_token(list, left);
         return;
     }
     else{  // 模式1

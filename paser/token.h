@@ -85,9 +85,10 @@ if(stop.type != ENTER_PASER && stop.type != EOF_token){ \
     paser_error("Don't get stop token or EOF"); \
 } \
 if(stop.type == EOF_token){ \
-    back_one_token(list, stop); \
+    back_again(list, stop); \
 } \
 }while(0);
+// EOF的返回使用了回退，目的是让command_list第二次执行command的时候，执行safe_get_token获取EOF，否则将会回去两个EOF
 
 // 非终结符
 #define NonTerminator -1
@@ -180,7 +181,7 @@ typedef struct token
 {
     token_type type;  // token的类型，是数字、变量、关键字、符号
     enum {
-        text,
+        text = 1,
         d_number,
         i_number,
         statement_value,

@@ -40,7 +40,16 @@
         "interpreter.h": "c",
         "cstring": "c",
         "cstdlib": "c",
-        "mem.h": "c"
+        "mem.h": "c",
+        "atomic": "cpp",
+        "exception": "cpp",
+        "memory_resource": "cpp",
+        "random": "cpp",
+        "iosfwd": "cpp",
+        "numeric": "cpp",
+        "sstream": "cpp",
+        "thread": "cpp",
+        "*.inc": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

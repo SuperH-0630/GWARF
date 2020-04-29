@@ -26,6 +26,7 @@ void setup(char *file){
     file_p = fopen(file, "r");  // 打开文件
     debug = fopen("./debug.log", "w");  // 设置debug的位置
     status_log = fopen("./status.log", "w");  // 设置debug的位置
+    token_log = fopen("./token.log", "w");  // 设置debug的位置
     global_token_node = make_token_node();
 }
 
