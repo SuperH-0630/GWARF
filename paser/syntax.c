@@ -22,6 +22,9 @@ void bit_notor(int *status, token_node *list);
 void bit_or(int *status, token_node *list);
 void bit_and(int *status, token_node *list);
 void compare(int *status, token_node *list);
+void bool_and(int *status, token_node *list);
+void bool_or(int *status, token_node *list);
+void bool_not(int *status, token_node *list);
 
 void paser_error(char *text);
 
@@ -414,14 +417,166 @@ top_exp : polynomial
 void top_exp(int *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: top_exp\n");
     token exp;
-    get_base_token(status,list,compare,exp);
-    if(exp.type != NON_compare){
+    get_base_token(status,list,bool_or,exp);
+    if(exp.type != NON_bool_or){
         back_one_token(list, exp);
         return;
     }
     exp.type = NON_top_exp;
     add_node(list, exp);  // 压入节点
     return;
+}
+
+/*
+bool_or : bool_and
+        | bool_or AND bool_and
+*/
+void bool_or(int *status, token_node *list){  // 因试分解
+    fprintf(status_log, "[info][grammar]  mode status: bool_or\n");
+    token left, right, symbol, new_token;
+
+    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
+    if(left.type == NON_bool_or){  // 模式2/3
+        fprintf(status_log, "[info][grammar]  (bool_or)reduce right\n");
+        get_pop_token(status, list, symbol);
+
+        if(symbol.type == OR_PASER){  // 模式2/3
+            get_right_token(status, list, bool_and, right);  // 回调右边
+            if(right.type != NON_bool_and){
+                paser_error("Don't get a compare");
+            }
+            // 逻辑操作
+            new_token.type = NON_bool_or;
+            new_token.data_type = statement_value;
+
+            statement *code_tmp =  make_statement();
+            code_tmp->type = operation;
+            code_tmp->code.operation.type = OR_func;
+            code_tmp->code.operation.left_exp = left.data.statement_value;
+            code_tmp->code.operation.right_exp = right.data.statement_value;
+            
+            new_token.data.statement_value = code_tmp;
+            add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+            return bool_or(status, list);  // 回调自己
+        }
+        else{  // 递归跳出
+            // 回退，也就是让下一次pop的时候读取到的是left而不是symbol
+            fprintf(status_log, "[info][grammar]  (bit_notor)out\n");
+            back_one_token(list, left);
+            back_again(list, symbol);
+            return;
+        }
+    }
+    else{  // 模式1
+        fprintf(status_log, "[info][grammar]  (bool_or)back one token to (bool_and)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, bool_and, new_token);
+        if(new_token.type != NON_bool_and){
+            back_one_token(list, new_token);  // 往回[不匹配类型]
+            return;
+        }
+        new_token.type = NON_bool_or;
+        add_node(list, new_token);
+        return bool_or(status, list);  // 回调自己
+    }
+}
+
+/*
+bool_and : bool_not
+         | bool_and AND bool_not
+*/
+void bool_and(int *status, token_node *list){  // 因试分解
+    fprintf(status_log, "[info][grammar]  mode status: bool_and\n");
+    token left, right, symbol, new_token;
+
+    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
+    if(left.type == NON_bool_and){  // 模式2/3
+        fprintf(status_log, "[info][grammar]  (bool_and)reduce right\n");
+        get_pop_token(status, list, symbol);
+
+        if(symbol.type == AND_PASER){  // 模式2/3
+            get_right_token(status, list, bool_not, right);  // 回调右边
+            if(right.type != NON_bool_not){
+                paser_error("Don't get a bool_not");
+            }
+            // 逻辑操作
+            new_token.type = NON_bool_and;
+            new_token.data_type = statement_value;
+
+            statement *code_tmp =  make_statement();
+            code_tmp->type = operation;
+            code_tmp->code.operation.type = AND_func;
+            code_tmp->code.operation.left_exp = left.data.statement_value;
+            code_tmp->code.operation.right_exp = right.data.statement_value;
+            
+            new_token.data.statement_value = code_tmp;
+            add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+            return bool_and(status, list);  // 回调自己
+        }
+        else{  // 递归跳出
+            // 回退，也就是让下一次pop的时候读取到的是left而不是symbol
+            fprintf(status_log, "[info][grammar]  (bit_notor)out\n");
+            back_one_token(list, left);
+            back_again(list, symbol);
+            return;
+        }
+    }
+    else{  // 模式1
+        fprintf(status_log, "[info][grammar]  (bool_and)back one token to (compare)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, bool_not, new_token);
+        if(new_token.type != NON_bool_not){
+            back_one_token(list, new_token);  // 往回[不匹配类型]
+            return;
+        }
+        new_token.type = NON_bool_and;
+        add_node(list, new_token);
+        return bool_and(status, list);  // 回调自己
+    }
+}
+
+/*
+bool_not : compare
+         | BITNOT compare
+*/
+void bool_not(int *status, token_node *list){
+    fprintf(status_log, "[info][grammar]  mode status: negative\n");
+    token left, right, new_token;
+
+    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
+    if(left.type == NOT_PASER){  // 模式2
+        fprintf(status_log, "[info][grammar]  (bool_not)reduce right\n");
+
+        get_right_token(status, list, compare, right);  // 回调右边
+        if(right.type != NON_compare){
+            paser_error("Don't get a compare");
+        }
+        // 逻辑操作
+        new_token.type = NON_bool_not;
+        new_token.data_type = statement_value;
+
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = NOT_func;
+        code_tmp->code.operation.left_exp = NULL;
+        code_tmp->code.operation.right_exp = right.data.statement_value;
+
+        new_token.data.statement_value = code_tmp;
+        add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+        return;  // 回调自己
+    }
+    else{  // 模式1
+        fprintf(status_log, "[info][grammar]  (negative)back one token to (bit_not)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, compare, new_token);
+        if(new_token.type != NON_compare){
+            back_one_token(list, new_token);  // 往回[不匹配类型]
+            return;
+        }
+        new_token.type = NON_bool_not;
+        add_node(list, new_token);
+        return;
+    }
 }
 
 void compare(int *status, token_node *list){  // 多项式

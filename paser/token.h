@@ -3,7 +3,7 @@
 
 #include "../inter/interpreter.h"
 
-#define MAX_PASER_SIZE 36
+#define MAX_PASER_SIZE 39
 #define INT_PASER 0
 #define DOUBLE_PASER 1
 #define ENTER_PASER 2
@@ -40,6 +40,10 @@
 #define LESS_PASER 33
 #define LESSEQ_PASER 34
 #define NOTEQ_PASER 35
+#define AND_PASER 36
+#define OR_PASER 37
+#define NOT_PASER 38
+
 
 // 获取并返回一个token
 #define get_pop_token(status,list,new_token) \
@@ -103,6 +107,11 @@ typedef enum token_type
     WHILE = WHILE_PASER,
     LP = LP_PASER,
     RP = RP_PASER,
+    LI = LI_PASER,
+    RI = RI_PASER,
+    POW = POW_PASER,
+    LOG = LOG_PASER,
+    SQRT = SQRT_PASER,
     IF = IF_PASER,
     ELIF = ELIF_PASER,
     ELSE = ELSE_PASER,
@@ -120,6 +129,9 @@ typedef enum token_type
     LESS = LESS_PASER,
     LESSEQ = LESSEQ_PASER,
     NOTEQ = NOTEQ_PASER,
+    AND = AND_PASER,
+    OR = OR_PASER,
+    NOT = NOT_PASER,
 
     // 特殊符号
     BAD_token = -2,
@@ -148,6 +160,9 @@ typedef enum token_type
     NON_bit_or = -24,
     NON_bit_notor = -25,
     NON_compare = -26,
+    NON_bool_and = -27,
+    NON_bool_or = -28,
+    NON_bool_not = -29,
 } token_type;
 
 typedef union token_data
