@@ -242,7 +242,7 @@ typedef struct token_node
 struct token_node *make_token_node();
 void add_node(struct token_node *, struct token);
 struct token pop_node(struct token_node *);
-void safe_get_token(int *, struct token_node *);
+void safe_get_token(p_status *, struct token_node *);
 void back_token(token_node *);
 
 token_node *global_token_node = NULL;

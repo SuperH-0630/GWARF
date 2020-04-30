@@ -46,7 +46,7 @@ token pop_node(token_node *list){  // 弹出一个node
     return tmp;
 }
 
-void safe_get_token(int *status, token_node *list){
+void safe_get_token(p_status *status, token_node *list){
     if(list->seek < list->max_index){  // 有回退
         fprintf(status_log, "[debug][grammar]  get token seek += 1 : %d, index : %d\n", list->seek, list->max_index);
         list->seek += 1;

@@ -78,6 +78,6 @@ void free_list(word_paser **);
 char read_p();
 int check_list(word_paser **, char p);
 int paser(int *);
-struct token get_token(int *);
+struct token get_token(p_status *);
 
 #endif

@@ -11,8 +11,9 @@ void match_var(char p, word_paser *paser);
 int is_in(int);
 extern void paser_error(char *);
 
-token get_token(int *paser_status){
+token get_token(p_status *status){
     token return_token;
+    int s, *paser_status = &s;
     int index = 0;  // 记录index和是否遇到了EOF
     do{
         set_start(global_paser);

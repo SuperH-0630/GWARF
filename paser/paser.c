@@ -8,7 +8,8 @@
 #include "tokenstream.c"
 #include "syntax.c"
 
-int paser_status = 1;
+// int paser_status = 1;
+p_status paser_status = {.is_parameter = false, .is_func=false};
 
 void do_exit(void);
 void setup();

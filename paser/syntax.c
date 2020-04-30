@@ -2,37 +2,37 @@
 #include"lex.h"
 #include"../inter/interpreter.h"
 
-void factor(int *status, token_node *list);
-void power(int *status, token_node *list);
-void call_down(int *status, token_node *list);
-void number(int *status, token_node *list);
-void element(int *status, token_node *list);
-void var_token(int *status, token_node *list);
-void polynomial(int *status, token_node *list);
-void bit_move(int *status, token_node *list);
-void command(int *status, token_node *list);
-void while_(int *status, token_node *list);
-void if_(int *status, token_node *list);
-void for_(int *status, token_node *list);
-void elif_(int *status, token_node *list);
-void block_(int *status, token_node *list);
-void top_exp(int *status, token_node *list);
-void negative(int *status, token_node *list);
-void bit_not(int *status, token_node *list);
-void bit_notor(int *status, token_node *list);
-void bit_or(int *status, token_node *list);
-void bit_and(int *status, token_node *list);
-void compare(int *status, token_node *list);
-void bool_and(int *status, token_node *list);
-void bool_or(int *status, token_node *list);
-void bool_not(int *status, token_node *list);
-void eq_number(int *status, token_node *list);
-void call_back_(int *status, token_node *list);
-void def_(int *status, token_node *list);
-void ctrl_(int *status, token_node *list);
-void var_ctrl_(int *status, token_node *list);
-void return_(int *status, token_node *list);
-void formal_parameter(int *status, token_node *list);
+void factor(p_status *status, token_node *list);
+void power(p_status *status, token_node *list);
+void call_down(p_status *status, token_node *list);
+void number(p_status *status, token_node *list);
+void element(p_status *status, token_node *list);
+void var_token(p_status *status, token_node *list);
+void polynomial(p_status *status, token_node *list);
+void bit_move(p_status *status, token_node *list);
+void command(p_status *status, token_node *list);
+void while_(p_status *status, token_node *list);
+void if_(p_status *status, token_node *list);
+void for_(p_status *status, token_node *list);
+void elif_(p_status *status, token_node *list);
+void block_(p_status *status, token_node *list);
+void top_exp(p_status *status, token_node *list);
+void negative(p_status *status, token_node *list);
+void bit_not(p_status *status, token_node *list);
+void bit_notor(p_status *status, token_node *list);
+void bit_or(p_status *status, token_node *list);
+void bit_and(p_status *status, token_node *list);
+void compare(p_status *status, token_node *list);
+void bool_and(p_status *status, token_node *list);
+void bool_or(p_status *status, token_node *list);
+void bool_not(p_status *status, token_node *list);
+void eq_number(p_status *status, token_node *list);
+void call_back_(p_status *status, token_node *list);
+void def_(p_status *status, token_node *list);
+void ctrl_(p_status *status, token_node *list);
+void var_ctrl_(p_status *status, token_node *list);
+void return_(p_status *status, token_node *list);
+void formal_parameter(p_status *status, token_node *list);
 
 void paser_error(char *text);
 
@@ -40,7 +40,7 @@ void paser_error(char *text);
 command_list : command
              | command_list command
 */
-void command_list(int *status, token_node *list){  // 多项式
+void command_list(p_status *status, token_node *list){  // 多项式
     fprintf(status_log, "[info][grammar]  mode status: command_list\n", text);
     token left, right, new_token;
 
@@ -84,7 +84,7 @@ void command_list(int *status, token_node *list){  // 多项式
 /*
 command : top_exp <ENTER>
 */
-void command(int *status, token_node *list){  // 多项式
+void command(p_status *status, token_node *list){  // 多项式
     fprintf(status_log, "[info][grammar]  mode status: command\n", text);
     token left, new_token;
 
@@ -176,7 +176,7 @@ void command(int *status, token_node *list){  // 多项式
 /*
 if_ : IF LB top_exp RB block
 */
-void if_(int *status, token_node *list){
+void if_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: if_\n");
     token if_t, lb_t, exp_t, rb_t, block_t, next_t, child_t, new_token;
     if_t = pop_node(list);
@@ -240,7 +240,7 @@ void if_(int *status, token_node *list){
 /*
 elif_ : ELIF LB top_exp RB block
 */
-void elif_(int *status, token_node *list){
+void elif_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: elif_\n");
     token elif_t, lb_t, exp_t, rb_t, block_t, next_t, new_token;
     elif_t = pop_node(list);
@@ -294,7 +294,7 @@ void elif_(int *status, token_node *list){
 /*
 for_ : FOR LB top_exp COMMA top_exp COMMA top_exp RB block
 */
-void for_(int *status, token_node *list){
+void for_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: while_\n");
     token for_t, exp_1, exp_2, exp_3, block_t, lb_t, rb_t, comma_t,new_token;
     statement *exp_a, *exp_b, *exp_c;
@@ -385,7 +385,7 @@ void for_(int *status, token_node *list){
 /*
 def_ : DEF LB RB block
 */
-void def_(int *status, token_node *list){
+void def_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: def_\n");
     token def_t, lb_t, rb_t, block_t, name_t, parameter_t, new_token;
     parameter *p_list;
@@ -442,7 +442,7 @@ void def_(int *status, token_node *list){
     }
 }
 
-void formal_parameter(int *status, token_node *list){  // 因试分解
+void formal_parameter(p_status *status, token_node *list){  // 因试分解
     fprintf(status_log, "[info][grammar]  mode status: formal_parameter\n");
     token left, next, comma, before, eq, value_token, new_token;
     int mode = only_value;
@@ -561,7 +561,7 @@ void formal_parameter(int *status, token_node *list){  // 因试分解
 /*
 while_ : WHILE LB top_exp RB block
 */
-void while_(int *status, token_node *list){
+void while_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: while_\n");
     token while_t, lb_t, exp_t, rb_t, block_t, new_token;
     while_t = pop_node(list);
@@ -604,7 +604,7 @@ void while_(int *status, token_node *list){
 /*
 block_ : LP command_list RB
 */
-void block_(int *status, token_node *list){
+void block_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: block_\n");
     token lp_t, rp_t, new_token, command_list_t;
     lp_t = pop_node(list);
@@ -639,7 +639,7 @@ void block_(int *status, token_node *list){
 }
 
 // var_ctrl_ 包含诸如：global, nolocal，之类的
-void var_ctrl_(int *status, token_node *list){
+void var_ctrl_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: bit_not\n");
     token left, var, right, new_token;
     statement *times = NULL;
@@ -703,7 +703,7 @@ void var_ctrl_(int *status, token_node *list){
     }
 }
 
-void return_(int *status, token_node *list){
+void return_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: return_\n");
     token left, right, value, new_token;
     statement *times = NULL, *back_value = NULL;
@@ -751,7 +751,7 @@ void return_(int *status, token_node *list){
 }
 
 // ctrl_包含诸如：break，broken，之类的
-void ctrl_(int *status, token_node *list){
+void ctrl_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: bit_not\n");
     token left, right, new_token;
     statement *times = NULL;
@@ -824,7 +824,7 @@ void ctrl_(int *status, token_node *list){
 top_exp : polynomial
 */
 
-void top_exp(int *status, token_node *list){
+void top_exp(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: top_exp\n");
     token exp;
     get_base_token(status,list,eq_number,exp);
@@ -841,7 +841,7 @@ void top_exp(int *status, token_node *list){
 eq_number : bool_or
           | eq_number AND bool_or
 */
-void eq_number(int *status, token_node *list){  // 因试分解
+void eq_number(p_status *status, token_node *list){  // 因试分解
     fprintf(status_log, "[info][grammar]  mode status: eq_number\n");
     token left, right, symbol, new_token;
 
@@ -895,7 +895,7 @@ void eq_number(int *status, token_node *list){  // 因试分解
 call_back_ : bool_or
            | call_back_ LB RB
 */
-void call_back_(int *status, token_node *list){  // 因试分解
+void call_back_(p_status *status, token_node *list){  // 因试分解
     fprintf(status_log, "[info][grammar]  mode status: call_back_\n");
     token left, symbol, rb_t, new_token, parameter_t;
     parameter *p_list;
@@ -964,7 +964,7 @@ void call_back_(int *status, token_node *list){  // 因试分解
 bool_or : bool_and
         | bool_or AND bool_and
 */
-void bool_or(int *status, token_node *list){  // 因试分解
+void bool_or(p_status *status, token_node *list){  // 因试分解
     fprintf(status_log, "[info][grammar]  mode status: bool_or\n");
     token left, right, symbol, new_token;
 
@@ -1018,7 +1018,7 @@ void bool_or(int *status, token_node *list){  // 因试分解
 bool_and : bool_not
          | bool_and AND bool_not
 */
-void bool_and(int *status, token_node *list){  // 因试分解
+void bool_and(p_status *status, token_node *list){  // 因试分解
     fprintf(status_log, "[info][grammar]  mode status: bool_and\n");
     token left, right, symbol, new_token;
 
@@ -1072,7 +1072,7 @@ void bool_and(int *status, token_node *list){  // 因试分解
 bool_not : compare
          | BITNOT bool_not
 */
-void bool_not(int *status, token_node *list){
+void bool_not(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: negative\n");
     token left, right, new_token;
 
@@ -1112,7 +1112,7 @@ void bool_not(int *status, token_node *list){
     }
 }
 
-void compare(int *status, token_node *list){  // 多项式
+void compare(p_status *status, token_node *list){  // 多项式
     fprintf(status_log, "[info][grammar]  mode status: polynomial\n");
     token left, right, symbol, new_token;
 
@@ -1181,7 +1181,7 @@ void compare(int *status, token_node *list){  // 多项式
 bit_notor : bit_or
           | bit_notor BITOR bit_or
 */
-void bit_notor(int *status, token_node *list){  // 因试分解
+void bit_notor(p_status *status, token_node *list){  // 因试分解
     fprintf(status_log, "[info][grammar]  mode status: bit_or\n");
     token left, right, symbol, new_token;
 
@@ -1235,7 +1235,7 @@ void bit_notor(int *status, token_node *list){  // 因试分解
 bit_or : bit_and
        | bit_or BITOR bit_and
 */
-void bit_or(int *status, token_node *list){  // 因试分解
+void bit_or(p_status *status, token_node *list){  // 因试分解
     fprintf(status_log, "[info][grammar]  mode status: bit_or\n");
     token left, right, symbol, new_token;
 
@@ -1289,7 +1289,7 @@ void bit_or(int *status, token_node *list){  // 因试分解
 bit_and : bit_move
         | bit_and BITAND bit_move
 */
-void bit_and(int *status, token_node *list){  // 因试分解
+void bit_and(p_status *status, token_node *list){  // 因试分解
     fprintf(status_log, "[info][grammar]  mode status: bit_and\n");
     token left, right, symbol, new_token;
 
@@ -1344,7 +1344,7 @@ bit_move : power
          | bit_move BITRIGHT factor
          | bit_move BITLEFT factor
 */
-void bit_move(int *status, token_node *list){  // 因试分解
+void bit_move(p_status *status, token_node *list){  // 因试分解
     fprintf(status_log, "[info][grammar]  mode status: factor\n");
     token left, right, symbol, new_token;
 
@@ -1404,7 +1404,7 @@ polynomial : factor
            | polynomial ADD factor
            | polynomial SUB factor
 */
-void polynomial(int *status, token_node *list){  // 多项式
+void polynomial(p_status *status, token_node *list){  // 多项式
     fprintf(status_log, "[info][grammar]  mode status: polynomial\n");
     token left, right, symbol, new_token;
 
@@ -1461,7 +1461,7 @@ factor : power
        | factor MUL power
        | factor DIV power
 */
-void factor(int *status, token_node *list){  // 因试分解
+void factor(p_status *status, token_node *list){  // 因试分解
     fprintf(status_log, "[info][grammar]  mode status: factor\n");
     token left, right, symbol, new_token;
 
@@ -1519,7 +1519,7 @@ void factor(int *status, token_node *list){  // 因试分解
 negative : bit_not
          | BITNOT bit_not
 */
-void negative(int *status, token_node *list){
+void negative(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: negative\n");
     token left, right, new_token;
 
@@ -1562,7 +1562,7 @@ void negative(int *status, token_node *list){
 bit_not : power
         | BITNOT power
 */
-void bit_not(int *status, token_node *list){
+void bit_not(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: bit_not\n");
     token left, right, new_token;
 
@@ -1607,7 +1607,7 @@ power : element
       | power LOG element
       | power SQRT element
 */
-void power(int *status, token_node *list){
+void power(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: power\n");
     token left, right, symbol, new_token;
 
@@ -1668,7 +1668,7 @@ void power(int *status, token_node *list){
 call_down : element
           | call_down LI top_exp RI
 */
-void call_down(int *status, token_node *list){  // 因试分解
+void call_down(p_status *status, token_node *list){  // 因试分解
     fprintf(status_log, "[info][grammar]  mode status: call_down\n");
     token left, lb_t, rb_t, new_token, parameter_t;
     parameter *p_list;
@@ -1727,7 +1727,7 @@ void call_down(int *status, token_node *list){  // 因试分解
 element : number
         | LB top_exp RB
 */
-void element(int *status, token_node *list){  // 数字归约
+void element(p_status *status, token_node *list){  // 数字归约
     fprintf(status_log, "[info][grammar]  mode status: element\n");
     token gett, new_token;
 
@@ -1799,7 +1799,7 @@ void element(int *status, token_node *list){  // 数字归约
 /*
 var_token : VAR
 */
-void var_token(int *status, token_node *list){  // 数字归约
+void var_token(p_status *status, token_node *list){  // 数字归约
     fprintf(status_log, "[info][grammar]  mode status: var_token\n");
     token gett, new_token;
 
@@ -1835,7 +1835,7 @@ number : INT_PASER
        | DOUBLE_PASER
        | LB top_exp RB
 */
-void number(int *status, token_node *list){  // 数字归约
+void number(p_status *status, token_node *list){  // 数字归约
     fprintf(status_log, "[info][grammar]  mode status: number\n");
     token gett, new_token;
 
