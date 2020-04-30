@@ -1,358 +1,225 @@
-[debug][token : [  0]]  token list[from                      add_token] :: <token : 38 [pop] data(text) ： ! num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [  1]]  token list[from      safe_get_token(get token)] :: <token : 38 [pop] data(text) ： ! num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [  0]]  token list[from                      add_token] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [  1]]  token list[from      safe_get_token(get token)] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
 [debug][token : [  2]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [  3]]  token list[from                      add_token] :: <token : 38 [pop] data(text) ： ! num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [  3]]  token list[from                      add_token] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
 [debug][token : [  4]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [  5]]  token list[from                      add_token] :: <token : 38 [pop] data(text) ： ! num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [  5]]  token list[from                      add_token] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
 [debug][token : [  6]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [  7]]  token list[from                      add_token] :: <token : 38 [pop] data(text) ： ! num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [  7]]  token list[from                      add_token] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
 [debug][token : [  8]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [  9]]  token list[from                      add_token] :: <token : 38 [pop] data(text) ： ! num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [  9]]  token list[from                      add_token] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
 [debug][token : [ 10]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 11]]  token list[from                      add_token] :: <token : 8 [pop] data(text) ： ( num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 12]]  token list[from      safe_get_token(get token)] :: <token : 8 [pop] data(text) ： ( num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 13]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 14]]  token list[from                      add_token] :: <token : 8 [pop] data(text) ： ( num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 15]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 16]]  token list[from                      add_token] :: <token : 8 [pop] data(text) ： ( num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 17]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 18]]  token list[from                      add_token] :: <token : 8 [pop] data(text) ： ( num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 19]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 20]]  token list[from                      add_token] :: <token : 8 [pop] data(text) ： ( num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 21]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 22]]  token list[from                      add_token] :: <token : 8 [pop] data(text) ： ( num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 23]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 24]]  token list[from                      add_token] :: <token : 8 [pop] data(text) ： ( num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 25]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 26]]  token list[from                      add_token] :: <token : 8 [pop] data(text) ： ( num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 27]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 28]]  token list[from                      add_token] :: <token : 8 [pop] data(text) ： ( num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 29]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 30]]  token list[from                      add_token] :: <token : 8 [pop] data(text) ： ( num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 31]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 32]]  token list[from                      add_token] :: <token : 8 [pop] data(text) ： ( num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 33]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 34]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 35]]  token list[from      safe_get_token(get token)] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 36]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 37]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 11]]  token list[from                      add_token] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 12]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
+[debug][token : [ 13]]  token list[from                      add_token] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 14]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
+[debug][token : [ 15]]  token list[from                      add_token] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 16]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
+[debug][token : [ 17]]  token list[from                      add_token] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 18]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
+[debug][token : [ 19]]  token list[from                      add_token] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 20]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
+[debug][token : [ 21]]  token list[from                      add_token] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 22]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
+[debug][token : [ 23]]  token list[from                      add_token] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 24]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
+[debug][token : [ 25]]  token list[from                      add_token] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 26]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
+[debug][token : [ 27]]  token list[from                      add_token] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 28]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
+[debug][token : [ 29]]  token list[from                      add_token] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 30]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
+[debug][token : [ 31]]  token list[from                      add_token] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 32]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
+[debug][token : [ 33]]  token list[from                      add_token] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 34]]  token list[from      safe_get_token(get token)] :: <token : 24 [pop] data(text) ： ~ num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 35]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
+[debug][token : [ 36]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 5 num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 37]]  token list[from      safe_get_token(get token)] :: <token : 0 [pop] data(text) ： 5 num = 0> - <NULL [index/seek] num = 1> -  ||- END
 [debug][token : [ 38]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 39]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 39]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 5 num = 0> - <NULL [index/seek] num = 1> -  ||- END
 [debug][token : [ 40]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 41]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 41]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 5 num = 0> - <NULL [index/seek] num = 1> -  ||- END
 [debug][token : [ 42]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 43]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 43]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 5 num = 0> - <NULL [index/seek] num = 1> -  ||- END
 [debug][token : [ 44]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 45]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 45]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 5 num = 0> - <NULL [index/seek] num = 1> -  ||- END
 [debug][token : [ 46]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 47]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 47]]  token list[from                      add_token] :: <token : -4 [pop] data(statement_value) ： 24 on 620730d0 num = 0> - <NULL [index/seek] num = 1> -  ||- END
 [debug][token : [ 48]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 49]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 49]]  token list[from                      add_token] :: <token : -17 [pop] data(statement_value) ： 24 on 620730d0 num = 0> - <NULL [index/seek] num = 1> -  ||- END
 [debug][token : [ 50]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 51]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 51]]  token list[from                      add_token] :: <token : -34 [pop] data(statement_value) ： 24 on 620730d0 num = 0> - <NULL [index/seek] num = 1> -  ||- END
 [debug][token : [ 52]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 53]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 54]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 55]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 56]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 57]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 58]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 59]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 60]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 61]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 62]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 63]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 64]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 65]]  token list[from                      add_token] :: <token : -4 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 66]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 67]]  token list[from                      add_token] :: <token : -17 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 68]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 69]]  token list[from                      add_token] :: <token : -19 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 70]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 71]]  token list[from                      add_token] :: <token : 35 [pop] data(text) ： != num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 72]]  token list[from      safe_get_token(get token)] :: <token : 35 [pop] data(text) ： != num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 73]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
-[debug][token : [ 74]]  token list[from                      add_token] :: <token : -19 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <NULL [index/seek] num = 1> -  ||- END
-[debug][token : [ 75]]  token list[from                      add_token] :: <token : -19 data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [pop] data(text) ： != num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [ 76]]  token list[from                     back_token] :: <token : -19 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [seek] data(text) ： != num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [ 77]]  token list[from                      pop_token] :: <token : 35 [seek] data(text) ： != num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [ 78]]  token list[from                      add_token] :: <token : -20 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [seek] data(text) ： != num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [ 79]]  token list[from                      pop_token] :: <token : 35 [seek] data(text) ： != num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [ 80]]  token list[from                      add_token] :: <token : -21 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [seek] data(text) ： != num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [ 81]]  token list[from                      pop_token] :: <token : 35 [seek] data(text) ： != num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [ 82]]  token list[from                      add_token] :: <token : -6 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [seek] data(text) ： != num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [ 83]]  token list[from                      pop_token] :: <token : 35 [seek] data(text) ： != num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [ 84]]  token list[from      safe_get_token(move seek)] :: <token : 35 [pop] data(text) ： != num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [ 85]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [ 86]]  token list[from                      add_token] :: <token : -6 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [ 87]]  token list[from                      add_token] :: <token : -6 data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [pop] data(text) ： != num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [ 88]]  token list[from                     back_token] :: <token : -6 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [seek] data(text) ： != num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [ 89]]  token list[from                      pop_token] :: <token : 35 [seek] data(text) ： != num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [ 90]]  token list[from                      add_token] :: <token : -7 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [seek] data(text) ： != num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [ 91]]  token list[from                      pop_token] :: <token : 35 [seek] data(text) ： != num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [ 92]]  token list[from      safe_get_token(move seek)] :: <token : 35 [pop] data(text) ： != num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [ 93]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [ 94]]  token list[from                      add_token] :: <token : -7 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [ 95]]  token list[from                      add_token] :: <token : -7 data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [pop] data(text) ： != num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [ 96]]  token list[from                     back_token] :: <token : -7 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [seek] data(text) ： != num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [ 97]]  token list[from                      pop_token] :: <token : 35 [seek] data(text) ： != num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [ 98]]  token list[from                      add_token] :: <token : -22 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [seek] data(text) ： != num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [ 99]]  token list[from                      pop_token] :: <token : 35 [seek] data(text) ： != num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [100]]  token list[from      safe_get_token(move seek)] :: <token : 35 [pop] data(text) ： != num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 53]]  token list[from                      add_token] :: <token : 6 [pop] data(text) ： * num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 54]]  token list[from      safe_get_token(get token)] :: <token : 6 [pop] data(text) ： * num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 55]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> -  ||- END
+[debug][token : [ 56]]  token list[from                      add_token] :: <token : -34 [pop] data(statement_value) ： 24 on 620730d0 num = 0> - <NULL [index/seek] num = 1> -  ||- END
+[debug][token : [ 57]]  token list[from                      add_token] :: <token : -34 data(statement_value) ： 24 on 620730d0 num = 0> - <token : 6 [pop] data(text) ： * num = 1> - <NULL [index/seek] num = 2> -  ||- END
+[debug][token : [ 58]]  token list[from                     back_token] :: <token : -34 [pop] data(statement_value) ： 24 on 620730d0 num = 0> - <token : 6 [seek] data(text) ： * num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [ 59]]  token list[from                      pop_token] :: <token : 6 [seek] data(text) ： * num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 60]]  token list[from                      add_token] :: <token : -19 [pop] data(statement_value) ： 24 on 620730d0 num = 0> - <token : 6 [seek] data(text) ： * num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [ 61]]  token list[from                      pop_token] :: <token : 6 [seek] data(text) ： * num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 62]]  token list[from      safe_get_token(move seek)] :: <token : 6 [pop] data(text) ： * num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 63]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 64]]  token list[from                      add_token] :: <token : -19 [pop] data(statement_value) ： 24 on 620730d0 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 65]]  token list[from                      add_token] :: <token : -19 data(statement_value) ： 24 on 620730d0 num = 0> - <token : 6 [pop] data(text) ： * num = 1> - <NULL [index/seek] num = 2> -  ||- END
+[debug][token : [ 66]]  token list[from                     back_token] :: <token : -19 [pop] data(statement_value) ： 24 on 620730d0 num = 0> - <token : 6 [seek] data(text) ： * num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [ 67]]  token list[from                      pop_token] :: <token : 6 [seek] data(text) ： * num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 68]]  token list[from                      add_token] :: <token : -20 [pop] data(statement_value) ： 24 on 620730d0 num = 0> - <token : 6 [seek] data(text) ： * num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [ 69]]  token list[from                      pop_token] :: <token : 6 [seek] data(text) ： * num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 70]]  token list[from                      add_token] :: <token : -20 [pop] data(statement_value) ： 2 on 62073280 num = 0> - <token : 6 [seek] data(text) ： * num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [ 71]]  token list[from                      pop_token] :: <token : 6 [seek] data(text) ： * num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 72]]  token list[from                      add_token] :: <token : -20 [pop] data(statement_value) ： 2 on 620732c0 num = 0> - <token : 6 [seek] data(text) ： * num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [ 73]]  token list[from                      pop_token] :: <token : 6 [seek] data(text) ： * num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 74]]  token list[from                      add_token] :: <token : -21 [pop] data(statement_value) ： 2 on 620732c0 num = 0> - <token : 6 [seek] data(text) ： * num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [ 75]]  token list[from                      pop_token] :: <token : 6 [seek] data(text) ： * num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 76]]  token list[from                      add_token] :: <token : -6 [pop] data(statement_value) ： 2 on 620732c0 num = 0> - <token : 6 [seek] data(text) ： * num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [ 77]]  token list[from                      pop_token] :: <token : 6 [seek] data(text) ： * num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 78]]  token list[from      safe_get_token(move seek)] :: <token : 6 [pop] data(text) ： * num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 79]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 80]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 3 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 81]]  token list[from      safe_get_token(get token)] :: <token : 0 [pop] data(text) ： 3 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 82]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 83]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 3 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 84]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 85]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 3 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 86]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 87]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 3 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 88]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 89]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 3 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 90]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 91]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 3 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 92]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 93]]  token list[from                      add_token] :: <token : -4 [pop] data(statement_value) ： 24 on 62073320 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 94]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 95]]  token list[from                      add_token] :: <token : -17 [pop] data(statement_value) ： 24 on 62073320 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 96]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 97]]  token list[from                      add_token] :: <token : -34 [pop] data(statement_value) ： 24 on 62073320 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 98]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [ 99]]  token list[from                      add_token] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [100]]  token list[from      safe_get_token(get token)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
 [debug][token : [101]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [102]]  token list[from                      add_token] :: <token : -22 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [103]]  token list[from                      add_token] :: <token : -22 data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [pop] data(text) ： != num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [104]]  token list[from                     back_token] :: <token : -22 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [seek] data(text) ： != num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [105]]  token list[from                      pop_token] :: <token : 35 [seek] data(text) ： != num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [106]]  token list[from                      add_token] :: <token : -23 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [seek] data(text) ： != num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [107]]  token list[from                      pop_token] :: <token : 35 [seek] data(text) ： != num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [108]]  token list[from      safe_get_token(move seek)] :: <token : 35 [pop] data(text) ： != num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [102]]  token list[from                      add_token] :: <token : -34 [pop] data(statement_value) ： 24 on 62073320 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [103]]  token list[from                      add_token] :: <token : -34 data(statement_value) ： 24 on 62073320 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
+[debug][token : [104]]  token list[from                     back_token] :: <token : -34 [pop] data(statement_value) ： 24 on 62073320 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [105]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [106]]  token list[from                      add_token] :: <token : -19 [pop] data(statement_value) ： 24 on 62073320 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [107]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [108]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
 [debug][token : [109]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [110]]  token list[from                      add_token] :: <token : -23 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [111]]  token list[from                      add_token] :: <token : -23 data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [pop] data(text) ： != num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [112]]  token list[from                     back_token] :: <token : -23 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [seek] data(text) ： != num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [113]]  token list[from                      pop_token] :: <token : 35 [seek] data(text) ： != num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [114]]  token list[from                      add_token] :: <token : -24 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [seek] data(text) ： != num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [115]]  token list[from                      pop_token] :: <token : 35 [seek] data(text) ： != num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [116]]  token list[from      safe_get_token(move seek)] :: <token : 35 [pop] data(text) ： != num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [117]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [118]]  token list[from                      add_token] :: <token : -24 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [119]]  token list[from                      add_token] :: <token : -24 data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [pop] data(text) ： != num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [120]]  token list[from                     back_token] :: <token : -24 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [seek] data(text) ： != num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [121]]  token list[from                      pop_token] :: <token : 35 [seek] data(text) ： != num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [122]]  token list[from                      add_token] :: <token : -25 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [seek] data(text) ： != num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [123]]  token list[from                      pop_token] :: <token : 35 [seek] data(text) ： != num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [124]]  token list[from      safe_get_token(move seek)] :: <token : 35 [pop] data(text) ： != num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [125]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [126]]  token list[from                      add_token] :: <token : -25 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [127]]  token list[from                      add_token] :: <token : -25 data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [pop] data(text) ： != num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [128]]  token list[from                     back_token] :: <token : -25 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [seek] data(text) ： != num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [129]]  token list[from                      pop_token] :: <token : 35 [seek] data(text) ： != num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [130]]  token list[from                      add_token] :: <token : -26 [pop] data(statement_value) ： 24 on 9f23e070 num = 0> - <token : 35 [seek] data(text) ： != num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [131]]  token list[from                      pop_token] :: <token : 35 [seek] data(text) ： != num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [132]]  token list[from      safe_get_token(move seek)] :: <token : 35 [pop] data(text) ： != num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [133]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [134]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [135]]  token list[from      safe_get_token(get token)] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [136]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [137]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [138]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [139]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [140]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [141]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [142]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [143]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [144]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [145]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [146]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [147]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [148]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [149]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [150]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [151]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [152]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [153]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [154]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [155]]  token list[from                      add_token] :: <token : 0 [pop] data(text) ： 33 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [156]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [157]]  token list[from                      add_token] :: <token : -4 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [158]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [159]]  token list[from                      add_token] :: <token : -17 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [160]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [161]]  token list[from                      add_token] :: <token : -19 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [162]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [163]]  token list[from                      add_token] :: <token : 9 [pop] data(text) ： ) num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [164]]  token list[from      safe_get_token(get token)] :: <token : 9 [pop] data(text) ： ) num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [165]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [166]]  token list[from                      add_token] :: <token : -19 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [167]]  token list[from                      add_token] :: <token : -19 data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [pop] data(text) ： ) num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [168]]  token list[from                     back_token] :: <token : -19 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [169]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [170]]  token list[from                      add_token] :: <token : -20 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [171]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [172]]  token list[from                      add_token] :: <token : -21 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [173]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [174]]  token list[from                      add_token] :: <token : -6 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [175]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [176]]  token list[from      safe_get_token(move seek)] :: <token : 9 [pop] data(text) ： ) num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [177]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [178]]  token list[from                      add_token] :: <token : -6 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [179]]  token list[from                      add_token] :: <token : -6 data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [pop] data(text) ： ) num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [180]]  token list[from                     back_token] :: <token : -6 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [181]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [182]]  token list[from                      add_token] :: <token : -7 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [183]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [184]]  token list[from      safe_get_token(move seek)] :: <token : 9 [pop] data(text) ： ) num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [185]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [186]]  token list[from                      add_token] :: <token : -7 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [187]]  token list[from                      add_token] :: <token : -7 data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [pop] data(text) ： ) num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [188]]  token list[from                     back_token] :: <token : -7 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [189]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [190]]  token list[from                      add_token] :: <token : -22 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [191]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [192]]  token list[from      safe_get_token(move seek)] :: <token : 9 [pop] data(text) ： ) num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [193]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [194]]  token list[from                      add_token] :: <token : -22 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [195]]  token list[from                      add_token] :: <token : -22 data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [pop] data(text) ： ) num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [196]]  token list[from                     back_token] :: <token : -22 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [197]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [198]]  token list[from                      add_token] :: <token : -23 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [199]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [200]]  token list[from      safe_get_token(move seek)] :: <token : 9 [pop] data(text) ： ) num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [201]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [202]]  token list[from                      add_token] :: <token : -23 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [203]]  token list[from                      add_token] :: <token : -23 data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [pop] data(text) ： ) num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [204]]  token list[from                     back_token] :: <token : -23 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [205]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [206]]  token list[from                      add_token] :: <token : -24 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [207]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [208]]  token list[from      safe_get_token(move seek)] :: <token : 9 [pop] data(text) ： ) num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [209]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [210]]  token list[from                      add_token] :: <token : -24 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [211]]  token list[from                      add_token] :: <token : -24 data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [pop] data(text) ： ) num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [212]]  token list[from                     back_token] :: <token : -24 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [213]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [214]]  token list[from                      add_token] :: <token : -25 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [215]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [216]]  token list[from      safe_get_token(move seek)] :: <token : 9 [pop] data(text) ： ) num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [217]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [218]]  token list[from                      add_token] :: <token : -25 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [219]]  token list[from                      add_token] :: <token : -25 data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [pop] data(text) ： ) num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [220]]  token list[from                     back_token] :: <token : -25 [pop] data(statement_value) ： 24 on 9f23e220 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [221]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [222]]  token list[from                      add_token] :: <token : -26 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [223]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [224]]  token list[from      safe_get_token(move seek)] :: <token : 9 [pop] data(text) ： ) num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [225]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [226]]  token list[from                      add_token] :: <token : -26 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [227]]  token list[from                      add_token] :: <token : -26 data(statement_value) ： 2 on 9f23e310 num = 0> - <token : 9 [pop] data(text) ： ) num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [228]]  token list[from                     back_token] :: <token : -26 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [229]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [230]]  token list[from                      add_token] :: <token : -29 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [231]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [232]]  token list[from                      add_token] :: <token : -27 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [233]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [234]]  token list[from      safe_get_token(move seek)] :: <token : 9 [pop] data(text) ： ) num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [235]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [236]]  token list[from                      add_token] :: <token : -27 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [237]]  token list[from                      add_token] :: <token : -27 data(statement_value) ： 2 on 9f23e310 num = 0> - <token : 9 [pop] data(text) ： ) num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [238]]  token list[from                     back_token] :: <token : -27 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [239]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [240]]  token list[from                      add_token] :: <token : -28 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [241]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [242]]  token list[from      safe_get_token(move seek)] :: <token : 9 [pop] data(text) ： ) num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [243]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [244]]  token list[from                      add_token] :: <token : -28 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [245]]  token list[from                      add_token] :: <token : -28 data(statement_value) ： 2 on 9f23e310 num = 0> - <token : 9 [pop] data(text) ： ) num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [246]]  token list[from                     back_token] :: <token : -28 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [247]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [248]]  token list[from                      add_token] :: <token : -12 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : 9 [seek] data(text) ： ) num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [249]]  token list[from                      pop_token] :: <token : 9 [seek] data(text) ： ) num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [250]]  token list[from      safe_get_token(move seek)] :: <token : 9 [pop] data(text) ： ) num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [251]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [252]]  token list[from                      add_token] :: <token : -17 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [253]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [254]]  token list[from                      add_token] :: <token : -19 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [255]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [256]]  token list[from                      add_token] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [257]]  token list[from      safe_get_token(get token)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [258]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [259]]  token list[from                      add_token] :: <token : -19 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [260]]  token list[from                      add_token] :: <token : -19 data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [261]]  token list[from                     back_token] :: <token : -19 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [262]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [263]]  token list[from                      add_token] :: <token : -20 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [264]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [265]]  token list[from                      add_token] :: <token : -21 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [266]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [267]]  token list[from                      add_token] :: <token : -6 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [268]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [269]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [270]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [271]]  token list[from                      add_token] :: <token : -6 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [272]]  token list[from                      add_token] :: <token : -6 data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [273]]  token list[from                     back_token] :: <token : -6 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [274]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [275]]  token list[from                      add_token] :: <token : -7 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [276]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [277]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [278]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [279]]  token list[from                      add_token] :: <token : -7 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [280]]  token list[from                      add_token] :: <token : -7 data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [281]]  token list[from                     back_token] :: <token : -7 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [282]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [283]]  token list[from                      add_token] :: <token : -22 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [284]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [285]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [286]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [287]]  token list[from                      add_token] :: <token : -22 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [288]]  token list[from                      add_token] :: <token : -22 data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [289]]  token list[from                     back_token] :: <token : -22 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [290]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [291]]  token list[from                      add_token] :: <token : -23 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [292]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [293]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [294]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [295]]  token list[from                      add_token] :: <token : -23 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [296]]  token list[from                      add_token] :: <token : -23 data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [297]]  token list[from                     back_token] :: <token : -23 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [298]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [299]]  token list[from                      add_token] :: <token : -24 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [300]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [301]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [302]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [303]]  token list[from                      add_token] :: <token : -24 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [304]]  token list[from                      add_token] :: <token : -24 data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [305]]  token list[from                     back_token] :: <token : -24 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [306]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [307]]  token list[from                      add_token] :: <token : -25 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [308]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [309]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [310]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [311]]  token list[from                      add_token] :: <token : -25 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [312]]  token list[from                      add_token] :: <token : -25 data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [313]]  token list[from                     back_token] :: <token : -25 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [314]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [315]]  token list[from                      add_token] :: <token : -26 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [316]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [317]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [318]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [319]]  token list[from                      add_token] :: <token : -26 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [320]]  token list[from                      add_token] :: <token : -26 data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [321]]  token list[from                     back_token] :: <token : -26 [pop] data(statement_value) ： 2 on 9f23e310 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [322]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [323]]  token list[from                      add_token] :: <token : -29 [pop] data(statement_value) ： 2 on 9f23e350 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [324]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [325]]  token list[from                      add_token] :: <token : -27 [pop] data(statement_value) ： 2 on 9f23e350 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [326]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [327]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [328]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [329]]  token list[from                      add_token] :: <token : -27 [pop] data(statement_value) ： 2 on 9f23e350 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [330]]  token list[from                      add_token] :: <token : -27 data(statement_value) ： 2 on 9f23e350 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [331]]  token list[from                     back_token] :: <token : -27 [pop] data(statement_value) ： 2 on 9f23e350 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [332]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [333]]  token list[from                      add_token] :: <token : -28 [pop] data(statement_value) ： 2 on 9f23e350 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [334]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [335]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [336]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [337]]  token list[from                      add_token] :: <token : -28 [pop] data(statement_value) ： 2 on 9f23e350 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [338]]  token list[from                      add_token] :: <token : -28 data(statement_value) ： 2 on 9f23e350 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [339]]  token list[from                     back_token] :: <token : -28 [pop] data(statement_value) ： 2 on 9f23e350 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [340]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [341]]  token list[from                      add_token] :: <token : -12 [pop] data(statement_value) ： 2 on 9f23e350 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [342]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [343]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [344]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [345]]  token list[from                      add_token] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [346]]  token list[from                     back_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [347]]  token list[from                      add_token] :: <token : -8 [pop] data(statement_value) ： 2 on 9f23e350 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [348]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [349]]  token list[from                      add_token] :: <token : -9 [pop] data(statement_value) ： 2 on 9f23e350 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
-[debug][token : [350]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [351]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [352]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [353]]  token list[from                      add_token] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [354]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [355]]  token list[from                      add_token] :: <token : -9 [pop] data(statement_value) ： 2 on 9f23e350 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
-[debug][token : [356]]  token list[from                      add_token] :: <token : -9 data(statement_value) ： 2 on 9f23e350 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
-[debug][token : [357]]  token list[from                     back_token] :: <token : -9 [pop] data(statement_value) ： 2 on 9f23e350 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [110]]  token list[from                      add_token] :: <token : -19 [pop] data(statement_value) ： 24 on 62073320 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [111]]  token list[from                      add_token] :: <token : -19 data(statement_value) ： 24 on 62073320 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
+[debug][token : [112]]  token list[from                     back_token] :: <token : -19 [pop] data(statement_value) ： 24 on 62073320 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [113]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [114]]  token list[from                      add_token] :: <token : -20 [pop] data(statement_value) ： 24 on 62073320 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [115]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [116]]  token list[from                      add_token] :: <token : -21 [pop] data(statement_value) ： 24 on 62073320 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [117]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [118]]  token list[from                      add_token] :: <token : -6 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [119]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [120]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [121]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [122]]  token list[from                      add_token] :: <token : -6 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [123]]  token list[from                      add_token] :: <token : -6 data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
+[debug][token : [124]]  token list[from                     back_token] :: <token : -6 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [125]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [126]]  token list[from                      add_token] :: <token : -7 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [127]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [128]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [129]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [130]]  token list[from                      add_token] :: <token : -7 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [131]]  token list[from                      add_token] :: <token : -7 data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
+[debug][token : [132]]  token list[from                     back_token] :: <token : -7 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [133]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [134]]  token list[from                      add_token] :: <token : -22 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [135]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [136]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [137]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [138]]  token list[from                      add_token] :: <token : -22 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [139]]  token list[from                      add_token] :: <token : -22 data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
+[debug][token : [140]]  token list[from                     back_token] :: <token : -22 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [141]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [142]]  token list[from                      add_token] :: <token : -23 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [143]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [144]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [145]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [146]]  token list[from                      add_token] :: <token : -23 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [147]]  token list[from                      add_token] :: <token : -23 data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
+[debug][token : [148]]  token list[from                     back_token] :: <token : -23 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [149]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [150]]  token list[from                      add_token] :: <token : -24 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [151]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [152]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [153]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [154]]  token list[from                      add_token] :: <token : -24 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [155]]  token list[from                      add_token] :: <token : -24 data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
+[debug][token : [156]]  token list[from                     back_token] :: <token : -24 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [157]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [158]]  token list[from                      add_token] :: <token : -25 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [159]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [160]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [161]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [162]]  token list[from                      add_token] :: <token : -25 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [163]]  token list[from                      add_token] :: <token : -25 data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
+[debug][token : [164]]  token list[from                     back_token] :: <token : -25 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [165]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [166]]  token list[from                      add_token] :: <token : -26 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [167]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [168]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [169]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [170]]  token list[from                      add_token] :: <token : -26 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [171]]  token list[from                      add_token] :: <token : -26 data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
+[debug][token : [172]]  token list[from                     back_token] :: <token : -26 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [173]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [174]]  token list[from                      add_token] :: <token : -29 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [175]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [176]]  token list[from                      add_token] :: <token : -27 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [177]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [178]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [179]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [180]]  token list[from                      add_token] :: <token : -27 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [181]]  token list[from                      add_token] :: <token : -27 data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
+[debug][token : [182]]  token list[from                     back_token] :: <token : -27 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [183]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [184]]  token list[from                      add_token] :: <token : -28 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [185]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [186]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [187]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [188]]  token list[from                      add_token] :: <token : -28 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [189]]  token list[from                      add_token] :: <token : -28 data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
+[debug][token : [190]]  token list[from                     back_token] :: <token : -28 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [191]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [192]]  token list[from                      add_token] :: <token : -32 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [193]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [194]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [195]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [196]]  token list[from                      add_token] :: <token : -32 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [197]]  token list[from                      add_token] :: <token : -32 data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
+[debug][token : [198]]  token list[from                     back_token] :: <token : -32 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [199]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [200]]  token list[from                      add_token] :: <token : -30 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [201]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [202]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [203]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [204]]  token list[from                      add_token] :: <token : -30 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [205]]  token list[from                      add_token] :: <token : -30 data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
+[debug][token : [206]]  token list[from                     back_token] :: <token : -30 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [207]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [208]]  token list[from                      add_token] :: <token : -12 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [209]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [210]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [211]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [212]]  token list[from                      add_token] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [213]]  token list[from                     back_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [214]]  token list[from                      add_token] :: <token : -8 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [215]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [216]]  token list[from                      add_token] :: <token : -9 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END
+[debug][token : [217]]  token list[from                      pop_token] :: <token : -3 [seek] num = 0> - <NULL [index] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [218]]  token list[from      safe_get_token(move seek)] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [219]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [220]]  token list[from                      add_token] :: <token : -3 [pop] num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [221]]  token list[from                      pop_token] :: <NULL [index/seek] num = 0> - <NULL num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [222]]  token list[from                      add_token] :: <token : -9 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <NULL [index/seek] num = 1> - <NULL num = 2> -  ||- END
+[debug][token : [223]]  token list[from                      add_token] :: <token : -9 data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [pop] num = 1> - <NULL [index/seek] num = 2> -  ||- END
+[debug][token : [224]]  token list[from                     back_token] :: <token : -9 [pop] data(statement_value) ： 2 on 62073410 num = 0> - <token : -3 [seek] num = 1> - <NULL [index] num = 2> -  ||- END

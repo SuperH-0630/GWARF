@@ -112,6 +112,9 @@ int paser(int *index){
         match_text_s(p, global_paser[OR_PASER], "||");
         match_text_s(p, global_paser[AND_PASER], "&&");
         match_text(p, global_paser[NOT_PASER], "!");
+        match_text(p, global_paser[EQ_PASER], "=");
+        match_text(p, global_paser[DEF_PASER], "def");
+        match_text(p, global_paser[COLON_PASER], ",");
 
         *index = check_list(global_paser);  // 检查解析结果
 

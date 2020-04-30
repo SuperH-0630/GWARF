@@ -1,6 +1,6 @@
 [info][lexical]  set_start
 
-[info][lexical]  p = '!'
+[info][lexical]  p = '~'
 
 [debug][lexical]  check list : paser_list[0]->status = -1
 [debug][lexical]  check list : paser_list[1]->status = -1
@@ -26,7 +26,7 @@
 [debug][lexical]  check list : paser_list[21]->status = -1
 [debug][lexical]  check list : paser_list[22]->status = -1
 [debug][lexical]  check list : paser_list[23]->status = -1
-[debug][lexical]  check list : paser_list[24]->status = -1
+[debug][lexical]  check list : paser_list[24]->status = -2
 [debug][lexical]  check list : paser_list[25]->status = -1
 [debug][lexical]  check list : paser_list[26]->status = -1
 [debug][lexical]  check list : paser_list[27]->status = -1
@@ -37,18 +37,21 @@
 [debug][lexical]  check list : paser_list[32]->status = -1
 [debug][lexical]  check list : paser_list[33]->status = -1
 [debug][lexical]  check list : paser_list[34]->status = -1
-[debug][lexical]  check list : paser_list[35]->status = 1
+[debug][lexical]  check list : paser_list[35]->status = -1
 [debug][lexical]  check list : paser_list[36]->status = -1
 [debug][lexical]  check list : paser_list[37]->status = -1
-[debug][lexical]  check list : paser_list[38]->status = -2
+[debug][lexical]  check list : paser_list[38]->status = -1
+[debug][lexical]  check list : paser_list[39]->status = -1
+[debug][lexical]  check list : paser_list[40]->status = -1
+[debug][lexical]  check list : paser_list[41]->status = -1
 [debug][lexical]  check list : end_count = 0
 [debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 37
-[debug][lexical]  check list : count all = 39
+[debug][lexical]  check list : not_count = 41
+[debug][lexical]  check list : count all = 42
 
 [debug][lexical]  continue to paser
 
-[info][lexical]  p = '('
+[info][lexical]  p = '~'
 
 [debug][lexical]  check list : paser_list[0]->status = -1
 [debug][lexical]  check list : paser_list[1]->status = -1
@@ -74,7 +77,7 @@
 [debug][lexical]  check list : paser_list[21]->status = -1
 [debug][lexical]  check list : paser_list[22]->status = -1
 [debug][lexical]  check list : paser_list[23]->status = -1
-[debug][lexical]  check list : paser_list[24]->status = -1
+[debug][lexical]  check list : paser_list[24]->status = -3
 [debug][lexical]  check list : paser_list[25]->status = -1
 [debug][lexical]  check list : paser_list[26]->status = -1
 [debug][lexical]  check list : paser_list[27]->status = -1
@@ -88,21 +91,24 @@
 [debug][lexical]  check list : paser_list[35]->status = -1
 [debug][lexical]  check list : paser_list[36]->status = -1
 [debug][lexical]  check list : paser_list[37]->status = -1
-[debug][lexical]  check list : paser_list[38]->status = -3
+[debug][lexical]  check list : paser_list[38]->status = -1
+[debug][lexical]  check list : paser_list[39]->status = -1
+[debug][lexical]  check list : paser_list[40]->status = -1
+[debug][lexical]  check list : paser_list[41]->status = -1
 [debug][lexical]  check list : end_count = 1
 [debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 38
-[debug][lexical]  check list : count all = 39
+[debug][lexical]  check list : not_count = 41
+[debug][lexical]  check list : count all = 42
 
 [info][lexical]  back_p
 
-[info][lexical]  get value = '!' len = 1 from 38
+[info][lexical]  get value = '~' len = 1 from 24
 
-[debug]token type = 38
+[debug]token type = 24
 
 [info][lexical]  set_start
 
-[info][lexical]  p = '('
+[info][lexical]  p = '~'
 
 [debug][lexical]  check list : paser_list[0]->status = -1
 [debug][lexical]  check list : paser_list[1]->status = -1
@@ -112,7 +118,7 @@
 [debug][lexical]  check list : paser_list[5]->status = -1
 [debug][lexical]  check list : paser_list[6]->status = -1
 [debug][lexical]  check list : paser_list[7]->status = -1
-[debug][lexical]  check list : paser_list[8]->status = -2
+[debug][lexical]  check list : paser_list[8]->status = -1
 [debug][lexical]  check list : paser_list[9]->status = -1
 [debug][lexical]  check list : paser_list[10]->status = -1
 [debug][lexical]  check list : paser_list[11]->status = -1
@@ -128,7 +134,7 @@
 [debug][lexical]  check list : paser_list[21]->status = -1
 [debug][lexical]  check list : paser_list[22]->status = -1
 [debug][lexical]  check list : paser_list[23]->status = -1
-[debug][lexical]  check list : paser_list[24]->status = -1
+[debug][lexical]  check list : paser_list[24]->status = -2
 [debug][lexical]  check list : paser_list[25]->status = -1
 [debug][lexical]  check list : paser_list[26]->status = -1
 [debug][lexical]  check list : paser_list[27]->status = -1
@@ -143,14 +149,17 @@
 [debug][lexical]  check list : paser_list[36]->status = -1
 [debug][lexical]  check list : paser_list[37]->status = -1
 [debug][lexical]  check list : paser_list[38]->status = -1
+[debug][lexical]  check list : paser_list[39]->status = -1
+[debug][lexical]  check list : paser_list[40]->status = -1
+[debug][lexical]  check list : paser_list[41]->status = -1
 [debug][lexical]  check list : end_count = 0
 [debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 38
-[debug][lexical]  check list : count all = 39
+[debug][lexical]  check list : not_count = 41
+[debug][lexical]  check list : count all = 42
 
 [debug][lexical]  continue to paser
 
-[info][lexical]  p = '3'
+[info][lexical]  p = '5'
 
 [debug][lexical]  check list : paser_list[0]->status = -1
 [debug][lexical]  check list : paser_list[1]->status = -1
@@ -160,7 +169,7 @@
 [debug][lexical]  check list : paser_list[5]->status = -1
 [debug][lexical]  check list : paser_list[6]->status = -1
 [debug][lexical]  check list : paser_list[7]->status = -1
-[debug][lexical]  check list : paser_list[8]->status = -3
+[debug][lexical]  check list : paser_list[8]->status = -1
 [debug][lexical]  check list : paser_list[9]->status = -1
 [debug][lexical]  check list : paser_list[10]->status = -1
 [debug][lexical]  check list : paser_list[11]->status = -1
@@ -176,7 +185,7 @@
 [debug][lexical]  check list : paser_list[21]->status = -1
 [debug][lexical]  check list : paser_list[22]->status = -1
 [debug][lexical]  check list : paser_list[23]->status = -1
-[debug][lexical]  check list : paser_list[24]->status = -1
+[debug][lexical]  check list : paser_list[24]->status = -3
 [debug][lexical]  check list : paser_list[25]->status = -1
 [debug][lexical]  check list : paser_list[26]->status = -1
 [debug][lexical]  check list : paser_list[27]->status = -1
@@ -191,20 +200,23 @@
 [debug][lexical]  check list : paser_list[36]->status = -1
 [debug][lexical]  check list : paser_list[37]->status = -1
 [debug][lexical]  check list : paser_list[38]->status = -1
+[debug][lexical]  check list : paser_list[39]->status = -1
+[debug][lexical]  check list : paser_list[40]->status = -1
+[debug][lexical]  check list : paser_list[41]->status = -1
 [debug][lexical]  check list : end_count = 1
 [debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 38
-[debug][lexical]  check list : count all = 39
+[debug][lexical]  check list : not_count = 41
+[debug][lexical]  check list : count all = 42
 
 [info][lexical]  back_p
 
-[info][lexical]  get value = '(' len = 1 from 8
+[info][lexical]  get value = '~' len = 1 from 24
 
-[debug]token type = 8
+[debug]token type = 24
 
 [info][lexical]  set_start
 
-[info][lexical]  p = '3'
+[info][lexical]  p = '5'
 
 [debug][lexical]  check list : paser_list[0]->status = 1
 [debug][lexical]  check list : paser_list[1]->status = 1
@@ -245,58 +257,13 @@
 [debug][lexical]  check list : paser_list[36]->status = -1
 [debug][lexical]  check list : paser_list[37]->status = -1
 [debug][lexical]  check list : paser_list[38]->status = -1
+[debug][lexical]  check list : paser_list[39]->status = -1
+[debug][lexical]  check list : paser_list[40]->status = -1
+[debug][lexical]  check list : paser_list[41]->status = -1
 [debug][lexical]  check list : end_count = 0
 [debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 37
-[debug][lexical]  check list : count all = 39
-
-[debug][lexical]  continue to paser
-
-[info][lexical]  p = '3'
-
-[debug][lexical]  check list : paser_list[0]->status = 1
-[debug][lexical]  check list : paser_list[1]->status = 1
-[debug][lexical]  check list : paser_list[2]->status = -1
-[debug][lexical]  check list : paser_list[3]->status = -1
-[debug][lexical]  check list : paser_list[4]->status = -1
-[debug][lexical]  check list : paser_list[5]->status = -1
-[debug][lexical]  check list : paser_list[6]->status = -1
-[debug][lexical]  check list : paser_list[7]->status = -1
-[debug][lexical]  check list : paser_list[8]->status = -1
-[debug][lexical]  check list : paser_list[9]->status = -1
-[debug][lexical]  check list : paser_list[10]->status = -1
-[debug][lexical]  check list : paser_list[11]->status = -1
-[debug][lexical]  check list : paser_list[12]->status = -1
-[debug][lexical]  check list : paser_list[13]->status = -1
-[debug][lexical]  check list : paser_list[14]->status = -1
-[debug][lexical]  check list : paser_list[15]->status = -1
-[debug][lexical]  check list : paser_list[16]->status = -1
-[debug][lexical]  check list : paser_list[17]->status = -1
-[debug][lexical]  check list : paser_list[18]->status = -1
-[debug][lexical]  check list : paser_list[19]->status = -1
-[debug][lexical]  check list : paser_list[20]->status = -1
-[debug][lexical]  check list : paser_list[21]->status = -1
-[debug][lexical]  check list : paser_list[22]->status = -1
-[debug][lexical]  check list : paser_list[23]->status = -1
-[debug][lexical]  check list : paser_list[24]->status = -1
-[debug][lexical]  check list : paser_list[25]->status = -1
-[debug][lexical]  check list : paser_list[26]->status = -1
-[debug][lexical]  check list : paser_list[27]->status = -1
-[debug][lexical]  check list : paser_list[28]->status = -1
-[debug][lexical]  check list : paser_list[29]->status = -1
-[debug][lexical]  check list : paser_list[30]->status = -1
-[debug][lexical]  check list : paser_list[31]->status = -1
-[debug][lexical]  check list : paser_list[32]->status = -1
-[debug][lexical]  check list : paser_list[33]->status = -1
-[debug][lexical]  check list : paser_list[34]->status = -1
-[debug][lexical]  check list : paser_list[35]->status = -1
-[debug][lexical]  check list : paser_list[36]->status = -1
-[debug][lexical]  check list : paser_list[37]->status = -1
-[debug][lexical]  check list : paser_list[38]->status = -1
-[debug][lexical]  check list : end_count = 0
-[debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 37
-[debug][lexical]  check list : count all = 39
+[debug][lexical]  check list : not_count = 40
+[debug][lexical]  check list : count all = 42
 
 [debug][lexical]  continue to paser
 
@@ -341,14 +308,17 @@
 [debug][lexical]  check list : paser_list[36]->status = -1
 [debug][lexical]  check list : paser_list[37]->status = -1
 [debug][lexical]  check list : paser_list[38]->status = -1
+[debug][lexical]  check list : paser_list[39]->status = -1
+[debug][lexical]  check list : paser_list[40]->status = -1
+[debug][lexical]  check list : paser_list[41]->status = -1
 [debug][lexical]  check list : end_count = 1
 [debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 38
-[debug][lexical]  check list : count all = 39
+[debug][lexical]  check list : not_count = 41
+[debug][lexical]  check list : count all = 42
 
 [info][lexical]  back_p
 
-[info][lexical]  get value = '33' len = 2 from 0
+[info][lexical]  get value = '5' len = 1 from 0
 
 [debug]token type = 0
 
@@ -395,14 +365,17 @@
 [debug][lexical]  check list : paser_list[36]->status = -1
 [debug][lexical]  check list : paser_list[37]->status = -1
 [debug][lexical]  check list : paser_list[38]->status = -1
+[debug][lexical]  check list : paser_list[39]->status = -1
+[debug][lexical]  check list : paser_list[40]->status = -1
+[debug][lexical]  check list : paser_list[41]->status = -1
 [debug][lexical]  check list : end_count = 0
 [debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 38
-[debug][lexical]  check list : count all = 39
+[debug][lexical]  check list : not_count = 41
+[debug][lexical]  check list : count all = 42
 
 [debug][lexical]  continue to paser
 
-[info][lexical]  p = '!'
+[info][lexical]  p = '*'
 
 [debug][lexical]  check list : paser_list[0]->status = -1
 [debug][lexical]  check list : paser_list[1]->status = -1
@@ -443,10 +416,13 @@
 [debug][lexical]  check list : paser_list[36]->status = -1
 [debug][lexical]  check list : paser_list[37]->status = -1
 [debug][lexical]  check list : paser_list[38]->status = -1
+[debug][lexical]  check list : paser_list[39]->status = -1
+[debug][lexical]  check list : paser_list[40]->status = -1
+[debug][lexical]  check list : paser_list[41]->status = -1
 [debug][lexical]  check list : end_count = 1
 [debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 38
-[debug][lexical]  check list : count all = 39
+[debug][lexical]  check list : not_count = 41
+[debug][lexical]  check list : count all = 42
 
 [info][lexical]  back_p
 
@@ -454,7 +430,7 @@
 
 [info][lexical]  set_start
 
-[info][lexical]  p = '!'
+[info][lexical]  p = '*'
 
 [debug][lexical]  check list : paser_list[0]->status = -1
 [debug][lexical]  check list : paser_list[1]->status = -1
@@ -462,7 +438,7 @@
 [debug][lexical]  check list : paser_list[3]->status = -1
 [debug][lexical]  check list : paser_list[4]->status = -1
 [debug][lexical]  check list : paser_list[5]->status = -1
-[debug][lexical]  check list : paser_list[6]->status = -1
+[debug][lexical]  check list : paser_list[6]->status = -2
 [debug][lexical]  check list : paser_list[7]->status = -1
 [debug][lexical]  check list : paser_list[8]->status = -1
 [debug][lexical]  check list : paser_list[9]->status = -1
@@ -477,7 +453,7 @@
 [debug][lexical]  check list : paser_list[18]->status = -1
 [debug][lexical]  check list : paser_list[19]->status = -1
 [debug][lexical]  check list : paser_list[20]->status = -1
-[debug][lexical]  check list : paser_list[21]->status = -1
+[debug][lexical]  check list : paser_list[21]->status = 1
 [debug][lexical]  check list : paser_list[22]->status = -1
 [debug][lexical]  check list : paser_list[23]->status = -1
 [debug][lexical]  check list : paser_list[24]->status = -1
@@ -491,62 +467,17 @@
 [debug][lexical]  check list : paser_list[32]->status = -1
 [debug][lexical]  check list : paser_list[33]->status = -1
 [debug][lexical]  check list : paser_list[34]->status = -1
-[debug][lexical]  check list : paser_list[35]->status = 1
+[debug][lexical]  check list : paser_list[35]->status = -1
 [debug][lexical]  check list : paser_list[36]->status = -1
 [debug][lexical]  check list : paser_list[37]->status = -1
-[debug][lexical]  check list : paser_list[38]->status = -2
+[debug][lexical]  check list : paser_list[38]->status = -1
+[debug][lexical]  check list : paser_list[39]->status = -1
+[debug][lexical]  check list : paser_list[40]->status = -1
+[debug][lexical]  check list : paser_list[41]->status = -1
 [debug][lexical]  check list : end_count = 0
 [debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 37
-[debug][lexical]  check list : count all = 39
-
-[debug][lexical]  continue to paser
-
-[info][lexical]  p = '='
-
-[debug][lexical]  check list : paser_list[0]->status = -1
-[debug][lexical]  check list : paser_list[1]->status = -1
-[debug][lexical]  check list : paser_list[2]->status = -1
-[debug][lexical]  check list : paser_list[3]->status = -1
-[debug][lexical]  check list : paser_list[4]->status = -1
-[debug][lexical]  check list : paser_list[5]->status = -1
-[debug][lexical]  check list : paser_list[6]->status = -1
-[debug][lexical]  check list : paser_list[7]->status = -1
-[debug][lexical]  check list : paser_list[8]->status = -1
-[debug][lexical]  check list : paser_list[9]->status = -1
-[debug][lexical]  check list : paser_list[10]->status = -1
-[debug][lexical]  check list : paser_list[11]->status = -1
-[debug][lexical]  check list : paser_list[12]->status = -1
-[debug][lexical]  check list : paser_list[13]->status = -1
-[debug][lexical]  check list : paser_list[14]->status = -1
-[debug][lexical]  check list : paser_list[15]->status = -1
-[debug][lexical]  check list : paser_list[16]->status = -1
-[debug][lexical]  check list : paser_list[17]->status = -1
-[debug][lexical]  check list : paser_list[18]->status = -1
-[debug][lexical]  check list : paser_list[19]->status = -1
-[debug][lexical]  check list : paser_list[20]->status = -1
-[debug][lexical]  check list : paser_list[21]->status = -1
-[debug][lexical]  check list : paser_list[22]->status = -1
-[debug][lexical]  check list : paser_list[23]->status = -1
-[debug][lexical]  check list : paser_list[24]->status = -1
-[debug][lexical]  check list : paser_list[25]->status = -1
-[debug][lexical]  check list : paser_list[26]->status = -1
-[debug][lexical]  check list : paser_list[27]->status = -1
-[debug][lexical]  check list : paser_list[28]->status = -1
-[debug][lexical]  check list : paser_list[29]->status = -1
-[debug][lexical]  check list : paser_list[30]->status = -1
-[debug][lexical]  check list : paser_list[31]->status = -1
-[debug][lexical]  check list : paser_list[32]->status = -1
-[debug][lexical]  check list : paser_list[33]->status = -1
-[debug][lexical]  check list : paser_list[34]->status = -1
-[debug][lexical]  check list : paser_list[35]->status = -2
-[debug][lexical]  check list : paser_list[36]->status = -1
-[debug][lexical]  check list : paser_list[37]->status = -1
-[debug][lexical]  check list : paser_list[38]->status = -3
-[debug][lexical]  check list : end_count = 1
-[debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 37
-[debug][lexical]  check list : count all = 39
+[debug][lexical]  check list : not_count = 40
+[debug][lexical]  check list : count all = 42
 
 [debug][lexical]  continue to paser
 
@@ -558,7 +489,7 @@
 [debug][lexical]  check list : paser_list[3]->status = -1
 [debug][lexical]  check list : paser_list[4]->status = -1
 [debug][lexical]  check list : paser_list[5]->status = -1
-[debug][lexical]  check list : paser_list[6]->status = -1
+[debug][lexical]  check list : paser_list[6]->status = -3
 [debug][lexical]  check list : paser_list[7]->status = -1
 [debug][lexical]  check list : paser_list[8]->status = -1
 [debug][lexical]  check list : paser_list[9]->status = -1
@@ -587,20 +518,23 @@
 [debug][lexical]  check list : paser_list[32]->status = -1
 [debug][lexical]  check list : paser_list[33]->status = -1
 [debug][lexical]  check list : paser_list[34]->status = -1
-[debug][lexical]  check list : paser_list[35]->status = -4
+[debug][lexical]  check list : paser_list[35]->status = -1
 [debug][lexical]  check list : paser_list[36]->status = -1
 [debug][lexical]  check list : paser_list[37]->status = -1
 [debug][lexical]  check list : paser_list[38]->status = -1
-[debug][lexical]  check list : end_count = 0
-[debug][lexical]  check list : s_end_count = 1
-[debug][lexical]  check list : not_count = 38
-[debug][lexical]  check list : count all = 39
+[debug][lexical]  check list : paser_list[39]->status = -1
+[debug][lexical]  check list : paser_list[40]->status = -1
+[debug][lexical]  check list : paser_list[41]->status = -1
+[debug][lexical]  check list : end_count = 1
+[debug][lexical]  check list : s_end_count = 0
+[debug][lexical]  check list : not_count = 41
+[debug][lexical]  check list : count all = 42
 
 [info][lexical]  back_p
 
-[info][lexical]  get value = '!=' len = 2 from 35
+[info][lexical]  get value = '*' len = 1 from 6
 
-[debug]token type = 35
+[debug]token type = 6
 
 [info][lexical]  set_start
 
@@ -645,10 +579,13 @@
 [debug][lexical]  check list : paser_list[36]->status = -1
 [debug][lexical]  check list : paser_list[37]->status = -1
 [debug][lexical]  check list : paser_list[38]->status = -1
+[debug][lexical]  check list : paser_list[39]->status = -1
+[debug][lexical]  check list : paser_list[40]->status = -1
+[debug][lexical]  check list : paser_list[41]->status = -1
 [debug][lexical]  check list : end_count = 0
 [debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 38
-[debug][lexical]  check list : count all = 39
+[debug][lexical]  check list : not_count = 41
+[debug][lexical]  check list : count all = 42
 
 [debug][lexical]  continue to paser
 
@@ -693,10 +630,13 @@
 [debug][lexical]  check list : paser_list[36]->status = -1
 [debug][lexical]  check list : paser_list[37]->status = -1
 [debug][lexical]  check list : paser_list[38]->status = -1
+[debug][lexical]  check list : paser_list[39]->status = -1
+[debug][lexical]  check list : paser_list[40]->status = -1
+[debug][lexical]  check list : paser_list[41]->status = -1
 [debug][lexical]  check list : end_count = 1
 [debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 38
-[debug][lexical]  check list : count all = 39
+[debug][lexical]  check list : not_count = 41
+[debug][lexical]  check list : count all = 42
 
 [info][lexical]  back_p
 
@@ -745,166 +685,19 @@
 [debug][lexical]  check list : paser_list[36]->status = -1
 [debug][lexical]  check list : paser_list[37]->status = -1
 [debug][lexical]  check list : paser_list[38]->status = -1
+[debug][lexical]  check list : paser_list[39]->status = -1
+[debug][lexical]  check list : paser_list[40]->status = -1
+[debug][lexical]  check list : paser_list[41]->status = -1
 [debug][lexical]  check list : end_count = 0
 [debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 37
-[debug][lexical]  check list : count all = 39
-
-[debug][lexical]  continue to paser
-
-[info][lexical]  p = '3'
-
-[debug][lexical]  check list : paser_list[0]->status = 1
-[debug][lexical]  check list : paser_list[1]->status = 1
-[debug][lexical]  check list : paser_list[2]->status = -1
-[debug][lexical]  check list : paser_list[3]->status = -1
-[debug][lexical]  check list : paser_list[4]->status = -1
-[debug][lexical]  check list : paser_list[5]->status = -1
-[debug][lexical]  check list : paser_list[6]->status = -1
-[debug][lexical]  check list : paser_list[7]->status = -1
-[debug][lexical]  check list : paser_list[8]->status = -1
-[debug][lexical]  check list : paser_list[9]->status = -1
-[debug][lexical]  check list : paser_list[10]->status = -1
-[debug][lexical]  check list : paser_list[11]->status = -1
-[debug][lexical]  check list : paser_list[12]->status = -1
-[debug][lexical]  check list : paser_list[13]->status = -1
-[debug][lexical]  check list : paser_list[14]->status = -1
-[debug][lexical]  check list : paser_list[15]->status = -1
-[debug][lexical]  check list : paser_list[16]->status = -1
-[debug][lexical]  check list : paser_list[17]->status = -1
-[debug][lexical]  check list : paser_list[18]->status = -1
-[debug][lexical]  check list : paser_list[19]->status = -1
-[debug][lexical]  check list : paser_list[20]->status = -1
-[debug][lexical]  check list : paser_list[21]->status = -1
-[debug][lexical]  check list : paser_list[22]->status = -1
-[debug][lexical]  check list : paser_list[23]->status = -1
-[debug][lexical]  check list : paser_list[24]->status = -1
-[debug][lexical]  check list : paser_list[25]->status = -1
-[debug][lexical]  check list : paser_list[26]->status = -1
-[debug][lexical]  check list : paser_list[27]->status = -1
-[debug][lexical]  check list : paser_list[28]->status = -1
-[debug][lexical]  check list : paser_list[29]->status = -1
-[debug][lexical]  check list : paser_list[30]->status = -1
-[debug][lexical]  check list : paser_list[31]->status = -1
-[debug][lexical]  check list : paser_list[32]->status = -1
-[debug][lexical]  check list : paser_list[33]->status = -1
-[debug][lexical]  check list : paser_list[34]->status = -1
-[debug][lexical]  check list : paser_list[35]->status = -1
-[debug][lexical]  check list : paser_list[36]->status = -1
-[debug][lexical]  check list : paser_list[37]->status = -1
-[debug][lexical]  check list : paser_list[38]->status = -1
-[debug][lexical]  check list : end_count = 0
-[debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 37
-[debug][lexical]  check list : count all = 39
-
-[debug][lexical]  continue to paser
-
-[info][lexical]  p = ')'
-
-[debug][lexical]  check list : paser_list[0]->status = -3
-[debug][lexical]  check list : paser_list[1]->status = -1
-[debug][lexical]  check list : paser_list[2]->status = -1
-[debug][lexical]  check list : paser_list[3]->status = -1
-[debug][lexical]  check list : paser_list[4]->status = -1
-[debug][lexical]  check list : paser_list[5]->status = -1
-[debug][lexical]  check list : paser_list[6]->status = -1
-[debug][lexical]  check list : paser_list[7]->status = -1
-[debug][lexical]  check list : paser_list[8]->status = -1
-[debug][lexical]  check list : paser_list[9]->status = -1
-[debug][lexical]  check list : paser_list[10]->status = -1
-[debug][lexical]  check list : paser_list[11]->status = -1
-[debug][lexical]  check list : paser_list[12]->status = -1
-[debug][lexical]  check list : paser_list[13]->status = -1
-[debug][lexical]  check list : paser_list[14]->status = -1
-[debug][lexical]  check list : paser_list[15]->status = -1
-[debug][lexical]  check list : paser_list[16]->status = -1
-[debug][lexical]  check list : paser_list[17]->status = -1
-[debug][lexical]  check list : paser_list[18]->status = -1
-[debug][lexical]  check list : paser_list[19]->status = -1
-[debug][lexical]  check list : paser_list[20]->status = -1
-[debug][lexical]  check list : paser_list[21]->status = -1
-[debug][lexical]  check list : paser_list[22]->status = -1
-[debug][lexical]  check list : paser_list[23]->status = -1
-[debug][lexical]  check list : paser_list[24]->status = -1
-[debug][lexical]  check list : paser_list[25]->status = -1
-[debug][lexical]  check list : paser_list[26]->status = -1
-[debug][lexical]  check list : paser_list[27]->status = -1
-[debug][lexical]  check list : paser_list[28]->status = -1
-[debug][lexical]  check list : paser_list[29]->status = -1
-[debug][lexical]  check list : paser_list[30]->status = -1
-[debug][lexical]  check list : paser_list[31]->status = -1
-[debug][lexical]  check list : paser_list[32]->status = -1
-[debug][lexical]  check list : paser_list[33]->status = -1
-[debug][lexical]  check list : paser_list[34]->status = -1
-[debug][lexical]  check list : paser_list[35]->status = -1
-[debug][lexical]  check list : paser_list[36]->status = -1
-[debug][lexical]  check list : paser_list[37]->status = -1
-[debug][lexical]  check list : paser_list[38]->status = -1
-[debug][lexical]  check list : end_count = 1
-[debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 38
-[debug][lexical]  check list : count all = 39
-
-[info][lexical]  back_p
-
-[info][lexical]  get value = '33' len = 2 from 0
-
-[debug]token type = 0
-
-[info][lexical]  set_start
-
-[info][lexical]  p = ')'
-
-[debug][lexical]  check list : paser_list[0]->status = -1
-[debug][lexical]  check list : paser_list[1]->status = -1
-[debug][lexical]  check list : paser_list[2]->status = -1
-[debug][lexical]  check list : paser_list[3]->status = -1
-[debug][lexical]  check list : paser_list[4]->status = -1
-[debug][lexical]  check list : paser_list[5]->status = -1
-[debug][lexical]  check list : paser_list[6]->status = -1
-[debug][lexical]  check list : paser_list[7]->status = -1
-[debug][lexical]  check list : paser_list[8]->status = -1
-[debug][lexical]  check list : paser_list[9]->status = -2
-[debug][lexical]  check list : paser_list[10]->status = -1
-[debug][lexical]  check list : paser_list[11]->status = -1
-[debug][lexical]  check list : paser_list[12]->status = -1
-[debug][lexical]  check list : paser_list[13]->status = -1
-[debug][lexical]  check list : paser_list[14]->status = -1
-[debug][lexical]  check list : paser_list[15]->status = -1
-[debug][lexical]  check list : paser_list[16]->status = -1
-[debug][lexical]  check list : paser_list[17]->status = -1
-[debug][lexical]  check list : paser_list[18]->status = -1
-[debug][lexical]  check list : paser_list[19]->status = -1
-[debug][lexical]  check list : paser_list[20]->status = -1
-[debug][lexical]  check list : paser_list[21]->status = -1
-[debug][lexical]  check list : paser_list[22]->status = -1
-[debug][lexical]  check list : paser_list[23]->status = -1
-[debug][lexical]  check list : paser_list[24]->status = -1
-[debug][lexical]  check list : paser_list[25]->status = -1
-[debug][lexical]  check list : paser_list[26]->status = -1
-[debug][lexical]  check list : paser_list[27]->status = -1
-[debug][lexical]  check list : paser_list[28]->status = -1
-[debug][lexical]  check list : paser_list[29]->status = -1
-[debug][lexical]  check list : paser_list[30]->status = -1
-[debug][lexical]  check list : paser_list[31]->status = -1
-[debug][lexical]  check list : paser_list[32]->status = -1
-[debug][lexical]  check list : paser_list[33]->status = -1
-[debug][lexical]  check list : paser_list[34]->status = -1
-[debug][lexical]  check list : paser_list[35]->status = -1
-[debug][lexical]  check list : paser_list[36]->status = -1
-[debug][lexical]  check list : paser_list[37]->status = -1
-[debug][lexical]  check list : paser_list[38]->status = -1
-[debug][lexical]  check list : end_count = 0
-[debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 38
-[debug][lexical]  check list : count all = 39
+[debug][lexical]  check list : not_count = 40
+[debug][lexical]  check list : count all = 42
 
 [debug][lexical]  continue to paser
 
 [info][lexical]  p = <Enter>
 
-[debug][lexical]  check list : paser_list[0]->status = -1
+[debug][lexical]  check list : paser_list[0]->status = -3
 [debug][lexical]  check list : paser_list[1]->status = -1
 [debug][lexical]  check list : paser_list[2]->status = -1
 [debug][lexical]  check list : paser_list[3]->status = -1
@@ -913,7 +706,7 @@
 [debug][lexical]  check list : paser_list[6]->status = -1
 [debug][lexical]  check list : paser_list[7]->status = -1
 [debug][lexical]  check list : paser_list[8]->status = -1
-[debug][lexical]  check list : paser_list[9]->status = -3
+[debug][lexical]  check list : paser_list[9]->status = -1
 [debug][lexical]  check list : paser_list[10]->status = -1
 [debug][lexical]  check list : paser_list[11]->status = -1
 [debug][lexical]  check list : paser_list[12]->status = -1
@@ -943,16 +736,19 @@
 [debug][lexical]  check list : paser_list[36]->status = -1
 [debug][lexical]  check list : paser_list[37]->status = -1
 [debug][lexical]  check list : paser_list[38]->status = -1
+[debug][lexical]  check list : paser_list[39]->status = -1
+[debug][lexical]  check list : paser_list[40]->status = -1
+[debug][lexical]  check list : paser_list[41]->status = -1
 [debug][lexical]  check list : end_count = 1
 [debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 38
-[debug][lexical]  check list : count all = 39
+[debug][lexical]  check list : not_count = 41
+[debug][lexical]  check list : count all = 42
 
 [info][lexical]  back_p
 
-[info][lexical]  get value = ')' len = 1 from 9
+[info][lexical]  get value = '3' len = 1 from 0
 
-[debug]token type = 9
+[debug]token type = 0
 
 [info][lexical]  set_start
 
@@ -997,10 +793,13 @@
 [debug][lexical]  check list : paser_list[36]->status = -1
 [debug][lexical]  check list : paser_list[37]->status = -1
 [debug][lexical]  check list : paser_list[38]->status = -1
+[debug][lexical]  check list : paser_list[39]->status = -1
+[debug][lexical]  check list : paser_list[40]->status = -1
+[debug][lexical]  check list : paser_list[41]->status = -1
 [debug][lexical]  check list : end_count = 0
 [debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 38
-[debug][lexical]  check list : count all = 39
+[debug][lexical]  check list : not_count = 41
+[debug][lexical]  check list : count all = 42
 
 [debug][lexical]  continue to paser
 
@@ -1045,10 +844,13 @@
 [debug][lexical]  check list : paser_list[36]->status = -1
 [debug][lexical]  check list : paser_list[37]->status = -1
 [debug][lexical]  check list : paser_list[38]->status = -1
+[debug][lexical]  check list : paser_list[39]->status = -1
+[debug][lexical]  check list : paser_list[40]->status = -1
+[debug][lexical]  check list : paser_list[41]->status = -1
 [debug][lexical]  check list : end_count = 1
 [debug][lexical]  check list : s_end_count = 0
-[debug][lexical]  check list : not_count = 38
-[debug][lexical]  check list : count all = 39
+[debug][lexical]  check list : not_count = 41
+[debug][lexical]  check list : count all = 42
 
 [info][lexical]  back_p
 
