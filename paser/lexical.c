@@ -23,6 +23,7 @@ token get_token(int *paser_status){
         return_token.type = EOF_token;
         return_token.data_type = empty;
         fprintf(debug, "[debug]token type = <EOF>\n\n");
+        fprintf(status_log, "[info]token type = <EOF>\n");
     }
     else if(index == -2){
         paser_error("lexical token error");
@@ -33,6 +34,7 @@ token get_token(int *paser_status){
         return_token.data.text = malloc(strlen(global_paser[index]->text));
         strcpy(return_token.data.text, global_paser[index]->text);
         fprintf(debug, "[debug]token type = %d\n\n", index);
+        fprintf(status_log, "[info]token type = %d\n", index);
     }
     return return_token;
 }
@@ -50,14 +52,16 @@ int is_in(int element){  // 检查某个值是否在数组中
 
 int paser(int *index){
     char p;
-    int status = 1;  // 是否还有继续
     int is_eof = 0;  // 考虑用status取代is_eof
+    int count = 0;
     while(1){
         p = read_p();
         if(p == EOF){  // 遇到EOF[先不break]
             fprintf(debug, "[info][lexical]  p = <EOF>\n\n");
-            status = 0;
             is_eof = 1;
+            if(count == 0){
+                return 0;
+            }
         }
         else{
             if(p == '\n'){
@@ -69,7 +73,7 @@ int paser(int *index){
                 fputs("'\n\n", debug); 
             }
         }
-
+        count += 1;
         // 执行解析器
         match_int(p, global_paser[INT_PASER]);
         match_double(p, global_paser[DOUBLE_PASER]);
@@ -115,11 +119,23 @@ int paser(int *index){
         match_text(p, global_paser[EQ_PASER], "=");
         match_text(p, global_paser[DEF_PASER], "def");
         match_text(p, global_paser[COLON_PASER], ",");
+        match_text(p, global_paser[BREAK_PASER], "break");
+        match_text(p, global_paser[BROKEN_PASER], "broken");
+        match_text(p, global_paser[REGO_PASER], "rego");
+        match_text(p, global_paser[REWENT_PASER], "rewent");
+        match_text(p, global_paser[RESTART_PASER], "restart");
+        match_text_s(p, global_paser[RESTARTED_PASER], "restarted");
+        match_text(p, global_paser[CONTINUE_PASER], "continue");
+        match_text_s(p, global_paser[CONTINUED_PASER], "continued");
+        match_text_s(p, global_paser[GLOBAL_PASER], "global");
+        match_text(p, global_paser[NOLOCAL_PASER], "nolocal");
+        match_text_s(p, global_paser[DEFAULT_PASER], "default");
 
-        *index = check_list(global_paser);  // 检查解析结果
+        *index = check_list(global_paser, p);  // 检查解析结果
 
         if(*index >= 0){  // index >= 0表示找到解析的结果[存在一个解析器存在结果，其他解析器没有结果]
             fprintf(debug, "[info][lexical]  get value = '%s' len = %d from %d\n\n", global_paser[*index]->text, strlen(global_paser[*index]->text),*index);
+            fprintf(status_log, "[info][lexical]  get value = '%s' len = %d from %d\n", global_paser[*index]->text, strlen(global_paser[*index]->text),*index);
             break;
         }
         else if(*index == -2){  // -2表示全部解析器没有结果
@@ -128,21 +144,25 @@ int paser(int *index){
         }
         else if(is_eof){  // 以上状况均不是，如果是eof仍要推出
             fprintf(debug, "[error][lexical]  EOF Paser Wrong!\n\n");
-            break;
+            return 0;
         }
         else{
             fprintf(debug, "[debug][lexical]  continue to paser\n\n");
         }
         // else情况：继续匹配
     }
-    return status;
+    return 1;
 }
 
 char read_p(){  // 读取一个字符
     return getc(file_p);
 }
 
-void back_p(){  // 回退一个字符
+void back_p(char p){  // 回退一个字符
+    if(p == EOF){
+        fprintf(debug, "[info][lexical]  back_p <EOF>\n\n");
+        return;
+    }
     fseek(file_p, -1, 1);
     fprintf(debug, "[info][lexical]  back_p\n\n");
 }
@@ -179,7 +199,7 @@ void free_list(word_paser **paser_list){  // 释放空间
     free(paser_list);  // 释放数组本身
 }
 
-int check_list(word_paser **paser_list){  // 检查结果
+int check_list(word_paser **paser_list, char p){  // 检查结果
     // 统计数据
     int end_count = 0;
     int s_end_count = 0;  // 二级合并
@@ -217,7 +237,7 @@ int check_list(word_paser **paser_list){  // 检查结果
 
     // 需要往回放一个字符
     if((MAX_PASER_SIZE - not_count - end_count) == 0 && end_count == 1){  // 除了不匹配就是匹配成功，且只有一个成功
-        back_p();  // 回退一个字符[所有匹配成功的都必须吞一个字符，然后再这里统一回退]
+        back_p(p);  // 回退一个字符[所有匹配成功的都必须吞一个字符，然后再这里统一回退]
         return end_index;
     }
     if(MAX_PASER_SIZE == not_count){  // 全部匹配不正确，没有一个成功

@@ -3,7 +3,7 @@
 
 #include "../inter/interpreter.h"
 
-#define MAX_PASER_SIZE 42
+#define MAX_PASER_SIZE 53
 #define INT_PASER 0
 #define DOUBLE_PASER 1
 #define ENTER_PASER 2
@@ -46,7 +46,17 @@
 #define EQ_PASER 39
 #define DEF_PASER 40
 #define COLON_PASER 41
-
+#define BREAK_PASER 42
+#define BROKEN_PASER 43
+#define CONTINUE_PASER 44
+#define CONTINUED_PASER 45
+#define RESTART_PASER 46
+#define RESTARTED_PASER 47
+#define REGO_PASER 48
+#define REWENT_PASER 49
+#define GLOBAL_PASER 50
+#define NOLOCAL_PASER 51
+#define DEFAULT_PASER 52
 
 // 获取并返回一个token
 #define get_pop_token(status,list,new_token) \
@@ -139,6 +149,17 @@ typedef enum token_type
     EQ = EQ_PASER,
     DEF = DEF_PASER,
     COLON = COLON_PASER,
+    BREAK = BREAK_PASER,
+    BROKEN = BROKEN_PASER,
+    CONTINUE = CONTINUE_PASER,
+    CONTINUED = CONTINUED_PASER,
+    RESTART = RESTART_PASER,
+    RESTARTED = RESTARTED_PASER,
+    REGO = REGO_PASER,
+    REWENT = REWENT_PASER,
+    GLOBAL = GLOBAL_PASER,
+    NOLOCAL = NOLOCAL_PASER,
+    DEFAULT = DEFAULT_PASER,
 
     // 特殊符号
     BAD_token = -2,
@@ -175,6 +196,8 @@ typedef enum token_type
     NON_call = -32,
     NON_parameter = -33,
     NON_call_down = -34,
+    NON_ctrl = -35,
+    NON_var_ctrl = -36,
 } token_type;
 
 typedef union token_data

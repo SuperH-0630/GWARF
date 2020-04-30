@@ -1,4 +1,6 @@
-[debug][grammar]  get token type : 24; data type : 1
+[info][lexical]  get value = 'if' len = 2 from 13
+[info]token type = 13
+[debug][grammar]  get token type : 13; data type : 1
 [debug][grammar]  add a token[seek : 0, index : 0, size : 1]
 [debug][grammar]  after add a token[seek : 1, index : 1]
 [debug][token : [  0]]
@@ -13,119 +15,120 @@
 [info][grammar]  mode status: command
 [debug][grammar]  pop a token[seek : 0, index : 0]
 [debug][token : [  4]]
-[info][grammar]  (command)back one token to (top_exp)
+[info][grammar]  (command)back one token to (if)
 [debug][grammar]  add a token[seek : 0, index : 0, size : 2]
 [debug][grammar]  after add a token[seek : 1, index : 1]
 [debug][token : [  5]]
-[info][grammar]  mode status: top_exp
-[info][grammar]  mode status: eq_number
+[info][grammar]  mode status: if_
 [debug][grammar]  pop a token[seek : 0, index : 0]
 [debug][token : [  6]]
-[info][grammar]  (bool_or)back one token to (bool_and)
+[info][lexical]  get value = '(' len = 1 from 8
+[info]token type = 8
+[debug][grammar]  get token type : 8; data type : 1
 [debug][grammar]  add a token[seek : 0, index : 0, size : 2]
 [debug][grammar]  after add a token[seek : 1, index : 1]
 [debug][token : [  7]]
-[info][grammar]  mode status: call_back_
-[debug][grammar]  pop a token[seek : 0, index : 0]
 [debug][token : [  8]]
-[info][grammar]  (call_back_)back one token to (bool_or)
-[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
-[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][grammar]  pop a token[seek : 0, index : 0]
 [debug][token : [  9]]
-[info][grammar]  mode status: bool_or
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 10]]
-[info][grammar]  (bool_or)back one token to (bool_and)
-[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 11]]
-[info][grammar]  mode status: bool_and
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 12]]
-[info][grammar]  (bool_and)back one token to (compare)
-[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 13]]
-[info][grammar]  mode status: negative
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 14]]
-[info][grammar]  (negative)back one token to (compare)
-[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 15]]
-[info][grammar]  mode status: polynomial
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 16]]
-[info][grammar]  (polynomial)back one token to (factor)
-[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 17]]
-[info][grammar]  mode status: bit_or
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 18]]
-[info][grammar]  (bit_or)back one token to (bit_and)
-[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 19]]
-[info][grammar]  mode status: bit_or
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 20]]
-[info][grammar]  (bit_or)back one token to (bit_and)
-[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 21]]
-[info][grammar]  mode status: bit_and
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 22]]
-[info][grammar]  (bit_move)back one token to (factor)
-[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 23]]
-[info][grammar]  mode status: factor
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 24]]
-[info][grammar]  (bit_move)back one token to (factor)
-[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 25]]
-[info][grammar]  mode status: polynomial
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 26]]
-[info][grammar]  (polynomial)back one token to (factor)
-[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 27]]
-[info][grammar]  mode status: factor
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 28]]
-[info][grammar]  (factor)back one token to (element)
-[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 29]]
-[info][grammar]  mode status: negative
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 30]]
-[info][grammar]  (negative)back one token to (bit_not)
-[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 31]]
-[info][grammar]  mode status: bit_not
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 32]]
-[info][grammar]  (bit_not)reduce right
-[debug][grammar]  get token type : 24; data type : 1
-[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 33]]
-[debug][token : [ 34]]
-[info][grammar]  mode status: bit_not
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 35]]
-[info][grammar]  (bit_not)reduce right
+[info][lexical]  get value = '1' len = 1 from 0
+[info]token type = 0
 [debug][grammar]  get token type : 0; data type : 1
 [debug][grammar]  add a token[seek : 0, index : 0, size : 2]
 [debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [ 10]]
+[debug][token : [ 11]]
+[info][grammar]  mode status: top_exp
+[info][grammar]  mode status: eq_number
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [ 12]]
+[info][grammar]  (bool_or)back one token to (bool_and)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [ 13]]
+[info][grammar]  mode status: call_back_
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [ 14]]
+[info][grammar]  (call_back_)back one token to (bool_or)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [ 15]]
+[info][grammar]  mode status: bool_or
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [ 16]]
+[info][grammar]  (bool_or)back one token to (bool_and)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [ 17]]
+[info][grammar]  mode status: bool_and
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [ 18]]
+[info][grammar]  (bool_and)back one token to (compare)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [ 19]]
+[info][grammar]  mode status: negative
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [ 20]]
+[info][grammar]  (negative)back one token to (compare)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [ 21]]
+[info][grammar]  mode status: polynomial
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [ 22]]
+[info][grammar]  (polynomial)back one token to (factor)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [ 23]]
+[info][grammar]  mode status: bit_or
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [ 24]]
+[info][grammar]  (bit_or)back one token to (bit_and)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [ 25]]
+[info][grammar]  mode status: bit_or
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [ 26]]
+[info][grammar]  (bit_or)back one token to (bit_and)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [ 27]]
+[info][grammar]  mode status: bit_and
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [ 28]]
+[info][grammar]  (bit_move)back one token to (factor)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [ 29]]
+[info][grammar]  mode status: factor
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [ 30]]
+[info][grammar]  (bit_move)back one token to (factor)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [ 31]]
+[info][grammar]  mode status: polynomial
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [ 32]]
+[info][grammar]  (polynomial)back one token to (factor)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [ 33]]
+[info][grammar]  mode status: factor
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [ 34]]
+[info][grammar]  (factor)back one token to (element)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [ 35]]
+[info][grammar]  mode status: negative
+[debug][grammar]  pop a token[seek : 0, index : 0]
 [debug][token : [ 36]]
+[info][grammar]  (negative)back one token to (bit_not)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 2]
+[debug][grammar]  after add a token[seek : 1, index : 1]
 [debug][token : [ 37]]
 [info][grammar]  mode status: bit_not
 [debug][grammar]  pop a token[seek : 0, index : 0]
@@ -158,7 +161,7 @@
 [info][grammar]  mode status: number
 [debug][grammar]  pop a token[seek : 0, index : 0]
 [debug][token : [ 46]]
-[info][grammar]  (number)get int number: 5
+[info][grammar]  (number)get int number: 1
 [info][grammar]  (number)add one token
 [debug][grammar]  add a token[seek : 0, index : 0, size : 2]
 [debug][grammar]  after add a token[seek : 1, index : 1]
@@ -177,7 +180,9 @@
 [debug][grammar]  pop a token[seek : 0, index : 0]
 [debug][token : [ 52]]
 [info][grammar]  (call_down)reduce right
-[debug][grammar]  get token type : 6; data type : 1
+[info][lexical]  get value = '==' len = 2 from 30
+[info]token type = 30
+[debug][grammar]  get token type : 30; data type : 1
 [debug][grammar]  add a token[seek : 0, index : 0, size : 2]
 [debug][grammar]  after add a token[seek : 1, index : 1]
 [debug][token : [ 53]]
@@ -230,427 +235,926 @@
 [debug][grammar]  add a token[seek : 0, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 2]
 [debug][token : [ 72]]
+[info][grammar]  mode status: factor
 [debug][grammar]  pop a token[seek : 0, index : 1]
 [debug][token : [ 73]]
-[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 2]
+[info][grammar]  (factor)reduce right
+[debug][grammar]  get token seek += 1 : 0, index : 1
 [debug][token : [ 74]]
-[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][grammar]  pop a token[seek : 0, index : 0]
 [debug][token : [ 75]]
-[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 2]
-[debug][token : [ 76]]
-[info][grammar]  mode status: factor
-[debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [ 77]]
-[info][grammar]  (factor)reduce right
-[debug][grammar]  get token seek += 1 : 0, index : 1
-[debug][token : [ 78]]
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 79]]
-[debug][grammar]  get token type : 0; data type : 1
-[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 80]]
-[debug][token : [ 81]]
-[info][grammar]  mode status: negative
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 82]]
-[info][grammar]  (negative)back one token to (bit_not)
-[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 83]]
-[info][grammar]  mode status: bit_not
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 84]]
-[info][grammar]  (bit_not)back one token to (power)
-[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 85]]
-[info][grammar]  mode status: power
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 86]]
-[info][grammar]  (power)back one token to (element)
-[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 87]]
-[info][grammar]  mode status: call_down
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 88]]
-[info][grammar]  (call_down)back one token to (element)
-[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 89]]
-[info][grammar]  mode status: element
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 90]]
-[info][grammar]  (element)back one token to (number)
-[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 91]]
-[info][grammar]  mode status: number
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 92]]
-[info][grammar]  (number)get int number: 3
-[info][grammar]  (number)add one token
-[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 93]]
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 94]]
-[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 95]]
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 96]]
-[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 97]]
-[info][grammar]  mode status: call_down
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [ 98]]
-[info][grammar]  (call_down)reduce right
-[debug][grammar]  get token type : -3; data type : 7
-[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [ 99]]
-[debug][token : [100]]
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [101]]
-[info][grammar]  (call_back_)out
-[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [102]]
-[debug][grammar]  add a token[seek : 1, index : 1, size : 3]
-[debug][grammar]  after add a token[seek : 2, index : 2]
-[debug][token : [103]]
-[debug][grammar]  back a token[seek : 1, index : 2]
-[debug][token : [104]]
-[debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [105]]
-[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 2]
-[debug][token : [106]]
-[info][grammar]  mode status: power
-[debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [107]]
-[info][grammar]  (power)reduce right
-[debug][grammar]  get token seek += 1 : 0, index : 1
-[debug][token : [108]]
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [109]]
-[info][grammar]  (power)out
-[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [110]]
-[debug][grammar]  add a token[seek : 1, index : 1, size : 3]
-[debug][grammar]  after add a token[seek : 2, index : 2]
-[debug][token : [111]]
-[debug][grammar]  back a token[seek : 1, index : 2]
-[debug][token : [112]]
-[debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [113]]
-[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 2]
-[debug][token : [114]]
-[debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [115]]
-[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 2]
-[debug][token : [116]]
-[debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [117]]
-[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 2]
-[debug][token : [118]]
-[info][grammar]  mode status: factor
-[debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [119]]
-[info][grammar]  (factor)reduce right
-[debug][grammar]  get token seek += 1 : 0, index : 1
-[debug][token : [120]]
-[debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [121]]
 [info][grammar]  (factor)out
 [debug][grammar]  add a token[seek : 0, index : 0, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [122]]
+[debug][token : [ 76]]
 [debug][grammar]  add a token[seek : 1, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 2, index : 2]
-[debug][token : [123]]
+[debug][token : [ 77]]
 [debug][grammar]  back a token[seek : 1, index : 2]
-[debug][token : [124]]
+[debug][token : [ 78]]
 [debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [125]]
+[debug][token : [ 79]]
 [debug][grammar]  add a token[seek : 0, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 2]
-[debug][token : [126]]
+[debug][token : [ 80]]
 [info][grammar]  mode status: polynomial
 [debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [127]]
+[debug][token : [ 81]]
 [info][grammar]  (polynomial)reduce right
 [debug][grammar]  get token seek += 1 : 0, index : 1
-[debug][token : [128]]
+[debug][token : [ 82]]
 [debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [129]]
+[debug][token : [ 83]]
 [info][grammar]  (polynomial)out
 [debug][grammar]  add a token[seek : 0, index : 0, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [130]]
+[debug][token : [ 84]]
 [debug][grammar]  add a token[seek : 1, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 2, index : 2]
-[debug][token : [131]]
+[debug][token : [ 85]]
 [debug][grammar]  back a token[seek : 1, index : 2]
-[debug][token : [132]]
+[debug][token : [ 86]]
 [debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [133]]
+[debug][token : [ 87]]
 [debug][grammar]  add a token[seek : 0, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 2]
-[debug][token : [134]]
+[debug][token : [ 88]]
 [info][grammar]  mode status: factor
 [debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [135]]
+[debug][token : [ 89]]
 [info][grammar]  (factor)reduce right
 [debug][grammar]  get token seek += 1 : 0, index : 1
-[debug][token : [136]]
+[debug][token : [ 90]]
 [debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [137]]
+[debug][token : [ 91]]
 [info][grammar]  (bit_move)out
 [debug][grammar]  add a token[seek : 0, index : 0, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [138]]
+[debug][token : [ 92]]
 [debug][grammar]  add a token[seek : 1, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 2, index : 2]
-[debug][token : [139]]
+[debug][token : [ 93]]
 [debug][grammar]  back a token[seek : 1, index : 2]
-[debug][token : [140]]
+[debug][token : [ 94]]
 [debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [141]]
+[debug][token : [ 95]]
 [debug][grammar]  add a token[seek : 0, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 2]
-[debug][token : [142]]
+[debug][token : [ 96]]
 [info][grammar]  mode status: bit_and
 [debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [143]]
+[debug][token : [ 97]]
 [info][grammar]  (factor)reduce right
 [debug][grammar]  get token seek += 1 : 0, index : 1
-[debug][token : [144]]
+[debug][token : [ 98]]
 [debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [145]]
+[debug][token : [ 99]]
 [info][grammar]  (bit_and)out
 [debug][grammar]  add a token[seek : 0, index : 0, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [146]]
+[debug][token : [100]]
 [debug][grammar]  add a token[seek : 1, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 2, index : 2]
-[debug][token : [147]]
+[debug][token : [101]]
 [debug][grammar]  back a token[seek : 1, index : 2]
-[debug][token : [148]]
+[debug][token : [102]]
 [debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [149]]
+[debug][token : [103]]
 [debug][grammar]  add a token[seek : 0, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 2]
-[debug][token : [150]]
+[debug][token : [104]]
 [info][grammar]  mode status: bit_or
 [debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [151]]
+[debug][token : [105]]
 [info][grammar]  (bit_or)reduce right
 [debug][grammar]  get token seek += 1 : 0, index : 1
-[debug][token : [152]]
+[debug][token : [106]]
 [debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [153]]
+[debug][token : [107]]
 [info][grammar]  (bit_or)out
 [debug][grammar]  add a token[seek : 0, index : 0, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [154]]
+[debug][token : [108]]
 [debug][grammar]  add a token[seek : 1, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 2, index : 2]
-[debug][token : [155]]
+[debug][token : [109]]
 [debug][grammar]  back a token[seek : 1, index : 2]
-[debug][token : [156]]
+[debug][token : [110]]
 [debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [157]]
+[debug][token : [111]]
 [debug][grammar]  add a token[seek : 0, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 2]
-[debug][token : [158]]
+[debug][token : [112]]
 [info][grammar]  mode status: bit_or
 [debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [159]]
+[debug][token : [113]]
 [info][grammar]  (bit_or)reduce right
 [debug][grammar]  get token seek += 1 : 0, index : 1
-[debug][token : [160]]
+[debug][token : [114]]
 [debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [161]]
+[debug][token : [115]]
 [info][grammar]  (bit_notor)out
 [debug][grammar]  add a token[seek : 0, index : 0, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [162]]
+[debug][token : [116]]
 [debug][grammar]  add a token[seek : 1, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 2, index : 2]
-[debug][token : [163]]
+[debug][token : [117]]
 [debug][grammar]  back a token[seek : 1, index : 2]
-[debug][token : [164]]
+[debug][token : [118]]
 [debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [165]]
+[debug][token : [119]]
 [debug][grammar]  add a token[seek : 0, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 2]
-[debug][token : [166]]
+[debug][token : [120]]
 [info][grammar]  mode status: polynomial
 [debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [167]]
+[debug][token : [121]]
 [info][grammar]  (polynomial)reduce right
 [debug][grammar]  get token seek += 1 : 0, index : 1
-[debug][token : [168]]
+[debug][token : [122]]
 [debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [169]]
-[info][grammar]  (polynomial)out
+[debug][token : [123]]
+[info][lexical]  get value = '1' len = 1 from 0
+[info]token type = 0
+[debug][grammar]  get token type : 0; data type : 1
 [debug][grammar]  add a token[seek : 0, index : 0, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [170]]
+[debug][token : [124]]
+[debug][token : [125]]
+[info][grammar]  mode status: bit_or
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [126]]
+[info][grammar]  (bit_or)back one token to (bit_and)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [127]]
+[info][grammar]  mode status: bit_or
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [128]]
+[info][grammar]  (bit_or)back one token to (bit_and)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [129]]
+[info][grammar]  mode status: bit_and
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [130]]
+[info][grammar]  (bit_move)back one token to (factor)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [131]]
+[info][grammar]  mode status: factor
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [132]]
+[info][grammar]  (bit_move)back one token to (factor)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [133]]
+[info][grammar]  mode status: polynomial
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [134]]
+[info][grammar]  (polynomial)back one token to (factor)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [135]]
+[info][grammar]  mode status: factor
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [136]]
+[info][grammar]  (factor)back one token to (element)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [137]]
+[info][grammar]  mode status: negative
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [138]]
+[info][grammar]  (negative)back one token to (bit_not)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [139]]
+[info][grammar]  mode status: bit_not
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [140]]
+[info][grammar]  (bit_not)back one token to (power)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [141]]
+[info][grammar]  mode status: power
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [142]]
+[info][grammar]  (power)back one token to (element)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [143]]
+[info][grammar]  mode status: call_down
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [144]]
+[info][grammar]  (call_down)back one token to (element)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [145]]
+[info][grammar]  mode status: element
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [146]]
+[info][grammar]  (element)back one token to (number)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [147]]
+[info][grammar]  mode status: number
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [148]]
+[info][grammar]  (number)get int number: 1
+[info][grammar]  (number)add one token
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [149]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [150]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [151]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [152]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [153]]
+[info][grammar]  mode status: call_down
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [154]]
+[info][grammar]  (call_down)reduce right
+[info][lexical]  get value = ')' len = 1 from 9
+[info]token type = 9
+[debug][grammar]  get token type : 9; data type : 1
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [155]]
+[debug][token : [156]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [157]]
+[info][grammar]  (call_back_)out
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [158]]
 [debug][grammar]  add a token[seek : 1, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 2, index : 2]
-[debug][token : [171]]
+[debug][token : [159]]
 [debug][grammar]  back a token[seek : 1, index : 2]
+[debug][token : [160]]
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [161]]
+[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 2]
+[debug][token : [162]]
+[info][grammar]  mode status: power
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [163]]
+[info][grammar]  (power)reduce right
+[debug][grammar]  get token seek += 1 : 0, index : 1
+[debug][token : [164]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [165]]
+[info][grammar]  (power)out
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [166]]
+[debug][grammar]  add a token[seek : 1, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 2, index : 2]
+[debug][token : [167]]
+[debug][grammar]  back a token[seek : 1, index : 2]
+[debug][token : [168]]
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [169]]
+[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 2]
+[debug][token : [170]]
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [171]]
+[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 2]
 [debug][token : [172]]
 [debug][grammar]  pop a token[seek : 0, index : 1]
 [debug][token : [173]]
 [debug][grammar]  add a token[seek : 0, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 2]
 [debug][token : [174]]
+[info][grammar]  mode status: factor
 [debug][grammar]  pop a token[seek : 0, index : 1]
 [debug][token : [175]]
-[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 2]
-[debug][token : [176]]
-[info][grammar]  mode status: bool_and
-[debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [177]]
-[info][grammar]  (bool_and)reduce right
+[info][grammar]  (factor)reduce right
 [debug][grammar]  get token seek += 1 : 0, index : 1
-[debug][token : [178]]
+[debug][token : [176]]
 [debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [179]]
-[info][grammar]  (bit_notor)out
+[debug][token : [177]]
+[info][grammar]  (factor)out
 [debug][grammar]  add a token[seek : 0, index : 0, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [180]]
+[debug][token : [178]]
 [debug][grammar]  add a token[seek : 1, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 2, index : 2]
-[debug][token : [181]]
+[debug][token : [179]]
 [debug][grammar]  back a token[seek : 1, index : 2]
+[debug][token : [180]]
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [181]]
+[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 2]
 [debug][token : [182]]
+[info][grammar]  mode status: polynomial
 [debug][grammar]  pop a token[seek : 0, index : 1]
 [debug][token : [183]]
-[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 2]
-[debug][token : [184]]
-[info][grammar]  mode status: bool_or
-[debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [185]]
-[info][grammar]  (bool_or)reduce right
+[info][grammar]  (polynomial)reduce right
 [debug][grammar]  get token seek += 1 : 0, index : 1
-[debug][token : [186]]
+[debug][token : [184]]
 [debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [187]]
-[info][grammar]  (bit_notor)out
+[debug][token : [185]]
+[info][grammar]  (polynomial)out
 [debug][grammar]  add a token[seek : 0, index : 0, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [188]]
+[debug][token : [186]]
 [debug][grammar]  add a token[seek : 1, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 2, index : 2]
-[debug][token : [189]]
+[debug][token : [187]]
 [debug][grammar]  back a token[seek : 1, index : 2]
+[debug][token : [188]]
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [189]]
+[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 2]
 [debug][token : [190]]
+[info][grammar]  mode status: factor
 [debug][grammar]  pop a token[seek : 0, index : 1]
 [debug][token : [191]]
-[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 2]
-[debug][token : [192]]
-[info][grammar]  mode status: call_back_
-[debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [193]]
-[info][grammar]  (call_back_)reduce right
+[info][grammar]  (factor)reduce right
 [debug][grammar]  get token seek += 1 : 0, index : 1
-[debug][token : [194]]
+[debug][token : [192]]
 [debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [195]]
-[info][grammar]  (call_back_)out
+[debug][token : [193]]
+[info][grammar]  (bit_move)out
 [debug][grammar]  add a token[seek : 0, index : 0, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [196]]
+[debug][token : [194]]
 [debug][grammar]  add a token[seek : 1, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 2, index : 2]
-[debug][token : [197]]
+[debug][token : [195]]
 [debug][grammar]  back a token[seek : 1, index : 2]
+[debug][token : [196]]
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [197]]
+[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 2]
 [debug][token : [198]]
+[info][grammar]  mode status: bit_and
 [debug][grammar]  pop a token[seek : 0, index : 1]
 [debug][token : [199]]
-[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 2]
-[debug][token : [200]]
-[info][grammar]  mode status: eq_number
-[debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [201]]
-[info][grammar]  (eq_number)reduce right
+[info][grammar]  (factor)reduce right
 [debug][grammar]  get token seek += 1 : 0, index : 1
-[debug][token : [202]]
+[debug][token : [200]]
 [debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [203]]
-[info][grammar]  (bit_notor)out
+[debug][token : [201]]
+[info][grammar]  (bit_and)out
 [debug][grammar]  add a token[seek : 0, index : 0, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [204]]
+[debug][token : [202]]
 [debug][grammar]  add a token[seek : 1, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 2, index : 2]
-[debug][token : [205]]
+[debug][token : [203]]
 [debug][grammar]  back a token[seek : 1, index : 2]
-[debug][token : [206]]
+[debug][token : [204]]
 [debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [207]]
+[debug][token : [205]]
 [debug][grammar]  add a token[seek : 0, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 2]
-[debug][token : [208]]
+[debug][token : [206]]
+[info][grammar]  mode status: bit_or
 [debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [209]]
+[debug][token : [207]]
+[info][grammar]  (bit_or)reduce right
 [debug][grammar]  get token seek += 1 : 0, index : 1
-[debug][token : [210]]
+[debug][token : [208]]
 [debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [211]]
+[debug][token : [209]]
+[info][grammar]  (bit_or)out
 [debug][grammar]  add a token[seek : 0, index : 0, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [210]]
+[debug][grammar]  add a token[seek : 1, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 2, index : 2]
+[debug][token : [211]]
+[debug][grammar]  back a token[seek : 1, index : 2]
 [debug][token : [212]]
-[debug][grammar]  back a token[seek : 0, index : 1]
+[debug][grammar]  pop a token[seek : 0, index : 1]
 [debug][token : [213]]
 [debug][grammar]  add a token[seek : 0, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 2]
 [debug][token : [214]]
+[info][grammar]  mode status: bit_or
 [debug][grammar]  pop a token[seek : 0, index : 1]
 [debug][token : [215]]
-[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
-[debug][grammar]  after add a token[seek : 1, index : 2]
-[debug][token : [216]]
-[info][grammar]  mode status: command_list
-[debug][grammar]  pop a token[seek : 0, index : 1]
-[debug][token : [217]]
-[info][grammar]  (command_list)reduce right
+[info][grammar]  (bit_or)reduce right
 [debug][grammar]  get token seek += 1 : 0, index : 1
-[debug][token : [218]]
-[info][grammar]  mode status: command
+[debug][token : [216]]
 [debug][grammar]  pop a token[seek : 0, index : 0]
-[debug][token : [219]]
-[info][grammar]  (command)back <EOF>
+[debug][token : [217]]
+[info][grammar]  (bit_notor)out
 [debug][grammar]  add a token[seek : 0, index : 0, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [218]]
+[debug][grammar]  add a token[seek : 1, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 2, index : 2]
+[debug][token : [219]]
+[debug][grammar]  back a token[seek : 1, index : 2]
 [debug][token : [220]]
-[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][grammar]  pop a token[seek : 0, index : 1]
 [debug][token : [221]]
-[info][grammar]  (command_list)reduce right STOP
+[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 2]
+[debug][token : [222]]
+[info][grammar]  mode status: polynomial
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [223]]
+[info][grammar]  (polynomial)reduce right
+[debug][grammar]  get token seek += 1 : 0, index : 1
+[debug][token : [224]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [225]]
+[info][grammar]  (polynomial)out
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [226]]
+[debug][grammar]  add a token[seek : 1, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 2, index : 2]
+[debug][token : [227]]
+[debug][grammar]  back a token[seek : 1, index : 2]
+[debug][token : [228]]
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [229]]
+[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 2]
+[debug][token : [230]]
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [231]]
+[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 2]
+[debug][token : [232]]
+[info][grammar]  mode status: bool_and
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [233]]
+[info][grammar]  (bool_and)reduce right
+[debug][grammar]  get token seek += 1 : 0, index : 1
+[debug][token : [234]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [235]]
+[info][grammar]  (bit_notor)out
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [236]]
+[debug][grammar]  add a token[seek : 1, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 2, index : 2]
+[debug][token : [237]]
+[debug][grammar]  back a token[seek : 1, index : 2]
+[debug][token : [238]]
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [239]]
+[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 2]
+[debug][token : [240]]
+[info][grammar]  mode status: bool_or
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [241]]
+[info][grammar]  (bool_or)reduce right
+[debug][grammar]  get token seek += 1 : 0, index : 1
+[debug][token : [242]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [243]]
+[info][grammar]  (bit_notor)out
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [244]]
+[debug][grammar]  add a token[seek : 1, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 2, index : 2]
+[debug][token : [245]]
+[debug][grammar]  back a token[seek : 1, index : 2]
+[debug][token : [246]]
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [247]]
+[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 2]
+[debug][token : [248]]
+[info][grammar]  mode status: call_back_
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [249]]
+[info][grammar]  (call_back_)reduce right
+[debug][grammar]  get token seek += 1 : 0, index : 1
+[debug][token : [250]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [251]]
+[info][grammar]  (call_back_)out
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [252]]
+[debug][grammar]  add a token[seek : 1, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 2, index : 2]
+[debug][token : [253]]
+[debug][grammar]  back a token[seek : 1, index : 2]
+[debug][token : [254]]
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [255]]
+[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 2]
+[debug][token : [256]]
+[info][grammar]  mode status: eq_number
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [257]]
+[info][grammar]  (eq_number)reduce right
+[debug][grammar]  get token seek += 1 : 0, index : 1
+[debug][token : [258]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [259]]
+[info][grammar]  (bit_notor)out
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [260]]
+[debug][grammar]  add a token[seek : 1, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 2, index : 2]
+[debug][token : [261]]
+[debug][grammar]  back a token[seek : 1, index : 2]
+[debug][token : [262]]
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [263]]
+[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 2]
+[debug][token : [264]]
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [265]]
+[debug][grammar]  get token seek += 1 : 0, index : 1
+[debug][token : [266]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [267]]
+[info][lexical]  get value = '{' len = 1 from 11
+[info]token type = 11
+[debug][grammar]  get token type : 11; data type : 1
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [268]]
+[debug][token : [269]]
+[info][grammar]  mode status: block_
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [270]]
+[info][lexical]  get value = '
+' len = 1 from 2
+[info]token type = 2
+[debug][grammar]  get token type : 2; data type : 1
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [271]]
+[debug][token : [272]]
+[info][grammar]  mode status: command_list
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [273]]
+[info][grammar]  (command_list)back one token to (command)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [274]]
+[info][grammar]  mode status: command
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [275]]
+[info][grammar]  (command)back <ENTER>
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [276]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [277]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [278]]
+[info][grammar]  mode status: command_list
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [279]]
+[info][grammar]  (command_list)reduce right
+[info][lexical]  get value = '}' len = 1 from 12
+[info]token type = 12
+[debug][grammar]  get token type : 12; data type : 1
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [280]]
+[debug][token : [281]]
+[info][grammar]  mode status: command
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [282]]
+[info][grammar]  (command)back one token to (top_exp)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [283]]
+[info][grammar]  mode status: top_exp
+[info][grammar]  mode status: eq_number
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [284]]
+[info][grammar]  (bool_or)back one token to (bool_and)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [285]]
+[info][grammar]  mode status: call_back_
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [286]]
+[info][grammar]  (call_back_)back one token to (bool_or)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [287]]
+[info][grammar]  mode status: bool_or
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [288]]
+[info][grammar]  (bool_or)back one token to (bool_and)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [289]]
+[info][grammar]  mode status: bool_and
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [290]]
+[info][grammar]  (bool_and)back one token to (compare)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [291]]
+[info][grammar]  mode status: negative
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [292]]
+[info][grammar]  (negative)back one token to (compare)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [293]]
+[info][grammar]  mode status: polynomial
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [294]]
+[info][grammar]  (polynomial)back one token to (factor)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [295]]
+[info][grammar]  mode status: bit_or
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [296]]
+[info][grammar]  (bit_or)back one token to (bit_and)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [297]]
+[info][grammar]  mode status: bit_or
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [298]]
+[info][grammar]  (bit_or)back one token to (bit_and)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [299]]
+[info][grammar]  mode status: bit_and
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [300]]
+[info][grammar]  (bit_move)back one token to (factor)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [301]]
+[info][grammar]  mode status: factor
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [302]]
+[info][grammar]  (bit_move)back one token to (factor)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [303]]
+[info][grammar]  mode status: polynomial
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [304]]
+[info][grammar]  (polynomial)back one token to (factor)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [305]]
+[info][grammar]  mode status: factor
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [306]]
+[info][grammar]  (factor)back one token to (element)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [307]]
+[info][grammar]  mode status: negative
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [308]]
+[info][grammar]  (negative)back one token to (bit_not)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [309]]
+[info][grammar]  mode status: bit_not
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [310]]
+[info][grammar]  (bit_not)back one token to (power)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [311]]
+[info][grammar]  mode status: power
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [312]]
+[info][grammar]  (power)back one token to (element)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [313]]
+[info][grammar]  mode status: call_down
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [314]]
+[info][grammar]  (call_down)back one token to (element)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [315]]
+[info][grammar]  mode status: element
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [316]]
+[info][grammar]  (element)back one token to (number)
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [317]]
+[info][grammar]  mode status: number
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [318]]
+[info][grammar]  (number)back one token
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [319]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [320]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [321]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [322]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [323]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [324]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [325]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [326]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [327]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [328]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [329]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [330]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [331]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [332]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [333]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [334]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [335]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [336]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [337]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [338]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [339]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [340]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [341]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [342]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [343]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [344]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [345]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [346]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [347]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [348]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [349]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [350]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [351]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [352]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [353]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [354]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [355]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [356]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [357]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [358]]
 [info][grammar]  (command_list)out
 [debug][grammar]  add a token[seek : 0, index : 0, size : 3]
 [debug][grammar]  after add a token[seek : 1, index : 1]
-[debug][token : [222]]
+[debug][token : [359]]
 [debug][grammar]  add a token[seek : 1, index : 1, size : 3]
 [debug][grammar]  after add a token[seek : 2, index : 2]
-[debug][token : [223]]
+[debug][token : [360]]
 [debug][grammar]  back a token[seek : 1, index : 2]
-[debug][token : [224]]
+[debug][token : [361]]
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [362]]
+[debug][grammar]  get token seek += 1 : 0, index : 1
+[debug][token : [363]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [364]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [365]]
+[tag 1]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [366]]
+[info][lexical]  get value = '
+' len = 1 from 2
+[info]token type = 2
+[debug][grammar]  get token type : 2; data type : 1
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [367]]
+[debug][token : [368]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [369]]
+[info]token type = <EOF>
+[debug][grammar]  get token type : -3; data type : 7
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [370]]
+[debug][token : [371]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [372]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [373]]
+[debug][grammar]  back a token[seek : 0, index : 1]
+[debug][token : [374]]
+[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 2]
+[debug][token : [375]]
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [376]]
+[debug][grammar]  get token seek += 1 : 0, index : 1
+[debug][token : [377]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [378]]
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [379]]
+[debug][grammar]  back a token[seek : 0, index : 1]
+[debug][token : [380]]
+[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 2]
+[debug][token : [381]]
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [382]]
+[debug][grammar]  add a token[seek : 0, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 2]
+[debug][token : [383]]
+[info][grammar]  mode status: command_list
+[debug][grammar]  pop a token[seek : 0, index : 1]
+[debug][token : [384]]
+[info][grammar]  (command_list)reduce right
+[debug][grammar]  get token seek += 1 : 0, index : 1
+[debug][token : [385]]
+[info][grammar]  mode status: command
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [386]]
+[info][grammar]  (command)back <EOF>
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [387]]
+[debug][grammar]  pop a token[seek : 0, index : 0]
+[debug][token : [388]]
+[info][grammar]  (command_list)out
+[debug][grammar]  add a token[seek : 0, index : 0, size : 3]
+[debug][grammar]  after add a token[seek : 1, index : 1]
+[debug][token : [389]]
+[debug][grammar]  add a token[seek : 1, index : 1, size : 3]
+[debug][grammar]  after add a token[seek : 2, index : 2]
+[debug][token : [390]]
+[debug][grammar]  back a token[seek : 1, index : 2]
+[debug][token : [391]]

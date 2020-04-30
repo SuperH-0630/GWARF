@@ -29,6 +29,8 @@ void bool_not(int *status, token_node *list);
 void eq_number(int *status, token_node *list);
 void call_back_(int *status, token_node *list);
 void def_(int *status, token_node *list);
+void ctrl_(int *status, token_node *list);
+void var_ctrl_(int *status, token_node *list);
 void formal_parameter(int *status, token_node *list);
 
 void paser_error(char *text);
@@ -45,7 +47,6 @@ void command_list(int *status, token_node *list){  // 多项式
     if(left.type == NON_command_list){  // 模式2
         fprintf(status_log, "[info][grammar]  (command_list)reduce right\n");
         get_right_token(status, list, command, right);  // 回调右边
-        fprintf(status_log, "[info][grammar]  (command_list)reduce right STOP\n");
         if(right.type == NON_command){
             new_token.type = NON_command_list;
             new_token.data_type = empty;
@@ -119,6 +120,23 @@ void command(int *status, token_node *list){  // 多项式
         get_stop_token();
         push_statement(statement_base, new_token);
     }
+    else if(left.type == BREAK_PASER || left.type == BROKEN_PASER || left.type == CONTINUE_PASER || left.type == CONTINUED_PASER ||
+            left.type == RESTART_PASER || left.type == RESTARTED_PASER || left.type == REGO_PASER || left.type == REWENT_PASER){
+        fprintf(status_log, "[info][grammar]  (command)back one token to (ctrl_)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, ctrl_, new_token);
+
+        get_stop_token();
+        push_statement(statement_base, new_token);
+    }
+    else if(left.type == GLOBAL_PASER || left.type == DEFAULT_PASER || left.type == NOLOCAL_PASER){
+        fprintf(status_log, "[info][grammar]  (command)back one token to (var_ctrl_)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, var_ctrl_, new_token);
+
+        get_stop_token();
+        push_statement(statement_base, new_token);
+    }
     else if(left.type == ENTER_PASER){
         fprintf(status_log, "[info][grammar]  (command)back <ENTER>\n");
     }
@@ -175,7 +193,6 @@ void if_(int *status, token_node *list){
         statement *if_tmp =  make_statement();
         if_tmp->type = if_branch;
         if_tmp->code.if_branch.done = make_if(exp_t.data.statement_value, block_t.data.statement_value);
-
         // 检查else和elseif
         el_again: 
         get_pop_token(status,list,next_t);
@@ -192,9 +209,8 @@ void if_(int *status, token_node *list){
             }
         }
         else{
-            back_one_token(list, next_t);
+            back_again(list, next_t);  // 下一次读取需要用safe_get_token
         }
-
         new_token.type = NON_if;
         new_token.data_type = statement_value;
         new_token.data.statement_value = if_tmp;
@@ -523,7 +539,6 @@ void formal_parameter(int *status, token_node *list){  // 因试分解
             new_token.data.parameter_list->type = only_value;
         }
         add_node(list, new_token);
-        fprintf(status_log,"[tag 1]\n");
         return formal_parameter(status, list);  // 回调自己
     }
 }
@@ -593,10 +608,146 @@ void block_(int *status, token_node *list){
         new_token.data_type = statement_value;
         new_token.data.statement_value = block_tmp;
         add_node(list, new_token);  // 压入节点
+        fprintf(status_log, "[tag 1]\n");
         return;
     }
     else{
         back_one_token(list, lp_t);
+        return;
+    }
+}
+
+// var_ctrl_ 包含诸如：global, nolocal，之类的
+void var_ctrl_(int *status, token_node *list){
+    fprintf(status_log, "[info][grammar]  mode status: bit_not\n");
+    token left, var, right, new_token;
+    statement *times = NULL;
+    char *var_name = NULL;
+
+    left = pop_node(list);
+    if(left.type == GLOBAL_PASER || left.type == DEFAULT_PASER || left.type == NOLOCAL_PASER){
+        fprintf(status_log, "[info][grammar]  (ctrl_)reduce right\n");
+
+        get_right_token(status, list, top_exp, var);  // 取得base_var
+        if(var.type != NON_top_exp && var.data.statement_value->type != base_var){
+            paser_error("Don't get var");
+        }
+        else{
+            var_name = malloc(sizeof(var.data.statement_value->code.base_var.var_name));
+            strcpy(var_name, var.data.statement_value->code.base_var.var_name);
+            times = var.data.statement_value->code.base_var.from;
+            // TODO:: 本质上没有完全释放
+            free(var.data.statement_value->code.base_var.var_name);
+            free(var.data.statement_value);
+        }
+
+        if(left.type == DEFAULT_PASER){  // 设置times
+            get_right_token(status, list, top_exp, right);  // 回调右边
+            if(right.type != NON_top_exp){
+                back_again(list, right);  // 不是期望的数字
+            }
+            else{
+                times = right.data.statement_value;
+            }
+        }
+        // 逻辑操作
+        new_token.type = NON_ctrl;
+        new_token.data_type = statement_value;
+        statement *code_tmp =  make_statement();
+        switch (left.type)
+        {
+            case GLOBAL_PASER:
+                code_tmp->type = set_global;
+                code_tmp->code.set_global.name = var_name;
+                break;
+            case DEFAULT_PASER:
+                code_tmp->type = set_default;
+                code_tmp->code.set_default.name = var_name;
+                code_tmp->code.set_default.times = times;
+                break;
+            case NOLOCAL_PASER:
+                code_tmp->type = set_nonlocal;
+                code_tmp->code.set_nonlocal.name = var_name;
+                break;
+            default:
+                break;
+        }
+        new_token.data.statement_value = code_tmp;
+        add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+        return;  // 回调自己
+    }
+    else{  // 模式1
+        back_one_token(list, left);
+        return;
+    }
+}
+
+// ctrl_包含诸如：break，broken，之类的
+void ctrl_(int *status, token_node *list){
+    fprintf(status_log, "[info][grammar]  mode status: bit_not\n");
+    token left, right, new_token;
+    statement *times = NULL;
+
+    left = pop_node(list);
+    if(left.type == BREAK_PASER || left.type == BROKEN_PASER || left.type == CONTINUE_PASER || left.type == CONTINUED_PASER ||
+       left.type == RESTART_PASER || left.type == RESTARTED_PASER || left.type == REGO_PASER || left.type == REWENT_PASER){
+        fprintf(status_log, "[info][grammar]  (ctrl_)reduce right\n");
+
+        if(left.type != REGO_PASER && left.type != REWENT_PASER){
+            get_right_token(status, list, top_exp, right);  // 回调右边
+            if(right.type != NON_top_exp){
+                back_again(list, right);  // 不是期望的数字，就默认使用NULL，并且回退
+                times = NULL;
+            }
+            else{
+                times = right.data.statement_value;
+            }
+        }
+        // 逻辑操作
+        new_token.type = NON_ctrl;
+        new_token.data_type = statement_value;
+        statement *code_tmp =  make_statement();
+        switch (left.type)
+        {
+            case BREAK_PASER:
+                code_tmp->type = break_cycle;
+                code_tmp->code.break_cycle.times = times;
+                break;
+            case BROKEN_PASER:
+                code_tmp->type = broken;
+                code_tmp->code.broken.times = times;
+                break;
+            case CONTINUE_PASER:
+                code_tmp->type = continue_cycle;
+                code_tmp->code.continue_cycle.times = times;
+                break;
+            case CONTINUED_PASER:
+                code_tmp->type = continued;
+                code_tmp->code.continued.times = times;
+                break;
+            case RESTART_PASER:
+                code_tmp->type = restart;
+                code_tmp->code.restart.times = times;
+                break;
+            case RESTARTED_PASER:
+                code_tmp->type = restarted;
+                code_tmp->code.restarted.times = times;
+                break;
+            case REGO_PASER:
+                code_tmp->type = rego;
+                break;
+            case REWENT_PASER:
+                code_tmp->type = rewent;
+                break;
+            default:
+                break;
+        }
+        new_token.data.statement_value = code_tmp;
+        add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+        return;  // 回调自己
+    }
+    else{  // 模式1
+        back_one_token(list, left);
         return;
     }
 }
