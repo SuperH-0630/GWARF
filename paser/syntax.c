@@ -392,9 +392,11 @@ void def_(p_status *status, token_node *list){
 
     def_t = pop_node(list);
     if(def_t.type == DEF_PASER){
-        get_right_token(status,list,element,name_t);  // 避免了top_exp把括号捕捉为call_back，不过，可以使用list设置status参数从而让call_back不捕捉[未实现]
-        if(name_t.type != NON_element){  // 不是表达式
-            paser_error("Don't get 'element'");
+        status->is_func = true;
+        get_right_token(status,list,top_exp,name_t);  // 避免了top_exp把括号捕捉为call_back，不过，可以使用list设置status参数从而让call_back不捕捉[未实现]
+        status->is_func = false;
+        if(name_t.type != NON_top_exp){  // 不是表达式
+            paser_error("Don't get 'top_exp'");
         }
         get_pop_token(status, list, lb_t);
         if(lb_t.type != LB_PASER){
@@ -464,8 +466,10 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
                 back_again(list,before);  // 回退
             }
 
-            get_right_token(status, list, element, next);
-            if(next.type != NON_element){
+            status->is_parameter = true;
+            get_right_token(status, list, top_exp, next);
+            status->is_parameter = false;
+            if(next.type != NON_top_exp){
                 paser_error("Don't get a top_exp");
                 return;
             }
@@ -503,8 +507,10 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
     }
     else if(left.type == POW_PASER || left.type == MUL_PASER){  // 模式1
         fprintf(status_log, "[info][grammar]  (formal_parameter)back one token to (top_exp)[**/*]\n");
-        get_right_token(status, list, element, next);  // 不需要back_one_token
-        if(next.type != NON_element){
+        status->is_parameter = true;
+        get_right_token(status, list, top_exp, next);  // 不需要back_one_token
+        status->is_parameter = false;
+        if(next.type != NON_top_exp){
             back_one_token(list, next);  // 往回[不匹配类型]
             return;
         }
@@ -524,8 +530,10 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
     else{  // 模式1
         fprintf(status_log, "[info][grammar]  (formal_parameter)back one token to (top_exp)\n");
         back_one_token(list, left);
-        get_base_token(status, list, element, next);
-        if(next.type != NON_element){
+        status->is_parameter = true;
+        get_base_token(status, list, top_exp, next);
+        status->is_parameter = false;
+        if(next.type != NON_top_exp){
             back_one_token(list, next);  // 往回[不匹配类型]
             return;
         }
@@ -850,7 +858,7 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
         fprintf(status_log, "[info][grammar]  (eq_number)reduce right\n");
         get_pop_token(status, list, symbol);
 
-        if(symbol.type == EQ_PASER){  // 模式2/3
+        if(symbol.type == EQ_PASER && !status->is_parameter){  // 模式2/3
             get_right_token(status, list, call_back_, right);  // 回调右边
             if(right.type != NON_call){
                 paser_error("Don't get a call_back_");
@@ -905,7 +913,7 @@ void call_back_(p_status *status, token_node *list){  // 因试分解
         fprintf(status_log, "[info][grammar]  (call_back_)reduce right\n");
         get_pop_token(status, list, symbol);
 
-        if(symbol.type == LB_PASER){
+        if(symbol.type == LB_PASER && !status->is_func){
 
             get_pop_token(status, list, rb_t);
             if(rb_t.type != RB_PASER){  // 带参数
