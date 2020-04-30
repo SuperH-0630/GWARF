@@ -31,6 +31,7 @@ void call_back_(int *status, token_node *list);
 void def_(int *status, token_node *list);
 void ctrl_(int *status, token_node *list);
 void var_ctrl_(int *status, token_node *list);
+void return_(int *status, token_node *list);
 void formal_parameter(int *status, token_node *list);
 
 void paser_error(char *text);
@@ -133,6 +134,14 @@ void command(int *status, token_node *list){  // 多项式
         fprintf(status_log, "[info][grammar]  (command)back one token to (var_ctrl_)\n");
         back_one_token(list, left);
         get_base_token(status, list, var_ctrl_, new_token);
+
+        get_stop_token();
+        push_statement(statement_base, new_token);
+    }
+    else if(left.type == RETURN_PASER){
+        fprintf(status_log, "[info][grammar]  (command)back one token to (return_)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, return_, new_token);
 
         get_stop_token();
         push_statement(statement_base, new_token);
@@ -598,6 +607,7 @@ void block_(int *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: block_\n");
     token lp_t, rp_t, new_token, command_list_t;
     lp_t = pop_node(list);
+    again:
     if(lp_t.type == LP_PASER){
         statement *block_tmp =  make_statement();
         statement_base = append_statement_list(block_tmp, statement_base);
@@ -616,7 +626,12 @@ void block_(int *status, token_node *list){
         fprintf(status_log, "[tag 1]\n");
         return;
     }
+    if(lp_t.type == ENTER_PASER){
+        get_pop_token(status,list,lp_t);
+        goto again;
+    }
     else{
+        printf("lp_t.type = %d != %d\n", lp_t.type, LP_PASER);
         back_one_token(list, lp_t);
         return;
     }
@@ -677,6 +692,53 @@ void var_ctrl_(int *status, token_node *list){
             default:
                 break;
         }
+        new_token.data.statement_value = code_tmp;
+        add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+        return;  // 回调自己
+    }
+    else{  // 模式1
+        back_one_token(list, left);
+        return;
+    }
+}
+
+void return_(int *status, token_node *list){
+    fprintf(status_log, "[info][grammar]  mode status: return_\n");
+    token left, right, value, new_token;
+    statement *times = NULL, *back_value = NULL;
+
+    left = pop_node(list);
+    if(left.type == RETURN_PASER){
+        fprintf(status_log, "[info][grammar]  (return_)reduce right\n");
+
+        get_right_token(status, list, top_exp, value);  // 回调右边
+        if(value.type != NON_top_exp){
+            back_again(list, value);  // 不是期望的数字，就默认使用NULL，并且回退
+            times = NULL;
+            back_value = NULL;
+            goto not_times;
+        }
+        else{
+            back_value = value.data.statement_value;
+        }
+
+        get_right_token(status, list, top_exp, right);  // 回调右边
+        if(right.type != NON_top_exp){
+            back_again(list, right);  // 不是期望的数字，就默认使用NULL，并且回退
+            times = NULL;
+        }
+        else{
+            times = right.data.statement_value;
+        }
+
+        not_times:
+        new_token.type = NON_return;
+        new_token.data_type = statement_value;
+        statement *code_tmp =  make_statement();
+        code_tmp->type = return_code;
+        code_tmp->code.return_code.times = times;
+        code_tmp->code.return_code.value = back_value;
+        
         new_token.data.statement_value = code_tmp;
         add_node(list, new_token);  // 压入节点[弹出3个压入1个]
         return;  // 回调自己

@@ -3,7 +3,7 @@
 
 #include "../inter/interpreter.h"
 
-#define MAX_PASER_SIZE 53
+#define MAX_PASER_SIZE 54
 #define INT_PASER 0
 #define DOUBLE_PASER 1
 #define ENTER_PASER 2
@@ -57,6 +57,7 @@
 #define GLOBAL_PASER 50
 #define NOLOCAL_PASER 51
 #define DEFAULT_PASER 52
+#define RETURN_PASER 53
 
 // 获取并返回一个token
 #define get_pop_token(status,list,new_token) \
@@ -160,6 +161,7 @@ typedef enum token_type
     GLOBAL = GLOBAL_PASER,
     NOLOCAL = NOLOCAL_PASER,
     DEFAULT = DEFAULT_PASER,
+    RETURN = RETURN_PASER,
 
     // 特殊符号
     BAD_token = -2,
@@ -198,6 +200,7 @@ typedef enum token_type
     NON_call_down = -34,
     NON_ctrl = -35,
     NON_var_ctrl = -36,
+    NON_return = -37,
 } token_type;
 
 typedef union token_data
@@ -224,6 +227,7 @@ typedef struct token
         empty,
     } data_type;  // data的数据类型
     token_data data;
+    int tab;  // 缩进
 } token;
 
 // 解析token链表，FILO

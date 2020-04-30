@@ -130,6 +130,7 @@ int paser(int *index){
         match_text(p, global_paser[GLOBAL_PASER], "global");
         match_text(p, global_paser[NOLOCAL_PASER], "nolocal");
         match_text(p, global_paser[DEFAULT_PASER], "default");
+        match_text(p, global_paser[RETURN_PASER], "return");
 
         *index = check_list(global_paser, p);  // 检查解析结果
 
