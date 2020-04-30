@@ -535,13 +535,14 @@ void formal_parameter(int *status, token_node *list){  // 因试分解
 
         parameter *tmp = NULL;
         get_pop_token(status, list, eq);
-        printf("eq.type = %d\n", eq.type);
         if(eq.type == EQ_PASER){  // name_value模式
             get_right_token(status, list, top_exp, value_token);
             if(value_token.type != NON_top_exp){
                 paser_error("Don't get a top_exp");
                 return;
             }
+            puts("DEFAULT");
+            printf("next.data.statement_value.type = %d\n", next.data.statement_value->type);
             new_token.data.parameter_list = make_parameter_name(next.data.statement_value);
             new_token.data.parameter_list->u.value = value_token.data.statement_value;
             new_token.data.parameter_list->type = name_value;
