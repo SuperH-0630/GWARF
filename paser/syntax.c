@@ -543,7 +543,7 @@ void formal_parameter(int *status, token_node *list){  // 因试分解
                 return;
             }
             new_token.data.parameter_list = make_parameter_name(next.data.statement_value);
-            new_token.data.parameter_list->u.var = value_token.data.statement_value;
+            new_token.data.parameter_list->u.value = value_token.data.statement_value;
             new_token.data.parameter_list->type = name_value;
         }
         else{

@@ -1814,6 +1814,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
     var_list *tmp_var = make_var_base(make_hash_var());  // 为1-模式准备
 
     while(1){
+        puts("again");
         if ((tmp_x == NULL)&&(tmp_s == NULL)){  // the last
             break;
         }
@@ -1823,15 +1824,18 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                 break;
             }
             else if ((tmp_x != NULL)&&(tmp_s == NULL)){  // 使用默认值
+                puts("[tag 2]");
                 while(1){  // 如果是name_value类型则继续赋值
                     if(tmp_x == NULL){
                         break;
                     }
                     else if(tmp_x->type == name_value){
+                        puts("[tag 3]");
                         GWARF_result tmp = traverse(tmp_x->u.value, the_var, false);  // 执行形参
                         if(is_error(&tmp) || is_space(&tmp)){
                             return tmp;
                         }
+                        printf("tmp_x->u.var->type = %d\n", tmp_x->u.var->type);
                         assignment_statement(tmp_x->u.var, old_var_list,the_var, tmp);  // 赋值
                         tmp_x = tmp_x->next;  // get the next to iter
                     }
