@@ -215,6 +215,11 @@ void if_(int *status, token_node *list){
         new_token.data_type = statement_value;
         new_token.data.statement_value = if_tmp;
         add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+        
+        token tmp_enter;
+        tmp_enter.type = ENTER_PASER;
+        tmp_enter.data_type = empty;
+        back_again(list, tmp_enter);  // push入一个ENTER
         return;
     }
     else{
@@ -430,14 +435,14 @@ void def_(int *status, token_node *list){
 
 void formal_parameter(int *status, token_node *list){  // 因试分解
     fprintf(status_log, "[info][grammar]  mode status: formal_parameter\n");
-    token left, next, colon, before, eq, value_token, new_token;
+    token left, next, comma, before, eq, value_token, new_token;
     int mode = only_value;
 
     left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
     if(left.type == NON_parameter){  // 模式2/3
         fprintf(status_log, "[info][grammar]  (formal_parameter)reduce right\n");
-        get_pop_token(status, list, colon);
-        if(colon.type == COLON_PASER){
+        get_pop_token(status, list, comma);
+        if(comma.type == COMMA_PASER){
             get_pop_token(status, list, before);
             if(before.type == MUL_PASER){
                 mode = put_args;
@@ -483,7 +488,7 @@ void formal_parameter(int *status, token_node *list){  // 因试分解
             // 回退，也就是让下一次pop的时候读取到的是left而不是symbol
             fprintf(status_log, "[info][grammar]  (formal_parameter)out\n");
             back_one_token(list, left);
-            back_again(list, colon);
+            back_again(list, comma);
             return;
         }
     }

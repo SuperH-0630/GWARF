@@ -20,7 +20,7 @@
 #define IF_PASER 13
 #define ELIF_PASER 14
 #define ELSE_PASER 15
-#define COMMA_PASER 16
+#define COLON_PASER 16
 #define FOR_PASER 17
 #define VAR_PASER 18
 #define LI_PASER 19
@@ -45,7 +45,7 @@
 #define NOT_PASER 38
 #define EQ_PASER 39
 #define DEF_PASER 40
-#define COLON_PASER 41
+#define COMMA_PASER 41
 #define BREAK_PASER 42
 #define BROKEN_PASER 43
 #define CONTINUE_PASER 44
@@ -129,7 +129,7 @@ typedef enum token_type
     IF = IF_PASER,
     ELIF = ELIF_PASER,
     ELSE = ELSE_PASER,
-    COMMA = COMMA_PASER,
+    COLON = COLON_PASER,
     VAR = VAR_PASER,
     BITNOT = BITNOT_PASER,
     BITRIGHT = BITRIGHT_PASER,
@@ -148,7 +148,7 @@ typedef enum token_type
     NOT = NOT_PASER,
     EQ = EQ_PASER,
     DEF = DEF_PASER,
-    COLON = COLON_PASER,
+    COMMA = COMMA_PASER,
     BREAK = BREAK_PASER,
     BROKEN = BROKEN_PASER,
     CONTINUE = CONTINUE_PASER,

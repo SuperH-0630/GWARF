@@ -94,7 +94,7 @@ int paser(int *index){
         match_text(p, global_paser[IF_PASER], "if");
         match_text(p, global_paser[ELIF_PASER], "elif");
         match_text(p, global_paser[ELSE_PASER], "else");
-        match_text(p, global_paser[COMMA_PASER], ";");
+        match_text(p, global_paser[COLON_PASER], ":");
         match_text(p, global_paser[FOR_PASER], "for");
         match_text(p, global_paser[LI_PASER], "[");
         match_text(p, global_paser[RI_PASER], "]");
@@ -118,7 +118,7 @@ int paser(int *index){
         match_text(p, global_paser[NOT_PASER], "!");
         match_text(p, global_paser[EQ_PASER], "=");
         match_text(p, global_paser[DEF_PASER], "def");
-        match_text(p, global_paser[COLON_PASER], ",");
+        match_text(p, global_paser[COMMA_PASER], ",");
         match_text(p, global_paser[BREAK_PASER], "break");
         match_text(p, global_paser[BROKEN_PASER], "broken");
         match_text(p, global_paser[REGO_PASER], "rego");
@@ -127,9 +127,9 @@ int paser(int *index){
         match_text_s(p, global_paser[RESTARTED_PASER], "restarted");
         match_text(p, global_paser[CONTINUE_PASER], "continue");
         match_text_s(p, global_paser[CONTINUED_PASER], "continued");
-        match_text_s(p, global_paser[GLOBAL_PASER], "global");
+        match_text(p, global_paser[GLOBAL_PASER], "global");
         match_text(p, global_paser[NOLOCAL_PASER], "nolocal");
-        match_text_s(p, global_paser[DEFAULT_PASER], "default");
+        match_text(p, global_paser[DEFAULT_PASER], "default");
 
         *index = check_list(global_paser, p);  // 检查解析结果
 
