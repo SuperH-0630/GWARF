@@ -134,6 +134,9 @@ int paser(int *index){
         match_text(p, global_paser[DEFAULT_PASER], "default");
         match_text(p, global_paser[RETURN_PASER], "return");
         match_str(p, global_paser[STR_PASER]);
+        match_text(p, global_paser[TRUE_PASER], "True");
+        match_text(p, global_paser[FALSE_PASER], "False");
+        match_text(p, global_paser[NONE_PASER], "None");
 
         *index = check_list(global_paser, p);  // 检查解析结果
 
@@ -299,19 +302,24 @@ void match_str(char p, word_paser *paser){  // 匹配一个var字符串
         GET_LEN(paser);
         if(paser->status == START){  // start模式先匹配'或者"
             if(p == '\''){
+                paser->text = NULL;
                 paser->status = 1;
+            }
+            else if(p == '\"'){
+                paser->text = NULL;
+                paser->status = 2;
             }
             else{
                 paser->status = NOTMATCH;
             }
         }
         else{
-            if(p != '\''){
+            if((p != '\'' && paser->status == 1) || (p != '\"' && paser->status == 2)){  // 匹配到最后一个
                 paser->text = (char *)realloc(paser->text, sizeof(char) * (len + 1));
                 paser->text[len] = p;
             }
             else{
-                paser->status = END;
+                paser->status = WAIT_END;
             }
         }
     }

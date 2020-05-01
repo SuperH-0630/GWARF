@@ -1336,7 +1336,6 @@ GWARF_result forin_func(statement *the_statement, var_list *the_var){  // read t
         goto return_value;
     }
     
-    // puts("[tag 1]goto for in");
     GWARF_value iter_value = get__iter__(&(tmp_result.value), the_var).value;  // 获取迭代object，一般是返回self
     while (1){
         GWARF_result tmp_next = get__next__(&(iter_value), the_var);// 执行__next__的返回值
@@ -1824,13 +1823,11 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                 break;
             }
             else if ((tmp_x != NULL)&&(tmp_s == NULL)){  // 使用默认值
-                puts("[tag 2]");
                 while(1){  // 如果是name_value类型则继续赋值
                     if(tmp_x == NULL){
                         break;
                     }
                     else if(tmp_x->type == name_value){
-                        puts("[tag 3]");
                         GWARF_result tmp = traverse(tmp_x->u.value, the_var, false);  // 执行形参
                         if(is_error(&tmp) || is_space(&tmp)){
                             return tmp;
@@ -1975,7 +1972,6 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
         }
         else if(assignment_type == 0 && tmp_x->type == put_kwargs){  // tmp_s还没到根据name_value的阶段, 遇到了**kwargs，则把后面的所有直接变成dict
             // 放入list中
-            puts("[tag 1]");
             GWARF_result dict_tmp;
             dict_tmp.value = to_object(parameter_to_dict(tmp_s, old_var_list), old_var_list);  // 把所有name_value变成dict
             assignment_statement(tmp_x->u.var, old_var_list, the_var, dict_tmp);

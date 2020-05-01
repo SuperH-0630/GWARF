@@ -29,7 +29,12 @@ void *safe_free(void *p){  // 安全的释放
 
 void *safe_realloc(void *p, size_t size){
     void *tmp;
-    tmp = realloc(p, size);
+    if(p != NULL){
+        tmp = realloc(p, size);
+    }
+    else{
+        tmp = safe_calloc(size, 1);
+    }
     if(tmp != NULL){
         return tmp;
     }
