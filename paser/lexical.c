@@ -7,6 +7,7 @@ void match_double(char, word_paser *);
 void match_text(char, word_paser *, char *);
 void match_text_s(char, word_paser *, char *);
 void match_var(char p, word_paser *paser);
+void match_str(char p, word_paser *paser);
 
 int is_in(int);
 extern void paser_error(char *);
@@ -132,6 +133,7 @@ int paser(int *index){
         match_text(p, global_paser[NOLOCAL_PASER], "nolocal");
         match_text(p, global_paser[DEFAULT_PASER], "default");
         match_text(p, global_paser[RETURN_PASER], "return");
+        match_str(p, global_paser[STR_PASER]);
 
         *index = check_list(global_paser, p);  // 检查解析结果
 
@@ -292,6 +294,29 @@ void match_double(char p, word_paser *paser){  // 匹配一个double
     UNUSE_SET;
 }
 
+void match_str(char p, word_paser *paser){  // 匹配一个var字符串
+    if(USE){
+        GET_LEN(paser);
+        if(paser->status == START){  // start模式先匹配'或者"
+            if(p == '\''){
+                paser->status = 1;
+            }
+            else{
+                paser->status = NOTMATCH;
+            }
+        }
+        else{
+            if(p != '\''){
+                paser->text = (char *)realloc(paser->text, sizeof(char) * (len + 1));
+                paser->text[len] = p;
+            }
+            else{
+                paser->status = END;
+            }
+        }
+    }
+    UNUSE_SET;
+}
 
 void match_var(char p, word_paser *paser){  // 匹配一个var
     if(USE){
@@ -308,7 +333,7 @@ void match_var(char p, word_paser *paser){  // 匹配一个var
         }
         else{
             if(p == '_' || (p <= 'z' && p >= 'a') || (p <= '9' && p >= '0')){
-                paser->text = (char *)realloc(paser->text, sizeof(char) * (strlen(paser->text) + 1));
+                paser->text = (char *)realloc(paser->text, sizeof(char) * (len + 1));
                 paser->text[len] = p;
             }
             else{

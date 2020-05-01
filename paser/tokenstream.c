@@ -70,11 +70,13 @@ void print_node(token_node *list, char *from){  // 把FILO输出到 status_log
     static int count = 0;
     fprintf(token_log, "[debug][token : [%3d]]  token list[from %30s] :: ", count, from);
     fprintf(status_log, "[debug][token : [%3d]]\n", count);
+    fprintf(token_info, "[info][token : [%3d]] :: ", count);
     count += 1;
     int max = list->max_size;  // 迭代次数
     for(int i = 0; i < max; i += 1){
         if(i < list->max_index){  // 在范围内
             fprintf(token_log, "<token : %d ", list->token_list[i].type);
+            fprintf(token_info, "<token : %3d ", list->token_list[i].type);
             if(i == list->seek){  // seek指针所在位置
                 fprintf(token_log, "[seek] ");
             }
@@ -105,17 +107,23 @@ void print_node(token_node *list, char *from){  // 把FILO输出到 status_log
                 break;
             }
             fprintf(token_log, "num = %d>", i);
+            fprintf(token_info, "num = %3d>", i);
         }
         else if(i == list->max_index && i == list->seek){
             fprintf(token_log, "<NULL [index/seek] num = %d>", i);
+            fprintf(token_info, "<NULL        num = %3d>", i);
         }
         else if(i == list->max_index){
             fprintf(token_log, "<NULL [index] num = %d>", i);
+            fprintf(token_info, "<NULL        num = %3d>", i);
         }
         else{
             fprintf(token_log, "<NULL num = %d>", i);
+            fprintf(token_info, "<NULL        num = %3d>", i);
         }
         fprintf(token_log, " - ");
+        fprintf(token_info, " - ", i);
     }
     fprintf(token_log, " ||- END\n");
+    fprintf(token_info, " ||- END\n");
 }

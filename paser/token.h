@@ -3,7 +3,7 @@
 
 #include "../inter/interpreter.h"
 
-#define MAX_PASER_SIZE 54
+#define MAX_PASER_SIZE 55
 #define INT_PASER 0
 #define DOUBLE_PASER 1
 #define ENTER_PASER 2
@@ -58,6 +58,7 @@
 #define NOLOCAL_PASER 51
 #define DEFAULT_PASER 52
 #define RETURN_PASER 53
+#define STR_PASER 54
 
 // 获取并返回一个token
 #define get_pop_token(status,list,new_token) \
@@ -201,6 +202,7 @@ typedef enum token_type
     NON_ctrl = -35,
     NON_var_ctrl = -36,
     NON_return = -37,
+    NON_list = -38,
 } token_type;
 
 typedef union token_data

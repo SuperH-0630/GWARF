@@ -9,7 +9,7 @@
 #include "syntax.c"
 
 // int paser_status = 1;
-p_status paser_status = {.is_parameter = false, .is_func=false};
+p_status paser_status = {.is_parameter = false, .is_func=false, .is_list=false, .is_dict=false};
 
 void do_exit(void);
 void setup();
@@ -28,6 +28,7 @@ void setup(char *file){
     debug = fopen("./debug.log", "w");  // 设置debug的位置
     status_log = fopen("./status.log", "w");  // 设置debug的位置
     token_log = fopen("./token.log", "w");  // 设置debug的位置
+    token_info = fopen("./tokenINFO.log", "w");  // 设置debug的位置
     global_token_node = make_token_node();
 }
 
