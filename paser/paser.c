@@ -9,7 +9,7 @@
 #include "syntax.c"
 
 // int paser_status = 1;
-p_status paser_status = {.is_parameter = false, .is_func=false, .is_list=false, .is_dict=false};
+p_status paser_status = {.is_parameter = false, .is_func=false, .is_list=false, .is_dict=false, .is_left=false, .is_peq=false, .is_for=false};
 
 void do_exit(void);
 void setup();

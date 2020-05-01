@@ -208,6 +208,7 @@ typedef enum token_type
     NON_return = -37,
     NON_list = -38,
     NON_dict = -39,
+    NON_hide_list = -40,
 } token_type;
 
 typedef union token_data

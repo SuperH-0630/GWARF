@@ -2057,14 +2057,17 @@ GWARF_value parameter_to_list(parameter *tmp_s, var_list *the_var){  // 把param
         if(tmp_s->type != only_value){
             goto next;  // 跳过这一个
         }
-        
+        puts("cul 1");
         result_tmp = traverse(tmp_s->u.value, the_var, false);  // 不需要取__value__
+        printf("type = %d\n", tmp_s->u.value->type);
+        puts("cul 2");
         if(is_error(&result_tmp) || is_space(&result_tmp)){  // Name Error错误
             goto next;  // 直接指向下一个
         }
         index += 1;
         return_list.value.list_value->list_value = realloc(return_list.value.list_value->list_value, sizeof(GWARF_value) * index);  // 申请新空间
         return_list.value.list_value->list_value[index - 1] = result_tmp.value;  // 保存value
+        puts("count one");
         next: tmp_s = tmp_s->next;  // 指向下一个
     }
     return_list.value.list_value->index = index;

@@ -35,6 +35,7 @@ void return_(p_status *status, token_node *list);
 void formal_parameter(p_status *status, token_node *list);
 void list_(p_status *status, token_node *list);
 void dict_(p_status *status, token_node *list);
+void hide_list(p_status *status, token_node *list);
 void paser_error(char *text);
 
 /*
@@ -86,6 +87,7 @@ void command_list(p_status *status, token_node *list){  // 多项式
 command : top_exp <ENTER>
 */
 void command(p_status *status, token_node *list){  // 多项式
+    status->is_left = false;  // is_left复位[只有top_exp会开启以及element会开启]
     fprintf(status_log, "[info][grammar]  mode status: command\n", text);
     token left, new_token;
 
@@ -158,7 +160,9 @@ void command(p_status *status, token_node *list){  // 多项式
     else{  // 表达式
         fprintf(status_log, "[info][grammar]  (command)back one token to (top_exp)\n");
         back_one_token(list, left);
+        status->is_left = true;
         get_base_token(status, list, top_exp, new_token);
+        status->is_left = false;
         if(new_token.type != NON_top_exp){
             back_one_token(list, new_token);  // 往回[不匹配类型]
             return;
@@ -312,7 +316,9 @@ void for_(p_status *status, token_node *list){
         }
         else{
             back_one_token(list, exp_1);
+            status->is_for = true;
             get_base_token(status,list,top_exp,exp_1);  // 不是使用right token，不需要执行safe_get_token
+            status->is_for = false;
             if(exp_1.type != NON_top_exp){  // 不是表达式
                 paser_error("Don't get 'top_exp'");
             }
@@ -329,7 +335,9 @@ void for_(p_status *status, token_node *list){
         }
         else{
             back_one_token(list, exp_2);
+            status->is_for = true;
             get_base_token(status,list,top_exp,exp_2);  // 不是使用right token，不需要执行safe_get_token
+            status->is_for = false;
             if(exp_2.type != NON_top_exp){  // 不是表达式
                 paser_error("Don't get 'top_exp'");
             }
@@ -347,7 +355,9 @@ void for_(p_status *status, token_node *list){
         }
         else{
             back_one_token(list, exp_3);
+            status->is_for = true;
             get_base_token(status,list,top_exp,exp_3);  // 不是使用right token，不需要执行safe_get_token
+            status->is_for = false;
             if(exp_3.type != NON_top_exp){  // 不是表达式
                 paser_error("Don't get 'top_exp'");
             }
@@ -456,13 +466,13 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
         get_pop_token(status, list, comma);
         if(comma.type == COMMA_PASER){
             get_pop_token(status, list, before);
-            if(before.type == MUL_PASER){
+            if(before.type == MUL_PASER && !status->is_peq){
                 if(status->is_dict){
                     paser_error("dict shouldn't get '*'");
                 }
                 mode = put_args;
             }
-            else if(before.type == POW_PASER){
+            else if(before.type == POW_PASER && !status->is_peq){
                 if(status->is_list){
                     paser_error("list shouldn't get '*'");
                 }
@@ -484,11 +494,13 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
             new_token = left;
             parameter *tmp = NULL;
             get_pop_token(status, list, eq);
-            if(eq.type == (status->is_dict ? COLON_PASER : EQ_PASER)){  // name_value模式
+            if(eq.type == ((status->is_dict || status->is_peq) ? COLON_PASER : EQ_PASER)){  // name_value模式
                 if(status->is_list){
                     paser_error("list shouldn't get '='");
                 }
+                if(status->is_peq) status->is_parameter = true;
                 get_right_token(status, list, top_exp, value_token);
+                if(status->is_peq) status->is_parameter = false;
                 if(value_token.type != NON_top_exp){
                     paser_error("Don't get a top_exp");
                     return;
@@ -564,11 +576,13 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
         parameter *tmp = NULL;
         get_pop_token(status, list, eq);
         printf("eq.type = %d\n", eq.type);
-        if(eq.type == (status->is_dict ? COLON_PASER : EQ_PASER)){  // name_value模式
+        if(eq.type == ((status->is_dict || status->is_peq) ? COLON_PASER : EQ_PASER)){  // name_value模式
             if(status->is_list){
                 paser_error("list shouldn't get '='");
             }
+            if(status->is_peq) status->is_parameter = false;
             get_right_token(status, list, top_exp, value_token);
+            if(status->is_peq) status->is_parameter = true;
             if(value_token.type != NON_top_exp){
                 paser_error("Don't get a top_exp");
                 return;
@@ -883,9 +897,9 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
         get_pop_token(status, list, symbol);
 
         if(symbol.type == EQ_PASER && !status->is_parameter){  // 模式2/3
-            get_right_token(status, list, call_back_, right);  // 回调右边
-            if(right.type != NON_call){
-                paser_error("Don't get a call_back_");
+            get_right_token(status, list, hide_list, right);  // 回调右边
+            if(right.type != NON_hide_list){
+                paser_error("Don't get a hide_list");
             }
             // 逻辑操作
             new_token.type = NON_eq;
@@ -910,12 +924,63 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
         }
     }
     else{  // 模式1
+        // is_left将会在这里消亡为false
         fprintf(status_log, "[info][grammar]  (bool_or)back one token to (bool_and)\n");
         back_one_token(list, left);
-        get_base_token(status, list, call_back_, new_token);
-        if(new_token.type != NON_call){
+        get_base_token(status, list, hide_list, new_token);  // hide_list会处理is_left
+        if(new_token.type != NON_hide_list){
             back_one_token(list, new_token);  // 往回[不匹配类型]
             return;
+        }
+        if(status->is_left){  // 必须是在最左边
+            status->is_left = false;  // 设置为false，随后一切top_exp行为均不执行这一步骤
+            token comma, p_left, eq_t, p_right, tmp;
+            parameter *the_right;
+            get_pop_token(status, list,comma);
+            if(comma.type == COMMA_PASER){  // a,b = [1,2]的赋值方式
+                back_one_token(list, new_token);  // 先把new_token和comma一起回退
+                back_again(list, comma);
+                
+                status->is_peq = true;
+                get_base_token(status,list,formal_parameter,p_left);
+                status->is_peq = false;
+                
+                get_pop_token(status, list, eq_t);
+                if(eq_t.type != EQ_PASER){
+                    paser_error("Don't get '='[1]");
+                }
+
+                get_pop_token(status,list,tmp);
+                if(tmp.type == POW_PASER || tmp.type == MUL_PASER || tmp.type == COLON_PASER){
+                    if(tmp.type != COLON_PASER){
+                        back_again(list, tmp);
+                    }
+                    get_right_token(status,list,formal_parameter,p_right);
+                    if(p_right.type != NON_parameter){
+                        paser_error("Don't get formal_parameter");
+                    }
+                    the_right = p_right.data.parameter_list;
+                }
+                else{
+                    back_again(list, tmp);
+                    get_right_token(status,list,hide_list,p_right);
+                    if(p_right.type != NON_hide_list){
+                        paser_error("Don't get hide_list");
+                    }
+                    the_right = make_parameter_value(p_right.data.statement_value);
+                    the_right->type = put_args;
+                    the_right->u.var = the_right->u.value;
+                }
+
+                new_token.data_type = statement_value;
+                new_token.data.statement_value = make_statement();
+                new_token.data.statement_value->type = pack_eq;
+                new_token.data.statement_value->code.pack_eq.left = p_left.data.parameter_list;
+                new_token.data.statement_value->code.pack_eq.right = the_right;
+            }
+            else{
+                back_again(list, comma);  // 回退comma 使用back_again目的是让new_token在comma之前
+            }
         }
         new_token.type = NON_eq;
         add_node(list, new_token);
@@ -923,6 +988,45 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
     }
 }
 
+void hide_list(p_status *status, token_node *list){
+    fprintf(status_log, "[info][grammar]  mode status: top_exp\n");
+    token exp;
+    bool old_is_left = status->is_left;
+    status->is_left = false;
+    get_base_token(status,list,call_back_,exp);
+    status->is_left = old_is_left;
+    if(exp.type != NON_call){
+        back_one_token(list, exp);
+        return;
+    }
+    if(status->is_func + status->is_left + status->is_parameter + status->is_for + status->is_list + status->is_dict == 0){  // 几个会用到逗号的选项先排除
+        token comma;
+        get_pop_token(status,list,comma);
+        printf("comma.type = %d\n", comma.type);
+        if(comma.type == COMMA_PASER){
+            token new_token;
+            back_one_token(list, exp);
+            back_again(list, comma);
+            status->is_list = true;
+            get_base_token(status, list, formal_parameter, new_token);
+            status->is_list = false;
+            if(new_token.type != NON_parameter){
+                paser_error("Don't get formal_parameter");
+            }
+            statement *code_tmp =  make_statement();
+            code_tmp->type = base_list;
+            code_tmp->code.base_list.value = new_token.data.parameter_list;
+            exp.data.statement_value = code_tmp;
+            exp.data_type = statement_value;
+        }
+        else{
+            back_again(list, comma);
+        }
+    }
+    exp.type = NON_hide_list;
+    add_node(list, exp);  // 压入节点
+    return;
+}
 /*
 call_back_ : bool_or
            | call_back_ LB RB
@@ -1766,7 +1870,9 @@ void element(p_status *status, token_node *list){  // 数字归约
     gett = pop_node(list);  // 取得一个token
     if(gett.type == LB_PASER){  // 模式3
         fprintf(status_log, "[info][grammar]  (element)get LB\n");
+        status->is_left = true;  // 允许复位
         get_right_token(status, list, top_exp, new_token);
+        status->is_left = false;
         if(new_token.type != NON_top_exp){
             paser_error("Don't get 'top_exp'");            
         }
@@ -1802,7 +1908,9 @@ void element(p_status *status, token_node *list){  // 数字归约
     }
     else if(gett.type == LI_PASER){  // [1]a或[1]列表或[1,2,3,4]列表
         token exp_token, rb, tmp_var;
+        status->is_list = true;  // 防止top_exp收走逗号
         get_right_token(status, list, top_exp, exp_token);
+        status->is_list = false;  // 防止top_exp收走逗号
         if(exp_token.type == RI_PASER){  //可以认定为空list
             back_one_token(list, gett);
             back_again(list, exp_token);
@@ -2021,7 +2129,6 @@ void var_token(p_status *status, token_node *list){  // 数字归约
 /*
 number : INT_PASER
        | DOUBLE_PASER
-       | LB top_exp RB
 */
 void paser_value(p_status *status, token_node *list){  // 数字归约
     fprintf(status_log, "[info][grammar]  mode status: paser_value\n");
