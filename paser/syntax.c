@@ -28,7 +28,7 @@ void bool_or(p_status *status, token_node *list);
 void bool_not(p_status *status, token_node *list);
 void eq_number(p_status *status, token_node *list);
 void call_back_(p_status *status, token_node *list);
-void def_(p_status *status, token_node *list);
+void def_class(p_status *status, token_node *list);
 void ctrl_(p_status *status, token_node *list);
 void var_ctrl_(p_status *status, token_node *list);
 void return_(p_status *status, token_node *list);
@@ -37,6 +37,8 @@ void list_(p_status *status, token_node *list);
 void dict_(p_status *status, token_node *list);
 void hide_list(p_status *status, token_node *list);
 void do_while_(p_status *status, token_node *list);
+void try_(p_status *status, token_node *list);
+void out_exception(p_status *status, token_node *list);
 void paser_error(char *text);
 
 /*
@@ -117,10 +119,10 @@ void command(p_status *status, token_node *list){  // 多项式
         get_stop_token();
         push_statement(statement_base, new_token);
     }
-    else if(left.type == DEF_PASER){
-        fprintf(status_log, "[info][grammar]  (command)back one token to (def_)\n");
+    else if(left.type == DEF_PASER || left.type == CLASS_PASER){
+        fprintf(status_log, "[info][grammar]  (command)back one token to (def_class)\n");
         back_one_token(list, left);
-        get_base_token(status, list, def_, new_token);
+        get_base_token(status, list, def_class, new_token);
 
         get_stop_token();
         push_statement(statement_base, new_token);
@@ -150,10 +152,26 @@ void command(p_status *status, token_node *list){  // 多项式
         get_stop_token();
         push_statement(statement_base, new_token);
     }
+    else if(left.type == TRY_PASER){
+        fprintf(status_log, "[info][grammar]  (command)back one token to (try_)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, try_, new_token);
+
+        get_stop_token();
+        push_statement(statement_base, new_token);
+    }
     else if(left.type == DO_PASER){
-        fprintf(status_log, "[info][grammar]  (command)back one token to (return_)\n");
+        fprintf(status_log, "[info][grammar]  (command)back one token to (do/do...while)\n");
         back_one_token(list, left);
         get_base_token(status, list, do_while_, new_token);
+
+        get_stop_token();
+        push_statement(statement_base, new_token);
+    }
+    else if(left.type == RAISE_PASER || left.type == THROW_PASER || left.type == ASSERT_PASER){
+        fprintf(status_log, "[info][grammar]  (command)back one token to (out_exception)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, out_exception, new_token);
 
         get_stop_token();
         push_statement(statement_base, new_token);
@@ -424,13 +442,13 @@ void for_(p_status *status, token_node *list){
 /*
 def_ : DEF LB RB block
 */
-void def_(p_status *status, token_node *list){
+void def_class(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: def_\n");
     token def_t, lb_t, rb_t, block_t, name_t, parameter_t, new_token;
     parameter *p_list;
 
     def_t = pop_node(list);
-    if(def_t.type == DEF_PASER){
+    if(def_t.type == DEF_PASER || def_t.type == CLASS_PASER){
         status->is_func = true;
         get_right_token(status,list,top_exp,name_t);  // 避免了top_exp把括号捕捉为call_back，不过，可以使用list设置status参数从而让call_back不捕捉[未实现]
         status->is_func = false;
@@ -466,10 +484,18 @@ void def_(p_status *status, token_node *list){
         }
 
         statement *def_tmp =  make_statement();
-        def_tmp->type = def;
-        def_tmp->code.def.var = name_t.data.statement_value;
-        def_tmp->code.def.parameter_list = p_list;
-        def_tmp->code.def.done = block_t.data.statement_value;
+        if(def_t.type == DEF_PASER){
+            def_tmp->type = def;
+            def_tmp->code.def.var = name_t.data.statement_value;
+            def_tmp->code.def.parameter_list = p_list;
+            def_tmp->code.def.done = block_t.data.statement_value;
+        }
+        else{
+            def_tmp->type = set_class;
+            def_tmp->code.set_class.var = name_t.data.statement_value;
+            def_tmp->code.set_class.father_list = p_list;
+            def_tmp->code.set_class.done = block_t.data.statement_value;
+        }
 
         new_token.type = NON_def;
         new_token.data_type = statement_value;
@@ -730,6 +756,61 @@ void while_(p_status *status, token_node *list){
 }
 
 /*
+try_ : TRY block EXCEPT AS top_exp block
+*/
+void try_(p_status *status, token_node *list){
+    fprintf(status_log, "[info][grammar]  mode status: while_\n");
+    token try_t, try_block, except_t, as_t, var_t, except_block, new_token;
+    try_t = pop_node(list);
+    if(try_t.type == TRY_PASER){
+        get_right_token(status, list, block_, try_block);
+        if(try_block.type != NON_block){
+            paser_error("Don't get '{'");
+        }
+
+        except_again:
+        get_pop_token(status,list,except_t);
+        if(except_t.type == ENTER_PASER){
+            goto except_again;
+        }
+        else if(except_t.type != EXCEPT_PASER){  // 不是except
+            paser_error("Don't get 'except'");
+        }
+
+        get_pop_token(status,list,as_t);
+        if(as_t.type != AS_PASER){  // 不是except
+            paser_error("Don't get 'as'");
+        }
+
+        get_right_token(status, list, top_exp, var_t);
+        if(var_t.type != NON_top_exp){
+            paser_error("Don't get top_exp");
+        }
+
+        get_right_token(status,list,block_,except_block);
+        if(except_block.type != NON_block){  // 不是表达式
+            paser_error("Don't get '{'");
+        }
+
+        statement *try_tmp =  make_statement();
+        try_tmp->type = try_code;
+        try_tmp->code.try_code.try = try_block.data.statement_value;
+        try_tmp->code.try_code.except = except_block.data.statement_value;
+        try_tmp->code.try_code.var = var_t.data.statement_value;
+
+        new_token.type = NON_try;
+        new_token.data_type = statement_value;
+        new_token.data.statement_value = try_tmp;
+        add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+        return;
+    }
+    else{
+        back_one_token(list, try_t);
+        return;
+    }
+}
+
+/*
 block_ : LP command_list RB
 */
 void block_(p_status *status, token_node *list){
@@ -816,6 +897,59 @@ void var_ctrl_(p_status *status, token_node *list){
             case NOLOCAL_PASER:
                 code_tmp->type = set_nonlocal;
                 code_tmp->code.set_nonlocal.name = var_name;
+                break;
+            default:
+                break;
+        }
+        new_token.data.statement_value = code_tmp;
+        add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+        return;  // 回调自己
+    }
+    else{  // 模式1
+        back_one_token(list, left);
+        return;
+    }
+}
+
+// raise throw 和 assert
+void out_exception(p_status *status, token_node *list){
+    fprintf(status_log, "[info][grammar]  mode status: out_exception\n");
+    token left, exp1, exp2, new_token;
+
+    left = pop_node(list);
+    if(left.type == RAISE_PASER || left.type == THROW_PASER || left.type == ASSERT_PASER){
+        fprintf(status_log, "[info][grammar]  (out_exception)reduce right\n");
+
+        get_right_token(status, list, top_exp, exp1);  // 取得base_var
+        if(exp1.type != NON_top_exp){
+            paser_error("Don't get top_exp");
+        }
+
+        if(left.type != THROW_PASER){  // 设置times
+            get_right_token(status, list, top_exp, exp2);  // 回调右边
+            if(exp2.type != NON_top_exp){
+                paser_error("Don't get top_exp");
+            }
+        }
+        // 逻辑操作
+        new_token.type = NON_exception;
+        new_token.data_type = statement_value;
+        statement *code_tmp =  make_statement();
+        switch (left.type)
+        {
+            case RAISE_PASER:
+                code_tmp->type = raise_e;
+                code_tmp->code.raise_e.done = exp1.data.statement_value;
+                code_tmp->code.raise_e.info = exp2.data.statement_value;
+                break;
+            case THROW_PASER:
+                code_tmp->type = throw_e;
+                code_tmp->code.throw_e.done = exp1.data.statement_value;
+                break;
+            case ASSERT_PASER:
+                code_tmp->type = assert_e;
+                code_tmp->code.assert_e.condition = exp1.data.statement_value;
+                code_tmp->code.assert_e.info = exp2.data.statement_value;
                 break;
             default:
                 break;

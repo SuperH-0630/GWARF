@@ -139,6 +139,13 @@ int paser(int *index){
         match_text(p, global_paser[NONE_PASER], "None");
         match_text(p, global_paser[DO_PASER], "do");
         match_text(p, global_paser[IN_PASER], "in");
+        match_text(p, global_paser[CLASS_PASER], "class");
+        match_text(p, global_paser[TRY_PASER], "try");
+        match_text(p, global_paser[EXCEPT_PASER], "except");
+        match_text(p, global_paser[AS_PASER], "as");
+        match_text(p, global_paser[RAISE_PASER], "raise");
+        match_text(p, global_paser[THROW_PASER], "throw");
+        match_text(p, global_paser[ASSERT_PASER], "assert");
 
         *index = check_list(global_paser, p);  // 检查解析结果
 

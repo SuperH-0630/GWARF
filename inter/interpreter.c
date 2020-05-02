@@ -180,9 +180,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             // base_value返回字面量 -> 主要返回object类型，还会返回GWARF_value的其他类型供生成object类型
             break;
         case base_list:  // get value[所有字面量均为这个表达式]
-            puts("WWWW2");
             return_value.value = to_object(parameter_to_list(the_statement->code.base_list.value, the_var), the_var);  // code
-            puts("WWWW");
             break;
         case base_dict:  // get value[所有字面量均为这个表达式]
             return_value.value = to_object(parameter_to_dict(the_statement->code.base_dict.value, the_var), the_var);  // code
