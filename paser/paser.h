@@ -1,9 +1,9 @@
 #ifndef MEM_INCLUDE
 #define MEM_INCLUDE
 
-// struct word_paser **global_paser;  // 解析器，记录状态和text
+#define reset_status(status) {status.is_parameter=false,status.is_func=false,status.is_list=false,status.is_dict=false,status.is_left=true,status.is_peq=false,status.is_for=false,status.ignore_enter=false;}
+
 FILE *debug = NULL, *status_log = NULL, *token_log = NULL, *token_info = NULL;
-// FILE *file_p = NULL;
 
 typedef struct p_status
 {
@@ -16,6 +16,7 @@ typedef struct p_status
     bool is_for;  // for循环，用于排除COMMA的使用[top_exp]
     FILE *file_p;
     struct word_paser **global_paser;
+    bool ignore_enter;  // 忽略回车
 } p_status;
 
 

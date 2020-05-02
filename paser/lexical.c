@@ -9,7 +9,7 @@ void match_text_s(char, word_paser *, char *);
 void match_var(char p, word_paser *paser);
 void match_str(char p, word_paser *paser);
 
-int is_in(int);
+int is_in(int, p_status *status);
 extern void paser_error(char *);
 
 token get_token(p_status *status){
@@ -19,7 +19,7 @@ token get_token(p_status *status){
     do{
         set_start(status->global_paser);
         *paser_status = paser(&index, status);  // 解析
-    }while(is_in(index));
+    }while(is_in(index, status));
 
     if(!(*paser_status)){  // 匹配到eof
         return_token.type = EOF_token;
@@ -41,9 +41,12 @@ token get_token(p_status *status){
     return return_token;
 }
 
-int is_in(int element){  // 检查某个值是否在数组中
-    int list[] = {SPACE_PASER};
-    int len = 1;
+int is_in(int element, p_status *status){  // 检查某个值是否在数组中
+    if(status->ignore_enter && element == ENTER_PASER){  // 忽略ENTER
+        return 1;
+    }
+    int list[] = {SPACE_PASER,IGNORE_ENTER};
+    int len = 2;
     for(int i=0;i<len;i++){
         if(list[i] == element){
             return 1;
@@ -84,6 +87,7 @@ int paser(int *index, p_status *status){
 
         // 常规文本解析器
         match_text(p, global_paser[ENTER_PASER], "\n");
+        match_text(p, global_paser[IGNORE_ENTER], "\\\n");  // 忽略空格，匹配\ + <enter>，使用is_in忽略
         match_text(p, global_paser[SPACE_PASER], " ");
         match_text(p, global_paser[ADD_PASER], "+");
         match_text(p, global_paser[SUB_PASER], "-");

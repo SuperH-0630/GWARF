@@ -2101,9 +2101,10 @@ void element(p_status *status, token_node *list){  // 数字归约
     gett = pop_node(list);  // 取得一个token
     if(gett.type == LB_PASER){  // 模式3
         fprintf(status_log, "[info][grammar]  (element)get LB\n");
-        status->is_left = true;  // 允许复位
-        get_right_token(status, list, top_exp, new_token);
-        status->is_left = false;
+        p_status reset_status = *status;  // 继承file_p等值
+        reset_status(reset_status);  // 不会影响 *staus
+        reset_status.ignore_enter = true;  // 括号内忽略回车
+        get_right_token(&reset_status, list, top_exp, new_token);
         if(new_token.type != NON_top_exp){
             paser_error("Don't get 'top_exp'");            
         }
