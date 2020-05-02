@@ -85,6 +85,7 @@ typedef struct statement{
         operation,  // such as + - * /
         base_var,  // return var value by name
         base_value,  // return an GWARF_value
+        base_tuple,
         base_list,  // return an GWARF_value->LIST_value
         base_dict,  // return an GWARF_value->DICT_value
         while_cycle,  // while
@@ -212,6 +213,10 @@ typedef struct statement{
         struct{
             parameter *value;  // [1,2,3,4] -> to_list
         } base_list;
+
+        struct{
+            parameter *value;  // [1,2,3,4] -> to_tuple
+        } base_tuple;
 
         struct{
             parameter *right;  // 实参
@@ -599,6 +604,10 @@ GWARF_result str_official_func(func *the_func, parameter *tmp_s, var_list *the_v
 // bool内置类
 class_object *bool_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list);
 GWARF_result bool_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var);
+
+// list内置类
+class_object *tuple_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list);
+GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var);
 
 // list内置类
 class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list);

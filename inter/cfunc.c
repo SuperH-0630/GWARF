@@ -97,6 +97,21 @@ GWARF_value to_object(GWARF_value value, var_list *the_var){  // 把GWARF_value�
 }
 
 
+GWARF_value to_tuple(GWARF_value value, var_list *the_var){  // 把GWARF_value封装成objct
+    GWARF_result func_result;
+    func_result.u = statement_end;
+    var *tmp;
+    tmp = find_var(the_var, 0, "tuple");
+    if(tmp != NULL){
+        func_result.value = tmp->value;
+    }
+    else{
+        return value;
+    }
+    return call_back_core(func_result, the_var, pack_value_parameter(value)).value;
+}
+
+
 GWARF_result get_object(parameter *tmp_s, char *name, var_list *the_var){  // 生成一个object
     GWARF_result func_result;
     func_result.u = statement_end;
@@ -1748,8 +1763,7 @@ GWARF_value to_bool_(GWARF_value value, var_list *the_var){
     return return_number;
 }
 
-
-class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list){
+class_object *tuple_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list){
     // 创建对象[空对象]
     puts("----set class----");
     GWARF_result class_value;
@@ -1758,12 +1772,12 @@ class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func 
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
-    assignment_func("list", class_value, the_var, 0);  // 注册class 的 位置
+    assignment_func("tuple", class_value, the_var, 0);  // 注册class 的 位置
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{2,1},{23,1},{24,1},{25,1},{26,1},{27,1},{28,1}};
-    char *name[] = {"__init__", "__len__", "__down__", "__set__", "__slice__", "__iter__", "__next__"};  //  __len__是获取长度，__down__是获取下值，__set__是设置值，__slice__是切片
+    int a[][2] = {{2,1},{23,1},{24,1},{26,1},{27,1},{28,1}};
+    char *name[] = {"__init__", "__len__", "__down__", "__slice__", "__iter__", "__next__"};  //  __len__是获取长度，__down__是获取下值，__slice__是切片
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
@@ -1772,7 +1786,7 @@ class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func 
     return class_tmp;
 }
 
-GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var){  // out_var是外部环境, the_var是self内部环境
+GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var){  // out_var是外部环境, the_var是self内部环境
     GWARF_result return_value;
     var_list *login_var;
     return_value.u = return_def;
@@ -1939,6 +1953,51 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
             }
             break;
         }
+        default:
+            break;
+    }
+    return_result: return return_value;
+}
+
+class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assignment_func("list", class_value, the_var, 0);  // 注册class 的 位置
+    puts("----stop set class----");
+
+    // 注册函数
+    int a[][2] = {{25,1}};
+    char *name[] = {"__set__"};  //  继承tuple
+
+    int lenth = sizeof(a)/sizeof(a[0]);
+    for(int i = 0;i < lenth;i+=1){
+        login_official_func(a[i][0], a[i][1], class_tmp->the_var, name[i], paser);
+    }
+    return class_tmp;
+}
+
+GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var){  // out_var是外部环境, the_var是self内部环境
+    GWARF_result return_value;
+    var_list *login_var;
+    return_value.u = return_def;
+    return_value.return_times = 0;
+    if(father.father->type == CLASS_value){  // is class so that can use "."
+        login_var = father.father->value.class_value->the_var;
+    }
+    else if(father.father->type == OBJECT_value){
+        login_var = father.father->value.object_value->the_var;
+    }
+    else{
+        printf("NO login, father type = %d\n", father.father->type);
+    }
+    switch (the_func->official_func)
+    {
         case __set__func:{  // return index
             var *tmp = find_var(login_var, 0, "value");
             if(tmp != NULL){
@@ -2124,9 +2183,7 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var){  // 把param
             before->next = after;
             goto next;  // 跳过这一个
         }
-        puts("[tag 7]");
         if(tmp_s->type != name_value){
-            puts("[tag 4]");
             goto next;  // 跳过这一个
         }
         result_tmp = traverse(tmp_s->u.value, the_var, false);  // 不需要取__value__
@@ -2138,22 +2195,15 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var){  // 把param
         }
         char *key;
         if(tmp_s->u.var->type == base_var){
-            puts("[tag 11.2]");
             size_t size = (size_t)(13 + strlen(tmp_s->u.var->code.base_var.var_name));
             key = (char *)malloc(size);
             snprintf(key, size, "str_%s", tmp_s->u.var->code.base_var.var_name);
-            puts("[tag 8.1]");
         }
         else{
-            puts("[tag 10.2]");
             GWARF_result key_tmp = traverse(tmp_s->u.var, the_var, 0);
             key = to_str_dict(key_tmp.value, the_var).value.string;
-            puts("[tag 8.2]");
         }
-        puts("[tag 9]");
-        printf("result_tmp.value.type = %d\n",result_tmp.value.type);
         login_node(key, result_tmp.value, return_dict.value.dict_value->dict_value);  // 插入
-        printf("NEW KEY = %s, type = %d\n", key, result_tmp.value.type);
         dict_key *tmp_dict_name = return_dict.value.dict_value->name_list;
         while (1){  // 迭代
             if(!strcmp(tmp_dict_name->key, key)){  // 已经存在
@@ -2172,7 +2222,6 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var){  // 把param
         next: tmp_s = tmp_s->next;  // 指向下一个
     }
     return_dict.value.dict_value->index = index;
-    puts("[tag 8]");
     return return_dict;
 }
 
@@ -2189,8 +2238,8 @@ class_object *dict_login_official(var_list *the_var, GWARF_result (*paser)(func 
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{2,1},{23,1},{24,1},{25,1},{27,1},{28,1}};
-    char *name[] = {"__init__", "__len__", "__down__", "__set__", "__iter__", "__next__"};  //  __len__是获取长度，__down__是获取下值，__set__是设置值，__slice__是切片
+    int a[][2] = {{2,1},{24,1},{25,1},{28,1}};
+    char *name[] = {"__init__", "__down__", "__set__", "__next__"};  //  继承tuple
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
@@ -2258,21 +2307,6 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
             iter_value.value.type = INT_value;
             iter_value.value.value.int_value = 0;
             assignment_func("iter_value", iter_value, login_var, 0);  // 注册到self
-            break;
-        }
-        case __len__func:{  // return index
-            var *tmp = find_var(login_var, 0, "value");
-            return_value.value.type = INT_value;
-            return_value.value.value.int_value = tmp->value.value.list_value->index;
-            break;
-        }
-        case __iter__func:{  // return self
-            GWARF_result iter_value;
-            iter_value.value.type = INT_value;
-            iter_value.value.value.int_value = 0;
-            assignment_func("iter_value", iter_value, login_var, 0);  // 注册到self
-
-            return_value.value = *(father.father);
             break;
         }
         case __next__func:{  // return index

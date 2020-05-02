@@ -1158,11 +1158,20 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
                 
                 status->is_peq = true;
                 get_base_token(status,list,formal_parameter,p_left);
+                if(p_left.type != NON_parameter){
+                    paser_error("Dont get formal_parameter");
+                }
                 status->is_peq = false;
                 
                 get_pop_token(status, list, eq_t);
-                if(eq_t.type != EQ_PASER){
-                    paser_error("Don't get '='[1]");
+                if(eq_t.type != EQ_PASER){  // 变成hide_list
+                    back_again(list, eq_t);
+                    statement *code_tmp =  make_statement();
+                    code_tmp->type = base_tuple;
+                    code_tmp->code.base_tuple.value = p_left.data.parameter_list;
+                    new_token.data.statement_value = code_tmp;
+                    new_token.data_type = statement_value;
+                    goto return_back;
                 }
 
                 get_pop_token(status,list,tmp);
@@ -1197,6 +1206,7 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
                 back_again(list, comma);  // 回退comma 使用back_again目的是让new_token在comma之前
             }
         }
+        return_back:
         new_token.type = NON_eq;
         add_node(list, new_token);
         return eq_number(status, list);  // 回调自己
@@ -1229,8 +1239,8 @@ void hide_list(p_status *status, token_node *list){
                 paser_error("Don't get formal_parameter");
             }
             statement *code_tmp =  make_statement();
-            code_tmp->type = base_list;
-            code_tmp->code.base_list.value = new_token.data.parameter_list;
+            code_tmp->type = base_tuple;
+            code_tmp->code.base_tuple.value = new_token.data.parameter_list;
             exp.data.statement_value = code_tmp;
             exp.data_type = statement_value;
         }
@@ -1868,7 +1878,8 @@ void factor(p_status *status, token_node *list){  // 因试分解
 
 /*
 negative : bit_not
-         | BITNOT bit_not
+         | SUB_PASER bit_not
+         | ADD_PASER bit_not
 */
 void negative(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: negative\n");
@@ -1893,13 +1904,18 @@ void negative(p_status *status, token_node *list){
         code_tmp->code.operation.right_exp = right.data.statement_value;
         new_token.data.statement_value = code_tmp;
         add_node(list, new_token);  // 压入节点[弹出3个压入1个]
-        return;  // 回调自己
+        return;
     }
     else{  // 模式1
         fprintf(status_log, "[info][grammar]  (negative)back one token to (bit_not)\n");
-        back_one_token(list, left);
-        get_base_token(status, list, bit_not, new_token);
-        if(new_token.type != NON_bit_not){
+        if(left.type != ADD_PASER){  // 取正运算符
+            back_one_token(list, left);
+            get_base_token(status, list, bit_not, new_token);
+        }
+        else{  // 需要safe_get_token
+            get_right_token(status, list, negative, new_token);
+        }
+        if(new_token.type != NON_bit_not && new_token.type != NON_negative){
             back_one_token(list, new_token);  // 往回[不匹配类型]
             return;
         }
