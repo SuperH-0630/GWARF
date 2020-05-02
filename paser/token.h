@@ -277,6 +277,4 @@ struct token pop_node(struct token_node *);
 void safe_get_token(p_status *, struct token_node *);
 void back_token(token_node *);
 
-token_node *global_token_node = NULL;
-
 #endif

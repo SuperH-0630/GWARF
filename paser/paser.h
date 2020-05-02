@@ -3,7 +3,7 @@
 
 // struct word_paser **global_paser;  // 解析器，记录状态和text
 FILE *debug = NULL, *status_log = NULL, *token_log = NULL, *token_info = NULL;
-FILE *file_p = NULL;
+// FILE *file_p = NULL;
 
 typedef struct p_status
 {
@@ -14,6 +14,7 @@ typedef struct p_status
     bool is_left;  // 是否为最左边的公式
     bool is_peq;  // 正在使用解包赋值
     bool is_for;  // for循环，用于排除COMMA的使用[top_exp]
+    FILE *file_p;
     struct word_paser **global_paser;
 } p_status;
 

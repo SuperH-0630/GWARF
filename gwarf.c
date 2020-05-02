@@ -12,8 +12,26 @@
 
 #include "inter/interpreter.c"
 
+void do_exit(void);
+void setup();
+
+void setup(){
+    debug = fopen("./debug.log", "w");  // 设置debug的位置
+    status_log = fopen("./status.log", "w");  // 设置debug的位置
+    token_log = fopen("./token.log", "w");  // 设置debug的位置
+    token_info = fopen("./tokenINFO.log", "w");  // 设置debug的位置
+}
+
+void do_exit(void){
+    fclose(debug);
+    fclose(status_log);
+    fclose(token_log);
+    fclose(token_info);
+}
 
 int main(){
+    atexit(*do_exit);
+    setup();
     global_inter = get_inter();  // 拿全局解释器[并声明全局变量]
     var_list *the_var = make_var_base(global_inter->global_var);
     statement_base = make_statement_base(global_inter->global_code);

@@ -58,7 +58,7 @@ int paser(int *index, p_status *status){
     int is_eof = 0;  // 考虑用status取代is_eof
     int count = 0;
     while(1){
-        p = read_p();
+        p = read_p(status);
         if(p == EOF){  // 遇到EOF[先不break]
             fprintf(debug, "[info][lexical]  p = <EOF>\n\n");
             is_eof = 1;
@@ -148,7 +148,7 @@ int paser(int *index, p_status *status){
         match_text(p, global_paser[THROW_PASER], "throw");
         match_text(p, global_paser[ASSERT_PASER], "assert");
 
-        *index = check_list(global_paser, p);  // 检查解析结果
+        *index = check_list(global_paser, p, status);  // 检查解析结果
 
         if(*index >= 0){  // index >= 0表示找到解析的结果[存在一个解析器存在结果，其他解析器没有结果]
             fprintf(debug, "[info][lexical]  get value = '%s' len = %d from %d\n\n", global_paser[*index]->text, strlen(global_paser[*index]->text),*index);
@@ -171,16 +171,16 @@ int paser(int *index, p_status *status){
     return 1;
 }
 
-char read_p(){  // 读取一个字符
-    return getc(file_p);
+char read_p(p_status *status){  // 读取一个字符
+    return getc(status->file_p);
 }
 
-void back_p(char p){  // 回退一个字符
+void back_p(char p, p_status *status){  // 回退一个字符
     if(p == EOF){
         fprintf(debug, "[info][lexical]  back_p <EOF>\n\n");
         return;
     }
-    fseek(file_p, -1, 1);
+    fseek(status->file_p, -1, 1);
     fprintf(debug, "[info][lexical]  back_p\n\n");
 }
 
@@ -216,7 +216,7 @@ void free_list(word_paser **paser_list){  // 释放空间
     free(paser_list);  // 释放数组本身
 }
 
-int check_list(word_paser **paser_list, char p){  // 检查结果
+int check_list(word_paser **paser_list, char p, p_status *status){  // 检查结果
     // 统计数据
     int end_count = 0;
     int s_end_count = 0;  // 二级合并
@@ -254,7 +254,7 @@ int check_list(word_paser **paser_list, char p){  // 检查结果
 
     // 需要往回放一个字符
     if((MAX_PASER_SIZE - not_count - end_count) == 0 && end_count == 1){  // 除了不匹配就是匹配成功，且只有一个成功
-        back_p(p);  // 回退一个字符[所有匹配成功的都必须吞一个字符，然后再这里统一回退]
+        back_p(p, status);  // 回退一个字符[所有匹配成功的都必须吞一个字符，然后再这里统一回退]
         return end_index;
     }
     if(MAX_PASER_SIZE == not_count){  // 全部匹配不正确，没有一个成功
