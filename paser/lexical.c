@@ -17,8 +17,8 @@ token get_token(p_status *status){
     int s, *paser_status = &s;
     int index = 0;  // 记录index和是否遇到了EOF
     do{
-        set_start(global_paser);
-        *paser_status = paser(&index);  // 解析
+        set_start(status->global_paser);
+        *paser_status = paser(&index, status);  // 解析
     }while(is_in(index));
 
     if(!(*paser_status)){  // 匹配到eof
@@ -33,8 +33,8 @@ token get_token(p_status *status){
     else{
         return_token.type = index;
         return_token.data_type = text;
-        return_token.data.text = malloc(strlen(global_paser[index]->text));
-        strcpy(return_token.data.text, global_paser[index]->text);
+        return_token.data.text = malloc(strlen(status->global_paser[index]->text));
+        strcpy(return_token.data.text, status->global_paser[index]->text);
         fprintf(debug, "[debug]token type = %d\n\n", index);
         fprintf(status_log, "[info]token type = %d\n", index);
     }
@@ -52,7 +52,8 @@ int is_in(int element){  // 检查某个值是否在数组中
     return 0;
 }
 
-int paser(int *index){
+int paser(int *index, p_status *status){
+    word_paser **global_paser = status->global_paser;
     char p;
     int is_eof = 0;  // 考虑用status取代is_eof
     int count = 0;

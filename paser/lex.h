@@ -77,7 +77,7 @@ void set_start(word_paser **);
 void free_list(word_paser **);
 char read_p();
 int check_list(word_paser **, char p);
-int paser(int *);
+int paser(int *, p_status *);
 struct token get_token(p_status *);
 
 #endif
