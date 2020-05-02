@@ -93,6 +93,8 @@ int paser(int *index, p_status *status){
         match_text(p, global_paser[SUB_PASER], "-");
         match_text(p, global_paser[MUL_PASER], "*");
         match_text(p, global_paser[DIV_PASER], "/");
+        match_text_s(p, global_paser[INTDIV_PASER], "//");
+        match_text(p, global_paser[MOD_PASER], "%");
         match_text(p, global_paser[LB_PASER], "(");
         match_text(p, global_paser[RB_PASER], ")");
         match_text(p, global_paser[WHILE_PASER], "while");

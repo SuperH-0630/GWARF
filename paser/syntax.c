@@ -1831,7 +1831,7 @@ void factor(p_status *status, token_node *list){  // 因试分解
         fprintf(status_log, "[info][grammar]  (factor)reduce right\n");
         get_pop_token(status, list, symbol);
 
-        if(symbol.type == MUL_PASER || symbol.type == DIV_PASER){  // 模式2/3
+        if(symbol.type == MUL_PASER || symbol.type == DIV_PASER || symbol.type == INTDIV_PASER || symbol.type == MOD_PASER){  // 模式2/3
             get_right_token(status, list, negative, right);  // 回调右边
             if(right.type != NON_negative){
                 paser_error("Don't get a value");
@@ -1845,8 +1845,14 @@ void factor(p_status *status, token_node *list){  // 因试分解
             if(symbol.type == MUL_PASER){
                 code_tmp->code.operation.type = MUL_func;
             }
-            else{
+            else if(symbol.type == DIV_PASER){
                 code_tmp->code.operation.type = DIV_func;
+            }
+            else if(symbol.type == INTDIV_PASER){
+                code_tmp->code.operation.type = INTDIV_func;
+            }
+            else{
+                code_tmp->code.operation.type = MOD_func;
             }
             code_tmp->code.operation.left_exp = left.data.statement_value;
             code_tmp->code.operation.right_exp = right.data.statement_value;
