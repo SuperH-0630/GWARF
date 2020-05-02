@@ -1111,7 +1111,8 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
         fprintf(status_log, "[info][grammar]  (eq_number)reduce right\n");
         get_pop_token(status, list, symbol);
 
-        if(symbol.type == EQ_PASER && !status->is_parameter){  // 模式2/3
+        if((symbol.type == EQ_PASER && !status->is_parameter) || symbol.type == AADD_PASER || symbol.type == ASUB_PASER || symbol.type == AMUL_PASER || symbol.type == ADIV_PASER|| 
+            symbol.type == AMOD_PASER || symbol.type == AINTDIV_PASER || symbol.type == APOW_PASER){  // 模式2/3
             get_right_token(status, list, hide_list, right);  // 回调右边
             if(right.type != NON_hide_list){
                 paser_error("Don't get a hide_list");
@@ -1122,7 +1123,33 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
 
             statement *code_tmp =  make_statement();
             code_tmp->type = operation;
-            code_tmp->code.operation.type = ASSIGnMENT_func;
+            switch (symbol.type)
+            {
+            case EQ_PASER:
+                code_tmp->code.operation.type = ASSIGnMENT_func;
+                break;
+            case AADD_PASER:
+                code_tmp->code.operation.type = AADD_func;
+                break;
+            case ASUB_PASER:
+                code_tmp->code.operation.type = ASUB_func;
+                break;
+            case AMUL_PASER:
+                code_tmp->code.operation.type = AMUL_func;
+                break;
+            case ADIV_PASER:
+                code_tmp->code.operation.type = ADIV_func;
+                break;
+            case AMOD_PASER:
+                code_tmp->code.operation.type = AMOD_func;
+                break;
+            case AINTDIV_PASER:
+                code_tmp->code.operation.type = AINTDIV_func;
+                break;
+            case APOW_PASER:
+                code_tmp->code.operation.type = APOW_func;
+                break;
+            }
             code_tmp->code.operation.left_exp = left.data.statement_value;
             code_tmp->code.operation.right_exp = right.data.statement_value;
             

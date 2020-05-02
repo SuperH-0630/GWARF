@@ -94,6 +94,15 @@ int paser(int *index, p_status *status){
         match_text(p, global_paser[MUL_PASER], "*");
         match_text(p, global_paser[DIV_PASER], "/");
         match_text_s(p, global_paser[INTDIV_PASER], "//");
+        match_text_s(p, global_paser[AADD_PASER], "+=");
+        match_text_s(p, global_paser[ASUB_PASER], "-=");
+        match_text_s(p, global_paser[AMUL_PASER], "*=");
+        match_text_s(p, global_paser[ADIV_PASER], "/=");
+        match_text_s(p, global_paser[AINTDIV_PASER], "//=");
+        match_text_s(p, global_paser[AMOD_PASER], "%=");
+        match_text_s(p, global_paser[APOW_PASER], "**=");
+        match_text_s(p, global_paser[FADD_PASER], "++");
+        match_text_s(p, global_paser[FSUB_PASER], "--");
         match_text(p, global_paser[MOD_PASER], "%");
         match_text(p, global_paser[LB_PASER], "(");
         match_text(p, global_paser[RB_PASER], ")");
