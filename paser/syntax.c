@@ -36,6 +36,7 @@ void formal_parameter(p_status *status, token_node *list);
 void list_(p_status *status, token_node *list);
 void dict_(p_status *status, token_node *list);
 void hide_list(p_status *status, token_node *list);
+void do_while_(p_status *status, token_node *list);
 void paser_error(char *text);
 
 /*
@@ -145,6 +146,14 @@ void command(p_status *status, token_node *list){  // 多项式
         fprintf(status_log, "[info][grammar]  (command)back one token to (return_)\n");
         back_one_token(list, left);
         get_base_token(status, list, return_, new_token);
+
+        get_stop_token();
+        push_statement(statement_base, new_token);
+    }
+    else if(left.type == DO_PASER){
+        fprintf(status_log, "[info][grammar]  (command)back one token to (return_)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, do_while_, new_token);
 
         get_stop_token();
         push_statement(statement_base, new_token);
@@ -305,6 +314,8 @@ void for_(p_status *status, token_node *list){
     statement *exp_a, *exp_b, *exp_c;
     for_t = pop_node(list);
     if(for_t.type == FOR_PASER){
+        bool is_for_in = false;  // 是否为for in模式
+
         get_pop_token(status, list, lb_t);
         if(lb_t.type != LB_PASER){
             paser_error("Don't get '('");
@@ -323,7 +334,12 @@ void for_(p_status *status, token_node *list){
                 paser_error("Don't get 'top_exp'");
             }
             get_pop_token(status, list, comma_t);
-            if(comma_t.type != COMMA_PASER){
+            if(comma_t.type == IN_PASER){  // for in 模式 -> exp1不可以为NULL
+                is_for_in = true;
+                exp_a = exp_1.data.statement_value;
+                goto exp3;
+            }
+            else if(comma_t.type != COMMA_PASER){
                 paser_error("Don't get ';' in for cycle");
             }
             exp_a = exp_1.data.statement_value;
@@ -348,8 +364,12 @@ void for_(p_status *status, token_node *list){
             exp_b = exp_2.data.statement_value;
         }
 
+        exp3:
         get_pop_token(status, list, exp_3);
         if(exp_3.type == RB_PASER){
+            if(is_for_in){
+                paser_error("Don't get iter object");
+            }
             exp_c = NULL;  // exp_1 = NULL;
             back_one_token(list, exp_3);
         }
@@ -375,11 +395,19 @@ void for_(p_status *status, token_node *list){
         }
 
         statement *for_tmp =  make_statement();
-        for_tmp->type = for_cycle;
-        for_tmp->code.for_cycle.first = exp_a;
-        for_tmp->code.for_cycle.condition = exp_b;
-        for_tmp->code.for_cycle.after = exp_c;
-        for_tmp->code.for_cycle.done = block_t.data.statement_value;
+        if(is_for_in){
+            for_tmp->type = for_in_cycle;
+            for_tmp->code.for_in_cycle.var = exp_a;
+            for_tmp->code.for_in_cycle.iter = exp_c;
+            for_tmp->code.for_in_cycle.done = block_t.data.statement_value;
+        }
+        else{
+            for_tmp->type = for_cycle;
+            for_tmp->code.for_cycle.first = exp_a;
+            for_tmp->code.for_cycle.condition = exp_b;
+            for_tmp->code.for_cycle.after = exp_c;
+            for_tmp->code.for_cycle.done = block_t.data.statement_value;
+        }
 
         new_token.type = NON_for;
         new_token.data_type = statement_value;
@@ -608,6 +636,58 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
 /*
 while_ : WHILE LB top_exp RB block
 */
+void do_while_(p_status *status, token_node *list){
+    fprintf(status_log, "[info][grammar]  mode status: while_\n");
+    token do_t, while_t, lb_t, exp_t, rb_t, block_t, new_token;
+    do_t = pop_node(list);
+    if(do_t.type == DO_PASER){
+        get_right_token(status,list,block_,block_t);
+        if(block_t.type != NON_block){  // 不是表达式
+            paser_error("Don't get '{'");
+        }
+
+        statement *tmp =  make_statement();
+
+        get_pop_token(status, list, while_t);
+        if(while_t.type != WHILE_PASER){  // block模式
+            back_again(list,while_t);
+            tmp->type = code_block;
+            tmp->code.code_block.done = block_t.data.statement_value;
+        }
+        else{
+            get_pop_token(status, list, lb_t);
+            if(lb_t.type != LB_PASER){
+                paser_error("Don't get '('");
+            }
+            get_right_token(status,list,top_exp,exp_t);
+            if(exp_t.type != NON_top_exp){  // 不是表达式
+                paser_error("Don't get 'top_exp'");
+            }
+            get_pop_token(status, list, rb_t);
+            if(rb_t.type != RB_PASER){
+                paser_error("Don't get ')'");
+            }
+            tmp->type = while_cycle;
+            tmp->code.while_cycle.condition = exp_t.data.statement_value;
+            tmp->code.while_cycle.done = block_t.data.statement_value;
+            tmp->code.while_cycle.first_do = true;
+        }
+
+        new_token.type = NON_do_while;
+        new_token.data_type = statement_value;
+        new_token.data.statement_value = tmp;
+        add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+        return;
+    }
+    else{
+        back_one_token(list, do_t);
+        return;
+    }
+}
+
+/*
+while_ : WHILE LB top_exp RB block
+*/
 void while_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: while_\n");
     token while_t, lb_t, exp_t, rb_t, block_t, new_token;
@@ -635,6 +715,7 @@ void while_(p_status *status, token_node *list){
         while_tmp->type = while_cycle;
         while_tmp->code.while_cycle.condition = exp_t.data.statement_value;
         while_tmp->code.while_cycle.done = block_t.data.statement_value;
+        while_tmp->code.while_cycle.first_do = false;
 
         new_token.type = NON_while;
         new_token.data_type = statement_value;

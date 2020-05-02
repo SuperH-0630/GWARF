@@ -137,6 +137,8 @@ int paser(int *index){
         match_text(p, global_paser[TRUE_PASER], "True");
         match_text(p, global_paser[FALSE_PASER], "False");
         match_text(p, global_paser[NONE_PASER], "None");
+        match_text(p, global_paser[DO_PASER], "do");
+        match_text(p, global_paser[IN_PASER], "in");
 
         *index = check_list(global_paser, p);  // 检查解析结果
 

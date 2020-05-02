@@ -3,7 +3,7 @@
 
 #include "../inter/interpreter.h"
 
-#define MAX_PASER_SIZE 58
+#define MAX_PASER_SIZE 60
 #define INT_PASER 0
 #define DOUBLE_PASER 1
 #define ENTER_PASER 2
@@ -62,6 +62,8 @@
 #define TRUE_PASER 55
 #define FALSE_PASER 56
 #define NONE_PASER 57
+#define DO_PASER 58
+#define IN_PASER 59
 
 // 获取并返回一个token
 #define get_pop_token(status,list,new_token) \
@@ -167,6 +169,7 @@ typedef enum token_type
     DEFAULT = DEFAULT_PASER,
     RETURN = RETURN_PASER,
     STR = STR_PASER,
+    DO = DO_PASER,
 
     // 特殊符号
     BAD_token = -2,
@@ -209,6 +212,7 @@ typedef enum token_type
     NON_list = -38,
     NON_dict = -39,
     NON_hide_list = -40,
+    NON_do_while = -41,
 } token_type;
 
 typedef union token_data
