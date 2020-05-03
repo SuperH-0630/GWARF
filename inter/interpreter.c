@@ -370,7 +370,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             func_value.value.type = FUNC_value;
             func_value.value.value.func_value = func_tmp;
 
-            assignment_statement(the_statement->code.def.var, the_var, the_login_var, func_value);  // 注册函数到指定的位置
+            assignment_statement_core(the_statement->code.def.var, the_var, the_login_var, func_value, true);  // 注册函数到指定的位置
             // 无返回值
             break;
         }
@@ -448,6 +448,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 tmp = tmp->next;
             }
 
+            puts("def 1020");
             assignment_statement(the_statement->code.set_class.var, the_var,the_login_var, class_value);  // 注册class 的 位置
             puts("----stop set class----");
             // 无返回值
@@ -827,7 +828,7 @@ GWARF_result import_func(statement *the_statement, var_list *the_var){
     class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
 
     import_result.value.value.class_value = class_tmp;
-    assignment_statement(the_statement->code.import_class.var, the_var, the_var, import_result);
+    assignment_statement_core(the_statement->code.import_class.var, the_var, the_var, import_result, true);
 
     return_value.u = statement_end;
     return_value.value.type = NULL_value;
@@ -1662,7 +1663,7 @@ GWARF_result assignment_statement_value(statement *the_statement, var_list *the_
     return assignment_statement(the_statement, the_var, login_var, tmp);
 }
 
-GWARF_result assignment_statement(statement *the_statement, var_list *the_var, var_list *login_var, GWARF_result right_result){
+GWARF_result assignment_statement_core(statement *the_statement, var_list *the_var, var_list *login_var, GWARF_result right_result, bool self){
     GWARF_result value;
     value.u = statement_end;
     value.value.type = NULL_value;
@@ -1670,16 +1671,17 @@ GWARF_result assignment_statement(statement *the_statement, var_list *the_var, v
     if(the_statement->type != base_var && the_statement->type != point && the_statement->type != down){
         goto the_else;  // 非法的赋值语句
     }
-    if(right_result.value.type == OBJECT_value || right_result.value.type == CLASS_value){
-        right_result = get__assignment__(&(right_result.value), the_var);
-        if(is_error(&right_result)){  // Name Error错误
-            return right_result;
-        }
-        else if(is_space(&right_result)){
-            return right_result;
+    if(!self){  // 函数声明的时候使用self
+        if(right_result.value.type == OBJECT_value || right_result.value.type == CLASS_value){  // 比如a = q, q是一个object, 若他的__assignment__方法返回的是数字5, 那么a的赋值就相当与a = 5了而不是a = q
+            right_result = get__assignment__(&(right_result.value), the_var);
+            if(is_error(&right_result)){  // Name Error错误
+                return right_result;
+            }
+            else if(is_space(&right_result)){
+                return right_result;
+            }
         }
     }
-
     if(the_statement->type == base_var){  // 通过base_var赋值
         char *left = the_statement->code.base_var.var_name;  // get var name but not value
         int from = 0;
@@ -2060,7 +2062,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
             if(func_->is_class){
                 if(get.father != NULL){
                     father.value = *(get.father);
-                    assignment_statement(tmp_x->u.var, old_var_list, the_var, father);
+                    assignment_statement_core(tmp_x->u.var, old_var_list, the_var, father, true);
                     tmp_x = tmp_x->next;  // get the next to iter
                 }
                 else{
@@ -2121,7 +2123,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                 father.value.type = OBJECT_value;
                 father.value.value.object_value = object_tmp;
                 if(func_->is_class  == 1){
-                    assignment_statement(tmp_x->u.var, old_var_list, the_var, father);
+                    assignment_statement_core(tmp_x->u.var, old_var_list, the_var, father, true);
                     tmp_x = tmp_x->next;  // get the next to iter
                 }
 
@@ -2188,7 +2190,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                 father.value.type = OBJECT_value;
                 father.value.value.object_value = get.value.value.object_value;
                 if(func_->is_class  == 1){
-                    assignment_statement(tmp_x->u.var, old_var_list, the_var, father);
+                    assignment_statement_core(tmp_x->u.var, old_var_list, the_var, father, true);
                     tmp_x = tmp_x->next;  // get the next to iter
                 }
 

@@ -297,7 +297,7 @@ GWARF_result object_official_func(func *the_func, parameter *tmp_s, var_list *th
             break;
         }
         case __assignment__func:
-            return_value.value = *(father.father);  // 返回原值
+            return_value.value = *(father.father);  // 返回self
             break;
     }
     return_result: return return_value;

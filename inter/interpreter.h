@@ -8,6 +8,7 @@
 #define true 1
 #define bool int
 
+#define assignment_statement(the_statement,the_var,login_var,right_result) assignment_statement_core(the_statement,the_var,login_var,right_result,0)
 #define read_statement_list(the_statement,the_var) read_statement(the_statement,the_var,NULL)
 #define run_func(base_the_var,the_var,name) run_func_core(base_the_var,the_var,name,false)
 
@@ -528,7 +529,7 @@ GWARF_result sqrt_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result assignment_func(char *, GWARF_result, var_list *, int);
 GWARF_result equal_func(GWARF_result, GWARF_result, var_list *, int);
 GWARF_result negative_func(GWARF_result, var_list *);
-GWARF_result assignment_statement(statement *, var_list *, var_list *, GWARF_result);
+GWARF_result assignment_statement_core(statement *, var_list *, var_list *, GWARF_result, bool);
 GWARF_result assignment_statement_value(statement *, var_list *, var_list *, GWARF_value);
 GWARF_result not_func(GWARF_result, var_list *);
 GWARF_result or_func(statement *, statement *, var_list *);
