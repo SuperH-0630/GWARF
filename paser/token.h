@@ -3,7 +3,7 @@
 
 #include "../inter/interpreter.h"
 
-#define MAX_PASER_SIZE 79
+#define MAX_PASER_SIZE 80
 #define INT_PASER 0
 #define DOUBLE_PASER 1
 #define ENTER_PASER 2
@@ -83,6 +83,7 @@
 #define APOW_PASER 76
 #define FADD_PASER 77
 #define FSUB_PASER 78
+#define LAMBDA_PASER 79
 
 // 获取并返回一个token
 #define get_pop_token(status,list,new_token) \
@@ -120,11 +121,12 @@ do{ \
 token stop; \
 get_pop_token(status, list, stop); \
 printf("stop.type = %d\n", stop.type); \
-if(stop.type != ENTER_PASER && stop.type != EOF_token){ \
-    paser_error("Don't get stop token or EOF"); \
-} \
-if(stop.type == EOF_token){ \
+if((status->dict_to_enter && stop.type == RP_PASER) || stop.type == EOF_token){ \
     back_again(list, stop); \
+    break;  \
+} \
+if(stop.type != ENTER_PASER){ \
+    paser_error("Don't get stop token or EOF"); \
 } \
 }while(0);
 // EOF的返回使用了回退，目的是让command_list第二次执行command的时候，执行safe_get_token获取EOF，否则将会回去两个EOF
@@ -200,6 +202,19 @@ typedef enum token_type
     RAISE = RAISE_PASER,
     THROW = THROW_PASER,
     ASSERT = ASSERT_PASER,
+    IGNORE = IGNORE_ENTER,
+    INTDIV = INTDIV_PASER,
+    MOD = MOD_PASER,
+    AADD = AADD_PASER,
+    ASUB = ASUB_PASER,
+    AMUL = AMUL_PASER,
+    ADIV = ADIV_PASER,
+    AMOD = AMOD_PASER,
+    AINTDIV = AINTDIV_PASER,
+    APOW = APOW_PASER,
+    FADD = FADD_PASER,
+    FSUB = FSUB_PASER,
+    LAMBDA = LAMBDA_PASER,
 
     // 特殊符号
     BAD_token = -2,
@@ -246,6 +261,7 @@ typedef enum token_type
     NON_try = -42,
     NON_exception = -43,
     NON_self_exp = -44,
+    NON_lambda = -45,
 } token_type;
 
 typedef union token_data

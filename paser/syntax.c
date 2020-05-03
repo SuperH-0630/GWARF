@@ -40,6 +40,7 @@ void do_while_(p_status *status, token_node *list);
 void try_(p_status *status, token_node *list);
 void out_exception(p_status *status, token_node *list);
 void self_exp(p_status *status, token_node *list);
+void lambda_(p_status *status, token_node *list);
 void paser_error(char *text);
 
 /*
@@ -824,7 +825,10 @@ void block_(p_status *status, token_node *list){
         statement *block_tmp =  make_statement();
         statement_base = append_statement_list(block_tmp, statement_base);
         
-        get_right_token(status,list,command_list,command_list_t);  // 要把command_list也弹出来
+        p_status new_status = *status;  // 继承file_p等值
+        reset_status(new_status);  // 不会影响 *staus
+        new_status.dict_to_enter = true;
+        get_right_token(&new_status,list,command_list,command_list_t);  // 要把command_list也弹出来
 
         statement_base = free_statement_list(statement_base);  // 重新释放
         get_pop_token(status, list, rp_t);
@@ -1337,10 +1341,10 @@ void call_back_(p_status *status, token_node *list){  // 因试分解
         }
     }
     else{  // 模式1
-        fprintf(status_log, "[info][grammar]  (call_back_)back one token to (bool_or)\n");
+        fprintf(status_log, "[info][grammar]  (call_back_)back one token to (lambda_)\n");
         back_one_token(list, left);
-        get_base_token(status, list, bool_or, new_token);
-        if(new_token.type != NON_bool_or){
+        get_base_token(status, list, lambda_, new_token);
+        if(new_token.type != NON_lambda){
             back_one_token(list, new_token);  // 往回[不匹配类型]
             return;
         }
@@ -1351,7 +1355,46 @@ void call_back_(p_status *status, token_node *list){  // 因试分解
 }
 
 void lambda_(p_status *status, token_node *list){
+    fprintf(status_log, "[info][grammar]  mode status: lambda_\n");
+    token left, lambda_t, block_t, symbol, new_token;
+    left = pop_node(list);
+    if(left.type != NON_bool_or){
+        back_one_token(list, left);
+        get_base_token(status, list, bool_or, left);
+        if(left.type != NON_bool_or){
+            back_one_token(list, left);
+            return;
+        }
+    }
+    get_pop_token(status, list, lambda_t);
+    if(lambda_t.type != LAMBDA_PASER){  // 不是lambda表达式
+        left.type = NON_lambda;
+        back_one_token(list, left);
+        back_again(list, lambda_t);
+        return;
+    }
 
+    get_right_token(status, list, block_, block_t);
+    if(block_t.type != NON_block){
+        paser_error("Do't get '{");
+    }
+
+    statement *lambda_tmp =  make_statement();
+    lambda_tmp->type = lambda_func;
+
+    if(left.data.statement_value->type == base_tuple){
+        lambda_tmp->code.lambda_func.parameter_list = left.data.statement_value->code.base_tuple.value;
+    }
+    else{
+        lambda_tmp->code.lambda_func.parameter_list = NULL;
+    }
+    free(left.data.statement_value);
+    lambda_tmp->code.lambda_func.done = block_t.data.statement_value;
+    new_token.type = NON_lambda;
+    new_token.data_type = statement_value;
+    new_token.data.statement_value = lambda_tmp;
+    add_node(list, new_token);
+    return;
 }
 
 /*
@@ -2202,10 +2245,10 @@ void element(p_status *status, token_node *list){  // 数字归约
     gett = pop_node(list);  // 取得一个token
     if(gett.type == LB_PASER){  // 模式3
         fprintf(status_log, "[info][grammar]  (element)get LB\n");
-        p_status reset_status = *status;  // 继承file_p等值
-        reset_status(reset_status);  // 不会影响 *staus
-        reset_status.ignore_enter = true;  // 括号内忽略回车
-        get_right_token(&reset_status, list, top_exp, new_token);
+        p_status new_status = *status;  // 继承file_p等值
+        reset_status(new_status);  // 不会影响 *staus
+        new_status.ignore_enter = true;  // 括号内忽略回车
+        get_right_token(&new_status, list, top_exp, new_token);
         if(new_token.type == RB_PASER){
             statement *code_tmp =  make_statement();  // 默认
             new_token.data_type = statement_value;

@@ -162,6 +162,7 @@ int paser(int *index, p_status *status){
         match_text(p, global_paser[RAISE_PASER], "raise");
         match_text(p, global_paser[THROW_PASER], "throw");
         match_text(p, global_paser[ASSERT_PASER], "assert");
+        match_text_s(p, global_paser[LAMBDA_PASER], "->");
 
         *index = check_list(global_paser, p, status);  // 检查解析结果
 
