@@ -245,6 +245,7 @@ typedef enum token_type
     NON_do_while = -41,
     NON_try = -42,
     NON_exception = -43,
+    NON_self_exp = -44,
 } token_type;
 
 typedef union token_data

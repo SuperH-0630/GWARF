@@ -39,6 +39,7 @@ void hide_list(p_status *status, token_node *list);
 void do_while_(p_status *status, token_node *list);
 void try_(p_status *status, token_node *list);
 void out_exception(p_status *status, token_node *list);
+void self_exp(p_status *status, token_node *list);
 void paser_error(char *text);
 
 /*
@@ -540,8 +541,9 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
             status->is_parameter = true;
             get_right_token(status, list, top_exp, next);
             status->is_parameter = false;
-            if(next.type != NON_top_exp){
-                paser_error("Don't get a top_exp");
+            if(next.type != NON_top_exp){  // 结尾分号
+                back_one_token(list, left);  // 分号忽略
+                back_again(list, next);
                 return;
             }
 
@@ -1241,7 +1243,7 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
 }
 
 void hide_list(p_status *status, token_node *list){
-    fprintf(status_log, "[info][grammar]  mode status: top_exp\n");
+    fprintf(status_log, "[info][grammar]  mode status: hide_list\n");
     token exp;
     bool old_is_left = status->is_left;
     status->is_left = false;
@@ -1346,6 +1348,10 @@ void call_back_(p_status *status, token_node *list){  // 因试分解
         add_node(list, new_token);
         return call_back_(status, list);  // 回调自己
     }
+}
+
+void lambda_(p_status *status, token_node *list){
+
 }
 
 /*
@@ -2017,9 +2023,9 @@ void power(p_status *status, token_node *list){
         get_pop_token(status, list, symbol);
 
         if(symbol.type == POW_PASER || symbol.type == LOG_PASER || symbol.type == SQRT_PASER){  // 模式2/3/4
-            get_right_token(status, list, call_down, right);  // 回调右边
-            if(right.type != NON_call_down){
-                paser_error("Don't get a call_down");
+            get_right_token(status, list, self_exp, right);  // 回调右边
+            if(right.type != NON_self_exp){
+                paser_error("Don't get a self_exp");
             }
             // 逻辑操作
             new_token.type = NON_power;
@@ -2053,14 +2059,76 @@ void power(p_status *status, token_node *list){
     else{  // 模式1
         fprintf(status_log, "[info][grammar]  (power)back one token to (element)\n");
         back_one_token(list, left);
-        get_base_token(status, list, call_down, new_token);
-        if(new_token.type != NON_call_down){
+        get_base_token(status, list, self_exp, new_token);
+        if(new_token.type != NON_self_exp){
             back_one_token(list, new_token);  // 往回[不匹配类型]
             return;
         }
         new_token.type = NON_power;
         add_node(list, new_token);
         return power(status, list);  // 回调自己
+    }
+}
+
+/*
+self_exp : hide_list
+         | FADD self_exp
+         | FSUB self_exp
+         | self_exp FADD
+         | self_exp FSUB
+*/
+void self_exp(p_status *status, token_node *list){  // 因试分解
+    fprintf(status_log, "[info][grammar]  mode status: self_exp\n");
+    token left, right, new_token;
+    parameter *p_list;
+
+    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
+    if(left.type == FADD_PASER || left.type == FSUB_PASER){  // ++a和--a
+        get_right_token(status, list, self_exp, right);  // 递归自己，比如----a匹配为--new_token，new_token匹配为--a
+        if(right.type != NON_self_exp){
+            paser_error("Don't get self_exp");
+        }
+        statement *code_tmp =  make_statement();
+        code_tmp->type = operation;
+        code_tmp->code.operation.type = (left.type == FADD_PASER) ? FADD_func : FSUB_func;
+        code_tmp->code.operation.left_exp = NULL;
+        code_tmp->code.operation.right_exp = right.data.statement_value;
+        new_token.data.statement_value = code_tmp;
+        new_token.data_type = statement_value;
+        new_token.type = NON_self_exp;
+        add_node(list, new_token);  // 压入节点
+        return;
+    }
+    else if(left.type == NON_self_exp){
+        get_pop_token(status, list, right);
+        if(right.type == FADD_PASER || right.type == FSUB_PASER){  // a++和a--
+            statement *code_tmp =  make_statement();
+            code_tmp->type = operation;
+            code_tmp->code.operation.type = (right.type == FADD_PASER) ? LADD_func : LSUB_func;
+            code_tmp->code.operation.left_exp = left.data.statement_value;
+            code_tmp->code.operation.right_exp = NULL;
+            new_token.data.statement_value = code_tmp;
+            new_token.data_type = statement_value;
+            new_token.type = NON_self_exp;
+            add_node(list, new_token);  // 压入节点
+            return self_exp(status, list);  // 回调自己，比如a----匹配为self_exp--，再匹配为self_exp
+        }
+        else{  // 跳出递归
+            back_one_token(list, left);
+            back_again(list, right);
+            return;
+        }
+    }
+    else{  // a--和a++
+        back_one_token(list,left);
+        get_base_token(status, list, call_down, new_token);
+        if(new_token.type != NON_call_down){
+            back_one_token(list, new_token);  // 往回[不匹配类型]
+            return;
+        }
+        new_token.type = NON_self_exp;
+        add_node(list, new_token);
+        return self_exp(status, list);  // 回调自己
     }
 }
 
@@ -2138,7 +2206,13 @@ void element(p_status *status, token_node *list){  // 数字归约
         reset_status(reset_status);  // 不会影响 *staus
         reset_status.ignore_enter = true;  // 括号内忽略回车
         get_right_token(&reset_status, list, top_exp, new_token);
-        if(new_token.type != NON_top_exp){
+        if(new_token.type == RB_PASER){
+            statement *code_tmp =  make_statement();  // 默认
+            new_token.data_type = statement_value;
+            new_token.data.statement_value = code_tmp;
+            goto return_back;
+        }
+        else if(new_token.type != NON_top_exp){
             paser_error("Don't get 'top_exp'");            
         }
         token rb;
@@ -2146,6 +2220,7 @@ void element(p_status *status, token_node *list){  // 数字归约
         if(rb.type != RB_PASER){  // 匹配失败
             paser_error("Don't get ')'");
         }
+        return_back:
         new_token.type = NON_element;
         add_node(list, new_token);  // 压入节点
         return;
