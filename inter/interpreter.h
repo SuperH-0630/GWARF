@@ -460,7 +460,7 @@ typedef enum{
     __bitright__func = 38,
     __bitrightr__func = 39,
     __bitnot__func = 40,
-    __assignment__func = 41,
+    __assignment__func = 41,  // 赋值左值，对于int类型等赋值时需要复制
 } official_func_type;
 
 typedef struct func{

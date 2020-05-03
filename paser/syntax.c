@@ -901,52 +901,75 @@ void var_ctrl_(p_status *status, token_node *list){
     left = pop_node(list);
     if(left.type == GLOBAL_PASER || left.type == DEFAULT_PASER || left.type == NOLOCAL_PASER){
         fprintf(status_log, "[info][grammar]  (ctrl_)reduce right\n");
+        statement *base_tmp = NULL;
 
-        get_right_token(status, list, top_exp, var);  // 取得base_var
-        if(var.type != NON_top_exp && var.data.statement_value->type != base_var){
-            paser_error("Don't get var");
-        }
-        else{
-            var_name = malloc(sizeof(var.data.statement_value->code.base_var.var_name));
-            strcpy(var_name, var.data.statement_value->code.base_var.var_name);
-            times = var.data.statement_value->code.base_var.from;
-            // TODO:: 本质上没有完全释放
-            free(var.data.statement_value->code.base_var.var_name);
-            free(var.data.statement_value);
-        }
-
-        if(left.type == DEFAULT_PASER){  // 设置times
-            get_right_token(status, list, top_exp, right);  // 回调右边
-            if(right.type != NON_top_exp){
-                back_again(list, right);  // 不是期望的数字
+        again:
+        {
+            p_status new_status;
+            new_status = *status;
+            new_status.is_list = true;  // 不捕捉,
+            get_right_token(&new_status, list, top_exp, var);  // 取得base_var
+            if(var.type != NON_top_exp && var.data.statement_value->type != base_var){
+                paser_error("Don't get var");
             }
             else{
-                times = right.data.statement_value;
+                var_name = malloc(sizeof(var.data.statement_value->code.base_var.var_name));
+                strcpy(var_name, var.data.statement_value->code.base_var.var_name);
+                times = var.data.statement_value->code.base_var.from;
+                // TODO:: 本质上没有完全释放
+                free(var.data.statement_value->code.base_var.var_name);
+                free(var.data.statement_value);
+            }
+
+            if(left.type == DEFAULT_PASER){  // 设置times
+                get_right_token(&new_status, list, top_exp, right);  // 回调右边
+                if(right.type != NON_top_exp){
+                    back_again(list, right);  // 不是期望的数字
+                }
+                else{
+                    times = right.data.statement_value;
+                }
+            }
+            // 逻辑操作
+            new_token.type = NON_ctrl;
+            new_token.data_type = statement_value;
+            statement *code_tmp = make_statement();
+            if(base_tmp == NULL){
+                base_tmp = code_tmp;
+            }
+            else{
+                append_statement(base_tmp, code_tmp);
+            }
+            switch (left.type)
+            {
+                case GLOBAL_PASER:
+                    code_tmp->type = set_global;
+                    code_tmp->code.set_global.name = var_name;
+                    break;
+                case DEFAULT_PASER:
+                    code_tmp->type = set_default;
+                    code_tmp->code.set_default.name = var_name;
+                    code_tmp->code.set_default.times = times;
+                    break;
+                case NOLOCAL_PASER:
+                    code_tmp->type = set_nonlocal;
+                    code_tmp->code.set_nonlocal.name = var_name;
+                    break;
+                default:
+                    break;
             }
         }
-        // 逻辑操作
-        new_token.type = NON_ctrl;
-        new_token.data_type = statement_value;
-        statement *code_tmp =  make_statement();
-        switch (left.type)
-        {
-            case GLOBAL_PASER:
-                code_tmp->type = set_global;
-                code_tmp->code.set_global.name = var_name;
-                break;
-            case DEFAULT_PASER:
-                code_tmp->type = set_default;
-                code_tmp->code.set_default.name = var_name;
-                code_tmp->code.set_default.times = times;
-                break;
-            case NOLOCAL_PASER:
-                code_tmp->type = set_nonlocal;
-                code_tmp->code.set_nonlocal.name = var_name;
-                break;
-            default:
-                break;
+
+        token comma_t;
+        get_pop_token(status,list,comma_t);
+        if(comma_t.type == COMMA_PASER){
+            goto again;
         }
-        new_token.data.statement_value = code_tmp;
+        else{
+            back_again(list, comma_t);
+        }
+
+        new_token.data.statement_value = base_tmp;
         add_node(list, new_token);  // 压入节点[弹出3个压入1个]
         return;  // 回调自己
     }
