@@ -395,7 +395,6 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             class_object *class_tmp = malloc(sizeof(class_object));
 
             class_tmp->the_var = make_var_base(make_hash_var());  // make class var list
-            class_value.value.type = CLASS_value;
             class_value.value.value.class_value = class_tmp;
 
             // 获取father  -- append_by_var_list[拼凑]
@@ -448,8 +447,8 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 tmp = tmp->next;
             }
 
-            puts("def 1020");
-            assignment_statement(the_statement->code.set_class.var, the_var,the_login_var, class_value);  // 注册class 的 位置
+            class_value.value.type = CLASS_value;
+            assignment_statement_core(the_statement->code.set_class.var, the_var,the_login_var, class_value, true);  // 注册class 的 位置
             puts("----stop set class----");
             // 无返回值
             break;
@@ -2098,6 +2097,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
             result = func_->paser(func_, tmp_s, the_var, get, old_var_list);
         }
         the_var = free_var_list(the_var);  // free the new var
+        goto back;
     }
     else if(get.value.type == CLASS_value){  // 生成实例
         the_object *object_tmp = malloc(sizeof(the_object));  // 生成object的空间
@@ -2172,6 +2172,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
         result.value = tmp;
     }
     else if(get.value.type == OBJECT_value){  // 调用__call__方法
+        puts("WWWW");
         // 执行__init__
         var *call_tmp = find_var(get.value.value.object_value->the_var, 0, "__call__");
         if(call_tmp != NULL){  // 找到了__init__
@@ -2237,6 +2238,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
             the_var = free_var_list(the_var);  // free the new var
         }
     }
+    back:
     if(result.u == return_def){
         if(result.return_times <= 0){
             result.u = statement_end;
