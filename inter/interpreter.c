@@ -328,24 +328,21 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             }
 
             GWARF_value base_the_var = tmp_result.value;
-
             if(base_the_var.type == CLASS_value){  // is class so that can use "."
-                GWARF_result child_value = traverse((the_statement->code).down.child_var, the_var, false);  // 作为参数
                 var *tmp = find_var(base_the_var.value.class_value->the_var, 0, "__down__");
                 if(tmp != NULL){
                     get.value = tmp->value;
                     get.father = &base_the_var;  // 设置father
-                    return_value = call_back_core(get, the_var, pack_value_parameter(child_value.value));
+                    return_value = call_back_core(get, the_var, (the_statement->code).down.child_var);
                     goto the_break_down;
                 }
             }
             else if(base_the_var.type == OBJECT_value){
-                GWARF_result child_value = traverse((the_statement->code).down.child_var, the_var, false);  // 作为参数
                 var *tmp = find_var(base_the_var.value.object_value->the_var, 0, "__down__");
                 if(tmp != NULL){
                     get.value = tmp->value;
                     get.father = &base_the_var;  // 设置father
-                    return_value = call_back_core(get, the_var, pack_value_parameter(child_value.value));
+                    return_value = call_back_core(get, the_var, (the_statement->code).down.child_var);
                     goto the_break_down;
                 }
             }
@@ -1756,24 +1753,22 @@ GWARF_result assignment_statement(statement *the_statement, var_list *the_var, v
         }
         GWARF_value base_the_var = tmp_result.value;  // 不用取value
         if(base_the_var.type == CLASS_value){  // is class so that can use "."
-            GWARF_result child_value = traverse(the_statement->code.down.child_var, the_var, false);  // 作为参数
             var *tmp = find_var(base_the_var.value.class_value->the_var, 0, "__set__");
             if(tmp != NULL){
                 get.value = tmp->value;
                 get.father = &base_the_var;  // 设置father
-                parameter *tmp = pack_value_parameter(child_value.value);
+                parameter *tmp = the_statement->code.down.child_var;
                 tmp->next = pack_value_parameter(right_result.value);
                 value = call_back_core(get, the_var, tmp);
                 goto the_else;
             }
         }
         else if(base_the_var.type == OBJECT_value){
-            GWARF_result child_value = traverse(the_statement->code.down.child_var, the_var, false);  // 作为参数
             var *tmp = find_var(base_the_var.value.object_value->the_var, 0, "__set__");
             if(tmp != NULL){
                 get.value = tmp->value;
                 get.father = &base_the_var;  // 设置father
-                parameter *tmp = pack_value_parameter(child_value.value);
+                parameter *tmp = the_statement->code.down.child_var;
                 tmp->next = pack_value_parameter(right_result.value);
                 value = call_back_core(get, the_var, tmp);
             }

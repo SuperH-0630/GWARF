@@ -1,7 +1,7 @@
 #ifndef MEM_INCLUDE
 #define MEM_INCLUDE
 
-#define reset_status(status) {status.is_parameter=false,status.is_func=false,status.is_list=false,status.is_dict=false,status.is_left=true,status.is_peq=false,status.is_for=false,status.dict_to_enter=false,status.ignore_enter=false;}
+#define reset_status(status) {status.is_parameter=false,status.is_func=false,status.is_list=false,status.is_dict=false,status.is_left=true,status.is_peq=false,status.is_for=false,status.dict_to_enter=false,status.ignore_enter=false,status.is_slice=false;}
 
 FILE *debug = NULL, *status_log = NULL, *token_log = NULL, *token_info = NULL;
 
@@ -18,6 +18,7 @@ typedef struct p_status
     struct word_paser **global_paser;
     bool ignore_enter;  // 忽略回车
     bool dict_to_enter;  // 检查stop的时候把"}"算上
+    bool is_slice;  // slice使用:代替
 } p_status;
 
 

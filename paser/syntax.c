@@ -520,7 +520,7 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
     if(left.type == NON_parameter){  // 模式2/3
         fprintf(status_log, "[info][grammar]  (formal_parameter)reduce right\n");
         get_pop_token(status, list, comma);
-        if(comma.type == COMMA_PASER){
+        if(comma.type == (status->is_slice ? COLON_PASER : COMMA_PASER)){
             get_pop_token(status, list, before);
             if(before.type == MUL_PASER && !status->is_peq){
                 if(status->is_dict){
@@ -2182,31 +2182,64 @@ call_down : element
 void call_down(p_status *status, token_node *list){  // 因试分解
     fprintf(status_log, "[info][grammar]  mode status: call_down\n");
     token left, lb_t, rb_t, new_token, parameter_t;
-    parameter *p_list;
+    parameter *p_list = NULL;
 
     left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
     if(left.type == NON_call_down){
         fprintf(status_log, "[info][grammar]  (call_down)reduce right\n");
         get_pop_token(status, list, lb_t);
         if(lb_t.type == LI_PASER){
-            get_right_token(status, list, top_exp, parameter_t);  // 回调右边
+            p_status new_status;
+            new_status = *status;
+            new_status.is_list = true;
+            get_right_token(&new_status, list, top_exp, parameter_t);  // 回调右边
             if(parameter_t.type != NON_top_exp){
                 paser_error("Don't get a top_exp");
             }
 
+            statement *code_tmp =  make_statement();
             get_pop_token(status, list, rb_t);
-            if(rb_t.type != RI_PASER){  // 带参数
-                paser_error("Don't get ']'");
+            if(rb_t.type == RI_PASER || rb_t.type == COMMA_PASER){  // a[1,2,3,4]模式
+                back_one_token(list, parameter_t);
+                back_again(list, rb_t);
+                get_base_token(status,list,formal_parameter,parameter_t);
+                if(parameter_t.type != NON_parameter){
+                    paser_error("Don't get formal_parameter");
+                }
+                get_pop_token(status, list, rb_t);  // 把rb重新弹出来
+                p_list = parameter_t.data.parameter_list;
+                code_tmp->type = down;
+                code_tmp->code.down.base_var = left.data.statement_value;
+                code_tmp->code.down.child_var = p_list;
+            }
+            else if(rb_t.type == COLON_PASER){  // a[1,2,3,4]模式
+                back_one_token(list, parameter_t);
+                back_again(list, rb_t);
+                p_status new_status;
+                new_status = *status;
+                new_status.is_slice = true;
+                get_base_token(&new_status,list,formal_parameter,parameter_t);
+                if(parameter_t.type != NON_parameter){
+                    paser_error("Don't get formal_parameter");
+                }
+                get_pop_token(status, list, rb_t);  // 把rb重新弹出来
+                if(rb_t.type != RI_PASER){
+                    printf("rb_t.type = %d\n", rb_t.type);
+                    goto error;
+                }
+                p_list = parameter_t.data.parameter_list;
+                code_tmp->type = slice;
+                code_tmp->code.slice.base_var = left.data.statement_value;
+                code_tmp->code.slice.value = p_list;
+            }
+            else{
+                free(code_tmp);
+                error: paser_error("Don't get ']', ':' or ','");
             }
 
             // 逻辑操作
             new_token.type = NON_call_down;
             new_token.data_type = statement_value;
-
-            statement *code_tmp =  make_statement();
-            code_tmp->type = down;
-            code_tmp->code.down.base_var = left.data.statement_value;
-            code_tmp->code.down.child_var = parameter_t.data.statement_value;
             
             new_token.data.statement_value = code_tmp;
             add_node(list, new_token);  // 压入节点[弹出3个压入1个]

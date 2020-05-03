@@ -203,7 +203,7 @@ typedef struct statement{
 
         struct{
             struct statement *base_var;  // a[b] --> a
-            struct statement *child_var;  // a[b] --> b
+            struct parameter *child_var;  // a[b,c,d] --> b,c,d
         } down;
 
         struct{
