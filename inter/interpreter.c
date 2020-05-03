@@ -810,6 +810,7 @@ GWARF_result import_func(statement *the_statement, var_list *the_var){
     
     login(new_the_var);
     
+    printf("ad = %s\n", file.value.string);
     parser(file.value.string);
     printf("----start run----\n");
     traverse_global(global_inter->global_code, new_the_var);
