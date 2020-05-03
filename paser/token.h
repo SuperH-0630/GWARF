@@ -3,7 +3,7 @@
 
 #include "../inter/interpreter.h"
 
-#define MAX_PASER_SIZE 80
+#define MAX_PASER_SIZE 81
 #define INT_PASER 0
 #define DOUBLE_PASER 1
 #define ENTER_PASER 2
@@ -84,6 +84,7 @@
 #define FADD_PASER 77
 #define FSUB_PASER 78
 #define LAMBDA_PASER 79
+#define POINT_PASER 80
 
 // 获取并返回一个token
 #define get_pop_token(status,list,new_token) \
@@ -215,6 +216,7 @@ typedef enum token_type
     FADD = FADD_PASER,
     FSUB = FSUB_PASER,
     LAMBDA = LAMBDA_PASER,
+    POINT = POINT_PASER,
 
     // 特殊符号
     BAD_token = -2,
@@ -262,6 +264,7 @@ typedef enum token_type
     NON_exception = -43,
     NON_self_exp = -44,
     NON_lambda = -45,
+    NON_point = -46,
 } token_type;
 
 typedef union token_data
