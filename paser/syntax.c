@@ -214,20 +214,12 @@ if_ : IF LB top_exp RB block
 */
 void if_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: if_\n");
-    token if_t, lb_t, exp_t, rb_t, block_t, next_t, child_t, new_token;
+    token if_t, exp_t, block_t, next_t, child_t, new_token;
     if_t = pop_node(list);
     if(if_t.type == IF_PASER){
-        get_pop_token(status, list, lb_t);
-        if(lb_t.type != LB_PASER){
-            paser_error("Don't get '('");
-        }
         get_right_token(status,list,top_exp,exp_t);
         if(exp_t.type != NON_top_exp){  // 不是表达式
             paser_error("Don't get 'top_exp'");
-        }
-        get_pop_token(status, list, rb_t);
-        if(rb_t.type != RB_PASER){
-            paser_error("Don't get ')'");
         }
 
         get_right_token(status,list,block_,block_t);
@@ -278,20 +270,12 @@ elif_ : ELIF LB top_exp RB block
 */
 void elif_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: elif_\n");
-    token elif_t, lb_t, exp_t, rb_t, block_t, next_t, new_token;
+    token elif_t, exp_t, block_t, next_t, new_token;
     elif_t = pop_node(list);
     if(elif_t.type == ELIF_PASER){
-        get_pop_token(status, list, lb_t);
-        if(lb_t.type != LB_PASER){
-            paser_error("Don't get '('");
-        }
         get_right_token(status,list,top_exp,exp_t);
         if(exp_t.type != NON_top_exp){  // 不是表达式
             paser_error("Don't get 'top_exp'");
-        }
-        get_pop_token(status, list, rb_t);
-        if(rb_t.type != RB_PASER){
-            paser_error("Don't get ')'");
         }
 
         get_right_token(status,list,block_,block_t);
@@ -331,17 +315,13 @@ void elif_(p_status *status, token_node *list){
 for_ : FOR LB top_exp COMMA top_exp COMMA top_exp RB block
 */
 void for_(p_status *status, token_node *list){
-    fprintf(status_log, "[info][grammar]  mode status: while_\n");
-    token for_t, exp_1, exp_2, exp_3, block_t, lb_t, rb_t, comma_t,new_token;
+    fprintf(status_log, "[info][grammar]  mode status: for_\n");
+    token for_t, exp_1, exp_2, exp_3, block_t, comma_t,new_token;
     statement *exp_a, *exp_b, *exp_c;
     for_t = pop_node(list);
     if(for_t.type == FOR_PASER){
         bool is_for_in = false;  // 是否为for in模式
 
-        get_pop_token(status, list, lb_t);
-        if(lb_t.type != LB_PASER){
-            paser_error("Don't get '('");
-        }
 
         get_pop_token(status, list, exp_1);
         if(exp_1.type == COMMA_PASER){
@@ -364,7 +344,7 @@ void for_(p_status *status, token_node *list){
                 goto exp3;
             }
             else if(comma_t.type != COMMA_PASER){
-                paser_error("Don't get ';' in for cycle");
+                paser_error("Don't get ',' in for cycle");
             }
             exp_a = exp_1.data.statement_value;
         }
@@ -385,36 +365,37 @@ void for_(p_status *status, token_node *list){
             }
             get_pop_token(status, list, comma_t);
             if(comma_t.type != COMMA_PASER){
-                paser_error("Don't get ';' in for cycle");
+                paser_error("Don't get ',' in for cycle");
             }
             exp_b = exp_2.data.statement_value;
         }
 
         exp3:
+
         get_pop_token(status, list, exp_3);
-        if(exp_3.type == RB_PASER){
+        if(exp_3.type == COMMA_PASER){
             if(is_for_in){
                 paser_error("Don't get iter object");
             }
             exp_c = NULL;  // exp_1 = NULL;
-            back_one_token(list, exp_3);
         }
         else{
             back_one_token(list, exp_3);
             p_status new_status;
             new_status = *status;
-            new_status.is_for = true;
+            if(!is_for_in) new_status.is_for = true;
             get_base_token(&new_status,list,top_exp,exp_3);  // 不是使用right token，不需要执行safe_get_token
-            new_status.is_for = false;
+            if(!is_for_in) new_status.is_for = false;
             if(exp_3.type != NON_top_exp){  // 不是表达式
                 paser_error("Don't get 'top_exp'");
             }
+            if(!is_for_in){  // for in 不需要匹配“,”
+                get_pop_token(status, list, comma_t);
+                if(comma_t.type != COMMA_PASER){
+                    paser_error("Don't get ',' in for cycle");
+                }
+            }
             exp_c = exp_3.data.statement_value;
-        }
-
-        get_pop_token(status, list, rb_t);
-        if(rb_t.type != RB_PASER){
-            paser_error("Don't get ')'");
         }
 
         get_right_token(status,list,block_,block_t);
@@ -686,7 +667,7 @@ while_ : WHILE LB top_exp RB block
 */
 void do_while_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: while_\n");
-    token do_t, while_t, lb_t, exp_t, rb_t, block_t, new_token;
+    token do_t, while_t, exp_t, block_t, new_token;
     do_t = pop_node(list);
     if(do_t.type == DO_PASER){
         get_right_token(status,list,block_,block_t);
@@ -703,17 +684,9 @@ void do_while_(p_status *status, token_node *list){
             tmp->code.code_block.done = block_t.data.statement_value;
         }
         else{
-            get_pop_token(status, list, lb_t);
-            if(lb_t.type != LB_PASER){
-                paser_error("Don't get '('");
-            }
             get_right_token(status,list,top_exp,exp_t);
             if(exp_t.type != NON_top_exp){  // 不是表达式
                 paser_error("Don't get 'top_exp'");
-            }
-            get_pop_token(status, list, rb_t);
-            if(rb_t.type != RB_PASER){
-                paser_error("Don't get ')'");
             }
             tmp->type = while_cycle;
             tmp->code.while_cycle.condition = exp_t.data.statement_value;
@@ -738,20 +711,12 @@ while_ : WHILE LB top_exp RB block
 */
 void while_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: while_\n");
-    token while_t, lb_t, exp_t, rb_t, block_t, new_token;
+    token while_t, exp_t, block_t, new_token;
     while_t = pop_node(list);
     if(while_t.type == WHILE_PASER){
-        get_pop_token(status, list, lb_t);
-        if(lb_t.type != LB_PASER){
-            paser_error("Don't get '('");
-        }
         get_right_token(status,list,top_exp,exp_t);
         if(exp_t.type != NON_top_exp){  // 不是表达式
             paser_error("Don't get 'top_exp'");
-        }
-        get_pop_token(status, list, rb_t);
-        if(rb_t.type != RB_PASER){
-            paser_error("Don't get ')'");
         }
 
         get_right_token(status,list,block_,block_t);
