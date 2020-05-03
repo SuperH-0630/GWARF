@@ -26,9 +26,10 @@
         paser->text = (char *)malloc(sizeof(char)); \
     } \
     else{ \
-        paser->text = (char *)realloc(paser->text, sizeof(char) * (len + 1)); \
+        paser->text = (char *)realloc(paser->text, sizeof(char) * (len + 2)); \
     } \
     paser->text[len] = p; \
+    paser->text[len + 1] = '\0'; \
     } while(0)
 
 #define CHECK_END(paser) \
