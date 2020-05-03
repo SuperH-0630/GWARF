@@ -529,6 +529,7 @@ GWARF_result assignment_func(char *, GWARF_result, var_list *, int);
 GWARF_result equal_func(GWARF_result, GWARF_result, var_list *, int);
 GWARF_result negative_func(GWARF_result, var_list *);
 GWARF_result assignment_statement(statement *, var_list *, var_list *, GWARF_result);
+GWARF_result assignment_statement_value(statement *, var_list *, var_list *, GWARF_value);
 GWARF_result not_func(GWARF_result, var_list *);
 GWARF_result or_func(statement *, statement *, var_list *);
 GWARF_result and_func(statement *, statement *, var_list *);

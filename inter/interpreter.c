@@ -1532,51 +1532,52 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
             value = div_func(left_result, right_result, the_var);
             break;
         case AADD_func:
-            value = assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, add_func(left_result, right_result, the_var));
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(add_func(left_result, right_result, the_var).value, the_var));
+            // exit(1);
             break;
         case ASUB_func:
-            value = assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, sub_func(left_result, right_result, the_var));
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(sub_func(left_result, right_result, the_var).value, the_var));
             break;
         case AMUL_func:
-            value = assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, mul_func(left_result, right_result, the_var));
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(mul_func(left_result, right_result, the_var).value, the_var));
             break;
         case ADIV_func:
-            value = assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, div_func(left_result, right_result, the_var));
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(div_func(left_result, right_result, the_var).value, the_var));
             break;
         case AMOD_func:
-            value = assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, mod_func(left_result, right_result, the_var));
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(mod_func(left_result, right_result, the_var).value, the_var));
             break;
         case AINTDIV_func:
-            value = assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, int_div_func(left_result, right_result, the_var));
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(int_div_func(left_result, right_result, the_var).value, the_var));
             break;
         case APOW_func:
-            value = assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, pow_func(left_result, right_result, the_var));
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(pow_func(left_result, right_result, the_var).value, the_var));
             break;
         case LADD_func:  // a++
             right_result.u = statement_end;
             right_result.value.type = INT_value;
             right_result.value.value.int_value = 1;
-            assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, add_func(left_result, right_result, the_var));
+            assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(add_func(left_result, right_result, the_var).value, the_var));
             value = left_result;  // 先返回值，后自增
             break;
         case FADD_func:  // ++a
             left_result.u = statement_end;
             left_result.value.type = INT_value;
             left_result.value.value.int_value = 1;
-            value = assignment_statement(the_statement->code.operation.right_exp, the_var, login_var, add_func(left_result, right_result, the_var));  // 先自增，后返回值
+            value = assignment_statement_value(the_statement->code.operation.right_exp, the_var, login_var, to_object(add_func(left_result, right_result, the_var).value, the_var));  // 先自增，后返回值
             break;
         case LSUB_func:  // a--
             right_result.u = statement_end;
             right_result.value.type = INT_value;
             right_result.value.value.int_value = 1;
-            assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, sub_func(left_result, right_result, the_var));
+            assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(sub_func(left_result, right_result, the_var).value, the_var));
             value = left_result;  // 先返回值，后自增
             break;
         case FSUB_func:  // --a
             left_result.u = statement_end;
             left_result.value.type = INT_value;
             left_result.value.value.int_value = 1;
-            value = assignment_statement(the_statement->code.operation.right_exp, the_var, login_var, sub_func(right_result, left_result, the_var));  // 先自增，后返回值
+            value = assignment_statement_value(the_statement->code.operation.right_exp, the_var, login_var, to_object(sub_func(right_result, left_result, the_var).value, the_var));  // 先自增，后返回值
             break;
         case NEGATIVE_func:
             value = negative_func(right_result, the_var);
@@ -1651,6 +1652,13 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
     value.u = statement_end;  // 正常设置[正常语句结束]
     value.value = to_object(value.value, the_var);  // 返回类型是object[不下放到add func等]
     return value;
+}
+
+GWARF_result assignment_statement_value(statement *the_statement, var_list *the_var, var_list *login_var, GWARF_value right_value){
+    GWARF_result tmp;
+    tmp.u = statement_end;
+    tmp.value = right_value;
+    return assignment_statement(the_statement, the_var, login_var, tmp);
 }
 
 GWARF_result assignment_statement(statement *the_statement, var_list *the_var, var_list *login_var, GWARF_result right_result){
