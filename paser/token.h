@@ -116,12 +116,12 @@ add_node(list, new_token); \
 back_token(list); \
 }while(0);
 
-#define get_stop_token()  \
+#define get_stop_token(status, list)  \
 do{ \
 token stop; \
-get_pop_token(status, list, stop); \
+get_pop_token(&status, list, stop); \
 printf("stop.type = %d\n", stop.type); \
-if((status->dict_to_enter && stop.type == RP_PASER) || stop.type == EOF_token){ \
+if((status.dict_to_enter && stop.type == RP_PASER) || stop.type == EOF_token){ \
     back_again(list, stop); \
     break;  \
 } \
