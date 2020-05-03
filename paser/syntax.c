@@ -2339,9 +2339,12 @@ void element(p_status *status, token_node *list){  // 数字归约
         add_node(list, new_token);
         return;
     }
-    else if(gett.type == LP_PASER){
+    else if(gett.type == LP_PASER){  // dict
         back_one_token(list, gett);
-        get_base_token(status,list,dict_,new_token);  // 不需要safe_get_token
+        p_status new_status = *status;  // 继承file_p等值
+        reset_status(new_status);  // 不会影响 *staus
+        new_status.ignore_enter = true;  // 括号内忽略回车
+        get_base_token(&new_status,list,dict_,new_token);  // 不需要safe_get_token
         if(new_token.type != NON_dict){
             paser_error("Don't get a dict_");
         }
@@ -2354,12 +2357,12 @@ void element(p_status *status, token_node *list){  // 数字归约
         p_status new_status;
         new_status = *status;
         new_status.is_list = true;  // 防止top_exp收走逗号
+        new_status.ignore_enter = true;  // 括号内忽略回车
         get_right_token(&new_status, list, top_exp, exp_token);
-        new_status.is_list = false;  // 防止top_exp收走逗号
         if(exp_token.type == RI_PASER){  //可以认定为空list
             back_one_token(list, gett);
             back_again(list, exp_token);
-            get_base_token(status,list,list_,new_token);  // 不需要safe_get_token
+            get_base_token(status,list,list_,new_token);  // 返回空列表
             if(new_token.type != NON_list){
                 paser_error("Don't get a list_");
             }
@@ -2399,7 +2402,7 @@ void element(p_status *status, token_node *list){  // 数字归约
                 back_again(list, tmp_var);
                 back_again(list, rb);
                 back_again(list, exp_token);
-                get_base_token(status,list,list_,new_token);  // 不需要safe_get_token
+                get_base_token(&new_status,list,list_,new_token);  // 不需要safe_get_token
                 if(new_token.type != NON_list){
                     paser_error("Don't get a list_");
                 }
@@ -2410,7 +2413,7 @@ void element(p_status *status, token_node *list){  // 数字归约
             back_one_token(list, gett);
             back_again(list, rb);
             back_again(list, exp_token);
-            get_base_token(status,list,list_,new_token);  // 不需要safe_get_token
+            get_base_token(&new_status,list,list_,new_token);  // 不需要safe_get_token
             if(new_token.type != NON_list){
                 paser_error("Don't get a list_");
             }
