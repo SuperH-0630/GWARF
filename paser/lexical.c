@@ -164,6 +164,8 @@ int paser(int *index, p_status *status){
         match_text(p, global_paser[ASSERT_PASER], "assert");
         match_text_s(p, global_paser[LAMBDA_PASER], "->");
         match_text(p, global_paser[POINT_PASER], ".");
+        match_text(p, global_paser[IMPORT_PASER], "import");
+        match_text(p, global_paser[INCLUDE_PASER], "include");
 
         *index = check_list(global_paser, p, status);  // 检查解析结果
 
@@ -305,12 +307,13 @@ void match_double(char p, word_paser *paser){  // 匹配一个double
                 paser->status = 1;
             }
             else{
-                paser->text = (char *)realloc(paser->text, sizeof(char) * (strlen(paser->text) + 1));
+                paser->text = (char *)realloc(paser->text, sizeof(char) * (len + 2));
                 if(p == '.'){
                     paser->status = 2; 
                 }
             }
             paser->text[len] = p;
+            paser->text[len + 1] = '\0';
         }
         else{
             if(paser->status == 2){  // 必须进入小数模式才可以
@@ -342,8 +345,9 @@ void match_str(char p, word_paser *paser){  // 匹配一个var字符串
         }
         else{
             if((p != '\'' && paser->status == 1) || (p != '\"' && paser->status == 2)){  // 匹配到最后一个
-                paser->text = (char *)realloc(paser->text, sizeof(char) * (len + 1));
+                paser->text = (char *)realloc(paser->text, sizeof(char) * (len + 2));
                 paser->text[len] = p;
+                paser->text[len + 1] = '\0';
             }
             else{
                 paser->status = WAIT_END;
@@ -360,6 +364,7 @@ void match_var(char p, word_paser *paser){  // 匹配一个var
             if(p == '_' || (p <= 'z' && p >= 'a')){
                 paser->text = (char *)malloc(sizeof(char));
                 paser->text[len] = p;
+                paser->text[len + 1] = '\0';
                 paser->status = 1;
             }
             else{
@@ -368,8 +373,9 @@ void match_var(char p, word_paser *paser){  // 匹配一个var
         }
         else{
             if(p == '_' || (p <= 'z' && p >= 'a') || (p <= '9' && p >= '0')){
-                paser->text = (char *)realloc(paser->text, sizeof(char) * (len + 1));
+                paser->text = (char *)realloc(paser->text, sizeof(char) * (len + 2));
                 paser->text[len] = p;
+                paser->text[len + 1] = '\0';
             }
             else{
                 paser->status = S_END;

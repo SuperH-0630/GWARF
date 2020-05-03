@@ -42,6 +42,7 @@ void out_exception(p_status *status, token_node *list);
 void self_exp(p_status *status, token_node *list);
 void lambda_(p_status *status, token_node *list);
 void attribute(p_status *status, token_node *list);
+void import_include(p_status *status, token_node *list);
 void paser_error(char *text);
 
 /*
@@ -145,6 +146,14 @@ void command(p_status *old_status, token_node *list){  // 多项式
         fprintf(status_log, "[info][grammar]  (command)back one token to (var_ctrl_)\n");
         back_one_token(list, left);
         get_base_token(&status, list, var_ctrl_, new_token);
+
+        get_stop_token(status, list);
+        push_statement(statement_base, new_token);
+    }
+    else if(left.type == IMPORT_PASER || left.type == INCLUDE_PASER){
+        fprintf(status_log, "[info][grammar]  (command)back one token to (import_include)\n");
+        back_one_token(list, left);
+        get_base_token(&status, list, import_include, new_token);
 
         get_stop_token(status, list);
         push_statement(statement_base, new_token);
@@ -660,6 +669,51 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
         }
         add_node(list, new_token);
         return formal_parameter(status, list);  // 回调自己
+    }
+}
+
+/*
+import “aaa” as AA 和 include 语句
+*/
+void import_include(p_status *status, token_node *list){
+    fprintf(status_log, "[info][grammar]  mode status: while_\n");
+    token type_t, str_t, as_t, var_t, new_token;
+    type_t = pop_node(list);
+    if(type_t.type == IMPORT_PASER || type_t.type == INCLUDE_PASER){
+        get_right_token(status,list,top_exp,str_t);
+        if(str_t.type != NON_top_exp){  // 不是表达式
+            paser_error("Don't get top_exp");
+        }
+
+        statement *tmp =  make_statement();
+        if(type_t.type == IMPORT_PASER){  // import才有as top_exp
+            get_pop_token(status, list, as_t);
+            if(as_t.type != AS_PASER){
+                paser_error("Don't get as");
+            }
+
+            get_right_token(status,list,top_exp,var_t);
+            if(var_t.type != NON_top_exp){  // 不是表达式
+                paser_error("Don't get top_exp");
+            }
+            tmp->type = import_class;
+            tmp->code.import_class.file = str_t.data.statement_value;
+            tmp->code.import_class.var = var_t.data.statement_value;
+        }
+        else{
+            tmp->type = include_import;
+            tmp->code.include_import.file = str_t.data.statement_value;
+        }
+
+        new_token.type = NON_import;
+        new_token.data_type = statement_value;
+        new_token.data.statement_value = tmp;
+        add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+        return;
+    }
+    else{
+        back_one_token(list, type_t);
+        return;
     }
 }
 
