@@ -119,7 +119,6 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             break;
         }
         case call:
-            puts("tag 11");
             return_value = call_back(the_statement, the_var);
             break;
         case while_cycle:
@@ -281,9 +280,11 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             break;
         }
         case base_svar:{    // because the var tmp, we should ues a {} to make a block[name space] for the tmp var;
+            puts("[tag 2]");
             int from = 0;
             if(the_statement->code.base_svar.from == NULL){
                 from = 0;
+                puts("[tag 3]");
             }
             else{
                 GWARF_result tmp_result, tmp_object = traverse(the_statement->code.base_svar.from, the_var, false);
@@ -417,10 +418,8 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
 
             func_value.value.type = FUNC_value;
             func_value.value.value.func_value = func_tmp;
-            puts("tag 11");
             printf("the_statement->code.def.var = %d\n", the_statement->code.def.var->type);
             assignment_statement_core(the_statement->code.def.var, the_var, the_login_var, func_value, true);  // 注册函数到指定的位置
-            puts("tag 12");
             // 无返回值
             break;
         }
@@ -806,6 +805,56 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
         case assert_e:  // import xxx as xxx 语句
             return_value = assert_func(the_statement, the_var);
             break;
+        default:
+            puts("default");
+            break;
+    }
+    return return_value;
+}
+
+GWARF_result get_value(statement *the_statement, var_list *the_var, var_list *out_var){  // 为tmp_x和tmp_s注册函数所用  其中out_var是外部函数
+    GWARF_result return_value;
+    return_value.u = statement_end;  // 正常设置[正常语句结束]
+    return_value.value.type = NULL_value;  // 默认设置
+    return_value.value.value.int_value = 0;  // 默认设置
+    switch (the_statement->type)
+    {
+        case base_var:{    // because the var tmp, we should ues a {} to make a block[name space] for the tmp var;
+            int from = 0;
+            var *tmp = find_var(the_var, from, (the_statement->code).base_var.var_name);
+            if(tmp == NULL){  // 输出name error[共两处会输出]
+                char *tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
+                sprintf(tmp, "name not found [%s]\n", the_statement->code.base_var.var_name);
+                return_value = to_error(tmp, "NameException", out_var);
+            }
+            else{
+                return_value.value = tmp->value;  // get_var
+            }
+            break;
+        }
+        case base_svar:{    // because the var tmp, we should ues a {} to make a block[name space] for the tmp var;
+            int from = 0;
+            GWARF_result eq_object = traverse(the_statement->code.base_svar.var, out_var, false);
+            if(is_error(&eq_object)){
+                return eq_object;
+            }
+            else if(is_space(&eq_object)){
+                return eq_object;
+            }
+            char *str = to_str_dict(eq_object.value, out_var).value.string;
+            printf("str = %s\n", str);
+
+            var *tmp = find_var(the_var, from, str);
+            if(tmp == NULL){  // 输出name error[共两处会输出]
+                char *tmp = malloc((size_t)( 21 + strlen(str) ));
+                sprintf(tmp, "name not found [%s]\n", str);
+                return_value = to_error(tmp, "NameException", out_var);
+            }
+            else{
+                return_value.value = tmp->value;  // get_var
+            }
+            break;
+        }
         default:
             puts("default");
             break;
@@ -1921,7 +1970,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
         }
         if(assignment_type == 0){  // 对位赋值
             if ((tmp_x == NULL)&&(tmp_s != NULL)){  // 参数过多
-                printf("Warning!!!\n");
+                printf("Warning!!![2]\n");
                 break;
             }
             else if ((tmp_x != NULL)&&(tmp_s == NULL)){  // 使用默认值
@@ -1950,7 +1999,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                         tmp_x = tmp_x->next;  // get the next to iter
                     }
                     else{
-                        printf("warning!!!\n");
+                        printf("warning!!![3]\n");
                         break;
                     }
 
@@ -2006,7 +2055,8 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                         tmp_x->next = NULL;  // 理论上没有下一个
                     }
                     else{
-                        GWARF_result tmp_x_var = traverse(tmp_x->u.var, tmp_var, false);  // 使用tmp_x->u.var在tmp_var中获取变量的值
+                        printf("[tag 12221] %d\n",tmp_x->u.var->type);
+                        GWARF_result tmp_x_var = traverse_get_value(tmp_x->u.var, tmp_var, old_var_list);  // 使用tmp_x->u.var在tmp_var中获取变量的值
                         if((!is_error(&tmp_x_var)) && (!is_space(&tmp_x_var))){  // 如果找到了，就赋值
                             GWARF_result tmp = assignment_statement(tmp_x->u.var, old_var_list, the_var, tmp_x_var);
                             if(tmp.base_name != NULL){  // 删除变量
@@ -2018,10 +2068,11 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                             if(is_error(&tmp) || is_space(&tmp)){
                                 return tmp;
                             }
-                            puts("tag 4");
                             assignment_statement(tmp_x->u.var, old_var_list, the_var, tmp);
+                            puts("FFWWWWWW");
                         }
                         else{
+                            puts("[1]warning!!!");
                             break;
                         }
                     }
@@ -2031,6 +2082,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
             }
         }
 
+        // 默认处理程序
         GWARF_result tmp = traverse(tmp_s->u.value, old_var_list, false);  // 不需要取__value__
         if(is_error(&tmp)){
             return tmp;
@@ -2077,7 +2129,6 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
             // 放入list中
             GWARF_result dict_tmp;
             dict_tmp.value = to_object(parameter_to_dict(tmp_s, old_var_list), old_var_list);  // 把所有name_value变成dict
-            puts("tag 5");
             assignment_statement(tmp_x->u.var, old_var_list, the_var, dict_tmp);
             assignment_type = 1;  // 进入根据实参赋值模式
             tmp_x = NULL;  // 已经到最后一个了
@@ -2089,7 +2140,6 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                 break;
             }
             assignment_type = 1;
-            puts("tag 6");
             assignment_statement(tmp_s->u.var, old_var_list, tmp_var, tmp);  // 先赋值到tmp_var上
             tmp_s = tmp_s->next;
         }
@@ -2115,7 +2165,6 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
             // 放入list中
             GWARF_result list_tmp;
             list_tmp.value = to_object(parameter_to_list(tmp_s, old_var_list), old_var_list);  // 把所有only_value变成list
-            puts("tag 7");
             assignment_statement(tmp_x->u.var, old_var_list, the_var, list_tmp);
             assignment_type = 1;  // 进入根据实参赋值模式
             tmp_x = tmp_x->next;
@@ -2131,7 +2180,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
             }
         }
         else if(assignment_type == 0){
-            puts("tag 8");
+            puts("[tag 1]");
             assignment_statement(tmp_x->u.var, old_var_list, the_var, tmp);
             tmp_x = tmp_x->next;  // get the next to iter
             tmp_s = tmp_s->next;
@@ -2160,12 +2209,11 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
             if(func_->is_class){
                 if(get.father != NULL){
                     father.value = *(get.father);
-                    puts("tag 9");
                     assignment_statement_core(tmp_x->u.var, old_var_list, the_var, father, true);
                     tmp_x = tmp_x->next;  // get the next to iter
                 }
                 else{
-                    printf("Warning!!!\n");
+                    printf("Warning!!![1]\n");
                     // TODO:: 抛出错误
                 }
             }
@@ -3740,6 +3788,23 @@ GWARF_result traverse_global(statement *the_statement, var_list *the_var){  // t
             break;  // off
         }
         result = read_statement_list(tmp, the_var);
+        if(result.u == error){  // Name Error错误
+            printf("%s", result.error_info);
+            break;
+        }
+        tmp = tmp->next;
+    }
+    return result;
+}
+
+GWARF_result traverse_get_value(statement *the_statement, var_list *the_var, var_list *out_var){  // traverse the statement[not break、broken、and others] but error
+    statement *tmp = the_statement;
+    GWARF_result result;
+    while(1){
+        if(tmp == NULL){
+            break;  // off
+        }
+        result = get_value(tmp, the_var, out_var);
         if(result.u == error){  // Name Error错误
             printf("%s", result.error_info);
             break;

@@ -1,17 +1,17 @@
 #ifndef MEM_INCLUDE
 #define MEM_INCLUDE
 
-#define reset_status(status) {status.is_parameter=false,status.is_func=false,status.is_list=false,status.is_dict=false,status.is_left=true,status.is_peq=false,status.is_for=false,status.dict_to_enter=false,status.ignore_enter=false,status.is_slice=false;}
+#define reset_status(status) {status.not_match_eq=false,status.not_match_tuple=false,status.not_match_call=false,status.match_list=false,status.match_dict=false,status.is_left=true,status.is_peq=false,status.is_for=false,status.dict_to_enter=false,status.ignore_enter=false,status.is_slice=false;}
 
 FILE *debug = NULL, *status_log = NULL, *token_log = NULL, *token_info = NULL;
 
 typedef struct p_status
 {
-    bool is_parameter;  // parameter模式不匹配 = 
-    bool is_func;  // func模式不匹配 ()
-    bool is_call;
-    bool is_list;  // 不匹配参数的POW和name_value
-    bool is_dict;  // 不匹配参数的MUL和非only_value选项以及用:取代=
+    bool not_match_eq;  // parameter模式不匹配 = 
+    bool not_match_tuple;  // func模式不匹配 ()
+    bool not_match_call;
+    bool match_list;  // 不匹配参数的POW和name_value
+    bool match_dict;  // 不匹配参数的MUL和非only_value选项以及用:取代=
     bool is_left;  // 是否为最左边的公式
     bool is_peq;  // 正在使用解包赋值
     bool is_for;  // for循环，用于排除COMMA的使用[top_exp]

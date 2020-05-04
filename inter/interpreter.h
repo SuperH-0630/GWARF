@@ -694,6 +694,7 @@ statement *pack_call_name(char *, statement *);
 
 GWARF_result traverse(statement *, var_list *, bool);
 GWARF_result traverse_global(statement *, var_list *);
+GWARF_result traverse_get_value(statement *, var_list *, var_list *);
 
 inter *get_inter();
 void login(var_list *the_var);
