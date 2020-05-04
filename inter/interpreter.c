@@ -280,11 +280,9 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             break;
         }
         case base_svar:{    // because the var tmp, we should ues a {} to make a block[name space] for the tmp var;
-            puts("[tag 2]");
             int from = 0;
             if(the_statement->code.base_svar.from == NULL){
                 from = 0;
-                puts("[tag 3]");
             }
             else{
                 GWARF_result tmp_result, tmp_object = traverse(the_statement->code.base_svar.from, the_var, false);
@@ -1922,6 +1920,9 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
         else if(is_space(&eq_object)){
             return eq_object;
         }
+        if(eq_object.value.type == NULL_value){  // NULL value 不赋值
+            return right_result;
+        }
         char *str = to_str_dict(eq_object.value, the_var).value.string;
         value = assignment_func(str, right_result, login_var, from);
         value.base_name = str;  // str来自value，本身就是malloc申请的内存
@@ -1933,6 +1934,9 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
         }
         else if(is_space(&eq_object)){
             return eq_object;
+        }
+        if(eq_object.value.type == NULL_value){  // NULL value 不赋值
+            return right_result;
         }
         char *str = to_str_dict(eq_object.value, the_var).value.string;
         value = assignment_func(str, right_result, login_var, 0);
@@ -2055,7 +2059,6 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                         tmp_x->next = NULL;  // 理论上没有下一个
                     }
                     else{
-                        printf("[tag 12221] %d\n",tmp_x->u.var->type);
                         GWARF_result tmp_x_var = traverse_get_value(tmp_x->u.var, tmp_var, old_var_list);  // 使用tmp_x->u.var在tmp_var中获取变量的值
                         if((!is_error(&tmp_x_var)) && (!is_space(&tmp_x_var))){  // 如果找到了，就赋值
                             GWARF_result tmp = assignment_statement(tmp_x->u.var, old_var_list, the_var, tmp_x_var);
@@ -2175,12 +2178,10 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                 if(tmp_s->type != only_value && tmp_s->type != put_args){
                     break;
                 }
-                puts("GO");
                 tmp_s = tmp_s->next;  // tmp_s迭代到only_value的最后一个
             }
         }
         else if(assignment_type == 0){
-            puts("[tag 1]");
             assignment_statement(tmp_x->u.var, old_var_list, the_var, tmp);
             tmp_x = tmp_x->next;  // get the next to iter
             tmp_s = tmp_s->next;
@@ -3783,6 +3784,12 @@ GWARF_result traverse(statement *the_statement, var_list *the_var, bool new){  /
 GWARF_result traverse_global(statement *the_statement, var_list *the_var){  // traverse the statement[not break、broken、and others] but error
     statement *tmp = the_statement;
     GWARF_result result;
+    if(the_statement == NULL){
+        result.u = statement_end;  // 正常设置[正常语句结束]
+        result.value.type = NULL_value;  // 默认设置
+        result.value.value.int_value = 0;  // 默认设置
+        goto return_back;
+    }
     while(1){
         if(tmp == NULL){
             break;  // off
@@ -3794,12 +3801,18 @@ GWARF_result traverse_global(statement *the_statement, var_list *the_var){  // t
         }
         tmp = tmp->next;
     }
-    return result;
+    return_back: return result;
 }
 
 GWARF_result traverse_get_value(statement *the_statement, var_list *the_var, var_list *out_var){  // traverse the statement[not break、broken、and others] but error
     statement *tmp = the_statement;
     GWARF_result result;
+    if(the_statement == NULL){
+        result.u = statement_end;  // 正常设置[正常语句结束]
+        result.value.type = NULL_value;  // 默认设置
+        result.value.value.int_value = 0;  // 默认设置
+        goto return_back;
+    }
     while(1){
         if(tmp == NULL){
             break;  // off
@@ -3811,7 +3824,7 @@ GWARF_result traverse_get_value(statement *the_statement, var_list *the_var, var
         }
         tmp = tmp->next;
     }
-    return result;
+    return_back: return result;
 }
 
 inter *get_inter(){

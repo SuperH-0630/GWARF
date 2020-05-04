@@ -546,11 +546,17 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
             new_status = *status;
             new_status.not_match_eq = true;
             new_status.not_match_tuple = true;
-            get_right_token(&new_status, list, top_exp, next);
-            if(next.type != NON_top_exp){  // 结尾分号
-                back_one_token(list, left);  // 分号忽略
-                back_again(list, next);
-                return;
+            token tmp_next;
+            get_right_token(&new_status, list, top_exp, tmp_next);
+            if(tmp_next.type != NON_top_exp){  // 结尾分号 -> xun
+                back_again(list, tmp_next);
+                next.type = NON_top_exp;
+                next.data_type = statement_value;
+                next.data.statement_value = make_statement();  // NULL返回None
+                puts("FFFFFFFFFf");
+            }
+            else{
+                next = tmp_next;
             }
 
             new_token = left;
