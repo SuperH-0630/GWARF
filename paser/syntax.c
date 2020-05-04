@@ -454,9 +454,9 @@ void def_class(p_status *status, token_node *list){
     if(def_t.type == DEF_PASER || def_t.type == CLASS_PASER){
         p_status new_status;
         new_status = *status;
-        new_status.is_func = true;
+        new_status.not_match_tuple = true;
+        new_status.not_match_call = true;
         get_right_token(&new_status,list,top_exp,name_t);  // 避免了top_exp把括号捕捉为call_back，不过，可以使用list设置status参数从而让call_back不捕捉[未实现]
-        new_status.is_func = false;
         if(name_t.type != NON_top_exp){  // 不是表达式
             paser_error("Don't get 'top_exp'");
         }
@@ -472,6 +472,7 @@ void def_class(p_status *status, token_node *list){
             if(parameter_t.type != NON_parameter){
                 paser_error("Don't get formal_parameter");
             }
+            printf("parameter_t = %d\n", parameter_t.data.parameter_list->u.var->type);
             get_pop_token(status, list, rb_t);
             printf("rb_t.type = %d\n", rb_t.type);
             if(rb_t.type != RB_PASER){
@@ -525,14 +526,14 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
         get_pop_token(status, list, comma);
         if(comma.type == (status->is_slice ? COLON_PASER : COMMA_PASER)){
             get_pop_token(status, list, before);
-            if(before.type == MUL_PASER && !status->is_peq){
-                if(status->is_dict){
+            if(before.type == MUL_PASER){
+                if(status->match_dict){
                     paser_error("dict shouldn't get '*'");
                 }
                 mode = put_args;
             }
-            else if(before.type == POW_PASER && !status->is_peq){
-                if(status->is_list){
+            else if(before.type == POW_PASER){
+                if(status->match_list){
                     paser_error("list shouldn't get '*'");
                 }
                 mode = put_kwargs;
@@ -543,9 +544,9 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
             }
             p_status new_status;
             new_status = *status;
-            new_status.is_parameter = true;
+            new_status.not_match_eq = true;
+            new_status.not_match_tuple = true;
             get_right_token(&new_status, list, top_exp, next);
-            new_status.is_parameter = false;
             if(next.type != NON_top_exp){  // 结尾分号
                 back_one_token(list, left);  // 分号忽略
                 back_again(list, next);
@@ -555,15 +556,16 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
             new_token = left;
             parameter *tmp = NULL;
             get_pop_token(status, list, eq);
-            if(eq.type == ((status->is_dict || status->is_peq) ? COLON_PASER : EQ_PASER)){  // name_value模式
-                if(status->is_list){
+            printf("eq.type = %d   %d\n", eq.type, status->is_peq);
+            if(eq.type == ((status->match_dict || status->is_peq) ? COLON_PASER : EQ_PASER)){  // name_value模式
+                if(status->match_list){
                     paser_error("list shouldn't get '='");
                 }
                 p_status new_status;
                 new_status = *status;
-                if(status->is_peq) new_status.is_parameter = true;
+                if(!status->match_dict) new_status.not_match_eq = true;  // dict使用了 : 代替 = 
+                new_status.not_match_tuple = true;
                 get_right_token(&new_status, list, top_exp, value_token);
-                if(status->is_peq) new_status.is_parameter = false;
                 if(value_token.type != NON_top_exp){
                     paser_error("Don't get a top_exp");
                     return;
@@ -573,7 +575,7 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
                 tmp->u.value = value_token.data.statement_value;
             }
             else{
-                if(status->is_dict){
+                if(status->match_dict){
                     paser_error("dict should get ':'[1]");
                 }
                 back_again(list,eq);  // 回退[如果使用back_one_token则会导致add_node在EQ的后面]
@@ -597,9 +599,9 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
         fprintf(status_log, "[info][grammar]  (formal_parameter)back one token to (top_exp)[**/*]\n");
         p_status new_status;
         new_status = *status;
-        new_status.is_parameter = true;
+        new_status.not_match_eq = true;
+        new_status.not_match_tuple = true;
         get_right_token(&new_status, list, top_exp, next);  // 不需要back_one_token
-        new_status.is_parameter = false;
         if(next.type != NON_top_exp){
             back_one_token(list, next);  // 往回[不匹配类型]
             return;
@@ -609,13 +611,13 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
         new_token.data.parameter_list = make_parameter_value(next.data.statement_value);
         new_token.data.parameter_list->u.var = new_token.data.parameter_list->u.value;
         if(left.type == POW_PASER){
-            if(status->is_list){
+            if(status->match_list){
                 paser_error("list shouldn't get '**'");
             }
             new_token.data.parameter_list->type = put_kwargs;
         }
         else{
-            if(status->is_dict){
+            if(status->match_dict){
                 paser_error("dict shouldn't get '*'");
             }
             new_token.data.parameter_list->type = put_args;
@@ -626,13 +628,11 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
     else{  // 模式1
         fprintf(status_log, "[info][grammar]  (formal_parameter)back one token to (top_exp)\n");
         back_one_token(list, left);
-        printf("left.type = %d\n", left.type);
         p_status new_status;
         new_status = *status;
-        new_status.is_parameter = true;
-        printf("status->is_parameter = %d\n", new_status.is_parameter);
+        new_status.not_match_eq = true;
+        new_status.not_match_tuple = true;
         get_base_token(&new_status, list, top_exp, next);
-        new_status.is_parameter = false;
         if(next.type != NON_top_exp){
             back_one_token(list, next);  // 往回[不匹配类型]
             return;
@@ -643,16 +643,15 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
 
         parameter *tmp = NULL;
         get_pop_token(status, list, eq);
-        printf("eq.type = %d\n", eq.type);
-        if(eq.type == ((status->is_dict || status->is_peq) ? COLON_PASER : EQ_PASER)){  // name_value模式
-            if(status->is_list){
+        if(eq.type == ((status->match_dict || status->is_peq) ? COLON_PASER : EQ_PASER)){  // name_value模式
+            if(status->match_list){
                 paser_error("list shouldn't get '='");
             }
             p_status new_status;
             new_status = *status;
-            if(status->is_peq) new_status.is_parameter = true;
+            new_status.not_match_tuple = true;
+            if(!status->match_dict) new_status.not_match_eq = true;
             get_right_token(&new_status, list, top_exp, value_token);
-            if(status->is_peq) new_status.is_parameter = false;
             if(value_token.type != NON_top_exp){
                 paser_error("Don't get a top_exp");
                 return;
@@ -662,7 +661,7 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
             new_token.data.parameter_list->type = name_value;
         }
         else{
-            if(status->is_dict){
+            if(status->match_dict){
                 paser_error("dict should get ':'[2]");
             }
             back_again(list,eq);  // 回退[如果使用back_one_token则会导致add_node在EQ的后面]
@@ -910,7 +909,7 @@ void var_ctrl_(p_status *status, token_node *list){
         {
             p_status new_status;
             new_status = *status;
-            new_status.is_list = true;  // 不捕捉,
+            new_status.not_match_tuple = true;  // 不捕捉,
             get_right_token(&new_status, list, top_exp, var);  // 取得base_var
             if(var.type != NON_top_exp && var.data.statement_value->type != base_var){
                 paser_error("Don't get var");
@@ -1182,7 +1181,7 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
         fprintf(status_log, "[info][grammar]  (eq_number)reduce right\n");
         get_pop_token(status, list, symbol);
 
-        if((symbol.type == EQ_PASER && !status->is_parameter) || symbol.type == AADD_PASER || symbol.type == ASUB_PASER || symbol.type == AMUL_PASER || symbol.type == ADIV_PASER|| 
+        if((symbol.type == EQ_PASER && !status->not_match_eq) || symbol.type == AADD_PASER || symbol.type == ASUB_PASER || symbol.type == AMUL_PASER || symbol.type == ADIV_PASER|| 
             symbol.type == AMOD_PASER || symbol.type == AINTDIV_PASER || symbol.type == APOW_PASER){  // 模式2/3
             get_right_token(status, list, hide_list, right);  // 回调右边
             if(right.type != NON_hide_list){
@@ -1237,34 +1236,33 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
         }
     }
     else{  // 模式1
-        // is_left将会在这里消亡为false
-        fprintf(status_log, "[info][grammar]  (bool_or)back one token to (bool_and)\n");
+        fprintf(status_log, "[info][grammar]  (eq_number)back one token to (hide_list)\n");
         back_one_token(list, left);
         get_base_token(status, list, hide_list, new_token);  // hide_list会处理is_left
         if(new_token.type != NON_hide_list){
             back_one_token(list, new_token);  // 往回[不匹配类型]
             return;
         }
-        if(status->is_left){  // 必须是在最左边
-            p_status new_status;
-            new_status = *status;
-            new_status.is_left = false;  // 设置为false，随后一切top_exp行为均不执行这一步骤
+        if(status->is_left){  // 必须是在最左边 -> 进入解包赋值
+            status->is_left = false;
+            
             token comma, p_left, eq_t, p_right, tmp;
             parameter *the_right;
-            get_pop_token(&new_status, list,comma);
+            get_pop_token(status, list,comma);
             if(comma.type == COMMA_PASER){  // a,b = [1,2]的赋值方式
                 back_one_token(list, new_token);  // 先把new_token和comma一起回退
                 back_again(list, comma);
                 
+                p_status new_status;
+                new_status = *status;
                 new_status.is_peq = true;
                 get_base_token(&new_status,list,formal_parameter,p_left);
                 if(p_left.type != NON_parameter){
                     paser_error("Dont get formal_parameter");
                 }
-                new_status.is_peq = false;
                 
                 get_pop_token(status, list, eq_t);
-                if(eq_t.type != EQ_PASER){  // 变成hide_list
+                if(eq_t.type != EQ_PASER || status->not_match_eq){  // 变成hide_list
                     back_again(list, eq_t);
                     statement *code_tmp =  make_statement();
                     code_tmp->type = base_tuple;
@@ -1287,7 +1285,7 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
                 }
                 else{
                     back_again(list, tmp);
-                    get_right_token(status,list,hide_list,p_right);
+                    get_right_token(status,list,hide_list,p_right);  // 把后面匹配为list
                     if(p_right.type != NON_hide_list){
                         paser_error("Don't get hide_list");
                     }
@@ -1321,14 +1319,14 @@ void hide_list(p_status *status, token_node *list){
     p_status new_status;
     new_status = *status;
 
-    new_status.is_left = false;
+    new_status.is_left = false;  // 接下去的运算 is_left均为false
     get_base_token(&new_status,list,lambda_,exp);
     new_status.is_left = old_is_left;
     if(exp.type != NON_lambda){
         back_one_token(list, exp);
         return;
     }
-    if(status->is_func + status->is_left + status->is_parameter + status->is_for + status->is_list + status->is_dict + status->is_call == 0){  // 几个会用到逗号的选项先排除
+    if(!status->not_match_tuple && !status->is_left && !status->is_for){  // 几个会用到逗号的选项先排除
         token comma;
         get_pop_token(status,list,comma);
         if(comma.type == COMMA_PASER){
@@ -1337,9 +1335,8 @@ void hide_list(p_status *status, token_node *list){
             back_again(list, comma);
             p_status new_status;
             new_status = *status;
-            new_status.is_list = true;
+            new_status.not_match_tuple = true;
             get_base_token(&new_status, list, formal_parameter, new_token);
-            new_status.is_list = false;
             if(new_token.type != NON_parameter){
                 paser_error("Don't get formal_parameter");
             }
@@ -2299,7 +2296,7 @@ void call_down(p_status *status, token_node *list){  // 因试分解
         if(lb_t.type == LI_PASER){
             p_status new_status;
             new_status = *status;
-            new_status.is_list = true;
+            new_status.not_match_tuple = true;
             get_right_token(&new_status, list, top_exp, parameter_t);  // 回调右边
             if(parameter_t.type != NON_top_exp){
                 paser_error("Don't get a top_exp");
@@ -2389,13 +2386,14 @@ void call_back_(p_status *status, token_node *list){  // 因试分解
         fprintf(status_log, "[info][grammar]  (call_back_)reduce right\n");
         get_pop_token(status, list, symbol);
 
-        if(symbol.type == LB_PASER && !status->is_func){
+        if(symbol.type == LB_PASER && !status->not_match_call){
             get_pop_token(status, list, rb_t);
             if(rb_t.type != RB_PASER){  // 带参数
                 back_again(list, rb_t);
                 p_status new_status = *status;  // 继承file_p等值
                 reset_status(new_status);  // 不会影响 *staus
-                new_status.is_call = true;  // 括号内忽略回车
+                new_status.not_match_tuple = true;
+                new_status.is_left = false;
                 get_right_token(&new_status,list,formal_parameter,parameter_t);
                 if(parameter_t.type != NON_parameter){
                     paser_error("Don't get formal_parameter");
@@ -2519,7 +2517,8 @@ void element(p_status *status, token_node *list){  // 数字归约
         token exp_token, rb, tmp_var;
         p_status new_status;
         new_status = *status;
-        new_status.is_list = true;  // 防止top_exp收走逗号
+        new_status.match_list = true;  // 防止top_exp收走逗号
+        new_status.not_match_tuple = true;
         new_status.ignore_enter = true;  // 括号内忽略回车
         get_right_token(&new_status, list, top_exp, exp_token);
         if(exp_token.type == RI_PASER){  //可以认定为空list
@@ -2624,9 +2623,9 @@ void list_(p_status *status, token_node *list){  // 数字归约
     if(gett.type == LI_PASER){  // var类型
         p_status new_status;
         new_status = *status;
-        new_status.is_list = true;
+        new_status.match_list = true;
+        new_status.not_match_tuple = true;
         get_right_token(&new_status,list,formal_parameter,list_core);
-        new_status.is_list = false;
         if(list_core.type == RI_PASER){  // 空列表
             base = NULL;
             goto make_list;
@@ -2676,9 +2675,10 @@ void dict_(p_status *status, token_node *list){  // 数字归约
     if(gett.type == LP_PASER){  // var类型
         p_status new_status;
         new_status = *status;
-        new_status.is_dict = true;
+        new_status.match_dict = true;
+        new_status.not_match_tuple = true;
         get_right_token(&new_status,list,formal_parameter,dict_core);
-        new_status.is_dict = false;
+
         if(dict_core.type == RP_PASER){  // 空列表
             base = NULL;
             goto make_dict;
