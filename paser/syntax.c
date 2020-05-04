@@ -548,12 +548,16 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
             new_status.not_match_tuple = true;
             token tmp_next;
             get_right_token(&new_status, list, top_exp, tmp_next);
-            if(tmp_next.type != NON_top_exp){  // 结尾分号 -> xun
-                back_again(list, tmp_next);
-                next.type = NON_top_exp;
-                next.data_type = statement_value;
-                next.data.statement_value = make_statement();  // NULL返回None
-                puts("FFFFFFFFFf");
+            if(tmp_next.type != NON_top_exp){  // 结尾分号 -> 虚解包
+                if(!status->is_args){
+                    back_again(list, tmp_next);
+                    next.type = NON_top_exp;
+                    next.data_type = statement_value;
+                    next.data.statement_value = make_statement();  // NULL返回None
+                }
+                else{
+                    paser_error("args shouldn't get * or ** with not var name");
+                }
             }
             else{
                 next = tmp_next;
@@ -607,10 +611,21 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
         new_status = *status;
         new_status.not_match_eq = true;
         new_status.not_match_tuple = true;
-        get_right_token(&new_status, list, top_exp, next);  // 不需要back_one_token
-        if(next.type != NON_top_exp){
-            back_one_token(list, next);  // 往回[不匹配类型]
-            return;
+        token tmp_next;
+        get_right_token(&new_status, list, top_exp, tmp_next);
+        if(tmp_next.type != NON_top_exp){  // 结尾分号 -> 虚解包
+            if(!status->is_args){
+                back_again(list, tmp_next);
+                next.type = NON_top_exp;
+                next.data_type = statement_value;
+                next.data.statement_value = make_statement();  // NULL返回None
+            }
+            else{
+                paser_error("args shouldn't get * or ** with not var name");
+            }
+        }
+        else{
+            next = tmp_next;
         }
         new_token.type = NON_parameter;
         new_token.data_type = parameter_list;
@@ -2400,6 +2415,7 @@ void call_back_(p_status *status, token_node *list){  // 因试分解
                 reset_status(new_status);  // 不会影响 *staus
                 new_status.not_match_tuple = true;
                 new_status.is_left = false;
+                new_status.is_args = true;
                 get_right_token(&new_status,list,formal_parameter,parameter_t);
                 if(parameter_t.type != NON_parameter){
                     paser_error("Don't get formal_parameter");

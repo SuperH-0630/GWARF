@@ -52,6 +52,7 @@ return x n  函数返回值x，返回n层
 ## GWARF 大事记
 * GWARF立项和完成了基本结构
 * GWARF重写了PASER解析器(至今)
-
+* 修改了解析器中的status的成员的意义，修复了call back的bug[具体参见commit message]
+* 虚解包，允许语法：a,b,\* = 1,2,3,4,5,6。也支持形参表，但不支持实参表。
 ## 关于GWARF
 最后更新时间 ： 2020年05月04日 广州
