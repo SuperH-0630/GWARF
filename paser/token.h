@@ -268,6 +268,7 @@ typedef enum token_type
     NON_lambda = -45,
     NON_point = -46,
     NON_import = -47,
+    NON_chose = -48,
 } token_type;
 
 typedef union token_data

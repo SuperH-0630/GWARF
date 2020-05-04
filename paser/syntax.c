@@ -43,6 +43,7 @@ void self_exp(p_status *status, token_node *list);
 void lambda_(p_status *status, token_node *list);
 void attribute(p_status *status, token_node *list);
 void import_include(p_status *status, token_node *list);
+void chose_exp_(p_status *status, token_node *list);
 void paser_error(char *text);
 
 /*
@@ -1328,7 +1329,6 @@ void hide_list(p_status *status, token_node *list){
     if(status->is_func + status->is_left + status->is_parameter + status->is_for + status->is_list + status->is_dict == 0){  // 几个会用到逗号的选项先排除
         token comma;
         get_pop_token(status,list,comma);
-        printf("comma.type = %d\n", comma.type);
         if(comma.type == COMMA_PASER){
             token new_token;
             back_one_token(list, exp);
@@ -1428,10 +1428,10 @@ void lambda_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: lambda_\n");
     token left, lambda_t, block_t, symbol, new_token;
     left = pop_node(list);
-    if(left.type != NON_bool_or){
+    if(left.type != NON_chose){
         back_one_token(list, left);
-        get_base_token(status, list, bool_or, left);
-        if(left.type != NON_bool_or){
+        get_base_token(status, list, chose_exp_, left);
+        if(left.type != NON_chose){
             back_one_token(list, left);
             return;
         }
@@ -1463,6 +1463,57 @@ void lambda_(p_status *status, token_node *list){
     new_token.type = NON_lambda;
     new_token.data_type = statement_value;
     new_token.data.statement_value = lambda_tmp;
+    add_node(list, new_token);
+    return;
+}
+
+// xxx if yyy else zzz
+void chose_exp_(p_status *status, token_node *list){
+    fprintf(status_log, "[info][grammar]  mode status: chose_exp\n");
+    token left, if_t, else_t, condition, right, new_token;
+    
+    left = pop_node(list);
+    if(left.type != NON_bool_or){
+        back_one_token(list, left);
+        get_base_token(status, list, bool_or, left);
+        if(left.type != NON_bool_or){
+            back_one_token(list, left);
+            return;
+        }
+    }
+    get_pop_token(status, list, if_t);
+    if(if_t.type != IF_PASER){  // 不是if else表达式
+        left.type = NON_chose;
+        back_one_token(list, left);
+        back_again(list, if_t);
+        return;
+    }
+
+    get_right_token(status, list, bool_or, condition);
+    if(condition.type != NON_bool_or){
+        paser_error("Do't get condition");
+    }
+
+    get_pop_token(status, list, else_t);
+    if(else_t.type != ELSE_PASER){  // 不是if else表达式
+        paser_error("Do't get else");
+        return;
+    }
+
+    get_right_token(status, list, bool_or, right);
+    if(right.type != NON_bool_or){
+        paser_error("Do't get bool or");
+    }
+
+    statement *chose_tmp =  make_statement();
+    chose_tmp->type = chose_exp;
+    chose_tmp->code.chose_exp.condition = condition.data.statement_value;
+    chose_tmp->code.chose_exp.true_do = left.data.statement_value;
+    chose_tmp->code.chose_exp.false_do = right.data.statement_value;
+    
+    new_token.type = NON_chose;
+    new_token.data_type = statement_value;
+    new_token.data.statement_value = chose_tmp;
     add_node(list, new_token);
     return;
 }
