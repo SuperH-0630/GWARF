@@ -30,46 +30,28 @@ rego  if马上跳到下一个条件的代码块并执行[无视条件]
 rewent  当前if代码块执行完成后跳到下一个代码块执行
 注意: else层的rego和rewent需要可以遗传
 
-default <var name> n  指定变量默认调用层级
-global <var name>  指定变量为全局变量
-nonlocal <var name>  指定变量为非本地变量
+default <var name> n,<var name> n  指定变量默认调用层级, 也可以把<var name> n写为[n]<var name>
+global <var name>,<var name>...  指定变量为全局变量
+nonlocal <var name>,<var name>...  指定变量为非本地变量
 
 + - * /  加减乘除运算符
 ** ^  指数运算
-log  对书运算
-~  sqrt  根试运算
-=  赋值运算[左边仅能为变量、索引(a[1])、和成员(a.name)]
+log  对数运算
+sqrt  根试运算
+=  赋值运算[左边为变量、索引(a[1])、和成员(a.name)]
 
-true True false False bool值[本质为bool对象的实例]
-None NULL null  空值[本质就是空值]
+True False bool值[本质为bool对象的实例]
+None 空值[本质就是空值]
 class  定义类
-def  定义函数
-return n  函数返回值，返回n层
+def  定义函数(函数本身就是function的实例)
+return x n  函数返回值x，返回n层
 
 'xxxx' "xxxx"  字符串
-
-同时支持：大括号语法和缩进语法
-如：
-def a()
-{
-...some to do...
-}
-和
-def a()
-    ....some to do...
-等效
-注意：不可以混用
-
-def a()
-{
-    ....some to do....
-}
-等效于
-def a()
-{
-{
-.... some to do....
-}
-}
-
 ```
+
+## GWARF 大事记
+* GWARF立项和完成了基本结构
+* GWARF重写了PASER解析器(至今)
+
+## 关于GWARF
+最后更新时间 ： 2020年05月04日 广州
