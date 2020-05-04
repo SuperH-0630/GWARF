@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "mem/mem.c"
-#include "paser/y.tab.c"
+#include "paser/paser.c"
 #include "inter/branch.c"
 #include "inter/cfunc.c"
 #include "inter/parameter.c"
@@ -12,8 +12,26 @@
 
 #include "inter/interpreter.c"
 
+void do_exit(void);
+void setup();
+
+void setup(){
+    debug = fopen("./debug.log", "w");  // 设置debug的位置
+    status_log = fopen("./status.log", "w");  // 设置debug的位置
+    token_log = fopen("./token.log", "w");  // 设置debug的位置
+    token_info = fopen("./tokenINFO.log", "w");  // 设置debug的位置
+}
+
+void do_exit(void){
+    fclose(debug);
+    fclose(status_log);
+    fclose(token_log);
+    fclose(token_info);
+}
 
 int main(){
+    atexit(*do_exit);
+    setup();
     global_inter = get_inter();  // 拿全局解释器[并声明全局变量]
     var_list *the_var = make_var_base(global_inter->global_var);
     statement_base = make_statement_base(global_inter->global_code);
@@ -37,8 +55,10 @@ void login(var_list *the_var){
     double_login_official(the_var, double_official_func, tmp_gobject->the_var);  // 注册double
     str_login_official(the_var, str_official_func, tmp_gobject->the_var);  // 注册str
     bool_login_official(the_var, bool_official_func, tmp_gobject->the_var);  // 注册bool
-    list_login_official(the_var, list_official_func, tmp_gobject->the_var);  // 注册list
-    dict_login_official(the_var, dict_official_func, tmp_gobject->the_var);  // 注册dict
+    
+    class_object *tmp_tuple = tuple_login_official(the_var, tuple_official_func, tmp_gobject->the_var);
+    list_login_official(the_var, list_official_func, tmp_tuple->the_var);  // 注册list
+    dict_login_official(the_var, dict_official_func, tmp_tuple->the_var);  // 注册dict
 
     // 注册错误类型
     class_object *tmp_BaseException = BaseException_login_official(the_var, BaseException_official_func, tmp_object->the_var);
@@ -49,7 +69,4 @@ void login(var_list *the_var){
     AssignmentException_login_official(the_var, tmp_Exception->the_var);
 }
 
-// 编译指令：cd "/home/songzihuan/文档/CProject/gwarf/" && gcc gwarf.c -lm -o gwarf && "/home/songzihuan/文档/CProject/gwarf/"gwarf
-// yacc和lex：cd ./paser && yacc -d gwarf_yacc.y && lex gwarf_lex.l
-// 合并编译：cd "/home/songzihuan/文档/CProject/gwarf/" && cd ./paser && yacc --verbose -d gwarf_yacc.y && lex gwarf_lex.l && cd .. && gcc gwarf.c -lm -o gwarf && "/home/songzihuan/文档/CProject/gwarf/"gwarf
-// --verbose 用于yacc生成.output文件
+// 合并编译：cd "/home/songzihuan/文档/CProject/gwarf/" && gcc gwarf.c -lm -o gwarf && "/home/songzihuan/文档/CProject/gwarf/"gwarf

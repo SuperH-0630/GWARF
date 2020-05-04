@@ -1,18 +1,22 @@
+#include "../mem/mem.h"
+
 #ifndef _INTERPRETER_H
 #define _INTERPRETER_H
 #define MAX_SIZE (1024)
-
-#define malloc(size) safe_malloc(size)
-#define free(p) p=safe_free(p)
-#define realloc(p,size) safe_realloc(p,size)
-#define memcpy(p1,p2,size) safe_memcpy(p1,p2,size)
 
 #define false 0
 #define true 1
 #define bool int
 
+#define assignment_statement(the_statement,the_var,login_var,right_result) assignment_statement_core(the_statement,the_var,login_var,right_result,0)
 #define read_statement_list(the_statement,the_var) read_statement(the_statement,the_var,NULL)
 #define run_func(base_the_var,the_var,name) run_func_core(base_the_var,the_var,name,false)
+
+#define push_statement(base,token) \
+do{ \
+statement *tmp = find_statement_list(0, base); \
+append_statement(tmp, token.data.statement_value); \
+}while(0);
 
 // the type of data(GWARF_value)
 typedef enum{
@@ -82,6 +86,7 @@ typedef struct statement{
         operation,  // such as + - * /
         base_var,  // return var value by name
         base_value,  // return an GWARF_value
+        base_tuple,
         base_list,  // return an GWARF_value->LIST_value
         base_dict,  // return an GWARF_value->DICT_value
         while_cycle,  // while
@@ -199,7 +204,7 @@ typedef struct statement{
 
         struct{
             struct statement *base_var;  // a[b] --> a
-            struct statement *child_var;  // a[b] --> b
+            struct parameter *child_var;  // a[b,c,d] --> b,c,d
         } down;
 
         struct{
@@ -209,6 +214,10 @@ typedef struct statement{
         struct{
             parameter *value;  // [1,2,3,4] -> to_list
         } base_list;
+
+        struct{
+            parameter *value;  // [1,2,3,4] -> to_tuple
+        } base_tuple;
 
         struct{
             parameter *right;  // 实参
@@ -451,7 +460,7 @@ typedef enum{
     __bitright__func = 38,
     __bitrightr__func = 39,
     __bitnot__func = 40,
-    __assignment__func = 41,
+    __assignment__func = 41,  // 赋值左值，对于int类型等赋值时需要复制
 } official_func_type;
 
 typedef struct func{
@@ -520,7 +529,8 @@ GWARF_result sqrt_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result assignment_func(char *, GWARF_result, var_list *, int);
 GWARF_result equal_func(GWARF_result, GWARF_result, var_list *, int);
 GWARF_result negative_func(GWARF_result, var_list *);
-GWARF_result assignment_statement(statement *, var_list *, var_list *, GWARF_result);
+GWARF_result assignment_statement_core(statement *, var_list *, var_list *, GWARF_result, bool);
+GWARF_result assignment_statement_value(statement *, var_list *, var_list *, GWARF_value);
 GWARF_result not_func(GWARF_result, var_list *);
 GWARF_result or_func(statement *, statement *, var_list *);
 GWARF_result and_func(statement *, statement *, var_list *);
@@ -596,6 +606,10 @@ GWARF_result str_official_func(func *the_func, parameter *tmp_s, var_list *the_v
 // bool内置类
 class_object *bool_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list);
 GWARF_result bool_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var);
+
+// list内置类
+class_object *tuple_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list);
+GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var);
 
 // list内置类
 class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *), var_list *father_var_list);

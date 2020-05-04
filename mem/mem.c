@@ -1,11 +1,13 @@
 #undef malloc
+#undef calloc
 #undef free
 #undef realloc
 #undef memcpy
 
-void *safe_malloc(size_t size){
+
+void *safe_calloc(size_t size, size_t num){
     void *tmp;
-    tmp = calloc(size,1);
+    tmp = calloc(size, num);
     if(tmp != NULL){
         return tmp;
     }
@@ -27,7 +29,12 @@ void *safe_free(void *p){  // 安全的释放
 
 void *safe_realloc(void *p, size_t size){
     void *tmp;
-    tmp = realloc(p, size);
+    if(p != NULL){
+        tmp = realloc(p, size);
+    }
+    else{
+        tmp = safe_calloc(size, 1);
+    }
     if(tmp != NULL){
         return tmp;
     }
