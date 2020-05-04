@@ -9,6 +9,7 @@ typedef struct p_status
 {
     bool is_parameter;  // parameter模式不匹配 = 
     bool is_func;  // func模式不匹配 ()
+    bool is_call;
     bool is_list;  // 不匹配参数的POW和name_value
     bool is_dict;  // 不匹配参数的MUL和非only_value选项以及用:取代=
     bool is_left;  // 是否为最左边的公式

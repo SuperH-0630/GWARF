@@ -121,6 +121,7 @@ typedef struct statement{
         assert_e,
         chose_exp,
         pack_eq,
+        base_svar,
     } type;  // the statement type
 
     union
@@ -196,6 +197,11 @@ typedef struct statement{
             char *var_name;  // return var
             struct statement *from;  // from where [double->int]
         } base_var;
+
+        struct{
+            struct statement *var;  // return var
+            struct statement *from;  // from where [double->int]
+        } base_svar;
 
         struct{
             struct statement *base_var;  // a.b --> a
@@ -356,8 +362,6 @@ typedef struct statement{
 // ------------------------- result value
 
 typedef struct GWARF_result{
-    GWARF_value value;
-    GWARF_value *father;  // a.b --> a
     enum{
         return_def=1,
         statement_end,
@@ -371,8 +375,11 @@ typedef struct GWARF_result{
         code_rewent,
         error,
     } u;  // the result type[from where]
+    GWARF_value value;
+    GWARF_value *father;  // a.b --> a
     int return_times;  // return用
     char *error_info;  // 输出的错误信息
+    char *base_name;  // 返回名字
 } GWARF_result;
 
 // ------------------------- default_var [记录默认变量[层]] 用于default语句
