@@ -8,6 +8,8 @@ void match_text(char, word_paser *, char *);
 void match_text_s(char, word_paser *, char *);
 void match_var(char p, word_paser *paser);
 void match_str(char p, word_paser *paser);
+void match_comment(char p, word_paser *paser);
+void match_enter(char p, word_paser *paser);
 
 int is_in(int, p_status *status);
 extern void paser_error(char *);
@@ -45,8 +47,8 @@ int is_in(int element, p_status *status){  // 检查某个值是否在数组中
     if(status->ignore_enter && element == ENTER_PASER){  // 忽略ENTER
         return 1;
     }
-    int list[] = {SPACE_PASER,IGNORE_ENTER};
-    int len = 2;
+    int list[] = {SPACE_PASER,IGNORE_ENTER,COMMENT_PASER};
+    int len = 3;
     for(int i=0;i<len;i++){
         if(list[i] == element){
             return 1;
@@ -85,9 +87,12 @@ int paser(int *index, p_status *status){
         match_double(p, global_paser[DOUBLE_PASER]);
         match_var(p, global_paser[VAR_PASER]);
 
+        // 匹配注释
+        match_comment(p, global_paser[COMMENT_PASER]);
+        match_enter(p, global_paser[IGNORE_ENTER]);  // 忽略空格，匹配\ + <enter>，使用is_in忽略
+
         // 常规文本解析器
         match_text(p, global_paser[ENTER_PASER], "\n");
-        match_text(p, global_paser[IGNORE_ENTER], "\\\n");  // 忽略空格，匹配\ + <enter>，使用is_in忽略
         match_text(p, global_paser[SPACE_PASER], " ");
         match_text(p, global_paser[ADD_PASER], "+");
         match_text(p, global_paser[SUB_PASER], "-");
@@ -379,6 +384,65 @@ void match_var(char p, word_paser *paser){  // 匹配一个var
             }
             else{
                 paser->status = S_END;
+            }
+        }
+    }
+    UNUSE_SET;
+}
+
+void match_comment(char p, word_paser *paser){  // 匹配一个注释
+    if(USE){
+        GET_LEN(paser);  // 设置len并且处理NULL
+        if(paser->status == START){
+            if(p == '#'){
+                SET_TEXT(paser);  // 设置text
+                paser->status = 1;
+            }
+            else{
+                paser->status = NOTMATCH;
+            }
+        }
+        else if(paser->status == 1){  // 如果是#!代表多行注释
+            if(p == '!'){
+                paser->status = 2;
+            }
+            else{
+                paser->status = 3;
+                if(p == '#'){  // 注释结束
+                    paser->status = WAIT_END;
+                }
+                else if(p == '\n'){
+                    paser->status = END;
+                }
+            }
+        }
+        else{
+            if(p == '#'){  // 注释结束
+                paser->status = WAIT_END;
+            }
+            else if(p == '\n' && paser->status == 3){
+                paser->status = END;
+            }
+        }
+    }
+    UNUSE_SET;
+}
+
+void match_enter(char p, word_paser *paser){  // 匹配一个强力注释
+    if(USE){
+        GET_LEN(paser);  // 设置len并且处理NULL
+        if(paser->status == START){
+            if(p == '\\'){
+                SET_TEXT(paser);  // 设置text
+                paser->status = 1;
+            }
+            else{
+                paser->status = NOTMATCH;
+            }
+        }
+        else{
+            if(p == '\n'){
+                paser->status = WAIT_END;
             }
         }
     }
