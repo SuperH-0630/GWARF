@@ -311,7 +311,7 @@ class_object *make_object(var_list *the_var, var_list *father_var_list){
         append_by_var_list(class_tmp->the_var, father_var_list);  // int、double、str等内置类需要继承gobject类
     }
 
-    class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
+    // class_tmp->out_var = copy_var_list(the_var);  // make class var list with out var
     return class_tmp;
 }
 
