@@ -406,11 +406,14 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             func_tmp->parameter_list = the_statement->code.def.parameter_list;
             func_tmp->the_var = copy_var_list(the_var);
             func_tmp->type = customize;  // func by user
-            if(the_login_var != the_var){  // 定义为类方法
-                func_tmp->is_class = true;
+            if((the_login_var != the_var && the_statement->code.def.type == auto_func) || the_statement->code.def.type == action){  // 定义为类方法
+                func_tmp->is_class = action;
+            }
+            else if(the_statement->code.def.type == cls){
+                func_tmp->is_class = cls;
             }
             else{
-                func_tmp->is_class = false;
+                func_tmp->is_class = function;
             }
             func_tmp->is_lambda = false;
 
@@ -428,7 +431,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             func_tmp->parameter_list = the_statement->code.lambda_func.parameter_list;
             func_tmp->the_var = copy_var_list(the_var);
             func_tmp->type = customize;  // func by user
-            func_tmp->is_class = false;
+            func_tmp->is_class = auto_func;
             func_tmp->is_lambda = true;
 
             return_value.value.type = FUNC_value;
@@ -2003,7 +2006,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                         tmp_x = tmp_x->next;  // get the next to iter
                     }
                     else{
-                        printf("warning!!![3]\n");
+                        printf("warning!!![3]\n");  // 形参不足
                         break;
                     }
 
@@ -2207,15 +2210,34 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
         if(func_->type == customize){  // 用户定义的方法
             // 赋值self
             GWARF_result father;
-            if(func_->is_class){
+            if(func_->is_class == action){
                 if(get.father != NULL){
                     father.value = *(get.father);
                     assignment_statement_core(tmp_x->u.var, old_var_list, the_var, father, true);
                     tmp_x = tmp_x->next;  // get the next to iter
                 }
                 else{
-                    printf("Warning!!![1]\n");
+                    printf("Warning!!![4]\n");
                     // TODO:: 抛出错误
+                }
+            }
+            else if(func_->is_class == cls){
+                if(get.father != NULL){
+                    if(get.father->type == CLASS_value){
+                        father.value = *(get.father);
+                    }
+                    else{
+                        class_object *class_tmp = malloc(sizeof(class_object));
+                        father.value.value.class_value = class_tmp;
+                        father.value.type = CLASS_value;
+                        class_tmp->the_var = get.father->value.object_value->cls;
+                        class_tmp->out_var = old_var_list;
+                    }
+                    assignment_statement_core(tmp_x->u.var, old_var_list, the_var, father, true);
+                    tmp_x = tmp_x->next;  // get the next to iter
+                }
+                else{
+                    printf("Warning!!![1]\n");
                 }
             }
 
@@ -2271,8 +2293,12 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                 GWARF_result father;
                 father.value.type = OBJECT_value;
                 father.value.value.object_value = object_tmp;
-                if(func_->is_class  == 1){
+                if(func_->is_class == action){
                     assignment_statement_core(tmp_x->u.var, old_var_list, the_var, father, true);
+                    tmp_x = tmp_x->next;  // get the next to iter
+                }
+                else if(func_->is_class == cls){
+                    assignment_statement_core(tmp_x->u.var, old_var_list, the_var, get, true);  // 传入父亲
                     tmp_x = tmp_x->next;  // get the next to iter
                 }
 
@@ -2321,7 +2347,6 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
         result.value = tmp;
     }
     else if(get.value.type == OBJECT_value){  // 调用__call__方法
-        puts("WWWW");
         // 执行__init__
         var *call_tmp = find_var(get.value.value.object_value->the_var, 0, "__call__");
         if(call_tmp != NULL){  // 找到了__init__
@@ -2336,10 +2361,18 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
             // // printf("----new address = %d----\n", the_var);
 
             if(func_->type == customize){  // 用户定义的方法
-                GWARF_result father;
-                father.value.type = OBJECT_value;
-                father.value.value.object_value = get.value.value.object_value;
-                if(func_->is_class  == 1){
+                if(func_->is_class == action){
+                    assignment_statement_core(tmp_x->u.var, old_var_list, the_var, get, true);
+                    tmp_x = tmp_x->next;  // get the next to iter
+                }
+                else if(func_->is_class == cls){
+                    GWARF_result father;
+                    class_object *class_tmp = malloc(sizeof(class_object));
+
+                    father.value.type = CLASS_value;
+                    father.value.value.class_value = class_tmp;
+                    class_tmp->the_var = get.value.value.object_value->cls;
+                    class_tmp->out_var = old_var_list;
                     assignment_statement_core(tmp_x->u.var, old_var_list, the_var, father, true);
                     tmp_x = tmp_x->next;  // get the next to iter
                 }

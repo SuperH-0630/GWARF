@@ -172,6 +172,7 @@ int paser(int *index, p_status *status){
         match_text(p, global_paser[IMPORT_PASER], "import");
         match_text(p, global_paser[INCLUDE_PASER], "include");
         match_text(p, global_paser[SVAR_PASER], "$");
+        match_text(p, global_paser[FUNC_PASER], "function");
 
         *index = check_list(global_paser, p, status);  // 检查解析结果
 

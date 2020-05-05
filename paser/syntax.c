@@ -127,7 +127,7 @@ void command(p_status *old_status, token_node *list){  // 多项式
         get_stop_token(status, list);
         push_statement(statement_base, new_token);
     }
-    else if(left.type == DEF_PASER || left.type == CLASS_PASER){
+    else if(left.type == DEF_PASER || left.type == FUNC_PASER || left.type == CLASS_PASER){
         fprintf(status_log, "[info][grammar]  (command)back one token to (def_class)\n");
         back_one_token(list, left);
         get_base_token(&status, list, def_class, new_token);
@@ -451,7 +451,7 @@ void def_class(p_status *status, token_node *list){
     parameter *p_list;
 
     def_t = pop_node(list);
-    if(def_t.type == DEF_PASER || def_t.type == CLASS_PASER){
+    if(def_t.type == DEF_PASER || def_t.type == FUNC_PASER || def_t.type == CLASS_PASER){
         p_status new_status;
         new_status = *status;
         new_status.not_match_tuple = true;
@@ -490,11 +490,12 @@ void def_class(p_status *status, token_node *list){
         }
 
         statement *def_tmp =  make_statement();
-        if(def_t.type == DEF_PASER){
+        if(def_t.type == DEF_PASER || def_t.type == FUNC_PASER){
             def_tmp->type = def;
             def_tmp->code.def.var = name_t.data.statement_value;
             def_tmp->code.def.parameter_list = p_list;
             def_tmp->code.def.done = block_t.data.statement_value;
+            def_tmp->code.def.type = (def_t.type == DEF_PASER) ? auto_func : function;
         }
         else{
             def_tmp->type = set_class;
