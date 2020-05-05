@@ -483,6 +483,7 @@ typedef struct func{
     struct parameter *parameter_list;  // def parameter
     struct statement *done;  // def to do
     struct var_list *the_var;  // func会记录the_var，因为不同地方调用var如果var链不统一那就会很乱
+    struct var_list *self;  // func会记录自己的self信息(可以类似于class和object那样调用)，对于setup func会合并到the_var中
     int is_class;
     bool is_lambda;
 } func;

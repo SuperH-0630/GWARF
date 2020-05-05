@@ -345,6 +345,9 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             else if(base_the_var.type == OBJECT_value){
                 return_value = traverse((the_statement->code).point.child_var, base_the_var.value.object_value->the_var, false);
             }
+            else if(base_the_var.type == FUNC_value){
+                return_value = traverse((the_statement->code).point.child_var, base_the_var.value.func_value->self, false);
+            }
             else{  // 其他类型
                 goto the_break;
             }
@@ -405,6 +408,8 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             func_tmp->done = the_statement->code.def.done;
             func_tmp->parameter_list = the_statement->code.def.parameter_list;
             func_tmp->the_var = copy_var_list(the_var);
+            func_tmp->self = make_var_base(make_hash_var());
+
             func_tmp->type = customize;  // func by user
             if((the_login_var != the_var && the_statement->code.def.type == auto_func) || the_statement->code.def.type == action){  // 定义为类方法
                 func_tmp->is_class = action;
@@ -430,6 +435,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             func_tmp->done = the_statement->code.lambda_func.done;
             func_tmp->parameter_list = the_statement->code.lambda_func.parameter_list;
             func_tmp->the_var = copy_var_list(the_var);
+            func_tmp->self = make_var_base(make_hash_var());
             func_tmp->type = customize;  // func by user
             func_tmp->is_class = auto_func;
             func_tmp->is_lambda = true;
@@ -1810,7 +1816,7 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
         value.base_name = left;
     }
     else if(the_statement->type == point){  // 通过point赋值
-        GWARF_result tmp_result = traverse(the_statement->code.point.base_var, login_var, false);  // 不用取value
+        GWARF_result tmp_result = traverse(the_statement->code.point.base_var, the_var, false);  // 不用取value
         if(is_error(&tmp_result)){  // Name Error错误
             // puts("STOP:: Name No Found!");
             return tmp_result;
@@ -1819,40 +1825,21 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
             return tmp_result;
         }
         GWARF_value base_the_var = tmp_result.value;  // 不用取value
-        if((the_statement->code.point.child_var)->type == base_var){
-            char *left = (the_statement->code.point.child_var)->code.base_var.var_name;
-            int from = 0;
-            if((the_statement->code.point.child_var)->code.base_var.from == NULL){
-                from = 0;
-            }
-            else{
-                GWARF_result tmp_result, tmp_object = traverse((the_statement->code.point.child_var)->code.base_var.from, the_var, false);
-                if(is_error(&tmp_object)){  // Name Error错误
-                    // puts("STOP:: Name No Found!");
-                    return tmp_object;
-                }
-                else if(is_space(&tmp_object)){
-                    return tmp_object;
-                }
-                tmp_result = get__value__(&(tmp_object.value), the_var);  // 从object中提取value
-                if(tmp_result.value.type == INT_value){
-                    from = tmp_result.value.value.int_value;
-                }
-                else if(tmp_result.value.type == NUMBER_value){
-                    from = (int)tmp_result.value.value.double_value;
-                }
-                else{
-                    from = 0;
-                }
-            }
-            value = assignment_func(left, right_result, base_the_var.value.object_value->the_var, from);
+        if(base_the_var.type == CLASS_value){
+            value = assignment_statement(the_statement->code.point.child_var, the_var, base_the_var.value.class_value->the_var, right_result);
+        }
+        else if(base_the_var.type == OBJECT_value){
+            value = assignment_statement(the_statement->code.point.child_var, the_var, base_the_var.value.object_value->the_var, right_result);
+        }
+        else if(base_the_var.type == FUNC_value){
+            value = assignment_statement(the_statement->code.point.child_var, the_var, base_the_var.value.func_value->self, right_result);
         }
         else{
             goto the_else;
         }
     }
     else if(the_statement->type == down){  // 通过down赋值
-        GWARF_result tmp_result = traverse(the_statement->code.down.base_var, login_var, false), get;  // 不用取value
+        GWARF_result tmp_result = traverse(the_statement->code.down.base_var, the_var, false), get;  // 不用取value
         if(is_error(&tmp_result)){  // Name Error错误
             // puts("STOP:: Name No Found!");
             return tmp_result;

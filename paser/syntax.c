@@ -504,6 +504,7 @@ void def_class(p_status *status, token_node *list){
                 break;
                 case FUNC_PASER:
                 def_tmp->code.def.type = function;
+                break;
                 case ACTION_PASER:
                 def_tmp->code.def.type = action;
                 break;
