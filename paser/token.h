@@ -3,7 +3,7 @@
 
 #include "../inter/interpreter.h"
 
-#define MAX_PASER_SIZE 88
+#define MAX_PASER_SIZE 90
 #define INT_PASER 0
 #define DOUBLE_PASER 1
 #define ENTER_PASER 2
@@ -92,6 +92,8 @@
 #define FUNC_PASER 85
 #define CLS_PASER 86
 #define ACTION_PASER 87
+#define SETUP_PASER 88
+#define INLINE_PASER 89
 
 // 获取并返回一个token
 #define get_pop_token(status,list,new_token) \
@@ -225,6 +227,10 @@ typedef enum token_type
     LAMBDA = LAMBDA_PASER,
     POINT = POINT_PASER,
     SVAR = SVAR_PASER,
+    FUNC = FUNC_PASER,
+    CLS = CLS_PASER,
+    ACTION = ACTION_PASER,
+    SETUP = SETUP_PASER,
 
     // 特殊符号
     BAD_token = -2,

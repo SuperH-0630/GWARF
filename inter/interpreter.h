@@ -290,12 +290,14 @@ typedef struct statement{
             parameter *parameter_list;  // def parameter
             struct statement *done;  // def to do
             struct statement *var;  // 方法的名字
+            struct statement *setup;  // setup to do
             enum {
                 function,
                 action,
                 cls,
                 auto_func,
             } type;  // 静态函数[function] or 实例函数[action] or 类方法[cls] or 默认[def]
+            bool is_inline;  // inline函数不设单独的func_var空间
         } def;
 
         struct{

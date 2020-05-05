@@ -127,7 +127,7 @@ void command(p_status *old_status, token_node *list){  // 多项式
         get_stop_token(status, list);
         push_statement(statement_base, new_token);
     }
-    else if(left.type == DEF_PASER || left.type == FUNC_PASER || left.type == CLASS_PASER || left.type == CLS_PASER || left.type == ACTION_PASER){
+    else if(left.type == DEF_PASER || left.type == FUNC_PASER || left.type == CLASS_PASER || left.type == CLS_PASER || left.type == ACTION_PASER || left.type == SETUP_PASER || left.type == INLINE_PASER){
         fprintf(status_log, "[info][grammar]  (command)back one token to (def_class)\n");
         back_one_token(list, left);
         get_base_token(&status, list, def_class, new_token);
@@ -451,7 +451,55 @@ void def_class(p_status *status, token_node *list){
     parameter *p_list;
 
     def_t = pop_node(list);
-    if(def_t.type == DEF_PASER || def_t.type == FUNC_PASER || def_t.type == CLASS_PASER || def_t.type == CLS_PASER || def_t.type == ACTION_PASER){
+    if(def_t.type == SETUP_PASER){  // 动态函数
+        get_right_token(status,list,block_,block_t);  // 获取初始化信息
+        if(block_t.type != NON_block){  // 不是表达式
+            paser_error("Don't get '{'");
+        }
+        token next, main_func;
+        again:
+        get_pop_token(status, list, next);
+        if(next.type == DEF_PASER || next.type == FUNC_PASER || next.type == CLS_PASER || next.type == ACTION_PASER){  // 许可的loop
+            back_one_token(list, next);
+            get_base_token(status, list, def_class, main_func);  // 不需要safe_get_token
+            if(main_func.type != NON_def){
+                goto error;
+            }
+            new_token = main_func;
+            new_token.data.statement_value->code.def.setup = block_t.data.statement_value;  // 设置setup
+        }
+        else if(next.type == ENTER_PASER){
+            goto again;
+        }
+        else{
+            error: paser_error("Don't get main func for setup");
+        }
+        new_token.type = NON_def;
+        new_token.data_type = statement_value;
+        add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+        return;
+    }
+    if(def_t.type == INLINE_PASER){  // 动态函数
+        token next, main_func;
+        get_pop_token(status, list, next);
+        if(next.type == DEF_PASER || next.type == FUNC_PASER || next.type == CLS_PASER || next.type == ACTION_PASER){  // 许可的loop
+            back_one_token(list, next);
+            get_base_token(status, list, def_class, main_func);  // 不需要safe_get_token
+            if(main_func.type != NON_def){
+                goto error_inline;
+            }
+            new_token = main_func;
+            new_token.data.statement_value->code.def.is_inline = true;  // 设置setup
+        }
+        else{
+            error_inline: paser_error("Don't func for inline func");
+        }
+        new_token.type = NON_def;
+        new_token.data_type = statement_value;
+        add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+        return;
+    }
+    else if(def_t.type == DEF_PASER || def_t.type == FUNC_PASER || def_t.type == CLASS_PASER || def_t.type == CLS_PASER || def_t.type == ACTION_PASER){
         p_status new_status;
         new_status = *status;
         new_status.not_match_tuple = true;
@@ -495,6 +543,8 @@ void def_class(p_status *status, token_node *list){
             def_tmp->code.def.var = name_t.data.statement_value;
             def_tmp->code.def.parameter_list = p_list;
             def_tmp->code.def.done = block_t.data.statement_value;
+            def_tmp->code.def.setup = NULL;
+            def_tmp->code.def.is_inline = false;
             switch(def_t.type){
                 case DEF_PASER:
                 def_tmp->code.def.type = auto_func;

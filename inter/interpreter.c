@@ -119,6 +119,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             break;
         }
         case call:
+            puts("statr call");
             return_value = call_back(the_statement, the_var);
             break;
         case while_cycle:
@@ -346,7 +347,10 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 return_value = traverse((the_statement->code).point.child_var, base_the_var.value.object_value->the_var, false);
             }
             else if(base_the_var.type == FUNC_value){
+                var_list *old_tmp = base_the_var.value.func_value->self->next;
+                base_the_var.value.func_value->self->next = NULL;  // 暂时断链
                 return_value = traverse((the_statement->code).point.child_var, base_the_var.value.func_value->self, false);
+                base_the_var.value.func_value->self->next = old_tmp;  // 恢复
             }
             else{  // 其他类型
                 goto the_break;
@@ -404,12 +408,27 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
         case def:{
             GWARF_result func_value;
             func *func_tmp = malloc(sizeof(func));
-
             func_tmp->done = the_statement->code.def.done;
             func_tmp->parameter_list = the_statement->code.def.parameter_list;
-            func_tmp->the_var = copy_var_list(the_var);
             func_tmp->self = make_var_base(make_hash_var());
+            if(the_statement->code.def.is_inline){  // inline函数
+                func_tmp->the_var = NULL;
+                goto make_func;  // 跳过其他设置
+            }
 
+            func_tmp->the_var = copy_var_list(the_var);
+            if(the_statement->code.def.setup != NULL){  // 存在setup的内容
+                append_by_var_list(func_tmp->self, func_tmp->the_var);
+                GWARF_result tmp;
+                tmp = traverse(the_statement->code.def.setup, func_tmp->self, false);
+                if(is_error(&tmp) || is_space(&tmp)){
+                    return_value = tmp;
+                    goto func_break;
+                }
+                func_tmp->the_var = func_tmp->self;
+            }
+
+            make_func:
             func_tmp->type = customize;  // func by user
             if((the_login_var != the_var && the_statement->code.def.type == auto_func) || the_statement->code.def.type == action){  // 定义为类方法
                 func_tmp->is_class = action;
@@ -427,7 +446,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             printf("the_statement->code.def.var = %d\n", the_statement->code.def.var->type);
             assignment_statement_core(the_statement->code.def.var, the_var, the_login_var, func_value, true);  // 注册函数到指定的位置
             // 无返回值
-            break;
+            func_break: break;
         }
         case lambda_func:{
             func *func_tmp = malloc(sizeof(func));
@@ -2186,13 +2205,17 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
     if(get.value.type == FUNC_value){
         func *func_ = get.value.value.func_value;
         parameter *tmp_x = func_->parameter_list;
-        the_var = func_->the_var;
+        bool new_var_list = false;
+        if(func_->the_var != NULL){
+            the_var = func_->the_var;  // inline则不需要设置
+            new_var_list = true;
+        }
         // tmp_x:形参，tmp_s:实参
 
-        // printf("----address = %d----\n", the_var);
-        hash_var *tmp = make_hash_var();  // base_var
-        the_var = append_var_list(tmp, the_var);
-        // printf("----new address = %d----\n", the_var);
+        if(new_var_list){
+            hash_var *tmp = make_hash_var();  // base_var
+            the_var = append_var_list(tmp, the_var);
+        }
 
         if(func_->type == customize){  // 用户定义的方法
             // 赋值self
@@ -2250,7 +2273,9 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
         else{
             result = func_->paser(func_, tmp_s, the_var, get, old_var_list);
         }
-        the_var = free_var_list(the_var);  // free the new var
+        if(new_var_list){
+            the_var = free_var_list(the_var);  // free the new var
+        }
         goto back;
     }
     else if(get.value.type == CLASS_value){  // 生成实例
