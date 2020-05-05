@@ -2019,7 +2019,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                             return tmp;
                         }
                         printf("tmp_x->u.var->type = %d\n", tmp_x->u.var->type);
-                        assignment_statement(tmp_x->u.var, old_var_list,the_var, tmp);  // 赋值
+                        assignment_statement(tmp_x->u.var, the_var, the_var, tmp);  // 赋值
                         tmp_x = tmp_x->next;  // get the next to iter
                     }
                     else if(tmp_x->type == put_args){  // args默认为[]
@@ -2030,7 +2030,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                         if(list_init != NULL){
                             func_result.value = list_init->value;
                         }
-                        assignment_statement(tmp_x->u.var, old_var_list, the_var,call_back_core(func_result, old_var_list, NULL));  // old_var_list用于计算from等
+                        assignment_statement(tmp_x->u.var, the_var, the_var,call_back_core(func_result, old_var_list, NULL));  // old_var_list用于计算from等
                         tmp_x = tmp_x->next;  // get the next to iter
                     }
                     else{
@@ -2086,13 +2086,13 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                         }
                         GWARF_result dict_result = GWARF_result_reset;
                         dict_result.value = dict_tmp;
-                        assignment_statement(tmp_x->u.var, old_var_list, the_var, dict_result);
+                        assignment_statement(tmp_x->u.var, the_var, the_var, dict_result);
                         tmp_x->next = NULL;  // 理论上没有下一个
                     }
                     else{
-                        GWARF_result tmp_x_var = traverse_get_value(tmp_x->u.var, tmp_var, old_var_list);  // 使用tmp_x->u.var在tmp_var中获取变量的值
+                        GWARF_result tmp_x_var = traverse_get_value(tmp_x->u.var, tmp_var, the_var);  // 使用tmp_x->u.var在tmp_var中获取变量的值
                         if((!is_error(&tmp_x_var)) && (!is_space(&tmp_x_var))){  // 如果找到了，就赋值
-                            GWARF_result tmp = assignment_statement(tmp_x->u.var, old_var_list, the_var, tmp_x_var);
+                            GWARF_result tmp = assignment_statement(tmp_x->u.var, the_var, the_var, tmp_x_var);  // tmp_x的外部变量使用the_var
                             if(tmp.base_name != NULL){  // 删除变量
                                 del_var_var_list(tmp_var, 0, tmp.base_name);  // 从中删除变量
                             }
@@ -2102,8 +2102,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                             if(is_error(&tmp) || is_space(&tmp)){
                                 return tmp;
                             }
-                            assignment_statement(tmp_x->u.var, old_var_list, the_var, tmp);
-                            puts("FFWWWWWW");
+                            assignment_statement(tmp_x->u.var, the_var, the_var, tmp);
                         }
                         else{
                             puts("[1]warning!!!");
@@ -2163,7 +2162,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
             // 放入list中
             GWARF_result dict_tmp = GWARF_result_reset;
             dict_tmp.value = to_object(parameter_to_dict(tmp_s, old_var_list), old_var_list);  // 把所有name_value变成dict
-            assignment_statement(tmp_x->u.var, old_var_list, the_var, dict_tmp);
+            assignment_statement(tmp_x->u.var, the_var, the_var, dict_tmp);
             assignment_type = 1;  // 进入根据实参赋值模式
             tmp_x = NULL;  // 已经到最后一个了
             tmp_s = NULL;
