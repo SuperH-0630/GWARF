@@ -485,7 +485,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 }
             }
 
-            class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  //TODO::class_tmp->out_var = copy_var_list(the_var);
+            class_tmp->out_var = copy_var_list(the_var);  //TODO::class_tmp->out_var = copy_var_list(the_var);
             // 执行done
             statement *tmp = the_statement->code.set_class.done;
             GWARF_result result;
@@ -924,7 +924,7 @@ GWARF_result import_func(statement *the_statement, var_list *the_var){
     
     class_object *class_tmp = malloc(sizeof(class_object));
     class_tmp->the_var = new_the_var;  // make class var list
-    class_tmp->out_var = append_by_var_list(class_tmp->the_var, copy_var_list(the_var));  // make class var list with out var
+    class_tmp->out_var = copy_var_list(the_var);  // make class var list with out var
 
     import_result.value.value.class_value = class_tmp;
     assignment_statement_core(the_statement->code.import_class.var, the_var, the_var, import_result, true);

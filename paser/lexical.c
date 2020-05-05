@@ -174,6 +174,7 @@ int paser(int *index, p_status *status){
         match_text(p, global_paser[SVAR_PASER], "$");
         match_text(p, global_paser[FUNC_PASER], "function");
         match_text(p, global_paser[CLS_PASER], "cls");
+        match_text(p, global_paser[ACTION_PASER], "action");
 
         *index = check_list(global_paser, p, status);  // 检查解析结果
 
