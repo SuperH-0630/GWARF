@@ -8,9 +8,11 @@
 #define true 1
 #define bool int
 
-#define assignment_statement(the_statement,the_var,login_var,right_result) assignment_statement_core(the_statement,the_var,login_var,right_result,0)
-#define read_statement_list(the_statement,the_var) read_statement(the_statement,the_var,NULL)
+#define assignment_statement(the_statement,the_var,login_var,right_result) assignment_statement_core(the_statement,the_var,login_var,right_result,0,auto_public)
+#define read_statement_list(the_statement,the_var) read_statement(the_statement,the_var,NULL,lock)
 #define run_func(base_the_var,the_var,name) run_func_core(base_the_var,the_var,name,false)
+#define GWARF_value_reset {.type=NULL_value,.value.int_value=0,.lock_token=base}
+#define GWARF_result_reset {.value.type=NULL_value,.value.value.int_value=0,.value.lock_token=base}
 
 #define push_statement(base,token) \
 do{ \
@@ -35,6 +37,10 @@ typedef enum{
 // all value is GWARF_value
 typedef struct GWARF_value{
     GWARF_value_type type;
+    enum {
+        base,
+        lock,
+    } lock_token;  // 代表object、class等的访问权限 之对self和cls有效
     union
     {
         double double_value;  // NUMBER
@@ -68,6 +74,11 @@ typedef struct parameter{
 // ------------------------- var
 
 typedef struct var{
+    enum{  // 代表变量访问权限
+        auto_public,  // 自动权限
+        public,
+        protect,
+    } lock;
     char *name;  // var name
     GWARF_value value;
     struct var *next;  // for list
@@ -196,6 +207,11 @@ typedef struct statement{
         struct{
             char *var_name;  // return var
             struct statement *from;  // from where [double->int]
+            enum {
+                auto_token,  // 默认情况下auto_token是具有权限访问protetc base_var的，但不具有权限修改protect var，使用point运算符时会修改auto_token
+                public_token,
+                protect_token,
+            } lock_token;  // 如果用于赋值，则是新变量的权限，如果用于读取则是访问的权限 [默认情况 base_var访问权限不受限制，point的时候会更正访问权限]
         } base_var;
 
         struct{
@@ -542,10 +558,10 @@ GWARF_result div_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result pow_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result log_func(GWARF_result, GWARF_result, var_list *);
 GWARF_result sqrt_func(GWARF_result, GWARF_result, var_list *);
-GWARF_result assignment_func(char *, GWARF_result, var_list *, int);
+GWARF_result assignment_func(char *, GWARF_result, var_list *, int, int);
 GWARF_result equal_func(GWARF_result, GWARF_result, var_list *, int);
 GWARF_result negative_func(GWARF_result, var_list *);
-GWARF_result assignment_statement_core(statement *, var_list *, var_list *, GWARF_result, bool);
+GWARF_result assignment_statement_core(statement *, var_list *, var_list *, GWARF_result, bool, int);
 GWARF_result assignment_statement_value(statement *, var_list *, var_list *, GWARF_value);
 GWARF_result not_func(GWARF_result, var_list *);
 GWARF_result or_func(statement *, statement *, var_list *);
@@ -665,7 +681,7 @@ statement *find_statement_list(int, statement_list *);
 statement_list *free_statement_list(statement_list *);
 
 var *make_var();
-void append_var(char *name, GWARF_value, var *);
+void append_var(char *name, GWARF_value, var *, int);
 void free_var(var *);
 var *get_var(char *, var *);
 void del_var(char *, var *);
@@ -680,13 +696,13 @@ var_list *append_by_var_list(var_list *, var_list *);
 var_list *free_var_list(var_list *);
 int get_var_list_len(var_list *);
 var *find_var(var_list *,int , char *);
-void add_var(var_list *,int , char *, GWARF_value);
+void add_var(var_list *,int , char *, GWARF_value, int);
 void del_var_var_list(var_list *,int, char *);
 var_list *copy_var_list(var_list *);
 
 hash_var *make_hash_var();
 unsigned int time33(char *);
-int login_node(char *, GWARF_value, hash_var *);
+int login_node(char *, GWARF_value, hash_var *, int);
 var *find_node(char *, hash_var *);
 void del_var_node(char *, hash_var *);
 

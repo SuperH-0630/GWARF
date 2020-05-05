@@ -9,10 +9,11 @@ var *make_var(){  // make var with base
     tmp = malloc(sizeof(var));  // get an address for base var
     tmp->name = "";  // can't get the name for the real var
     tmp->next = NULL;
+    tmp->lock = auto_public;
     return tmp;
 }
 
-void append_var(char *name, GWARF_value value, var *base_var){
+void append_var(char *name, GWARF_value value, var *base_var, int lock){
 
     int break_ = 1;  // get var[2] or not[1]
     var *tmp = base_var;  // iter var
@@ -29,16 +30,26 @@ void append_var(char *name, GWARF_value value, var *base_var){
         tmp = tmp->next;  // get the next to iter
     }
     if(break_ == 2){
-        tmp->value = value;
+        if(tmp->lock == lock || tmp->lock != protect){  // 检查是否具有修改的权限
+            tmp->value = value;
+            if(lock != auto_public){  // 检查是否可以改变权限
+                tmp->lock = lock;
+            }
+        }
         return;
     }
 
     var *new_tmp = make_var();
     tmp->next = new_tmp;
+    if(lock == auto_public){
+        tmp->lock = public;  // 使用自动权限
+    }
+    else{
+        new_tmp->lock = lock;
+    }
     new_tmp->name = malloc(sizeof(name));
     strcpy(new_tmp->name, name);
     new_tmp->value = value;
-
 }
 
 void free_var(var *base_var){  // free the address
@@ -107,14 +118,14 @@ unsigned int time33(char *key){
     return (hash & 0x7FFFFFFF) % MAX_SIZE;
 }
 
-int login_node(char *name, GWARF_value value, hash_var *the_hash_var){
+int login_node(char *name, GWARF_value value, hash_var *the_hash_var, int lock){
     unsigned int index = time33(name);
     var *base_node = the_hash_var->hash[index];  // 根据下标拿base节点
     if(base_node == NULL){  // 生成基本节点
         the_hash_var->hash[index] = make_var();
         base_node = the_hash_var->hash[index];
     }
-    append_var(name, value, base_node);
+    append_var(name, value, base_node, lock);
     return 0;
 }
 
@@ -280,7 +291,7 @@ var *find_var(var_list *var_base,int from, char *name){  // find var by func get
     }
 }
 
-void add_var(var_list *var_base,int from, char *name, GWARF_value value){  // add var by func append_var in var_list[iter to find]
+void add_var(var_list *var_base,int from, char *name, GWARF_value value, int lock){  // add var by func append_var in var_list[iter to find]
     var_list *start = var_base;
     var *return_var;
     from += get_default(name, var_base->default_list);
@@ -290,7 +301,7 @@ void add_var(var_list *var_base,int from, char *name, GWARF_value value){  // ad
         }
         start = start->next;
     }
-    login_node(name, value, start->hash_var_base);
+    login_node(name, value, start->hash_var_base, lock);
 }
 
 void del_var_var_list(var_list *var_base,int from, char *name){

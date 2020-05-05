@@ -2564,7 +2564,7 @@ void element(p_status *status, token_node *list){  // 数字归约
         add_node(list, new_token);  // 压入节点
         return;
     }
-    else if(gett.type == VAR_PASER){  // a
+    else if(gett.type == VAR_PASER || gett.type == PROTECT_PASER || gett.type == PUBLIC_PASER){  // a
         back_one_token(list, gett);
         get_base_token(status, list, var_token, new_token);
         if(new_token.type != NON_base_var){
@@ -2840,16 +2840,40 @@ var_token : VAR
 void var_token(p_status *status, token_node *list){  // 数字归约
     fprintf(status_log, "[info][grammar]  mode status: var_token\n");
     token gett, new_token;
-
+    int lock = auto_token;
     gett = pop_node(list);  // 取得一个token
-    if(gett.type == VAR_PASER){  // var类型
+    if(gett.type == VAR_PASER || gett.type == PROTECT_PASER || gett.type == PUBLIC_PASER){  // var类型
+        if(gett.type != VAR_PASER){
+            switch (gett.type)
+            {
+            case PROTECT_PASER:
+                lock = protect_token;
+                break;
+            
+            case PUBLIC_PASER:
+                lock = public_token;
+                break;
+
+            default:
+                break;
+            }
+            get_pop_token(status, list, gett);
+            if(gett.type != COLON_PASER){
+                paser_error("Don't get ':'");
+            }
+            get_pop_token(status, list, gett);
+            if(gett.type != VAR_PASER){
+                paser_error("Don't get var");
+            }
+        }
         new_token.type = NON_base_var;
 
         statement *code_tmp =  make_statement();
         code_tmp->type = base_var;
         code_tmp->code.base_var.var_name = gett.data.text;
         code_tmp->code.base_var.from = NULL;
-        
+        code_tmp->code.base_var.lock_token = lock;
+
         new_token.data.statement_value = code_tmp;
         new_token.data_type = statement_value;
 
@@ -2876,7 +2900,7 @@ void paser_value(p_status *status, token_node *list){  // 数字归约
     if(gett.type == INT_PASER){  // int类型
         new_token.type = NON_base_value;
 
-        GWARF_value tmp_value;
+        GWARF_value tmp_value = GWARF_value_reset;
         tmp_value.type = INT_value;
         tmp_value.value.int_value = atoi(gett.data.text);
 
@@ -2891,7 +2915,7 @@ void paser_value(p_status *status, token_node *list){  // 数字归约
     else if(gett.type == DOUBLE_PASER){
         new_token.type = NON_base_value;
 
-        GWARF_value tmp_value;
+        GWARF_value tmp_value = GWARF_value_reset;
         tmp_value.type = NUMBER_value;
         tmp_value.value.double_value = atof(gett.data.text);
 
@@ -2905,7 +2929,7 @@ void paser_value(p_status *status, token_node *list){  // 数字归约
     else if(gett.type == STR_PASER){
         new_token.type = NON_base_value;
 
-        GWARF_value tmp_value;
+        GWARF_value tmp_value = GWARF_value_reset;
         tmp_value.type = STRING_value;
         if(gett.data.text == NULL){
             tmp_value.value.string = "";
@@ -2927,7 +2951,7 @@ void paser_value(p_status *status, token_node *list){  // 数字归约
     else if(gett.type == TRUE_PASER || gett.type == FALSE_PASER){
         new_token.type = NON_base_value;
 
-        GWARF_value tmp_value;
+        GWARF_value tmp_value = GWARF_value_reset;
         tmp_value.type = BOOL_value;
         if(gett.type == TRUE_PASER){
             tmp_value.value.bool_value = true;

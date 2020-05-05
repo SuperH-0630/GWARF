@@ -3,7 +3,7 @@
 
 #include "../inter/interpreter.h"
 
-#define MAX_PASER_SIZE 90
+#define MAX_PASER_SIZE 92
 #define INT_PASER 0
 #define DOUBLE_PASER 1
 #define ENTER_PASER 2
@@ -94,6 +94,8 @@
 #define ACTION_PASER 87
 #define SETUP_PASER 88
 #define INLINE_PASER 89
+#define PROTECT_PASER 90
+#define PUBLIC_PASER 91
 
 // 获取并返回一个token
 #define get_pop_token(status,list,new_token) \
