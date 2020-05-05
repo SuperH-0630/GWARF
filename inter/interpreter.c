@@ -352,7 +352,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 return_value = traverse((the_statement->code).point.child_var, base_the_var.value.func_value->self, false);
                 base_the_var.value.func_value->self->next = old_tmp;  // 恢复
             }
-            else{  // 其他类型
+            else{  // 其他类型 均返回NULL
                 goto the_break;
             }
             if(is_error(&return_value)){  // Name Error错误
@@ -1854,7 +1854,7 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
             value = assignment_statement(the_statement->code.point.child_var, the_var, base_the_var.value.func_value->self, right_result);
         }
         else{
-            goto the_else;
+            return value;  // 对NONE的point运算均为NULL
         }
     }
     else if(the_statement->type == down){  // 通过down赋值

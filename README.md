@@ -61,5 +61,6 @@ return x n  函数返回值x，返回n层
 * 设置了函数静态空间，允许对函数使用point运算符。
 * 设置了setup函数，函数可以使用setup关键词进行初始化。
 * 设置inline函数，函数执行的时候将不会产生单独的``var_list``，也不会记录``var_list``。
+* 设置对None的point运算均为None
 ## 关于GWARF
 最后更新时间 ： 2020年05月05日 广州
