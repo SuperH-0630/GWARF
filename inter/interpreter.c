@@ -2211,14 +2211,10 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
             // 赋值self
             GWARF_result father;
             if(func_->is_class == action){
-                if(get.father != NULL){
+                if(get.father != NULL && get.father->type == OBJECT_value){
                     father.value = *(get.father);
                     assignment_statement_core(tmp_x->u.var, old_var_list, the_var, father, true);
                     tmp_x = tmp_x->next;  // get the next to iter
-                }
-                else{
-                    printf("Warning!!![4]\n");
-                    // TODO:: 抛出错误
                 }
             }
             else if(func_->is_class == cls){
