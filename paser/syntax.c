@@ -2194,7 +2194,7 @@ self_exp : hide_list
          | self_exp FADD
          | self_exp FSUB
 */
-void self_exp(p_status *status, token_node *list){  // 因试分解
+void self_exp(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: self_exp\n");
     token left, right, new_token;
     parameter *p_list;
@@ -2238,14 +2238,87 @@ void self_exp(p_status *status, token_node *list){  // 因试分解
     }
     else{  // a--和a++
         back_one_token(list,left);
-        get_base_token(status, list, attribute, new_token);
-        if(new_token.type != NON_point){
+        get_base_token(status, list, call_back_, new_token);
+        if(new_token.type != NON_call){
             back_one_token(list, new_token);  // 往回[不匹配类型]
             return;
         }
         new_token.type = NON_self_exp;
         add_node(list, new_token);
         return self_exp(status, list);  // 回调自己
+    }
+}
+
+/*
+call_back_ : bool_or
+           | call_back_ LB RB
+*/
+void call_back_(p_status *status, token_node *list){  // 因试分解
+    fprintf(status_log, "[info][grammar]  mode status: call_back_\n");
+    token left, symbol, rb_t, new_token, parameter_t;
+    parameter *p_list;
+
+    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
+    if(left.type == NON_call){
+        fprintf(status_log, "[info][grammar]  (call_back_)reduce right\n");
+        get_pop_token(status, list, symbol);
+
+        if(symbol.type == LB_PASER && !status->not_match_call){
+            get_pop_token(status, list, rb_t);
+            if(rb_t.type != RB_PASER){  // 带参数
+                back_again(list, rb_t);
+                p_status new_status = *status;  // 继承file_p等值
+                reset_status(new_status);  // 不会影响 *staus
+                new_status.not_match_tuple = true;
+                new_status.is_left = false;
+                new_status.is_args = true;
+                get_right_token(&new_status,list,formal_parameter,parameter_t);
+                if(parameter_t.type != NON_parameter){
+                    paser_error("Don't get formal_parameter");
+                }
+                printf("rb_t.type = %d\n", rb_t.type);
+                get_pop_token(status, list, rb_t);
+                if(rb_t.type != RB_PASER){
+                    paser_error("Don't get ')'[2]");
+                }
+                p_list = parameter_t.data.parameter_list;
+            }
+            else{
+                p_list = NULL;  // 没参数
+            }
+
+            // 逻辑操作
+            new_token.type = NON_call;
+            new_token.data_type = statement_value;
+
+            statement *code_tmp =  make_statement();
+            code_tmp->type = call;
+            code_tmp->code.call.func = left.data.statement_value;
+            code_tmp->code.call.parameter_list = p_list;
+            
+            new_token.data.statement_value = code_tmp;
+            add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+            return call_back_(status, list);  // 回调自己
+        }
+        else{  // 递归跳出
+            // 回退，也就是让下一次pop的时候读取到的是left而不是symbol
+            fprintf(status_log, "[info][grammar]  (call_back_)out\n");
+            back_one_token(list, left);
+            back_again(list, symbol);
+            return;
+        }
+    }
+    else{  // 模式1
+        fprintf(status_log, "[info][grammar]  (call_back_)back one token to (attribute)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, attribute, new_token);
+        if(new_token.type != NON_point){
+            back_one_token(list, new_token);  // 往回[不匹配类型]
+            return;
+        }
+        new_token.type = NON_call;
+        add_node(list, new_token);
+        return call_back_(status, list);  // 回调自己
     }
 }
 
@@ -2381,89 +2454,16 @@ void call_down(p_status *status, token_node *list){  // 因试分解
         }
     }
     else{  // 模式1
-        fprintf(status_log, "[info][grammar]  (call_down)back one token to (call_back_)\n");
-        back_one_token(list, left);
-        get_base_token(status, list, call_back_, new_token);
-        if(new_token.type != NON_call){
-            back_one_token(list, new_token);  // 往回[不匹配类型]
-            return;
-        }
-        new_token.type = NON_call_down;
-        add_node(list, new_token);
-        return call_down(status, list);  // 回调自己
-    }
-}
-
-/*
-call_back_ : bool_or
-           | call_back_ LB RB
-*/
-void call_back_(p_status *status, token_node *list){  // 因试分解
-    fprintf(status_log, "[info][grammar]  mode status: call_back_\n");
-    token left, symbol, rb_t, new_token, parameter_t;
-    parameter *p_list;
-
-    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
-    if(left.type == NON_call){
-        fprintf(status_log, "[info][grammar]  (call_back_)reduce right\n");
-        get_pop_token(status, list, symbol);
-
-        if(symbol.type == LB_PASER && !status->not_match_call){
-            get_pop_token(status, list, rb_t);
-            if(rb_t.type != RB_PASER){  // 带参数
-                back_again(list, rb_t);
-                p_status new_status = *status;  // 继承file_p等值
-                reset_status(new_status);  // 不会影响 *staus
-                new_status.not_match_tuple = true;
-                new_status.is_left = false;
-                new_status.is_args = true;
-                get_right_token(&new_status,list,formal_parameter,parameter_t);
-                if(parameter_t.type != NON_parameter){
-                    paser_error("Don't get formal_parameter");
-                }
-                printf("rb_t.type = %d\n", rb_t.type);
-                get_pop_token(status, list, rb_t);
-                if(rb_t.type != RB_PASER){
-                    paser_error("Don't get ')'[2]");
-                }
-                p_list = parameter_t.data.parameter_list;
-            }
-            else{
-                p_list = NULL;  // 没参数
-            }
-
-            // 逻辑操作
-            new_token.type = NON_call;
-            new_token.data_type = statement_value;
-
-            statement *code_tmp =  make_statement();
-            code_tmp->type = call;
-            code_tmp->code.call.func = left.data.statement_value;
-            code_tmp->code.call.parameter_list = p_list;
-            
-            new_token.data.statement_value = code_tmp;
-            add_node(list, new_token);  // 压入节点[弹出3个压入1个]
-            return call_back_(status, list);  // 回调自己
-        }
-        else{  // 递归跳出
-            // 回退，也就是让下一次pop的时候读取到的是left而不是symbol
-            fprintf(status_log, "[info][grammar]  (call_back_)out\n");
-            back_one_token(list, left);
-            back_again(list, symbol);
-            return;
-        }
-    }
-    else{  // 模式1
-        fprintf(status_log, "[info][grammar]  (call_back_)back one token to (element)\n");
+        fprintf(status_log, "[info][grammar]  (call_down)back one token to (element)\n");
         back_one_token(list, left);
         get_base_token(status, list, element, new_token);
         if(new_token.type != NON_element){
             back_one_token(list, new_token);  // 往回[不匹配类型]
             return;
         }
-        new_token.type = NON_call;
+        new_token.type = NON_call_down;
         add_node(list, new_token);
-        return call_back_(status, list);  // 回调自己
+        return call_down(status, list);  // 回调自己
     }
 }
 

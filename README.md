@@ -50,9 +50,11 @@ return x n  函数返回值x，返回n层
 ```
 
 ## GWARF 大事记
-* GWARF立项和完成了基本结构
-* GWARF重写了PASER解析器(至今)
-* 修改了解析器中的status的成员的意义，修复了call back的bug[具体参见commit message]
+* GWARF立项和完成了基本结构。
+* GWARF重写了PASER解析器。
+* 修改了解析器中的status的成员的意义，修复了call back的bug[具体参见commit message]。
 * 虚解包，允许语法：a,b,\* = 1,2,3,4,5,6。也支持形参表，但不支持实参表。
+* 使用function定义静态方法(def)可以定义auto方法(如果是class内则定义为action方法，否则定义为def方法)。
+* 优先级bug：调用类方法只能用(xxx.zzz)()的方式，为优先级错误[已经修复]。(至今)
 ## 关于GWARF
-最后更新时间 ： 2020年05月04日 广州
+最后更新时间 ： 2020年05月05日 广州
