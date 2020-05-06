@@ -433,10 +433,8 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 base_the_var.value.func_value->self->next = old_tmp;  // 恢复
             }
             else{  // 其他类型 均返回NULL
-                puts("[tag 8]");
                 goto the_break;
             }
-            puts("[tag 4]");
             if(is_error(&return_value)){  // Name Error错误
                 // puts("STOP:: Name No Found!");
                 goto the_break;
@@ -445,7 +443,6 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 goto the_break;
             }
 
-            puts("[tag 9]");
             return_value.father = malloc(sizeof(return_value.father));  // 记录father的值
             *(return_value.father) = base_the_var;
 
@@ -1733,6 +1730,21 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
         case APOW_func:
             value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(pow_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
             break;
+        case ABITAND_func:
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(bit_and_func(left_result, right_result, the_var, global_inter).value, global_inter),global_inter);
+            break;
+        case ABITOR_func:
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(bit_or_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
+            break;
+        case ABITNOTOR_func:
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(bit_notor_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
+            break;
+        case ABITRIGHT_func:
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(bit_right_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
+            break;
+        case ABITLEFT_func:
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(bit_left_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
+            break;
         case LADD_func:  // a++
             right_result.u = statement_end;
             right_result.value.type = INT_value;
@@ -2566,6 +2578,28 @@ GWARF_result and_func(statement *left_statement, statement *right_statement, var
     return_back: return return_value;
 }
 
+// ---------  SBOOL
+// 1- and
+// 2- or
+// 3- not or(不能相等)
+// 4- is(相等)
+// 5- left ==> right
+// 6- left <== right
+GWARF_result sbool_func(statement *left_statement, statement *right_statement, var_list *the_var, int type, inter *global_inter){  // the func for add and call from read_statement_list
+    GWARF_result return_value, get;  // the result by call read_statement_list with left and right = GWARF_result_reset; value is the result for and
+    return_value.u = statement_end;
+    return_value.value.type = BOOL_value;
+
+    bool left = to_bool(traverse(left_statement, the_var, false, global_inter).value, global_inter), right = to_bool(traverse(right_statement, the_var, false, global_inter).value, global_inter);
+    if((left + right == 2 && type == 1) || (left + right >= 1 && type == 2) || (left != right && type == 3) || (left == right && type == 4)|| ((!left || right) && type == 5) || ((left || !right) && type == 4)){
+        return_value.value.value.bool_value = true;
+    }
+    else{
+        return_value.value.value.bool_value = false;
+    }
+    return_back: return return_value;
+}
+
 // ---------  OR
 GWARF_result or_func(statement *left_statement, statement *right_statement, var_list *the_var, inter *global_inter){  // the func for add and call from read_statement_list
     GWARF_result return_value, get;  // the result by call read_statement_list with left and right = GWARF_result_reset; value is the result for and
@@ -2579,6 +2613,52 @@ GWARF_result or_func(statement *left_statement, statement *right_statement, var_
     else{
         right = to_bool(traverse(right_statement, the_var, false, global_inter).value, global_inter);
         if(right){
+            return_value.value.value.bool_value = true;
+        }
+        else{
+            return_value.value.value.bool_value = false;
+        }
+    }
+    return_back: return return_value;
+}
+
+// ---------  SLEFT
+// left =:> right
+GWARF_result sleft_func(statement *left_statement, statement *right_statement, var_list *the_var, inter *global_inter){  // the func for add and call from read_statement_list
+    GWARF_result return_value, get;  // the result by call read_statement_list with left and right = GWARF_result_reset; value is the result for and
+    return_value.u = statement_end;
+    return_value.value.type = BOOL_value;
+
+    bool left = to_bool(traverse(left_statement, the_var, false, global_inter).value, global_inter), right;
+    if(left){
+        right = to_bool(traverse(right_statement, the_var, false, global_inter).value, global_inter);
+        if(right){
+            return_value.value.value.bool_value = true;
+        }
+        else{
+            return_value.value.value.bool_value = false;
+        }
+    }
+    else{
+        return_value.value.value.bool_value = true;
+    }
+    return_back: return return_value;
+}
+
+// ---------  SRIGHT
+// left <:= right
+GWARF_result sright_func(statement *left_statement, statement *right_statement, var_list *the_var, inter *global_inter){  // the func for add and call from read_statement_list
+    GWARF_result return_value, get;  // the result by call read_statement_list with left and right = GWARF_result_reset; value is the result for and
+    return_value.u = statement_end;
+    return_value.value.type = BOOL_value;
+
+    bool left = to_bool(traverse(left_statement, the_var, false, global_inter).value, global_inter), right;
+    if(left){
+        return_value.value.value.bool_value = true;
+    }
+    else{
+        right = to_bool(traverse(right_statement, the_var, false, global_inter).value, global_inter);
+        if(!right){
             return_value.value.value.bool_value = true;
         }
         else{

@@ -3,7 +3,7 @@
 
 #include "../inter/interpreter.h"
 
-#define MAX_PASER_SIZE 93
+#define MAX_PASER_SIZE 106
 #define INT_PASER 0
 #define DOUBLE_PASER 1
 #define ENTER_PASER 2
@@ -97,6 +97,19 @@
 #define PROTECT_PASER 90
 #define PUBLIC_PASER 91
 #define PRIVATE_PASER 92
+#define ABITAND_PASER 93
+#define ABITOR_PASER 94
+#define ABITNOTOR_PASER 95
+#define ALEFT_PASER 96
+#define ARIGHT_PASER 97
+#define ILEFT_PASER 98
+#define IRIGHT_PASER 99
+#define ISLEFT_PASER 100
+#define ISRIGHT_PASER 101
+#define BOOLNOTOR_PASER 102
+#define BOOLIS_PASER 103
+#define BOOLSAND_PASER 104
+#define BOOLSOR_PASER 105
 
 // 获取并返回一个token
 #define get_pop_token(status,list,new_token) \
@@ -234,6 +247,23 @@ typedef enum token_type
     CLS = CLS_PASER,
     ACTION = ACTION_PASER,
     SETUP = SETUP_PASER,
+    INLINE = INLINE_PASER,
+    PROTECT = PROTECT_PASER,
+    PUBLIC = PUBLIC_PASER,
+    PRIVATE = PRIVATE_PASER,
+    ABITAND = ABITAND_PASER,
+    ABITOR = ABITOR_PASER,
+    ABITNOTOR = ABITNOTOR_PASER,
+    ALEFT = ALEFT_PASER,
+    ARIGHT = ARIGHT_PASER,
+    ILEFT = ILEFT_PASER,
+    IRIGHT = IRIGHT_PASER,
+    ISLEFT = ISLEFT_PASER,
+    ISRIGHT = ISRIGHT_PASER,
+    BOOLNOTOR = BOOLNOTOR_PASER,
+    BOOLIS = BOOLIS_PASER,
+    BOOLSAND = BOOLSAND_PASER,
+    BOOLSOR = BOOLSOR_PASER,
 
     // 特殊符号
     BAD_token = -2,

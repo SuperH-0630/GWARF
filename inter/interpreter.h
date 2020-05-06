@@ -161,9 +161,9 @@ typedef struct statement{
                 LOG_func,  // <>
                 SQRT_func,  // <>
                 NEGATIVE_func,  // -a
-                AND_func,  // -a
-                OR_func,  // -a
-                NOT_func,  // -a
+                AND_func,  // &&
+                OR_func,  // ||
+                NOT_func,  // !
                 MOD_func,  // %
                 INTDIV_func,  // //
                 AADD_func,  // +=
@@ -172,11 +172,16 @@ typedef struct statement{
                 AMUL_func,  // *=
                 AMOD_func,  // %=
                 AINTDIV_func,  // //=
+                APOW_func,  // **=
+                ABITAND_func,  // &=
+                ABITOR_func,  // |=
+                ABITNOTOR_func, // ^=
+                ABITRIGHT_func,  // >>=
+                ABITLEFT_func,  // <<=
                 FADD_func,  // a++
                 LADD_func,  // ++a
                 FSUB_func,  // a--
                 LSUB_func,  // --a
-                APOW_func,  // ^=
                 BITAND_func,
                 BITOR_func,
                 BITNOTOR_func,

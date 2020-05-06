@@ -1266,7 +1266,8 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
         get_pop_token(status, list, symbol);
 
         if((symbol.type == EQ_PASER && !status->not_match_eq) || symbol.type == AADD_PASER || symbol.type == ASUB_PASER || symbol.type == AMUL_PASER || symbol.type == ADIV_PASER|| 
-            symbol.type == AMOD_PASER || symbol.type == AINTDIV_PASER || symbol.type == APOW_PASER){  // 模式2/3
+            symbol.type == AMOD_PASER || symbol.type == AINTDIV_PASER || symbol.type == APOW_PASER || symbol.type == ABITAND_PASER || symbol.type == ABITOR_PASER || symbol.type == ABITNOTOR_PASER || 
+            symbol.type == ALEFT_PASER || symbol.type == ARIGHT_PASER){  // 模式2/3
             get_right_token(status, list, hide_list, right);  // 回调右边
             if(right.type != NON_hide_list){
                 paser_error("Don't get a hide_list");
@@ -1302,6 +1303,21 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
                 break;
             case APOW_PASER:
                 code_tmp->code.operation.type = APOW_func;
+                break;
+            case ABITAND_PASER:
+                code_tmp->code.operation.type = ABITAND_func;
+                break;
+            case ABITOR_PASER:
+                code_tmp->code.operation.type = ABITOR_func;
+                break;
+            case ABITNOTOR_PASER:
+                code_tmp->code.operation.type = ABITNOTOR_func;
+                break;
+            case ALEFT_PASER:
+                code_tmp->code.operation.type = ABITLEFT_func;
+                break;
+            case ARIGHT_PASER:
+                code_tmp->code.operation.type = ABITRIGHT_func;
                 break;
             }
             code_tmp->code.operation.left_exp = left.data.statement_value;
