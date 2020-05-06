@@ -30,10 +30,10 @@ bool is_error(GWARF_result *tmp){  // 判断是否为error
     return false;
 }
 
-bool to_bool(GWARF_value value){
+bool to_bool(GWARF_value value, inter *global_inter){
     double bool_double = 1;  // if bool_double == 0则返回false其他返回true
     if(value.type == OBJECT_value){  // 调用左add方法
-        bool_double = to_bool(get__bool__(&value, NULL).value, global_inter);  // 实际上不需要the_var参数链[没有实参]
+        bool_double = to_bool(get__bool__(&value, NULL, global_inter).value, global_inter);  // 实际上不需要the_var参数链[没有实参]
     }
     else{
         if(value.type == INT_value || value.type == BOOL_value){
@@ -110,14 +110,14 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 return_value = tmp_result;
                 break;
             }
-            if(to_bool(tmp_result.value)){
+            if(to_bool(tmp_result.value,global_inter)){
                 return_value = traverse(the_statement->code.chose_exp.true_do, the_var, false, global_inter);
             }
             else{
                 return_value = traverse(the_statement->code.chose_exp.false_do, the_var, false, global_inter);
             }
             if(!(is_error(&return_value) || is_space(&return_value))){  // Name Error错误
-                return_value.value = to_object(return_value.value, the_var);
+                return_value.value = to_object(return_value.value,global_inter);
             }
             break;
         }
@@ -184,13 +184,13 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             // base_value返回字面量 -> 主要返回object类型，还会返回GWARF_value的其他类型供生成object类型
             break;
         case base_tuple:  // get value[所有字面量均为这个表达式]
-            return_value.value = to_tuple(parameter_to_list(the_statement->code.base_tuple.value, the_var), the_var);  // code
+            return_value.value = to_tuple(parameter_to_list(the_statement->code.base_tuple.value, the_var,global_inter), global_inter);  // code
             break;
         case base_list:  // get value[所有字面量均为这个表达式]
-            return_value.value = to_object(parameter_to_list(the_statement->code.base_list.value, the_var), the_var);  // code
+            return_value.value = to_object(parameter_to_list(the_statement->code.base_list.value, the_var,global_inter),global_inter);  // code
             break;
         case base_dict:  // get value[所有字面量均为这个表达式]
-            return_value.value = to_object(parameter_to_dict(the_statement->code.base_dict.value, the_var), the_var);  // code
+            return_value.value = to_object(parameter_to_dict(the_statement->code.base_dict.value, the_var,global_inter),global_inter);  // code
             break;
         case slice:{  // get value[所有字面量均为这个表达式]
             GWARF_result tmp_result = traverse((the_statement->code).slice.base_var, the_var, false, global_inter), get;  // 把a[1:2:3]的a取出来
@@ -210,7 +210,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 if(tmp != NULL){
                     get.value = tmp->value;
                     get.father = &base_the_var;  // 设置father
-                    return_value = call_back_core(get, the_var, the_statement->code.slice.value, global_inter, global_inter);
+                    return_value = call_back_core(get, the_var, the_statement->code.slice.value, global_inter);
                     goto the_break_slice;
                 }
             }
@@ -219,13 +219,13 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 if(tmp != NULL){
                     get.value = tmp->value;
                     get.father = &base_the_var;  // 设置father
-                    return_value = call_back_core(get, the_var, the_statement->code.slice.value, global_inter, global_inter);
+                    return_value = call_back_core(get, the_var, the_statement->code.slice.value, global_inter);
                     goto the_break_slice;
                 }
             }
 
             the_break_slice: 
-            return_value.value = to_object(return_value.value, the_var);
+            return_value.value = to_object(return_value.value,global_inter);
             // printf("return_value.value.type = %d\n", return_value.value);
             break;
         }
@@ -289,7 +289,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 var_error:
                 str_tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
                 sprintf(str_tmp, "name not found [%s]\n", the_statement->code.base_var.var_name);
-                return_value = to_error(str_tmp, "NameException", out_var);
+                return_value = to_error(str_tmp, "NameException",global_inter);
             }
             else if(tmp->lock == protect && the_statement->code.base_var.lock_token == public_token){  // 权限不够
                 goto var_error;
@@ -336,14 +336,14 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             else if(is_space(&eq_object)){
                 return eq_object;
             }
-            char *str = to_str_dict(eq_object.value, the_var).value.string;
+            char *str = to_str_dict(eq_object.value, the_var, global_inter).value.string;
             printf("str = %s\n", str);
 
             var *tmp = find_var(the_var, from, str, NULL);
             if(tmp == NULL){  // 输出name error[共两处会输出]
                 char *tmp = malloc((size_t)( 21 + strlen(str) ));
                 sprintf(tmp, "name not found [%s]\n", str);
-                return_value = to_error(tmp, "NameException", the_var);
+                return_value = to_error(tmp, "NameException",global_inter);
             }
             else{
                 return_value.value = tmp->value;  // get_var
@@ -378,15 +378,15 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 }
             }
             if(base_the_var.type == CLASS_value){  // is class so that can use "."
-                return_value = traverse_get_value((the_statement->code).point.child_var, base_the_var.value.class_value->the_var, out_var);
+                return_value = traverse_get_value((the_statement->code).point.child_var, base_the_var.value.class_value->the_var, out_var, global_inter);
             }
             else if(base_the_var.type == OBJECT_value){
-                return_value = traverse_get_value((the_statement->code).point.child_var, base_the_var.value.object_value->the_var, out_var);
+                return_value = traverse_get_value((the_statement->code).point.child_var, base_the_var.value.object_value->the_var, out_var, global_inter);
             }
             else if(base_the_var.type == FUNC_value){
                 var_list *old_tmp = base_the_var.value.func_value->self->next;
                 base_the_var.value.func_value->self->next = NULL;  // 暂时断链
-                return_value = traverse_get_value((the_statement->code).point.child_var, base_the_var.value.func_value->self, out_var);
+                return_value = traverse_get_value((the_statement->code).point.child_var, base_the_var.value.func_value->self, out_var, global_inter);
                 base_the_var.value.func_value->self->next = old_tmp;  // 恢复
             }
             else{  // 其他类型 均返回NULL
@@ -407,7 +407,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             *(return_value.father) = base_the_var;
 
             the_break: 
-            return_value.value = to_object(return_value.value, the_var);
+            return_value.value = to_object(return_value.value,global_inter);
             break;
         }
         case down:{
@@ -427,7 +427,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 if(tmp != NULL){
                     get.value = tmp->value;
                     get.father = &base_the_var;  // 设置father
-                    return_value = call_back_core(get, the_var, (the_statement->code).down.child_var, global_inter, global_inter);
+                    return_value = call_back_core(get, the_var, (the_statement->code).down.child_var, global_inter);
                     goto the_break_down;
                 }
             }
@@ -436,13 +436,13 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 if(tmp != NULL){
                     get.value = tmp->value;
                     get.father = &base_the_var;  // 设置father
-                    return_value = call_back_core(get, the_var, (the_statement->code).down.child_var, global_inter, global_inter);
+                    return_value = call_back_core(get, the_var, (the_statement->code).down.child_var, global_inter);
                     goto the_break_down;
                 }
             }
 
             the_break_down: 
-            return_value.value = to_object(return_value.value, the_var);  // call_back_core 返回值是object
+            return_value.value = to_object(return_value.value,global_inter);  // call_back_core 返回值是object
             break;
         }
         case def:{
@@ -592,7 +592,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 if(tmp == NULL){
                     break;  // off
                 }
-                read_statement(tmp, the_var, class_tmp->the_var, NULL, lock);
+                read_statement(tmp, the_var, class_tmp->the_var, NULL, lock, global_inter);
                 tmp = tmp->next;
             }
 
@@ -832,7 +832,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                     return_value = tmp_result;
                     break;
                 }
-                return_value.value = to_object(tmp_result.value, the_var);
+                return_value.value = to_object(tmp_result.value,global_inter);
             }
             return_value.value.lock_token = base;
             break;
@@ -919,7 +919,7 @@ GWARF_result include_func(statement *the_statement, var_list *the_var, inter *gl
     GWARF_result return_value = GWARF_result_reset;
     statement *file_statement = the_statement->code.include_import.file;
 
-    GWARF_value file = to_str(traverse(file_statement, the_var, false).value, the_var, global_inter);
+    GWARF_value file = to_str(traverse(file_statement, the_var, false, global_inter).value, the_var, global_inter);
 
     // TODO:: 使用链表来存储
     inter *old_global = global_inter;  // 保存旧迭代器
@@ -932,7 +932,7 @@ GWARF_result include_func(statement *the_statement, var_list *the_var, inter *gl
     
     parser(file.value.string);
     printf("----start run----\n");
-    traverse_global(global_inter->global_code, the_var);
+    traverse_global(global_inter->global_code, the_var, global_inter);
     printf("code end...\n");
 
     global_inter = old_global;  // 变回旧迭代器
@@ -949,7 +949,7 @@ GWARF_result import_func(statement *the_statement, var_list *the_var, inter *glo
     GWARF_result return_value = GWARF_result_reset;
     statement *file_statement = the_statement->code.import_class.file;
     
-    GWARF_value file = to_str(traverse(file_statement, the_var, false).value, the_var, global_inter);
+    GWARF_value file = to_str(traverse(file_statement, the_var, false, global_inter).value, the_var, global_inter);
 
     // TODO:: 使用链表来存储
     inter *old_global = global_inter;  // 保存旧迭代器
@@ -964,7 +964,7 @@ GWARF_result import_func(statement *the_statement, var_list *the_var, inter *glo
     
     parser(file.value.string);
     printf("----start run----\n");
-    traverse_global(global_inter->global_code, new_the_var);
+    traverse_global(global_inter->global_code, new_the_var, global_inter);
     printf("code end...\n");
 
     global_inter = old_global;  // 保存旧迭代器
@@ -1074,7 +1074,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
                 break;
             }
 
-            condition = to_bool(tmp_result.value);
+            condition = to_bool(tmp_result.value, global_inter);
             printf("if condition = %d\n", condition);
             if(rego || (condition)){  // condition run success or rego(condition won't do) bug rewent can
                 if_restart:
@@ -1186,7 +1186,7 @@ GWARF_result for_func(statement *the_statement, var_list *the_var, inter *global
                 value = tmp_result;
                 goto return_value;
             }
-            condition = to_bool(tmp_result.value);
+            condition = to_bool(tmp_result.value, global_inter);
             printf("for condition = %d\n", condition);
             if(!condition){
                 break;
@@ -1278,7 +1278,7 @@ GWARF_result assert_func(statement *the_statement, var_list *the_var, inter *glo
         error_value = tmp_result;
         goto return_value;
     }
-    if(to_bool(tmp_result.value)){
+    if(to_bool(tmp_result.value, global_inter)){
         error_value.u = statement_end;
         error_value.value.type = NULL_value;
         error_value.value.value.int_value = 0;
@@ -1295,8 +1295,8 @@ GWARF_result assert_func(statement *the_statement, var_list *the_var, inter *glo
         goto return_value;
     }
 
-    info = to_str(tmp_info.value, the_var);
-    error_value = to_error(info.value.string , "AssertException", the_var);
+    info = to_str(tmp_info.value, the_var, global_inter);
+    error_value = to_error(info.value.string , "AssertException",global_inter);
     error_value.u = error;
 
     return_value: return error_value;
@@ -1309,14 +1309,14 @@ GWARF_result raise_func(statement *the_statement, var_list *the_var, bool not_cl
 
     if(not_class){  // raise
         error_value = traverse(the_statement->code.raise_e.done, the_var, false, global_inter);
-        info = to_str(traverse(the_statement->code.raise_e.info, the_var, false).value, the_var, global_inter);
+        info = to_str(traverse(the_statement->code.raise_e.info, the_var, false, global_inter).value, the_var, global_inter);
     }
     else{  // raise
         GWARF_value tmp = GWARF_value_reset;
         tmp.type = STRING_value;
         tmp.value.string = "throw by user";
         error_value = traverse(the_statement->code.throw_e.done, the_var, false, global_inter);
-        info = to_str(tmp, the_var);
+        info = to_str(tmp, the_var, global_inter);
     }
 
     // restart操作[和continue效果相同]
@@ -1338,7 +1338,7 @@ GWARF_result raise_func(statement *the_statement, var_list *the_var, bool not_cl
         error_value.value = call_back_core(error_value, the_var, pack_value_parameter(info), global_inter).value;
     }
     else{
-        error_value.value = to_object(error_value.value, the_var);  // 直接返回
+        error_value.value = to_object(error_value.value,global_inter);  // 直接返回
     }
 
     return_value: return error_value;
@@ -1359,7 +1359,7 @@ GWARF_result try_func(statement *the_statement, var_list *the_var, inter *global
     // restart操作[和continue效果相同]
 
     if(is_error(&value)){  // 遇到错误->执行except语句[不需要再检查break...]
-        assignment_statement(the_statement->code.try_code.var, the_var, the_var, value);
+        assignment_statement(the_statement->code.try_code.var, the_var, the_var, value,global_inter);
         puts("----except----");
         value = traverse(the_statement->code.try_code.except, the_var, false, global_inter);
         puts("----stop except----");
@@ -1499,7 +1499,7 @@ GWARF_result forin_func(statement *the_statement, var_list *the_var, inter *glob
             break;  // goto return_value;
         }
         else{
-            assignment_statement(the_statement->code.for_in_cycle.var, the_var, the_var,tmp_next);  // 赋值
+            assignment_statement(the_statement->code.for_in_cycle.var, the_var, the_var,tmp_next,global_inter);  // 赋值
         }
         restart_again: 
         puts("----for in----");
@@ -1580,7 +1580,7 @@ GWARF_result while_func(statement *the_statement, var_list *the_var, inter *glob
                 value = tmp_result;
                 goto return_value;
             }
-            condition = to_bool(tmp_result.value);
+            condition = to_bool(tmp_result.value, global_inter);
             printf("while condition = %d\n", condition);
             if(!condition){
                 break;
@@ -1685,11 +1685,11 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
             value = div_func(left_result, right_result, the_var, global_inter);
             break;
         case AADD_func:
-            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(add_func(left_result, right_result, the_var, global_inter).value, the_var), global_inter);
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(add_func(left_result, right_result, the_var, global_inter).value, the_var),global_inter);
             // exit(1);
             break;
         case ASUB_func:
-            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(sub_func(left_result, right_result, the_var, global_inter).value, the_var), global_inter);
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(sub_func(left_result, right_result, the_var, global_inter).value, the_var),global_inter);
             break;
         case AMUL_func:
             value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(mul_func(left_result, right_result, the_var, global_inter).value, the_var), global_inter);
@@ -1803,7 +1803,7 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
             break;
     }
     value.u = statement_end;  // 正常设置[正常语句结束]
-    value.value = to_object(value.value, the_var);  // 返回类型是object[不下放到add func等]
+    value.value = to_object(value.value,global_inter);  // 返回类型是object[不下放到add func等]
     return value;
 }
 
@@ -1811,7 +1811,7 @@ GWARF_result assignment_statement_value(statement *the_statement, var_list *the_
     GWARF_result tmp = GWARF_result_reset;
     tmp.u = statement_end;
     tmp.value = right_value;
-    return assignment_statement(the_statement, the_var, login_var, tmp);
+    return assignment_statement_core(the_statement, the_var, login_var, tmp, false, auto_public, global_inter);
 }
 
 GWARF_result assignment_statement_core(statement *the_statement, var_list *the_var, var_list *login_var, GWARF_result right_result, bool self, int the_lock, inter *global_inter){  // int lock代表的是注册权限，如果是auto_public则根据the_statement来决定权限
@@ -1896,13 +1896,13 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
         
         GWARF_value base_the_var = tmp_result.value;  // 不用取value
         if(base_the_var.type == CLASS_value){
-            value = assignment_statement(the_statement->code.point.child_var, the_var, base_the_var.value.class_value->the_var, right_result);
+            value = assignment_statement(the_statement->code.point.child_var, the_var, base_the_var.value.class_value->the_var, right_result,global_inter);
         }
         else if(base_the_var.type == OBJECT_value){
-            value = assignment_statement(the_statement->code.point.child_var, the_var, base_the_var.value.object_value->the_var, right_result);
+            value = assignment_statement(the_statement->code.point.child_var, the_var, base_the_var.value.object_value->the_var, right_result,global_inter);
         }
         else if(base_the_var.type == FUNC_value){
-            value = assignment_statement(the_statement->code.point.child_var, the_var, base_the_var.value.func_value->self, right_result);
+            value = assignment_statement(the_statement->code.point.child_var, the_var, base_the_var.value.func_value->self, right_result,global_inter);
         }
         else{
             return value;  // 对NONE的point运算均为NULL
@@ -1925,7 +1925,7 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
                 get.father = &base_the_var;  // 设置father
                 parameter *tmp = the_statement->code.down.child_var;
                 tmp->next = pack_value_parameter(right_result.value);
-                value = call_back_core(get, the_var, tmp, global_inter, global_inter);
+                value = call_back_core(get, the_var, tmp, global_inter);
                 goto the_else;
             }
         }
@@ -1936,14 +1936,14 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
                 get.father = &base_the_var;  // 设置father
                 parameter *tmp = the_statement->code.down.child_var;
                 tmp->next = pack_value_parameter(right_result.value);
-                value = call_back_core(get, the_var, tmp, global_inter, global_inter);
+                value = call_back_core(get, the_var, tmp, global_inter);
             }
             else{
                 goto the_else;
             }
         }
         else{
-            the_else: value = to_error("Bad Assignment", "AssignmentException", the_var);  // 赋值错误
+            the_else: value = to_error("Bad Assignment", "AssignmentException",global_inter);  // 赋值错误
             puts("Bad Assignment");
         }
     }
@@ -1983,7 +1983,7 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
         if(eq_object.value.type == NULL_value){  // NULL value 不赋值
             return right_result;
         }
-        char *str = to_str_dict(eq_object.value, the_var).value.string;
+        char *str = to_str_dict(eq_object.value, the_var, global_inter).value.string;
         value = assignment_func(str, right_result, login_var, from, the_lock);
         value.base_name = str;  // str来自value，本身就是malloc申请的内存
     }
@@ -1998,7 +1998,7 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
         if(eq_object.value.type == NULL_value){  // NULL value 不赋值
             return right_result;
         }
-        char *str = to_str_dict(eq_object.value, the_var).value.string;
+        char *str = to_str_dict(eq_object.value, the_var, global_inter).value.string;
         value = assignment_func(str, right_result, login_var, 0, the_lock);
         value.base_name = str;
     }
@@ -2014,8 +2014,8 @@ GWARF_result call_back(statement *the_statement, var_list *the_var, inter *globa
     else if(is_space(&get)){
         return get;
     }
-    result = call_back_core(get, the_var, the_statement->code.call.parameter_list, global_inter, global_inter);
-    result.value = to_object(result.value, the_var);  // 返回类型是object
+    result = call_back_core(get, the_var, the_statement->code.call.parameter_list, global_inter);
+    result.value = to_object(result.value,global_inter);  // 返回类型是object
     return result;
 }
 
@@ -2048,7 +2048,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                             return tmp;
                         }
                         printf("tmp_x->u.var->type = %d\n", tmp_x->u.var->type);
-                        assignment_statement(tmp_x->u.var, the_var, the_var, tmp);  // 赋值
+                        assignment_statement(tmp_x->u.var, the_var, the_var, tmp,global_inter);  // 赋值
                         tmp_x = tmp_x->next;  // get the next to iter
                     }
                     else if(tmp_x->type == put_args){  // args默认为[]
@@ -2059,7 +2059,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                         if(list_init != NULL){
                             func_result.value = list_init->value;
                         }
-                        assignment_statement(tmp_x->u.var, the_var, the_var,call_back_core(func_result, old_var_list, NULL), global_inter, global_inter);  // old_var_list用于计算from等
+                        assignment_statement(tmp_x->u.var, the_var, the_var,call_back_core(func_result, old_var_list, NULL, global_inter), global_inter);  // old_var_list用于计算from等
                         tmp_x = tmp_x->next;  // get the next to iter
                     }
                     else{
@@ -2078,7 +2078,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                         break;  // 形参录入完毕
                     }
                     if(tmp_x->type == put_kwargs){  // 如果遇到了**kwargs，直接把tmp_var中的哈希表合并
-                        GWARF_value dict_tmp = get_object(NULL, "dict", old_var_list).value;// 生成一个空的dict
+                        GWARF_value dict_tmp = get_object(NULL, "dict", old_var_list, global_inter).value;// 生成一个空的dict
                         hash_var *var_dict = tmp_var->hash_var_base;
                         for(int i = 0;i < MAX_SIZE;i += 1){  // 迭代哈希表
                             var *dict_var_tmp = var_dict->hash[i];
@@ -2107,7 +2107,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                                 if(__down__tmp != NULL){
                                     get.value = __down__tmp->value;
                                     get.father = &(dict_tmp);  // 设置father
-                                    call_back_core(get, old_var_list, tmp, global_inter, global_inter);  // 赋值
+                                    call_back_core(get, old_var_list, tmp, global_inter);  // 赋值
                                 }
                                 dict_var_tmp = dict_var_tmp->next;  // 迭代到下一个
                             }
@@ -2115,13 +2115,13 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                         }
                         GWARF_result dict_result = GWARF_result_reset;
                         dict_result.value = dict_tmp;
-                        assignment_statement(tmp_x->u.var, the_var, the_var, dict_result);
+                        assignment_statement(tmp_x->u.var, the_var, the_var, dict_result,global_inter);
                         tmp_x->next = NULL;  // 理论上没有下一个
                     }
                     else{
-                        GWARF_result tmp_x_var = traverse_get_value(tmp_x->u.var, tmp_var, the_var);  // 使用tmp_x->u.var在tmp_var中获取变量的值
+                        GWARF_result tmp_x_var = traverse_get_value(tmp_x->u.var, tmp_var, the_var, global_inter);  // 使用tmp_x->u.var在tmp_var中获取变量的值
                         if((!is_error(&tmp_x_var)) && (!is_space(&tmp_x_var))){  // 如果找到了，就赋值
-                            GWARF_result tmp = assignment_statement(tmp_x->u.var, the_var, the_var, tmp_x_var);  // tmp_x的外部变量使用the_var
+                            GWARF_result tmp = assignment_statement(tmp_x->u.var, the_var, the_var, tmp_x_var,global_inter);  // tmp_x的外部变量使用the_var
                             if(tmp.base_name != NULL){  // 删除变量
                                 del_var_var_list(tmp_var, 0, tmp.base_name);  // 从中删除变量
                             }
@@ -2131,7 +2131,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                             if(is_error(&tmp) || is_space(&tmp)){
                                 return tmp;
                             }
-                            assignment_statement(tmp_x->u.var, the_var, the_var, tmp);
+                            assignment_statement(tmp_x->u.var, the_var, the_var, tmp,global_inter);
                         }
                         else{
                             puts("[1]warning!!!");
@@ -2156,7 +2156,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
             parameter *before = tmp_s, *after = tmp_s->next;
             GWARF_value iter_value = get__iter__(&(tmp.value), old_var_list, global_inter).value;  // 获取迭代object，一般是返回self
             while (1){
-                GWARF_result tmp_next = get__next__(&(iter_value), old_var_list), tmp_next_down;// 执行__next__的返回值
+                GWARF_result tmp_next = get__next__(&(iter_value), old_var_list, global_inter), tmp_next_down;// 执行__next__的返回值
                 if(is_error(&tmp_next)){  // TODO:: 检查是否为IterException
                     break;  // goto return_value;
                 }
@@ -2171,13 +2171,13 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                 if(__down__tmp != NULL){
                     get.value = __down__tmp->value;
                     get.father = &(tmp.value);  // 设置father
-                    tmp_next_down = call_back_core(get, the_var, pack_value_parameter(tmp_next.value), global_inter, global_inter);
+                    tmp_next_down = call_back_core(get, the_var, pack_value_parameter(tmp_next.value), global_inter);
                 }
 
                 before->next = pack_value_parameter(tmp_next_down.value);
                 before->next->u.var = make_statement();
                 before->next->u.var->type = base_var;
-                before->next->u.var->code.base_var.var_name = to_str(tmp_next.value, old_var_list).value.string;
+                before->next->u.var->code.base_var.var_name = to_str(tmp_next.value, old_var_list, global_inter).value.string;
                 before->next->u.var->code.base_var.from = NULL;
                 before->next->type = name_value;
                 before = before->next;
@@ -2190,8 +2190,8 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
         else if(assignment_type == 0 && tmp_x->type == put_kwargs){  // tmp_s还没到根据name_value的阶段, 遇到了**kwargs，则把后面的所有直接变成dict
             // 放入list中
             GWARF_result dict_tmp = GWARF_result_reset;
-            dict_tmp.value = to_object(parameter_to_dict(tmp_s, old_var_list), old_var_list);  // 把所有name_value变成dict
-            assignment_statement(tmp_x->u.var, the_var, the_var, dict_tmp);
+            dict_tmp.value = to_object(parameter_to_dict(tmp_s, old_var_list, global_inter), global_inter);  // 把所有name_value变成dict
+            assignment_statement(tmp_x->u.var, the_var, the_var, dict_tmp,global_inter);
             assignment_type = 1;  // 进入根据实参赋值模式
             tmp_x = NULL;  // 已经到最后一个了
             tmp_s = NULL;
@@ -2202,7 +2202,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                 break;
             }
             assignment_type = 1;
-            assignment_statement(tmp_s->u.var, old_var_list, tmp_var, tmp);  // 先赋值到tmp_var上
+            assignment_statement(tmp_s->u.var, old_var_list, tmp_var, tmp,global_inter);  // 先赋值到tmp_var上
             tmp_s = tmp_s->next;
         }
         else if(tmp_s->type == put_args){  // assignment_type不在1模式 -> 把tmp_s列表解释为参数
@@ -2226,8 +2226,8 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
         else if(assignment_type == 0 && tmp_x->type == put_args){  // 形参出现了*args，收归所有无默认值的实参[如果以及开始了根据tmp_s赋值模式，则*args无效]
             // 放入list中
             GWARF_result list_tmp = GWARF_result_reset;
-            list_tmp.value = to_object(parameter_to_list(tmp_s, old_var_list), old_var_list);  // 把所有only_value变成list
-            assignment_statement(tmp_x->u.var, old_var_list, the_var, list_tmp);
+            list_tmp.value = to_object(parameter_to_list(tmp_s, old_var_list, global_inter), global_inter);  // 把所有only_value变成list
+            assignment_statement(tmp_x->u.var, old_var_list, the_var, list_tmp,global_inter);
             assignment_type = 1;  // 进入根据实参赋值模式
             tmp_x = tmp_x->next;
             while(1){
@@ -2241,7 +2241,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
             }
         }
         else if(assignment_type == 0){
-            assignment_statement(tmp_x->u.var, old_var_list, the_var, tmp);
+            assignment_statement(tmp_x->u.var, old_var_list, the_var, tmp,global_inter);
             tmp_x = tmp_x->next;  // get the next to iter
             tmp_s = tmp_s->next;
         }
@@ -2499,9 +2499,9 @@ GWARF_result and_func(statement *left_statement, statement *right_statement, var
     return_value.u = statement_end;
     return_value.value.type = BOOL_value;
 
-    bool left = to_bool(traverse(left_statement, the_var, false).value, global_inter), right;
+    bool left = to_bool(traverse(left_statement, the_var, false, global_inter).value, global_inter), right;
     if(left){
-        right = to_bool(traverse(right_statement, the_var, false).value, global_inter);
+        right = to_bool(traverse(right_statement, the_var, false, global_inter).value, global_inter);
         if(right){
             return_value.value.value.bool_value = true;
         }
@@ -2521,12 +2521,12 @@ GWARF_result or_func(statement *left_statement, statement *right_statement, var_
     return_value.u = statement_end;
     return_value.value.type = BOOL_value;
 
-    bool left = to_bool(traverse(left_statement, the_var, false).value, global_inter), right;
+    bool left = to_bool(traverse(left_statement, the_var, false, global_inter).value, global_inter), right;
     if(left){
         return_value.value.value.bool_value = true;
     }
     else{
-        right = to_bool(traverse(right_statement, the_var, false).value, global_inter);
+        right = to_bool(traverse(right_statement, the_var, false, global_inter).value, global_inter);
         if(right){
             return_value.value.value.bool_value = true;
         }
@@ -2542,7 +2542,7 @@ GWARF_result not_func(GWARF_result right_result, var_list *the_var, inter *globa
     GWARF_result return_value, get;  // the result by call read_statement_list with left and right = GWARF_result_reset; value is the result for and
     return_value.u = statement_end;
     return_value.value.type = BOOL_value;
-    bool right = to_bool(right_result.value);
+    bool right = to_bool(right_result.value, global_inter);
     if(right)
     {
         return_value.value.value.bool_value = false;
@@ -2565,7 +2565,7 @@ GWARF_result bit_and_func(GWARF_result left_result, GWARF_result right_result, v
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter);
             goto return_back;
         }
         // goto next if
@@ -2579,7 +2579,7 @@ GWARF_result bit_and_func(GWARF_result left_result, GWARF_result right_result, v
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter);
         }
         else{
             return_value.u = statement_end;
@@ -2635,7 +2635,7 @@ GWARF_result bit_or_func(GWARF_result left_result, GWARF_result right_result, va
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter);
             goto return_back;
         }
         // goto next if
@@ -2649,7 +2649,7 @@ GWARF_result bit_or_func(GWARF_result left_result, GWARF_result right_result, va
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter);
         }
         else{
             return_value.u = statement_end;
@@ -2706,7 +2706,7 @@ GWARF_result bit_notor_func(GWARF_result left_result, GWARF_result right_result,
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter);
             goto return_back;
         }
         // goto next if
@@ -2720,7 +2720,7 @@ GWARF_result bit_notor_func(GWARF_result left_result, GWARF_result right_result,
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter);
         }
         else{
             return_value.u = statement_end;
@@ -2776,7 +2776,7 @@ GWARF_result bit_left_func(GWARF_result left_result, GWARF_result right_result, 
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter);
             goto return_back;
         }
         // goto next if
@@ -2790,7 +2790,7 @@ GWARF_result bit_left_func(GWARF_result left_result, GWARF_result right_result, 
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter);
         }
         else{
             return_value.u = statement_end;
@@ -2846,7 +2846,7 @@ GWARF_result bit_right_func(GWARF_result left_result, GWARF_result right_result,
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter);
             goto return_back;
         }
         // goto next if
@@ -2860,7 +2860,7 @@ GWARF_result bit_right_func(GWARF_result left_result, GWARF_result right_result,
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter);
         }
         else{
             return_value.u = statement_end;
@@ -2916,7 +2916,7 @@ GWARF_result bit_not_func(GWARF_result right_result, var_list *the_var, inter *g
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter);
         }
         else{
             return_value.u = statement_end;
@@ -2967,7 +2967,7 @@ GWARF_result add_func(GWARF_result left_result, GWARF_result right_result, var_l
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter);
             goto return_back;
         }
         // goto next if
@@ -2981,7 +2981,7 @@ GWARF_result add_func(GWARF_result left_result, GWARF_result right_result, var_l
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter);
         }
         else{
             return_value.u = statement_end;
@@ -3046,7 +3046,7 @@ GWARF_result sub_func(GWARF_result left_result, GWARF_result right_result, var_l
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter);
             goto return_back;
         }
     }
@@ -3059,7 +3059,7 @@ GWARF_result sub_func(GWARF_result left_result, GWARF_result right_result, var_l
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter);
         }
         else{
             return_value.u = statement_end;
@@ -3070,7 +3070,7 @@ GWARF_result sub_func(GWARF_result left_result, GWARF_result right_result, var_l
     {
         if(left_result.value.type == NULL_value){
             return_value.u = statement_end;
-            return negative_func(right_result, the_var);  // NULL减法相当于0
+            return negative_func(right_result, the_var, global_inter);  // NULL减法相当于0
         }
         else if(right_result.value.type == NULL_value){
             return_value.u = statement_end;
@@ -3112,7 +3112,7 @@ GWARF_result negative_func(GWARF_result right_result, var_list *the_var, inter *
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter);
         }
         else{
             return_value.u = statement_end;
@@ -3174,7 +3174,7 @@ GWARF_result mul_func(GWARF_result left_result, GWARF_result right_result, var_l
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter);
             goto return_back;
         }
     }
@@ -3187,7 +3187,7 @@ GWARF_result mul_func(GWARF_result left_result, GWARF_result right_result, var_l
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter);
         }
         else{
             return_value.u = statement_end;
@@ -3299,7 +3299,7 @@ GWARF_result div_func(GWARF_result left_result, GWARF_result right_result, var_l
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter);
             goto return_back;
         }
     }
@@ -3312,7 +3312,7 @@ GWARF_result div_func(GWARF_result left_result, GWARF_result right_result, var_l
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter);
         }
         else{
             return_value.u = statement_end;
@@ -3366,7 +3366,7 @@ GWARF_result mod_func(GWARF_result left_result, GWARF_result right_result, var_l
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter);
             goto return_back;
         }
     }
@@ -3379,7 +3379,7 @@ GWARF_result mod_func(GWARF_result left_result, GWARF_result right_result, var_l
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter);
         }
         else{
             return_value.u = statement_end;
@@ -3433,7 +3433,7 @@ GWARF_result int_div_func(GWARF_result left_result, GWARF_result right_result, v
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter);
             goto return_back;
         }
     }
@@ -3446,7 +3446,7 @@ GWARF_result int_div_func(GWARF_result left_result, GWARF_result right_result, v
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter);
         }
         else{
             return_value.u = statement_end;
@@ -3500,7 +3500,7 @@ GWARF_result pow_func(GWARF_result left_result, GWARF_result right_result, var_l
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter);
             goto return_back;
         }
     }
@@ -3513,7 +3513,7 @@ GWARF_result pow_func(GWARF_result left_result, GWARF_result right_result, var_l
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter);
         }
         else{
             return_value.u = statement_end;
@@ -3566,7 +3566,7 @@ GWARF_result log_func(GWARF_result left_result, GWARF_result right_result, var_l
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter);
             goto return_back;
         }
     }
@@ -3579,7 +3579,7 @@ GWARF_result log_func(GWARF_result left_result, GWARF_result right_result, var_l
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter);
         }
         else{
             return_value.u = statement_end;
@@ -3632,7 +3632,7 @@ GWARF_result sqrt_func(GWARF_result left_result, GWARF_result right_result, var_
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter);
             goto return_back;
         }
     }
@@ -3645,7 +3645,7 @@ GWARF_result sqrt_func(GWARF_result left_result, GWARF_result right_result, var_
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter);
         }
         else{
             return_value.u = statement_end;
@@ -3708,7 +3708,7 @@ GWARF_result equal_func(GWARF_result left_result, GWARF_result right_result, var
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(right_result.value), global_inter);
             goto return_back;
         }
     }
@@ -3721,7 +3721,7 @@ GWARF_result equal_func(GWARF_result left_result, GWARF_result right_result, var
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
-            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter, global_inter);
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter);
         }
         else{
             return_value.u = statement_end;

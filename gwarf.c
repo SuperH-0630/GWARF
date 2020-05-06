@@ -32,12 +32,12 @@ void do_exit(void){
 int main(){
     atexit(*do_exit);
     setup();
-    global_inter = get_inter();  // 拿全局解释器[并声明全局变量]
+    inter *global_inter = get_inter();  // 拿全局解释器[并声明全局变量]
     var_list *the_var = make_var_base(global_inter->global_var);
     the_var->tag = run_class;
     statement_base = make_statement_base(global_inter->global_code);
     
-    login(the_var);
+    login(the_var, global_inter);
 
     parser("/home/songzihuan/test.gwf");
     printf("----start run----\n");

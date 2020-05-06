@@ -8,7 +8,7 @@
 #define true 1
 #define bool int
 
-#define assignment_statement(the_statement,the_var,login_var,right_result) assignment_statement_core(the_statement,the_var,login_var,right_result,0,auto_public)
+#define assignment_statement(the_statement,the_var,login_var,right_result,global_inter) assignment_statement_core(the_statement,the_var,login_var,right_result,0,auto_public,global_inter)
 #define read_statement_list(the_statement,the_var,global_inter) read_statement(the_statement,the_var,NULL,NULL,lock,global_inter)
 #define run_func(base_the_var,the_var,name,global_inter) run_func_core(base_the_var,the_var,name,false,global_inter)
 #define GWARF_value_reset {.type=NULL_value,.value.int_value=0,.lock_token=base}
@@ -587,21 +587,21 @@ GWARF_result bit_and_func(GWARF_result, GWARF_result, var_list *, inter *);
 double sqrt_(double, double);
 double log_(double, double);
 
-GWARF_value to_int(GWARF_value, var_list *the_var);
-GWARF_value to_double(GWARF_value value, var_list *the_var);
-GWARF_value to_str(GWARF_value value, var_list *the_var);
-GWARF_value to_str_dict(GWARF_value value, var_list *the_var);
-GWARF_value to_bool_(GWARF_value value, var_list *the_var);
-GWARF_value to_list(GWARF_value value, var_list *the_var);
-GWARF_value to_dict(GWARF_value value, var_list *the_var);
-GWARF_value parameter_to_list(parameter *tmp_s, var_list *the_var);
-GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var);
+GWARF_value to_int(GWARF_value, var_list *the_var,inter *);
+GWARF_value to_double(GWARF_value value, var_list *the_var,inter *);
+GWARF_value to_str(GWARF_value value, var_list *the_var,inter *);
+GWARF_value to_str_dict(GWARF_value value, var_list *the_var,inter *);
+GWARF_value to_bool_(GWARF_value value, var_list *the_var,inter *);
+GWARF_value to_list(GWARF_value value, var_list *the_var,inter *);
+GWARF_value to_dict(GWARF_value value, var_list *the_var,inter *);
+GWARF_value parameter_to_list(parameter *tmp_s, var_list *the_var, inter *global_inter);
+GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var, inter *global_inter);
 
 bool start_with(char *, char *);
 char *del_start(char *, char *);
 GWARF_value key_to_str(char *);
 
-bool to_bool(GWARF_value);
+bool to_bool(GWARF_value, inter *global_inter);
 
 GWARF_result get__value__(GWARF_value *, var_list *, inter *);
 GWARF_result get__bool__(GWARF_value *, var_list *, inter *);
@@ -614,64 +614,64 @@ int len_only_double(double num);
 int len_double(double num);
 int len_int(int num);
 int len_intx(unsigned int num);
-GWARF_value to_object(GWARF_value, var_list *);
-GWARF_result get_object(parameter *, char *, var_list *);
+GWARF_value to_object(GWARF_value, inter *);
+GWARF_result get_object(parameter *, char *, var_list *, inter *);
 class_object *make_object(var_list *the_var, var_list *father_var_list);
 
 void login_official_func(int type, int is_class, var_list *the_var, char *name, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *));
-void login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *));
+void login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *),inter *);
 
 // 内置函数
 GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var,inter *global_inter);
 
 // object内置类
-class_object *object_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *));
+class_object *object_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *),inter *);
 GWARF_result object_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var,inter *global_inter);
 
 // gobject内置类
-class_object *gobject_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list);
+class_object *gobject_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list,inter *);
 GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var,inter *global_inter);
 
 // int内置类
-class_object *int_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list);
+class_object *int_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list,inter *);
 GWARF_result int_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var,inter *global_inter);
 
 // double内置类
-class_object *double_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list);
+class_object *double_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list,inter *);
 GWARF_result double_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var,inter *global_inter);
 
 // str内置类
-class_object *str_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list);
+class_object *str_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list,inter *);
 GWARF_result str_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var,inter *global_inter);
 
 // bool内置类
-class_object *bool_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list);
+class_object *bool_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list,inter *);
 GWARF_result bool_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var,inter *global_inter);
 
 // list内置类
-class_object *tuple_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list);
+class_object *tuple_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list,inter *);
 GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var,inter *global_inter);
 
 // list内置类
-class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list);
+class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list,inter *);
 GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var,inter *global_inter);
 
 // dict内置类
-class_object *dict_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list);
+class_object *dict_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list,inter *);
 GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var,inter *global_inter);
 
 // 错误内置类
-class_object *BaseException_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list);
+class_object *BaseException_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list,inter *);
 GWARF_result BaseException_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var,inter *global_inter);
 
-class_object *Exception_login_official(var_list *the_var, var_list *father_var_list,inter *global_inter));
-class_object *NameException_login_official(var_list *the_var, var_list *father_var_list,inter *global_inter));
-class_object *IterException_login_official(var_list *the_var, var_list *father_var_list,inter *global_inter));
-class_object *AssertException_login_official(var_list *the_var, var_list *father_var_list,inter *global_inter));
-class_object *AssignmentException_login_official(var_list *the_var, var_list *father_var_list,inter *global_inter));
+class_object *Exception_login_official(var_list *the_var, var_list *father_var_list,inter *global_inter);
+class_object *NameException_login_official(var_list *the_var, var_list *father_var_list,inter *global_inter);
+class_object *IterException_login_official(var_list *the_var, var_list *father_var_list,inter *global_inter);
+class_object *AssertException_login_official(var_list *the_var, var_list *father_var_list,inter *global_inter);
+class_object *AssignmentException_login_official(var_list *the_var, var_list *father_var_list,inter *global_inter);
 
 // 生成错误
-GWARF_result to_error(char *error_info, char *error_type, var_list *the_var);
+GWARF_result to_error(char *, char *, inter *);
 
 
 bool is_space(GWARF_result *);
@@ -733,7 +733,7 @@ GWARF_result traverse_get_value(statement *, var_list *, var_list *,inter *);
 inter *get_inter();
 void login(var_list *the_var, inter *global_inter);
 
-inter *global_inter;
+// inter *global_inter;
 statement_list *statement_base;
 
 int yyerror(char const *);
