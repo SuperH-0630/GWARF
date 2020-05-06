@@ -21,6 +21,7 @@ typedef struct p_status
     bool is_args;  // args不允许虚解包
     FILE *file_p;
     struct word_paser **global_paser;
+    struct statement *statement_base;
 } p_status;
 
 

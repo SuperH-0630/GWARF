@@ -109,7 +109,7 @@ void command(p_status *old_status, token_node *list){  // 多项式
         get_base_token(&status, list, while_, new_token);
 
         get_stop_token(status, list);
-        push_statement(statement_base, new_token);
+        push_statement(old_status->statement_base, new_token);
     }
     else if(left.type == IF_PASER){
         fprintf(status_log, "[info][grammar]  (command)back one token to (if)\n");
@@ -117,7 +117,7 @@ void command(p_status *old_status, token_node *list){  // 多项式
         get_base_token(&status, list, if_, new_token);
 
         get_stop_token(status, list);
-        push_statement(statement_base, new_token);
+        push_statement(old_status->statement_base, new_token);
     }
     else if(left.type == FOR_PASER){
         fprintf(status_log, "[info][grammar]  (command)back one token to (for)\n");
@@ -125,7 +125,7 @@ void command(p_status *old_status, token_node *list){  // 多项式
         get_base_token(&status, list, for_, new_token);
 
         get_stop_token(status, list);
-        push_statement(statement_base, new_token);
+        push_statement(old_status->statement_base, new_token);
     }
     else if(left.type == DEF_PASER || left.type == FUNC_PASER || left.type == CLASS_PASER || left.type == CLS_PASER || left.type == ACTION_PASER || left.type == SETUP_PASER || left.type == INLINE_PASER){
         fprintf(status_log, "[info][grammar]  (command)back one token to (def_class)\n");
@@ -133,7 +133,7 @@ void command(p_status *old_status, token_node *list){  // 多项式
         get_base_token(&status, list, def_class, new_token);
 
         get_stop_token(status, list);
-        push_statement(statement_base, new_token);
+        push_statement(old_status->statement_base, new_token);
     }
     else if(left.type == BREAK_PASER || left.type == BROKEN_PASER || left.type == CONTINUE_PASER || left.type == CONTINUED_PASER ||
             left.type == RESTART_PASER || left.type == RESTARTED_PASER || left.type == REGO_PASER || left.type == REWENT_PASER){
@@ -142,7 +142,7 @@ void command(p_status *old_status, token_node *list){  // 多项式
         get_base_token(&status, list, ctrl_, new_token);
 
         get_stop_token(status, list);
-        push_statement(statement_base, new_token);
+        push_statement(old_status->statement_base, new_token);
     }
     else if(left.type == GLOBAL_PASER || left.type == DEFAULT_PASER || left.type == NOLOCAL_PASER){
         fprintf(status_log, "[info][grammar]  (command)back one token to (var_ctrl_)\n");
@@ -150,7 +150,7 @@ void command(p_status *old_status, token_node *list){  // 多项式
         get_base_token(&status, list, var_ctrl_, new_token);
 
         get_stop_token(status, list);
-        push_statement(statement_base, new_token);
+        push_statement(old_status->statement_base, new_token);
     }
     else if(left.type == IMPORT_PASER || left.type == INCLUDE_PASER){
         fprintf(status_log, "[info][grammar]  (command)back one token to (import_include)\n");
@@ -158,7 +158,7 @@ void command(p_status *old_status, token_node *list){  // 多项式
         get_base_token(&status, list, import_include, new_token);
 
         get_stop_token(status, list);
-        push_statement(statement_base, new_token);
+        push_statement(old_status->statement_base, new_token);
     }
     else if(left.type == RETURN_PASER){
         fprintf(status_log, "[info][grammar]  (command)back one token to (return_)\n");
@@ -166,7 +166,7 @@ void command(p_status *old_status, token_node *list){  // 多项式
         get_base_token(&status, list, return_, new_token);
 
         get_stop_token(status, list);
-        push_statement(statement_base, new_token);
+        push_statement(old_status->statement_base, new_token);
     }
     else if(left.type == TRY_PASER){
         fprintf(status_log, "[info][grammar]  (command)back one token to (try_)\n");
@@ -174,7 +174,7 @@ void command(p_status *old_status, token_node *list){  // 多项式
         get_base_token(&status, list, try_, new_token);
 
         get_stop_token(status, list);
-        push_statement(statement_base, new_token);
+        push_statement(old_status->statement_base, new_token);
     }
     else if(left.type == DO_PASER){
         fprintf(status_log, "[info][grammar]  (command)back one token to (do/do...while)\n");
@@ -182,7 +182,7 @@ void command(p_status *old_status, token_node *list){  // 多项式
         get_base_token(&status, list, do_while_, new_token);
 
         get_stop_token(status, list);
-        push_statement(statement_base, new_token);
+        push_statement(old_status->statement_base, new_token);
     }
     else if(left.type == RAISE_PASER || left.type == THROW_PASER || left.type == ASSERT_PASER){
         fprintf(status_log, "[info][grammar]  (command)back one token to (out_exception)\n");
@@ -190,7 +190,7 @@ void command(p_status *old_status, token_node *list){  // 多项式
         get_base_token(&status, list, out_exception, new_token);
 
         get_stop_token(status, list);
-        push_statement(statement_base, new_token);
+        push_statement(old_status->statement_base, new_token);
     }
     else if(left.type == ENTER_PASER){
         fprintf(status_log, "[info][grammar]  (command)back <ENTER>\n");
@@ -211,7 +211,7 @@ void command(p_status *old_status, token_node *list){  // 多项式
             return;
         }
         get_stop_token(status, list);
-        push_statement(statement_base, new_token);
+        push_statement(old_status->statement_base, new_token);
     }
 
     new_token.type = NON_command;
@@ -949,14 +949,13 @@ void block_(p_status *status, token_node *list){
     again:
     if(lp_t.type == LP_PASER){
         statement *block_tmp =  make_statement();
-        statement_base = append_statement_list(block_tmp, statement_base);
         
         p_status new_status = *status;  // 继承file_p等值
         reset_status(new_status);  // 不会影响 *staus
         new_status.dict_to_enter = true;
+        new_status.statement_base = block_tmp;  // 设置新的statement
         get_right_token(&new_status,list,command_list,command_list_t);  // 要把command_list也弹出来
 
-        statement_base = free_statement_list(statement_base);  // 重新释放
         get_pop_token(status, list, rp_t);
         if(rp_t.type != RP_PASER){
             paser_error("Don't get '}'");
