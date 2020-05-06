@@ -91,6 +91,13 @@ typedef struct hash_var{
 
 // ------------------------- statement
 
+typedef enum var_key_token{
+    auto_token,  // 默认情况下auto_token是具有权限访问protetc base_var的，但不具有权限修改protect var，使用point运算符时会修改auto_token
+    public_token,
+    protect_token,
+    private_token,
+} var_key_token;
+
 typedef struct statement{
     enum statement_type{
         start=1,  // for base statement
@@ -207,17 +214,13 @@ typedef struct statement{
         struct{
             char *var_name;  // return var
             struct statement *from;  // from where [double->int]
-            enum {
-                auto_token,  // 默认情况下auto_token是具有权限访问protetc base_var的，但不具有权限修改protect var，使用point运算符时会修改auto_token
-                public_token,
-                protect_token,
-                private_token,
-            } lock_token;  // 如果用于赋值，则是新变量的权限，如果用于读取则是访问的权限 [默认情况 base_var访问权限不受限制，point的时候会更正访问权限]
+            enum var_key_token lock_token;  // 如果用于赋值，则是新变量的权限，如果用于读取则是访问的权限 [默认情况 base_var访问权限不受限制，point的时候会更正访问权限]
         } base_var;
 
         struct{
             struct statement *var;  // return var
             struct statement *from;  // from where [double->int]
+            enum var_key_token lock_token;
         } base_svar;
 
         struct{

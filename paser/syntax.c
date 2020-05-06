@@ -2807,17 +2807,51 @@ void svar_token(p_status *status, token_node *list){  // 数字归约
 
     gett = pop_node(list);  // 取得一个token
     if(gett.type == SVAR_PASER){  // var类型
-        new_token.type = NON_svar;
+        int lock = auto_token;
 
-        get_right_token(status, list, element, var_t);
-        if(var_t.type != NON_element){
-            paser_error("Don't get element[1]");
+        new_token.type = NON_svar;
+        get_pop_token(status, list, var_t);
+        if(var_t.type == PROTECT_PASER || var_t.type == PUBLIC_PASER || var_t.type == PRIVATE_PASER){
+            switch (var_t.type)
+            {
+            case PROTECT_PASER:
+                lock = protect_token;
+                break;
+            
+            case PUBLIC_PASER:
+                lock = public_token;
+                break;
+
+            case PRIVATE_PASER:
+                lock = private_token;
+                break;
+
+            default:
+                break;
+            }
+            get_pop_token(status, list, var_t);
+            if(var_t.type != COLON_PASER){
+                paser_error("Don't get ':'");
+            }
+            get_right_token(status, list, element, var_t);
+            if(var_t.type != NON_element){
+
+                paser_error("Don't get element[1]");
+            }
+        }
+        else{
+            back_one_token(list, var_t);
+            get_base_token(status, list, element, var_t);
+            if(var_t.type != NON_element){
+                paser_error("Don't get element[2]");
+            }
         }
 
         statement *code_tmp =  make_statement();
         code_tmp->type = base_svar;
         code_tmp->code.base_svar.var = var_t.data.statement_value;
         code_tmp->code.base_svar.from = NULL;
+        code_tmp->code.base_svar.lock_token = lock;
         
         new_token.data.statement_value = code_tmp;
         new_token.data_type = statement_value;

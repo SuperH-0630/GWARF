@@ -255,10 +255,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                     }
                 }
             }
-            int index = 0;
-            int max_object = -1;  // 记录class的最大位置
-            int max_class = -1;  // 记录class的最大位置
-            int max = 0;
+            int index = 0, max_object = -1, max_class = -1, max = 0;
             var_list *start = the_var;
             while (1)
             {
@@ -309,7 +306,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 from = 0;
             }
             else{
-                GWARF_result tmp_result, tmp_object = traverse(the_statement->code.base_svar.from, the_var, false, global_inter);
+                GWARF_result tmp_result, tmp_object = traverse(the_statement->code.base_svar.from, out_var, false, global_inter);
                 if(is_error(&tmp_object)){  // Name Error错误
                     from = 0;
                 }
@@ -317,7 +314,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                     from = 0;
                 }
                 else{
-                    tmp_result = get__value__(&(tmp_object.value), the_var, global_inter);  // 从object中提取value
+                    tmp_result = get__value__(&(tmp_object.value), out_var, global_inter);  // 从object中提取value
                     if(tmp_result.value.type == INT_value){
                         from = tmp_result.value.value.int_value;
                     }
@@ -329,23 +326,58 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                     }
                 }
             }
-            GWARF_result eq_object = traverse(the_statement->code.base_svar.var, the_var, false, global_inter);
+            GWARF_result eq_object = traverse(the_statement->code.base_svar.var, out_var, false, global_inter);
             if(is_error(&eq_object)){
                 return eq_object;
             }
             else if(is_space(&eq_object)){
                 return eq_object;
             }
-            char *str = to_str_dict(eq_object.value, the_var, global_inter).value.string;
+
+            int index = 0, max_object = -1, max_class = -1, max = 0;
+            var_list *start = the_var;
+            while (1)
+            {
+                if(start == NULL){  // don't get the var and not next
+                    if(max_class == -1) max_class = max;
+                    if(max_object == -1) max_object = max;
+                    break;
+                }
+                else if(start->tag == run_class && max_class == -1){  // don't get the var but can next
+                    max_class = max;
+                    break;
+                }
+                else if(start->tag == run_object && max_object == -1){  // don't get the var but can next
+                    max_object = max;
+                }
+                if(max_object != -1 && max_class != -1){
+                    break;
+                }
+                start = start->next;
+                max += 1;
+            }
+
+            char *str = to_str_dict(eq_object.value, out_var, global_inter).value.string;
             printf("str = %s\n", str);
 
-            var *tmp = find_var(the_var, from, str, NULL);
-            if(tmp == NULL){  // 输出name error[共两处会输出]
-                char *tmp = malloc((size_t)( 21 + strlen(str) ));
-                sprintf(tmp, "name not found [%s]\n", str);
-                return_value = to_error(tmp, "NameException",global_inter);
+
+            var *tmp = find_var(the_var, from, str, &index);
+            // 检查权限
+            char *str_tmp;  // 因为goto语句，所以声明放到外面
+            if(tmp == NULL){
+                svar_error:
+                str_tmp = malloc((size_t)( 21 + strlen(str) ));
+                sprintf(str_tmp, "name not found [%s]\n", str);
+                return_value = to_error(str_tmp, "NameException",global_inter);
             }
-            else{
+            else if(tmp->lock == protect && the_statement->code.base_var.lock_token == public_token){  // 权限不够
+                goto svar_error;
+            }
+            else if(tmp->lock == private && ((the_statement->code.base_var.lock_token == protect && index > max_object && index > max_class) || the_statement->code.base_var.lock_token == public_token)){
+                goto svar_error;
+            }
+            else
+            {
                 return_value.value = tmp->value;  // get_var
             }
             break;
@@ -374,6 +406,17 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                     break;
                 default:
                     (the_statement->code).point.child_var->code.base_var.lock_token = public_token;  // 默认权限
+                    break;
+                }
+            }
+            if((the_statement->code).point.child_var->type == base_svar && (the_statement->code).point.child_var->code.base_var.lock_token == auto_token){  // 需要调整权限
+                switch (tmp_result.value.lock_token)
+                {
+                case lock:
+                    (the_statement->code).point.child_var->code.base_svar.lock_token = protect_token;  // 修改权限
+                    break;
+                default:
+                    (the_statement->code).point.child_var->code.base_svar.lock_token = public_token;  // 默认权限
                     break;
                 }
             }
@@ -1939,7 +1982,7 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
             puts("Bad Assignment");
         }
     }
-    else if(the_statement->type == base_svar){  // 通过base_var赋值
+    else if(the_statement->type == base_svar){  // 通过base_svar赋值
         int from = 0;
         if(the_statement->code.base_svar.from == NULL){
             from = 0;
@@ -1976,6 +2019,22 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
             return right_result;
         }
         char *str = to_str_dict(eq_object.value, the_var, global_inter).value.string;
+
+        if(the_lock == auto_public){  // 调整注册权限
+            switch(the_statement->code.base_var.lock_token){
+                case public_token:
+                the_lock = public;
+                break;
+                case protect_token:
+                the_lock = protect;
+                break;
+                case private_token:
+                the_lock = private;
+                break;
+            }
+        }
+
+        printf("set : %s\n", str);
         value = assignment_func(str, right_result, login_var, from, the_lock);
         value.base_name = str;  // str来自value，本身就是malloc申请的内存
     }

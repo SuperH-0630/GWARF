@@ -375,7 +375,7 @@ void match_var(char p, word_paser *paser){  // 匹配一个var
     if(USE){
         GET_LEN(paser);
         if(paser->status == START){
-            if(p == '_' || (p <= 'z' && p >= 'a')){
+            if(p == '_' || (p <= 'z' && p >= 'a') || (p <= 'Z' && p >= 'A')){
                 paser->text = (char *)malloc(sizeof(char));
                 paser->text[len] = p;
                 paser->text[len + 1] = '\0';
@@ -386,7 +386,7 @@ void match_var(char p, word_paser *paser){  // 匹配一个var
             }
         }
         else{
-            if(p == '_' || (p <= 'z' && p >= 'a') || (p <= '9' && p >= '0')){
+            if(p == '_' || (p <= 'z' && p >= 'a') || (p <= '9' && p >= '0') || (p <= 'Z' && p >= 'A')){
                 paser->text = (char *)realloc(paser->text, sizeof(char) * (len + 2));
                 paser->text[len] = p;
                 paser->text[len + 1] = '\0';
