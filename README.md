@@ -66,5 +66,6 @@ return x n  函数返回值x，返回n层
 * 设置了变量访问权限：private，根据对``var_list``的标签来判断
 * 面向对象取出重复，``to_error``和``to_object``不用``find_var``，在global的时候就设定好
 * GWARF去全局化，减少使用全局变量有利于为后期的多线程模式做铺垫
+* 赋值语句会为``GWARF_value``的访问权限降低到``base``，除非是self=true(1)的模式。
 ## 关于GWARF
 最后更新时间 ： 2020年05月05日 广州

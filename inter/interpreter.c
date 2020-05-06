@@ -962,7 +962,7 @@ GWARF_result import_func(statement *the_statement, var_list *the_var, inter *glo
     class_tmp->out_var = copy_var_list(the_var);  // make class var list with out var
 
     import_result.value.value.class_value = class_tmp;
-    assignment_statement_core(the_statement->code.import_class.var, the_var, the_var, import_result, true, auto_public, global_inter);
+    assignment_statement_core(the_statement->code.import_class.var, the_var, the_var, import_result, 2, auto_public, global_inter);
 
     return_value.u = statement_end;
     return_value.value.type = NULL_value;
@@ -1804,9 +1804,10 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
     value.value.type = NULL_value;
     value.value.value.int_value = 0;
     value.base_name = NULL;  // 默认是NULL
-    if(!self){  // 函数声明的时候使用self
+    if(self == false){  // 函数声明的时候使用self
         if(right_result.value.type == OBJECT_value || right_result.value.type == CLASS_value){  // 比如a = q, q是一个object, 若他的__assignment__方法返回的是数字5, 那么a的赋值就相当与a = 5了而不是a = q
             right_result = get__assignment__(&(right_result.value), the_var, global_inter);
+            right_result.value.lock_token = base;
             if(is_error(&right_result)){  // Name Error错误
                 return right_result;
             }
@@ -1814,6 +1815,13 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
                 return right_result;
             }
         }
+        else{
+            right_result.value.lock_token = base;
+        }
+
+    }
+    else if(self == 2){  // import和include语句
+        right_result.value.lock_token = base;
     }
     if(the_statement->type == base_var){  // 通过base_var赋值
         char *left = the_statement->code.base_var.var_name;  // get var name but not value
