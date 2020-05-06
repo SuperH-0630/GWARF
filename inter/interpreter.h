@@ -14,10 +14,9 @@
 #define GWARF_value_reset {.type=NULL_value,.value.int_value=0,.lock_token=base}
 #define GWARF_result_reset {.value.type=NULL_value,.value.value.int_value=0,.value.lock_token=base}
 
-#define push_statement(base,token) \
+#define push_statement(tmp_statement,token) \
 do{ \
-statement *tmp = find_statement_list(0, base); \
-append_statement(tmp, token.data.statement_value); \
+append_statement(tmp_statement,token.data.statement_value); \
 }while(0);
 
 // the type of data(GWARF_value)
@@ -433,7 +432,7 @@ typedef struct var_list{
 // ------------------------- inter paser [记录每一层变量code的链表]
 
 typedef struct statement_list{
-    statement *statement_base;
+    struct statement *statement_base;
     struct statement_list *next;
 } statement_list;
 
@@ -506,7 +505,7 @@ typedef enum{
 typedef struct func{
     func_type type;
     official_func_type official_func;
-    struct GWARF_result (*paser)(struct func *, struct parameter *, struct var_list *the_var, GWARF_result, var_list *);
+    struct GWARF_result (*paser)(struct func *, struct parameter *, struct var_list *, struct GWARF_result, struct var_list *,inter *);
     struct parameter *parameter_list;  // def parameter
     struct statement *done;  // def to do
     struct var_list *the_var;  // func会记录the_var，因为不同地方调用var如果var链不统一那就会很乱
@@ -734,9 +733,6 @@ inter *get_inter();
 void login(var_list *the_var, inter *global_inter);
 
 // inter *global_inter;
-statement_list *statement_base;
+// statement_list *statement_base;
 
-int yyerror(char const *);
-FILE *yyin;
-char *yytext;
 #endif

@@ -921,22 +921,14 @@ GWARF_result include_func(statement *the_statement, var_list *the_var, inter *gl
 
     GWARF_value file = to_str(traverse(file_statement, the_var, false, global_inter).value, the_var, global_inter);
 
-    // TODO:: 使用链表来存储
-    inter *old_global = global_inter;  // 保存旧迭代器
-    statement_list *old_statement_base = statement_base;  // 保存statement_base
-
-    global_inter = get_inter();  // 拿全局解释器[并声明全局变量]
-    free(global_inter->global_var);  // 不需要新的the_var
-    global_inter->global_var = the_var->hash_var_base;
-    statement_base = make_statement_base(global_inter->global_code);
+    inter *new_global_inter = get_inter();  // 拿全局解释器[并声明全局变量]
+    free(new_global_inter->global_var);  // 不需要新的the_var
+    new_global_inter->global_var = the_var->hash_var_base;
     
-    parser(file.value.string);
+    parser(file.value.string, new_global_inter);
     printf("----start run----\n");
-    traverse_global(global_inter->global_code, the_var, global_inter);
+    traverse_global(new_global_inter->global_code, the_var, new_global_inter);
     printf("code end...\n");
-
-    global_inter = old_global;  // 变回旧迭代器
-    statement_base = old_statement_base;  // 变回statement_base
 
     return_value.u = statement_end;
     return_value.value.type = NULL_value;
@@ -951,24 +943,16 @@ GWARF_result import_func(statement *the_statement, var_list *the_var, inter *glo
     
     GWARF_value file = to_str(traverse(file_statement, the_var, false, global_inter).value, the_var, global_inter);
 
-    // TODO:: 使用链表来存储
-    inter *old_global = global_inter;  // 保存旧迭代器
-    statement_list *old_statement_base = statement_base;  // 保存statement_base
-
-    global_inter = get_inter();  // 拿全局解释器[并声明全局变量]
+    inter *new_global_inter = get_inter();  // 拿全局解释器[并声明全局变量]
     var_list *new_the_var = make_var_base(global_inter->global_var);
     new_the_var->tag = run_class;
-    statement_base = make_statement_base(global_inter->global_code);
     
-    login(new_the_var, global_inter);
+    login(new_the_var, new_global_inter);
     
-    parser(file.value.string);
+    parser(file.value.string, new_global_inter);
     printf("----start run----\n");
-    traverse_global(global_inter->global_code, new_the_var, global_inter);
+    traverse_global(new_global_inter->global_code, new_the_var, new_global_inter);
     printf("code end...\n");
-
-    global_inter = old_global;  // 保存旧迭代器
-    statement_base = old_statement_base;  // 保存statement_base
 
     GWARF_result import_result = GWARF_result_reset;
     import_result.value.type = CLASS_value;
@@ -1685,52 +1669,52 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
             value = div_func(left_result, right_result, the_var, global_inter);
             break;
         case AADD_func:
-            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(add_func(left_result, right_result, the_var, global_inter).value, the_var),global_inter);
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(add_func(left_result, right_result, the_var, global_inter).value, global_inter),global_inter);
             // exit(1);
             break;
         case ASUB_func:
-            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(sub_func(left_result, right_result, the_var, global_inter).value, the_var),global_inter);
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(sub_func(left_result, right_result, the_var, global_inter).value, global_inter),global_inter);
             break;
         case AMUL_func:
-            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(mul_func(left_result, right_result, the_var, global_inter).value, the_var), global_inter);
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(mul_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
             break;
         case ADIV_func:
-            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(div_func(left_result, right_result, the_var, global_inter).value, the_var), global_inter);
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(div_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
             break;
         case AMOD_func:
-            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(mod_func(left_result, right_result, the_var, global_inter).value, the_var), global_inter);
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(mod_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
             break;
         case AINTDIV_func:
-            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(int_div_func(left_result, right_result, the_var, global_inter).value, the_var), global_inter);
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(int_div_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
             break;
         case APOW_func:
-            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(pow_func(left_result, right_result, the_var, global_inter).value, the_var), global_inter);
+            value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(pow_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
             break;
         case LADD_func:  // a++
             right_result.u = statement_end;
             right_result.value.type = INT_value;
             right_result.value.value.int_value = 1;
-            assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(add_func(left_result, right_result, the_var, global_inter).value, the_var), global_inter);
+            assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(add_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
             value = left_result;  // 先返回值，后自增
             break;
         case FADD_func:  // ++a
             left_result.u = statement_end;
             left_result.value.type = INT_value;
             left_result.value.value.int_value = 1;
-            value = assignment_statement_value(the_statement->code.operation.right_exp, the_var, login_var, to_object(add_func(left_result, right_result, the_var, global_inter).value, the_var), global_inter);  // 先自增，后返回值
+            value = assignment_statement_value(the_statement->code.operation.right_exp, the_var, login_var, to_object(add_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);  // 先自增，后返回值
             break;
         case LSUB_func:  // a--
             right_result.u = statement_end;
             right_result.value.type = INT_value;
             right_result.value.value.int_value = 1;
-            assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(sub_func(left_result, right_result, the_var, global_inter).value, the_var), global_inter);
+            assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(sub_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
             value = left_result;  // 先返回值，后自增
             break;
         case FSUB_func:  // --a
             left_result.u = statement_end;
             left_result.value.type = INT_value;
             left_result.value.value.int_value = 1;
-            value = assignment_statement_value(the_statement->code.operation.right_exp, the_var, login_var, to_object(sub_func(right_result, left_result, the_var, global_inter).value, the_var), global_inter);  // 先自增，后返回值
+            value = assignment_statement_value(the_statement->code.operation.right_exp, the_var, login_var, to_object(sub_func(right_result, left_result, the_var, global_inter).value, global_inter), global_inter);  // 先自增，后返回值
             break;
         case NEGATIVE_func:
             value = negative_func(right_result, the_var, global_inter);
@@ -2322,7 +2306,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
             puts("----stop start func----");
         }
         else{
-            result = func_->paser(func_, tmp_s, the_var, get, old_var_list);
+            result = func_->paser(func_, tmp_s, the_var, get, old_var_list, global_inter);
         }
         if(new_var_list){
             the_var = free_var_list(the_var);  // free the new var
@@ -2390,7 +2374,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                 father.type = OBJECT_value;
                 father.value.object_value = object_tmp;
                 tmp_get.father = &father;
-                GWARF_result tmp = func_->paser(func_, tmp_s, the_var, tmp_get, old_var_list);   // 返回值不记录
+                GWARF_result tmp = func_->paser(func_, tmp_s, the_var, tmp_get, old_var_list, global_inter);   // 返回值不记录
                 if(is_error(&tmp)){  // Name Error错误
                     the_var = free_var_list(the_var);  // free the new var
                     // puts("STOP:: Name No Found!");
@@ -2467,7 +2451,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                 father.type = OBJECT_value;
                 father.value.object_value = get.value.value.object_value;
                 tmp_get.father = &father;
-                GWARF_result tmp = func_->paser(func_, tmp_s, the_var, tmp_get, old_var_list);   // 返回值不记录
+                GWARF_result tmp = func_->paser(func_, tmp_s, the_var, tmp_get, old_var_list, global_inter);   // 返回值不记录
                 if(is_error(&tmp)){  // Name Error错误
                     the_var = free_var_list(the_var);  // free the new var
                     // puts("STOP:: Name No Found!");

@@ -35,11 +35,10 @@ int main(){
     inter *global_inter = get_inter();  // 拿全局解释器[并声明全局变量]
     var_list *the_var = make_var_base(global_inter->global_var);
     the_var->tag = run_class;
-    statement_base = make_statement_base(global_inter->global_code);
     
     login(the_var, global_inter);
 
-    parser("/home/songzihuan/test.gwf");
+    parser("/home/songzihuan/test.gwf", global_inter);
     printf("----start run----\n");
     traverse_global(global_inter->global_code, the_var, global_inter);
     printf("code end...\n");

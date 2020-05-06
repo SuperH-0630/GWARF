@@ -130,7 +130,7 @@ GWARF_result get_object(parameter *tmp_s, char *name, var_list *the_var, inter *
         func_result.value = tmp->value;
     }
     else{
-        return to_error("Object Name Not Found", "NameException", the_var);
+        return to_error("Object Name Not Found", "NameException", global_inter);
     }
     return call_back_core(func_result, the_var, tmp_s, global_inter);
 }
@@ -1880,7 +1880,7 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
             len = tmp->value.value.list_value->index;
             printf("len = %d, iter_index = %d\n", len, iter_index);
             if(iter_index >= len){  // 已经超出
-                return_value = to_error("Max Iter", "IterException", the_var);
+                return_value = to_error("Max Iter", "IterException", global_inter);
             }
             else{
                 return_value.value = tmp->value.value.list_value->list_value[iter_index];
@@ -2326,13 +2326,13 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
             tmp = find_var(login_var, 0, "value", NULL);
             len = tmp->value.value.dict_value->index;
             if(iter_index >= len){
-                return_value = to_error("Max Iter", "IterException", the_var);
+                return_value = to_error("Max Iter", "IterException", global_inter);
             }
             else{
                 dict_key *tmp_dict_key = tmp->value.value.dict_value->name_list->next;  // 忽略第一个点
                 for(int i = 0;i < iter_index;i += 1){
                     if(tmp_dict_key == NULL){  // to_error
-                        return_value = to_error("Max Iter", "IterException", the_var);
+                        return_value = to_error("Max Iter", "IterException", global_inter);
                         goto next_break;  // 
                     }
                     tmp_dict_key = tmp_dict_key->next;
@@ -2362,7 +2362,7 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 get_value.value = to_str_dict(tmp_result.value, out_var, global_inter);
                 var *find_var = find_node(get_value.value.value.string, tmp->value.value.dict_value->dict_value);
                 if(find_var == NULL){  // not found
-                    return_value = to_error("Dict key Not Found", "NameException", out_var);
+                    return_value = to_error("Dict key Not Found", "NameException", global_inter);
                 }
                 else{
                     return_value.value = find_var->value;
@@ -2505,7 +2505,7 @@ GWARF_result run_func_core(GWARF_value *base_the_var, var_list *the_var, char *n
         else{
             char *tmp = malloc((size_t)( 21 + strlen(name)) );
             sprintf(tmp, "name not found [%s]\n", name);
-            reight_tmp = to_error(tmp, "NameException", the_var);
+            reight_tmp = to_error(tmp, "NameException", global_inter);
             goto return_result;
         }
     }
