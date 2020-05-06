@@ -9,7 +9,7 @@
 #define bool int
 
 #define assignment_statement(the_statement,the_var,login_var,right_result) assignment_statement_core(the_statement,the_var,login_var,right_result,0,auto_public)
-#define read_statement_list(the_statement,the_var) read_statement(the_statement,the_var,NULL,lock)
+#define read_statement_list(the_statement,the_var) read_statement(the_statement,the_var,NULL,NULL,lock)
 #define run_func(base_the_var,the_var,name) run_func_core(base_the_var,the_var,name,false)
 #define GWARF_value_reset {.type=NULL_value,.value.int_value=0,.lock_token=base}
 #define GWARF_result_reset {.value.type=NULL_value,.value.value.int_value=0,.value.lock_token=base}
