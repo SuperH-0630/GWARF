@@ -2564,7 +2564,7 @@ void element(p_status *status, token_node *list){  // 数字归约
         add_node(list, new_token);  // 压入节点
         return;
     }
-    else if(gett.type == VAR_PASER || gett.type == PROTECT_PASER || gett.type == PUBLIC_PASER){  // a
+    else if(gett.type == VAR_PASER || gett.type == PROTECT_PASER || gett.type == PUBLIC_PASER || gett.type == PRIVATE_PASER){  // a
         back_one_token(list, gett);
         get_base_token(status, list, var_token, new_token);
         if(new_token.type != NON_base_var){
@@ -2842,7 +2842,7 @@ void var_token(p_status *status, token_node *list){  // 数字归约
     token gett, new_token;
     int lock = auto_token;
     gett = pop_node(list);  // 取得一个token
-    if(gett.type == VAR_PASER || gett.type == PROTECT_PASER || gett.type == PUBLIC_PASER){  // var类型
+    if(gett.type == VAR_PASER || gett.type == PROTECT_PASER || gett.type == PUBLIC_PASER || gett.type == PRIVATE_PASER){  // var类型
         if(gett.type != VAR_PASER){
             switch (gett.type)
             {
@@ -2852,6 +2852,10 @@ void var_token(p_status *status, token_node *list){  // 数字归约
             
             case PUBLIC_PASER:
                 lock = public_token;
+                break;
+
+            case PRIVATE_PASER:
+                lock = private_token;
                 break;
 
             default:

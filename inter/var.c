@@ -30,7 +30,7 @@ void append_var(char *name, GWARF_value value, var *base_var, int lock){
         tmp = tmp->next;  // get the next to iter
     }
     if(break_ == 2){
-        if(tmp->lock == lock || tmp->lock != protect){  // 检查是否具有修改的权限
+        if(tmp->lock == lock || tmp->lock == public || (tmp->lock == protect && lock == private_token)){  // 检查是否具有修改的权限
             tmp->value = value;
             if(lock != auto_public){  // 检查是否可以改变权限
                 tmp->lock = lock;
@@ -214,6 +214,7 @@ var_list *make_var_list(){  // make a empty var_list node
     tmp = malloc(sizeof(var_list));  // get an address for base var
     tmp->next = NULL;
     tmp->hash_var_base = NULL;
+    tmp->tag = run_func;
     tmp->default_list = make_default_var_base();
     return tmp;
 }
@@ -265,7 +266,7 @@ int get_var_list_len(var_list *var_base){
     return tmp;
 }
 
-var *find_var(var_list *var_base,int from, char *name){  // find var by func get_var in var_list[iter to find]
+var *find_var(var_list *var_base, int from, char *name, int *index){  // index表示层数
     var_list *start = var_base;
     var *return_var;
     from += get_default(name, var_base->default_list);
@@ -274,6 +275,9 @@ var *find_var(var_list *var_base,int from, char *name){  // find var by func get
             break;
         }
         start = start->next;
+    }
+    if(index != NULL){
+        *index = from;
     }
     // printf("name = %s, from = %d, address = %x\n", name, from, start->var_base);
     while (1)
@@ -284,9 +288,11 @@ var *find_var(var_list *var_base,int from, char *name){  // find var by func get
         }
         else if((return_var == NULL) && (start->next != NULL)){  // don't get the var but can next
             start = start->next;
+            if(index != NULL){
+                *index += 1;
+            }
             continue;
         }
-        // printf("find on name = %s, from = %d, address = %x\n", name, from, start->var_base);
         return return_var;  //get var success can or can't next
     }
 }

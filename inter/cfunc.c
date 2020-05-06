@@ -55,37 +55,37 @@ GWARF_value to_object(GWARF_value value, var_list *the_var){  // 把GWARF_value�
     func_result.value.value.int_value = 0;
     var *tmp;
     if(value.type == NUMBER_value){
-        tmp = find_var(the_var, 0, "double");
+        tmp = find_var(the_var, 0, "double", NULL);
         if(tmp != NULL){
             func_result.value = tmp->value;
         }
     }
     else if(value.type == INT_value){
-        tmp = find_var(the_var, 0, "int");
+        tmp = find_var(the_var, 0, "int", NULL);
         if(tmp != NULL){
             func_result.value = tmp->value;
         }
     }
     else if(value.type == BOOL_value){
-        tmp = find_var(the_var, 0, "bool");
+        tmp = find_var(the_var, 0, "bool", NULL);
         if(tmp != NULL){
             func_result.value = tmp->value;
         }
     }
     else if(value.type == STRING_value){
-        tmp = find_var(the_var, 0, "str");
+        tmp = find_var(the_var, 0, "str", NULL);
         if(tmp != NULL){
             func_result.value = tmp->value;
         }
     }
     else if(value.type == LIST_value){
-        tmp = find_var(the_var, 0, "list");
+        tmp = find_var(the_var, 0, "list", NULL);
         if(tmp != NULL){
             func_result.value = tmp->value;
         }
     }
     else if(value.type == DICT_value){
-        tmp = find_var(the_var, 0, "dict");
+        tmp = find_var(the_var, 0, "dict", NULL);
         if(tmp != NULL){
             func_result.value = tmp->value;
         }
@@ -101,7 +101,7 @@ GWARF_value to_tuple(GWARF_value value, var_list *the_var){  // 把GWARF_value�
     GWARF_result func_result = GWARF_result_reset;
     func_result.u = statement_end;
     var *tmp;
-    tmp = find_var(the_var, 0, "tuple");
+    tmp = find_var(the_var, 0, "tuple", NULL);
     if(tmp != NULL){
         func_result.value = tmp->value;
     }
@@ -117,7 +117,7 @@ GWARF_result get_object(parameter *tmp_s, char *name, var_list *the_var){  // �
     func_result.u = statement_end;
     func_result.value.type = NULL_value;
     func_result.value.value.int_value = 0;
-    var *tmp = find_var(the_var, 0, name);
+    var *tmp = find_var(the_var, 0, name, NULL);
     if(tmp != NULL){
         func_result.value = tmp->value;
     }
@@ -140,7 +140,7 @@ GWARF_result to_error(char *error_info, char *error_type, var_list *the_var){  /
     return_result.u = error;
     return_result.error_info = error_info;
 
-    var *tmp = find_var(the_var, 0, error_type);
+    var *tmp = find_var(the_var, 0, error_type, NULL);
 
     if(tmp != NULL){
         func_result.value = tmp->value;
@@ -494,7 +494,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             break;
         }
         case __value__func:{  // 若想实现运算必须要有这个方法
-            var *tmp = find_var(login_var, 0, "value");  // gobject类的value存储在self.value中
+            var *tmp = find_var(login_var, 0, "value", NULL);  // gobject类的value存储在self.value中
             if(tmp != NULL){
                 return_value.value = tmp->value;  // 取得用于计算的数值
             }
@@ -516,7 +516,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -539,7 +539,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -562,7 +562,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -585,7 +585,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -608,7 +608,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -631,7 +631,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -654,7 +654,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -677,7 +677,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -700,7 +700,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -723,7 +723,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -746,7 +746,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -769,7 +769,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -792,7 +792,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -815,7 +815,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -838,7 +838,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -861,7 +861,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -884,7 +884,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -907,7 +907,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -920,7 +920,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __negative__func:{
             GWARF_result left_tmp = GWARF_result_reset;
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -943,7 +943,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -966,7 +966,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -989,7 +989,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -1012,7 +1012,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -1037,7 +1037,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -1060,7 +1060,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -1083,7 +1083,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -1106,7 +1106,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -1129,7 +1129,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -1152,7 +1152,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -1175,7 +1175,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
             }
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var);
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -1188,7 +1188,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __bitnot__func:{
             GWARF_result left_tmp = GWARF_result_reset;
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
             }
@@ -1268,7 +1268,7 @@ GWARF_result int_official_func(func *the_func, parameter *tmp_s, var_list *the_v
 
                 // 执行__init__
                 GWARF_result self_value = GWARF_result_reset;
-                var *tmp = find_var(login_var, 0, "value");
+                var *tmp = find_var(login_var, 0, "value", NULL);
                 if(tmp != NULL){
                     self_value.value = to_int(tmp->value, out_var);
                 }
@@ -1385,7 +1385,7 @@ GWARF_result double_official_func(func *the_func, parameter *tmp_s, var_list *th
 
                 // 执行__init__
                 GWARF_result self_value = GWARF_result_reset;
-                var *tmp = find_var(login_var, 0, "value");
+                var *tmp = find_var(login_var, 0, "value", NULL);
                 if(tmp != NULL){
                     self_value.value = to_int(tmp->value, out_var);
                 }
@@ -1721,7 +1721,7 @@ GWARF_result bool_official_func(func *the_func, parameter *tmp_s, var_list *the_
 
                 // 执行__init__
                 GWARF_result self_value = GWARF_result_reset;
-                var *tmp = find_var(login_var, 0, "value");
+                var *tmp = find_var(login_var, 0, "value", NULL);
                 if(tmp != NULL){
                     self_value.value = to_bool_(tmp->value, out_var);
                 }
@@ -1844,7 +1844,7 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
             break;
         }
         case __len__func:{  // return index
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             return_value.value.type = INT_value;
             return_value.value.value.int_value = tmp->value.value.list_value->index;
             break;
@@ -1859,7 +1859,7 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
             break;
         }
         case __next__func:{  // return index
-            var *tmp = find_var(login_var, 0, "iter_value");
+            var *tmp = find_var(login_var, 0, "iter_value", NULL);
             int iter_index, len;
             if(tmp == NULL){
                 iter_index = 0;
@@ -1868,7 +1868,7 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
                 iter_index = to_int(tmp->value, out_var).value.int_value;
             }
 
-            tmp = find_var(login_var, 0, "value");
+            tmp = find_var(login_var, 0, "value", NULL);
             len = tmp->value.value.list_value->index;
             printf("len = %d, iter_index = %d\n", len, iter_index);
             if(iter_index >= len){  // 已经超出
@@ -1885,7 +1885,7 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
             break;
         }
         case __down__func:{  // return index
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false);
                 if(is_error(&tmp_result)){  // Name Error错误
@@ -1909,7 +1909,7 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
             break_down: break;
         }
         case __slice__func:{  // return index
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             int len = tmp->value.value.list_value->index;
             int start, end;
             if(tmp != NULL){
@@ -1999,7 +1999,7 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
     switch (the_func->official_func)
     {
         case __set__func:{  // return index
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false);
                 if(is_error(&tmp_result)){  // Name Error错误
@@ -2161,7 +2161,7 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var){  // 把param
                 GWARF_result get = GWARF_result_reset;  // 不会和下面发生重复计算
                 var_list *call_var = tmp.value.value.object_value->the_var;
 
-                var *__down__tmp = find_var(call_var, 0, "__down__");
+                var *__down__tmp = find_var(call_var, 0, "__down__", NULL);
                 if(__down__tmp != NULL){
                     get.value = __down__tmp->value;
                     get.father = &(tmp.value);  // 设置father
@@ -2306,7 +2306,7 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
             break;
         }
         case __next__func:{  // return index
-            var *tmp = find_var(login_var, 0, "iter_value");
+            var *tmp = find_var(login_var, 0, "iter_value", NULL);
             int iter_index, len;
             if(tmp == NULL){
                 iter_index = 0;
@@ -2315,7 +2315,7 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 iter_index = to_int(tmp->value, out_var).value.int_value;
             }
 
-            tmp = find_var(login_var, 0, "value");
+            tmp = find_var(login_var, 0, "value", NULL);
             len = tmp->value.value.dict_value->index;
             if(iter_index >= len){
                 return_value = to_error("Max Iter", "IterException", the_var);
@@ -2340,7 +2340,7 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
             next_break: break;
         }
         case __down__func:{  // return index
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false);
                 if(is_error(&tmp_result)){  // Name Error错误
@@ -2367,7 +2367,7 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
             break_down: break;
         }
         case __set__func:{  // return index
-            var *tmp = find_var(login_var, 0, "value");
+            var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false);
                 if(is_error(&tmp_result)){  // Name Error错误
@@ -2481,7 +2481,7 @@ GWARF_result run_func_core(GWARF_value *base_the_var, var_list *the_var, char *n
             reight_tmp.return_times = times;
             goto return_result;  // 如果类型不是object或者class
         }
-        var *tmp_var = find_var(call_var, 0, name);
+        var *tmp_var = find_var(call_var, 0, name, NULL);
         if(tmp_var != NULL){
             get.value = tmp_var->value;  // TODO:: 需要检查__value__是否存在
             get.father = base_the_var;  // 设置father

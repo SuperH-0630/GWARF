@@ -78,6 +78,7 @@ typedef struct var{
         auto_public,  // 自动权限
         public,
         protect,
+        private,
     } lock;
     char *name;  // var name
     GWARF_value value;
@@ -211,6 +212,7 @@ typedef struct statement{
                 auto_token,  // 默认情况下auto_token是具有权限访问protetc base_var的，但不具有权限修改protect var，使用point运算符时会修改auto_token
                 public_token,
                 protect_token,
+                private_token,
             } lock_token;  // 如果用于赋值，则是新变量的权限，如果用于读取则是访问的权限 [默认情况 base_var访问权限不受限制，point的时候会更正访问权限]
         } base_var;
 
@@ -419,6 +421,13 @@ typedef struct var_list{
     struct hash_var *hash_var_base;
     struct default_var *default_list;
     struct var_list *next;
+    enum{
+        run_func,
+        run_while,
+        run_if,
+        run_class,
+        run_object,
+    } tag;  // var_list的标签
 } var_list;
 
 // ------------------------- inter paser [记录每一层变量code的链表]
@@ -695,7 +704,7 @@ var_list *append_var_list(hash_var *, var_list *);
 var_list *append_by_var_list(var_list *, var_list *);
 var_list *free_var_list(var_list *);
 int get_var_list_len(var_list *);
-var *find_var(var_list *,int , char *);
+var *find_var(var_list *,int , char *, int *);
 void add_var(var_list *,int , char *, GWARF_value, int);
 void del_var_var_list(var_list *,int, char *);
 var_list *copy_var_list(var_list *);

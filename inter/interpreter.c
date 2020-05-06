@@ -203,7 +203,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             GWARF_value base_the_var = tmp_result.value;
 
             if(base_the_var.type == CLASS_value){  // is class so that can use "."
-                var *tmp = find_var(base_the_var.value.class_value->the_var, 0, "__slice__");
+                var *tmp = find_var(base_the_var.value.class_value->the_var, 0, "__slice__", NULL);
                 if(tmp != NULL){
                     get.value = tmp->value;
                     get.father = &base_the_var;  // 设置father
@@ -212,7 +212,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 }
             }
             else if(base_the_var.type == OBJECT_value){
-                var *tmp = find_var(base_the_var.value.object_value->the_var, 0, "__slice__");
+                var *tmp = find_var(base_the_var.value.object_value->the_var, 0, "__slice__", NULL);
                 if(tmp != NULL){
                     get.value = tmp->value;
                     get.father = &base_the_var;  // 设置father
@@ -253,12 +253,46 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                     }
                 }
             }
-            var *tmp = find_var(the_var, from, (the_statement->code).base_var.var_name);
+            int index = 0;
+            int max_object = -1;  // 记录class的最大位置
+            int max_class = -1;  // 记录class的最大位置
+            int max = 0;
+            var_list *start = the_var;
+            while (1)
+            {
+                if(start == NULL){  // don't get the var and not next
+                    if(max_class == -1) max_class = max;
+                    if(max_object == -1) max_object = max;
+                    break;
+                }
+                else if(start->tag == run_class && max_class == -1){  // don't get the var but can next
+                    max_class = max;
+                    break;
+                }
+                else if(start->tag == run_object && max_object == -1){  // don't get the var but can next
+                    max_object = max;
+                }
+                if(max_object != -1 && max_class != -1){
+                    break;
+                }
+                start = start->next;
+                max += 1;
+            }
+
+            var *tmp = find_var(the_var, from, (the_statement->code).base_var.var_name, &index);
             // 检查权限
-            if(tmp == NULL || (tmp->lock == protect && (the_statement->code).base_var.lock_token == public_token)){
-                char *tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
-                sprintf(tmp, "name not found [%s]\n", the_statement->code.base_var.var_name);
-                return_value = to_error(tmp, "NameException", the_var);
+            char *str_tmp;  // 因为goto语句，所以声明放到外面
+            if(tmp == NULL){
+                var_error:
+                str_tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
+                sprintf(str_tmp, "name not found [%s]\n", the_statement->code.base_var.var_name);
+                return_value = to_error(str_tmp, "NameException", the_var);
+            }
+            else if(tmp->lock == protect && the_statement->code.base_var.lock_token == public_token){  // 权限不够
+                goto var_error;
+            }
+            else if(tmp->lock == private && ((the_statement->code.base_var.lock_token == protect && index > max_object && index > max_class) || the_statement->code.base_var.lock_token == public_token)){
+                goto var_error;
             }
             else
             {
@@ -302,7 +336,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             char *str = to_str_dict(eq_object.value, the_var).value.string;
             printf("str = %s\n", str);
 
-            var *tmp = find_var(the_var, from, str);
+            var *tmp = find_var(the_var, from, str, NULL);
             if(tmp == NULL){  // 输出name error[共两处会输出]
                 char *tmp = malloc((size_t)( 21 + strlen(str) ));
                 sprintf(tmp, "name not found [%s]\n", str);
@@ -383,7 +417,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
 
             GWARF_value base_the_var = tmp_result.value;
             if(base_the_var.type == CLASS_value){  // is class so that can use "."
-                var *tmp = find_var(base_the_var.value.class_value->the_var, 0, "__down__");
+                var *tmp = find_var(base_the_var.value.class_value->the_var, 0, "__down__", NULL);
                 if(tmp != NULL){
                     get.value = tmp->value;
                     get.father = &base_the_var;  // 设置father
@@ -392,7 +426,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 }
             }
             else if(base_the_var.type == OBJECT_value){
-                var *tmp = find_var(base_the_var.value.object_value->the_var, 0, "__down__");
+                var *tmp = find_var(base_the_var.value.object_value->the_var, 0, "__down__", NULL);
                 if(tmp != NULL){
                     get.value = tmp->value;
                     get.father = &base_the_var;  // 设置father
@@ -411,6 +445,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             func_tmp->done = the_statement->code.def.done;
             func_tmp->parameter_list = the_statement->code.def.parameter_list;
             func_tmp->self = make_var_base(make_hash_var());
+            func_tmp->self->tag = run_object;
             if(the_statement->code.def.is_inline){  // inline函数
                 func_tmp->the_var = NULL;
                 goto make_func;  // 跳过其他设置
@@ -454,7 +489,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             func_tmp->done = the_statement->code.lambda_func.done;
             func_tmp->parameter_list = the_statement->code.lambda_func.parameter_list;
             func_tmp->the_var = copy_var_list(the_var);
-            func_tmp->self = make_var_base(make_hash_var());
+            func_tmp->self = make_var_base(make_hash_var());  // 默认设置为run_func
             func_tmp->type = customize;  // func by user
             func_tmp->is_class = auto_func;
             func_tmp->is_lambda = true;
@@ -470,6 +505,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             class_object *class_tmp = malloc(sizeof(class_object));
 
             class_tmp->the_var = make_var_base(make_hash_var());  // make class var list
+            class_tmp->the_var->tag = run_class;
             class_value.value.value.class_value = class_tmp;
 
             // 获取father  -- append_by_var_list[拼凑]
@@ -500,7 +536,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 }
             }
             else{
-                var *object_tmp = find_var(the_var, 0, "object");
+                var *object_tmp = find_var(the_var, 0, "object", NULL);
                 if(object_tmp != NULL){
                     father_tmp.value = object_tmp->value;
                     append_by_var_list(class_tmp->the_var, father_tmp.value.value.class_value->the_var);
@@ -848,7 +884,7 @@ GWARF_result get_value(statement *the_statement, var_list *the_var, var_list *ou
     {
         case base_var:{    // because the var tmp, we should ues a {} to make a block[name space] for the tmp var;
             int from = 0;
-            var *tmp = find_var(the_var, from, (the_statement->code).base_var.var_name);
+            var *tmp = find_var(the_var, from, (the_statement->code).base_var.var_name, NULL);
             if(tmp == NULL){  // 输出name error[共两处会输出]
                 char *tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
                 sprintf(tmp, "name not found [%s]\n", the_statement->code.base_var.var_name);
@@ -871,7 +907,7 @@ GWARF_result get_value(statement *the_statement, var_list *the_var, var_list *ou
             char *str = to_str_dict(eq_object.value, out_var).value.string;
             printf("str = %s\n", str);
 
-            var *tmp = find_var(the_var, from, str);
+            var *tmp = find_var(the_var, from, str, NULL);
             if(tmp == NULL){  // 输出name error[共两处会输出]
                 char *tmp = malloc((size_t)( 21 + strlen(str) ));
                 sprintf(tmp, "name not found [%s]\n", str);
@@ -932,6 +968,7 @@ GWARF_result import_func(statement *the_statement, var_list *the_var){
 
     global_inter = get_inter();  // 拿全局解释器[并声明全局变量]
     var_list *new_the_var = make_var_base(global_inter->global_var);
+    new_the_var->tag = run_class;
     statement_base = make_statement_base(global_inter->global_code);
     
     login(new_the_var);
@@ -1135,6 +1172,7 @@ GWARF_result for_func(statement *the_statement, var_list *the_var){  // read the
     GWARF_result value = GWARF_result_reset;
     hash_var *tmp = make_hash_var();  // base_var
     the_var = append_var_list(tmp, the_var);
+    the_var->tag = run_while;
     bool condition;
     if(the_statement->code.for_cycle.first != NULL){
         GWARF_result tmp_result = traverse(the_statement->code.for_cycle.first, the_var, false); // first to do
@@ -1323,7 +1361,7 @@ GWARF_result try_func(statement *the_statement, var_list *the_var){  // read the
     GWARF_result value = GWARF_result_reset;
 
     hash_var *tmp = make_hash_var();  // base_var
-    the_var = append_var_list(tmp, the_var);
+    the_var = append_var_list(tmp, the_var);  // run func
 
     again: 
     puts("----try----");
@@ -1451,7 +1489,7 @@ GWARF_result forin_func(statement *the_statement, var_list *the_var){  // read t
     GWARF_result value = GWARF_result_reset;
     hash_var *tmp = make_hash_var();  // base_var
     the_var = append_var_list(tmp, the_var);
-    
+    the_var->tag = run_while;
     GWARF_result tmp_result = traverse(the_statement->code.for_in_cycle.iter, the_var, false);  // 取得迭代器
     if(is_error(&tmp_result)){  // Name Error错误
         // puts("STOP:: Name No Found!");
@@ -1540,7 +1578,7 @@ GWARF_result while_func(statement *the_statement, var_list *the_var){  // read t
 
     hash_var *tmp = make_hash_var();  // base_var
     the_var = append_var_list(tmp, the_var);
-
+    the_var->tag = run_while;
     bool condition;
     while (1){
         if(!do_while){  // do_while 为 true的时候跳过条件检查
@@ -1839,6 +1877,9 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
                 case protect_token:
                 the_lock = protect;
                 break;
+                case private_token:
+                the_lock = private;
+                break;
             }
         }
         value = assignment_func(left, right_result, login_var, from, the_lock);
@@ -1890,7 +1931,7 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
         }
         GWARF_value base_the_var = tmp_result.value;  // 不用取value
         if(base_the_var.type == CLASS_value){  // is class so that can use "."
-            var *tmp = find_var(base_the_var.value.class_value->the_var, 0, "__set__");
+            var *tmp = find_var(base_the_var.value.class_value->the_var, 0, "__set__", NULL);
             if(tmp != NULL){
                 get.value = tmp->value;
                 get.father = &base_the_var;  // 设置father
@@ -1901,7 +1942,7 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
             }
         }
         else if(base_the_var.type == OBJECT_value){
-            var *tmp = find_var(base_the_var.value.object_value->the_var, 0, "__set__");
+            var *tmp = find_var(base_the_var.value.object_value->the_var, 0, "__set__", NULL);
             if(tmp != NULL){
                 get.value = tmp->value;
                 get.father = &base_the_var;  // 设置father
@@ -1997,7 +2038,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
     return_result.value.value.int_value = 0;
 
     int assignment_type = 0;  // 0-根据tmp_x进行赋值，1-根据tmp_s赋值，2-赋值到kwargs
-    var_list *tmp_var = make_var_base(make_hash_var());  // 为1-模式准备
+    var_list *tmp_var = make_var_base(make_hash_var());  // 为1-模式准备[默认为run_func]
 
     while(1){
         if ((tmp_x == NULL)&&(tmp_s == NULL)){  // the last
@@ -2026,7 +2067,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                         GWARF_result func_result = GWARF_result_reset;
                         var *list_init;
                         func_result.u = statement_end;
-                        list_init = find_var(old_var_list, 0, "list");
+                        list_init = find_var(old_var_list, 0, "list", NULL);
                         if(list_init != NULL){
                             func_result.value = list_init->value;
                         }
@@ -2074,7 +2115,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                                 GWARF_result get = GWARF_result_reset;
                                 var_list *call_var = dict_tmp.value.object_value->the_var;
 
-                                var *__down__tmp = find_var(call_var, 0, "__set__");
+                                var *__down__tmp = find_var(call_var, 0, "__set__", NULL);
                                 if(__down__tmp != NULL){
                                     get.value = __down__tmp->value;
                                     get.father = &(dict_tmp);  // 设置father
@@ -2138,7 +2179,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                 GWARF_result get = GWARF_result_reset;
                 var_list *call_var = tmp.value.value.object_value->the_var;
 
-                var *__down__tmp = find_var(call_var, 0, "__down__");
+                var *__down__tmp = find_var(call_var, 0, "__down__", NULL);
                 if(__down__tmp != NULL){
                     get.value = __down__tmp->value;
                     get.father = &(tmp.value);  // 设置father
@@ -2235,7 +2276,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
 
         if(new_var_list){
             hash_var *tmp = make_hash_var();  // base_var
-            the_var = append_var_list(tmp, the_var);
+            the_var = append_var_list(tmp, the_var);  // run func
         }
 
         if(func_->type == customize){  // 用户定义的方法
@@ -2303,13 +2344,15 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
     else if(get.value.type == CLASS_value){  // 生成实例
         the_object *object_tmp = malloc(sizeof(the_object));  // 生成object的空间
         object_tmp->cls = get.value.value.class_value->the_var;
-        object_tmp->the_var = append_by_var_list(make_var_base(make_hash_var()), object_tmp->cls);
+        var_list *tmp_var_list = make_var_base(make_hash_var());
+        object_tmp->the_var = append_by_var_list(tmp_var_list, object_tmp->cls);
+        object_tmp->the_var->tag = run_object;
         GWARF_value tmp = GWARF_value_reset;
         tmp.type = OBJECT_value;
         tmp.value.object_value = object_tmp;
 
         // 执行__init__
-        var *init_tmp = find_var(object_tmp->cls, 0, "__init__");
+        var *init_tmp = find_var(object_tmp->cls, 0, "__init__", NULL);
         if(init_tmp != NULL){  // 找到了__init__
             func *func_ = init_tmp->value.value.func_value;
             parameter *tmp_x = func_->parameter_list;
@@ -2317,7 +2360,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
             // tmp_x:形参，tmp_s:实参
 
             hash_var *tmp = make_hash_var();  // base_var
-            the_var = append_var_list(tmp, the_var);
+            the_var = append_var_list(tmp, the_var);  // 默认设置为run func
 
             if(func_->type == customize){  // 用户定义的方法
                 GWARF_result father = GWARF_result_reset;
@@ -2378,7 +2421,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
     }
     else if(get.value.type == OBJECT_value){  // 调用__call__方法
         // 执行__init__
-        var *call_tmp = find_var(get.value.value.object_value->the_var, 0, "__call__");
+        var *call_tmp = find_var(get.value.value.object_value->the_var, 0, "__call__", NULL);
         if(call_tmp != NULL){  // 找到了__init__
             func *func_ = call_tmp->value.value.func_value;
             parameter *tmp_x = func_->parameter_list;
@@ -2530,7 +2573,7 @@ GWARF_result bit_and_func(GWARF_result left_result, GWARF_result right_result, v
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__bitand__");
+        var *tmp = find_var(call_var, 0, "__bitand__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -2544,7 +2587,7 @@ GWARF_result bit_and_func(GWARF_result left_result, GWARF_result right_result, v
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__bitand__");
+        var *tmp = find_var(call_var, 0, "__bitand__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -2600,7 +2643,7 @@ GWARF_result bit_or_func(GWARF_result left_result, GWARF_result right_result, va
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__bitor__");
+        var *tmp = find_var(call_var, 0, "__bitor__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -2614,7 +2657,7 @@ GWARF_result bit_or_func(GWARF_result left_result, GWARF_result right_result, va
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__bitor__");
+        var *tmp = find_var(call_var, 0, "__bitor__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -2671,7 +2714,7 @@ GWARF_result bit_notor_func(GWARF_result left_result, GWARF_result right_result,
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__bitnotor__");
+        var *tmp = find_var(call_var, 0, "__bitnotor__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -2685,7 +2728,7 @@ GWARF_result bit_notor_func(GWARF_result left_result, GWARF_result right_result,
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__bitnotor__");
+        var *tmp = find_var(call_var, 0, "__bitnotor__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -2741,7 +2784,7 @@ GWARF_result bit_left_func(GWARF_result left_result, GWARF_result right_result, 
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__bitleft__");
+        var *tmp = find_var(call_var, 0, "__bitleft__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -2755,7 +2798,7 @@ GWARF_result bit_left_func(GWARF_result left_result, GWARF_result right_result, 
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__bitleftr__");
+        var *tmp = find_var(call_var, 0, "__bitleftr__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -2811,7 +2854,7 @@ GWARF_result bit_right_func(GWARF_result left_result, GWARF_result right_result,
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__bitright__");
+        var *tmp = find_var(call_var, 0, "__bitright__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -2825,7 +2868,7 @@ GWARF_result bit_right_func(GWARF_result left_result, GWARF_result right_result,
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__bitrightr__");
+        var *tmp = find_var(call_var, 0, "__bitrightr__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -2881,7 +2924,7 @@ GWARF_result bit_not_func(GWARF_result right_result, var_list *the_var){  // the
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__bitnot__");
+        var *tmp = find_var(call_var, 0, "__bitnot__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -2932,7 +2975,7 @@ GWARF_result add_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__add__");
+        var *tmp = find_var(call_var, 0, "__add__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -2946,7 +2989,7 @@ GWARF_result add_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__add__");
+        var *tmp = find_var(call_var, 0, "__add__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3011,7 +3054,7 @@ GWARF_result sub_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__sub__");
+        var *tmp = find_var(call_var, 0, "__sub__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3024,7 +3067,7 @@ GWARF_result sub_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__subr__");
+        var *tmp = find_var(call_var, 0, "__subr__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3077,7 +3120,7 @@ GWARF_result negative_func(GWARF_result right_result, var_list *the_var){  // th
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__negative__");
+        var *tmp = find_var(call_var, 0, "__negative__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3139,7 +3182,7 @@ GWARF_result mul_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__mul__");
+        var *tmp = find_var(call_var, 0, "__mul__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3152,7 +3195,7 @@ GWARF_result mul_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__mul__");
+        var *tmp = find_var(call_var, 0, "__mul__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3264,7 +3307,7 @@ GWARF_result div_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__div__");
+        var *tmp = find_var(call_var, 0, "__div__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3277,7 +3320,7 @@ GWARF_result div_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__divr__");
+        var *tmp = find_var(call_var, 0, "__divr__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3331,7 +3374,7 @@ GWARF_result mod_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__mod__");
+        var *tmp = find_var(call_var, 0, "__mod__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3344,7 +3387,7 @@ GWARF_result mod_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__modr__");
+        var *tmp = find_var(call_var, 0, "__modr__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3398,7 +3441,7 @@ GWARF_result int_div_func(GWARF_result left_result, GWARF_result right_result, v
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__idiv__");
+        var *tmp = find_var(call_var, 0, "__idiv__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3411,7 +3454,7 @@ GWARF_result int_div_func(GWARF_result left_result, GWARF_result right_result, v
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__idivr__");  // 整除
+        var *tmp = find_var(call_var, 0, "__idivr__", NULL);  // 整除
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3465,7 +3508,7 @@ GWARF_result pow_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__pow__");
+        var *tmp = find_var(call_var, 0, "__pow__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3478,7 +3521,7 @@ GWARF_result pow_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__powr__");
+        var *tmp = find_var(call_var, 0, "__powr__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3531,7 +3574,7 @@ GWARF_result log_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__log__");
+        var *tmp = find_var(call_var, 0, "__log__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3544,7 +3587,7 @@ GWARF_result log_func(GWARF_result left_result, GWARF_result right_result, var_l
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__logr__");
+        var *tmp = find_var(call_var, 0, "__logr__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3597,7 +3640,7 @@ GWARF_result sqrt_func(GWARF_result left_result, GWARF_result right_result, var_
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__sqrt__");
+        var *tmp = find_var(call_var, 0, "__sqrt__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3610,7 +3653,7 @@ GWARF_result sqrt_func(GWARF_result left_result, GWARF_result right_result, var_
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, "__sqrtr__");
+        var *tmp = find_var(call_var, 0, "__sqrtr__", NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3673,7 +3716,7 @@ GWARF_result equal_func(GWARF_result left_result, GWARF_result right_result, var
         GWARF_value base_the_var = left_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, left_func_list[type]);
+        var *tmp = find_var(call_var, 0, left_func_list[type], NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
@@ -3686,7 +3729,7 @@ GWARF_result equal_func(GWARF_result left_result, GWARF_result right_result, var
         GWARF_value base_the_var = right_result.value;  // 只有一个参数
         var_list *call_var = base_the_var.value.object_value->the_var;
 
-        var *tmp = find_var(call_var, 0, right_func_list[type]);
+        var *tmp = find_var(call_var, 0, right_func_list[type], NULL);
         if(tmp != NULL){
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
