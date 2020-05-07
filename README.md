@@ -73,5 +73,6 @@ return x n  函数返回值x，返回n层
 * ``!==`` 为逻辑运算：异或门 ``and`` 和 ``or`` 为非短路逻辑运算符：与，或
 * 处理``GWARF_result``
 * 新增Exception, 修复了``to_object``会捕获异常的bug
+* Div和Log运算检查数字类型
 ## 关于GWARF
 最后更新时间 ： 2020年05月07日 广州

@@ -1847,7 +1847,6 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
                 error_space(get_value, return_result, return_value);
                 if(len - 1 < get_value.value.value.int_value){
                     return_value = to_error("Index To Max", "IndexException", global_inter);
-                    puts("FSFS");
                     goto return_result;
                 }
                 else if(get_value.value.value.int_value < 0){
@@ -1894,7 +1893,7 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
                     end = len;
                 }
                 if(len < start || len < end || end < start){
-                    return_value = to_error("Index To Max[1]", "IndexException", global_inter);
+                    return_value = to_error("Index To Max", "IndexException", global_inter);
                     goto return_result;
                 }
                 else if(end < 0 || start < 0){
@@ -1917,7 +1916,6 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
             break;
     }
     return_result:
-    puts("STOP");
     return return_value;
 }
 

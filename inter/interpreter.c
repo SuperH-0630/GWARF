@@ -292,15 +292,21 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             }
             else if(tmp->lock == protect && the_statement->code.base_var.lock_token == public_token){  // 权限不够
                 // 企图使用public权限访问protect
-                goto var_error;
+                str_tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
+                sprintf(str_tmp, "var is protect [%s]\n", the_statement->code.base_var.var_name);
+                return_value = to_error(str_tmp, "VarException",global_inter);
             }
             else if(tmp->lock == private && the_statement->code.base_var.lock_token == protect && index > max_object && index > max_class){
                 // 企图使用不合法的protect权限访问private
-                goto var_error;
+                str_tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
+                sprintf(str_tmp, "var is private [%s]\n", the_statement->code.base_var.var_name);
+                return_value = to_error(str_tmp, "VarException",global_inter);
             }
             else if(tmp->lock == private && the_statement->code.base_var.lock_token == public_token){
                 // 企图使用public权限访问private
-                goto var_error;
+                str_tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
+                sprintf(str_tmp, "var is private [%s]\n", the_statement->code.base_var.var_name);
+                return_value = to_error(str_tmp, "VarException",global_inter);
             }
             else{
                 return_value.value = tmp->value;  // get_var
@@ -372,13 +378,19 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 return_value = to_error(str_tmp, "NameException",global_inter);
             }
             else if(tmp->lock == protect && the_statement->code.base_var.lock_token == public_token){  // 权限不够
-                goto svar_error;
+                str_tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
+                sprintf(str_tmp, "var is protect [%s]\n", the_statement->code.base_var.var_name);
+                return_value = to_error(str_tmp, "VarException",global_inter);
             }
             else if(tmp->lock == private && the_statement->code.base_var.lock_token == protect && index > max_object && index > max_class){
-                goto svar_error;
+                str_tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
+                sprintf(str_tmp, "var is private [%s]\n", the_statement->code.base_var.var_name);
+                return_value = to_error(str_tmp, "VarException",global_inter);
             }
             else if(tmp->lock == private && the_statement->code.base_var.lock_token == public_token){
-                goto svar_error;
+                str_tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
+                sprintf(str_tmp, "var is private [%s]\n", the_statement->code.base_var.var_name);
+                return_value = to_error(str_tmp, "VarException",global_inter);
             }
             else{
                 return_value.value = tmp->value;  // get_var
@@ -3504,6 +3516,12 @@ GWARF_result mul_func(GWARF_result left_result, GWARF_result right_result, var_l
     return_back: return return_value;
 }
 
+#define div_zero_check(value) \
+if(value == 0){ \
+    return_value = to_error("Try to Div Zero", "DivZeroException", global_inter); \
+    goto return_back; \
+}
+
 // ---------  DIV
 GWARF_result div_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var, inter *global_inter){  // the func for div and call from read_statement_list
     GWARF_result return_value;  // the result by call read_statement_list with left and right = GWARF_result_reset; value is the result for div
@@ -3550,21 +3568,25 @@ GWARF_result div_func(GWARF_result left_result, GWARF_result right_result, var_l
         if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
             return_value.u = statement_end;
             return_value.value.type = NUMBER_value;  // 除 无int
+            div_zero_check(right_result.value.value.int_value);
             return_value.value.value.double_value = ((double)left_result.value.value.int_value / (double)right_result.value.value.int_value);
         }
         else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
             return_value.u = statement_end;
             return_value.value.type = NUMBER_value;
+            div_zero_check(right_result.value.value.double_value);
             return_value.value.value.double_value = (left_result.value.value.double_value / right_result.value.value.double_value);
         }
         else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
             return_value.u = statement_end;
             return_value.value.type = NUMBER_value;
+            div_zero_check(right_result.value.value.double_value);
             return_value.value.value.double_value = ((double)left_result.value.value.int_value / right_result.value.value.double_value);
         }
         else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is NUMBER
             return_value.u = statement_end;
             return_value.value.type = NUMBER_value;
+            div_zero_check(right_result.value.value.int_value);
             return_value.value.value.double_value = (left_result.value.value.double_value / (double)right_result.value.value.int_value);
         }
         NotSupportCul();
@@ -3618,21 +3640,25 @@ GWARF_result mod_func(GWARF_result left_result, GWARF_result right_result, var_l
         if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
             return_value.u = statement_end;
             return_value.value.type = INT_value;
+            div_zero_check(right_result.value.value.int_value);
             return_value.value.value.int_value = (left_result.value.value.int_value % right_result.value.value.int_value);
         }
         else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
             return_value.u = statement_end;
             return_value.value.type = INT_value;
+            div_zero_check(right_result.value.value.double_value);
             return_value.value.value.int_value = ((int)left_result.value.value.double_value % (int)right_result.value.value.double_value);
         }
         else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
             return_value.u = statement_end;
             return_value.value.type = INT_value;
+            div_zero_check(right_result.value.value.double_value);
             return_value.value.value.int_value = (left_result.value.value.int_value % (int)right_result.value.value.double_value);
         }
         else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is NUMBER
             return_value.u = statement_end;
             return_value.value.type = INT_value;
+            div_zero_check(right_result.value.value.int_value);
             return_value.value.value.int_value = ((int)left_result.value.value.double_value % right_result.value.value.int_value);
         }
         NotSupportCul();
@@ -3686,21 +3712,25 @@ GWARF_result int_div_func(GWARF_result left_result, GWARF_result right_result, v
         if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
             return_value.u = statement_end;
             return_value.value.type = INT_value;  // 除 无int
+            div_zero_check(right_result.value.value.int_value);
             return_value.value.value.int_value = ((int)left_result.value.value.int_value / (int)right_result.value.value.int_value);
         }
         else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
             return_value.u = statement_end;
             return_value.value.type = INT_value;
+            div_zero_check(right_result.value.value.double_value);
             return_value.value.value.int_value = ((int)left_result.value.value.double_value / (int)right_result.value.value.double_value);
         }
         else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
             return_value.u = statement_end;
             return_value.value.type = INT_value;
+            div_zero_check(right_result.value.value.double_value);
             return_value.value.value.int_value = ((int)left_result.value.value.int_value / (int)right_result.value.value.double_value);
         }
         else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is NUMBER
             return_value.u = statement_end;
             return_value.value.type = INT_value;
+            div_zero_check(right_result.value.value.int_value);
             return_value.value.value.int_value = ((int)left_result.value.value.double_value / (int)right_result.value.value.int_value);
         }
         NotSupportCul();
@@ -3775,6 +3805,20 @@ GWARF_result pow_func(GWARF_result left_result, GWARF_result right_result, var_l
     return_back: return return_value;
 }
 
+#define log_check(left, right) \
+if(left <= 0){ \
+    return_value = to_error("Logarithm Base Can't Be Less Than 0", "ValueException", global_inter); \
+    goto return_back; \
+} \
+if(left == 1){ \
+    return_value = to_error("Logarithm Base Can't be 1", "ValueException", global_inter); \
+    goto return_back; \
+} \
+if(right <= 0){ \
+    return_value = to_error("Logarithmic True Number Can't Be Less Than 0", "ValueException", global_inter); \
+    goto return_back; \
+}
+
 // ---------  LOG
 GWARF_result log_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var, inter *global_inter){  // the func for div and call from read_statement_list
     GWARF_result return_value;  // the result by call read_statement_list with left and right = GWARF_result_reset; value is the result for div
@@ -3820,21 +3864,25 @@ GWARF_result log_func(GWARF_result left_result, GWARF_result right_result, var_l
         else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is INT
             return_value.u = statement_end;
             return_value.value.type = INT_value;
+            log_check(left_result.value.value.int_value, right_result.value.value.int_value);
             return_value.value.value.int_value = (int)log_((double)left_result.value.value.int_value, (double)right_result.value.value.int_value);
         }
         else if((left_result.value.type == NUMBER_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
             return_value.u = statement_end;
             return_value.value.type = NUMBER_value;
+            log_check(left_result.value.value.double_value, right_result.value.value.double_value);
             return_value.value.value.double_value = (double)log_(left_result.value.value.double_value, right_result.value.value.double_value);
         }
         else if((left_result.value.type == INT_value || left_result.value.type == BOOL_value) && (right_result.value.type == NUMBER_value)){  // all is NUMBER
             return_value.u = statement_end;
             return_value.value.type = NUMBER_value;
+            log_check(left_result.value.value.int_value, right_result.value.value.double_value);
             return_value.value.value.double_value = (double)log_((double)left_result.value.value.int_value, (double)right_result.value.value.double_value);
         }
         else if((left_result.value.type == NUMBER_value) && (right_result.value.type == INT_value || right_result.value.type == BOOL_value)){  // all is NUMBER
             return_value.u = statement_end;
             return_value.value.type = NUMBER_value;
+            log_check(left_result.value.value.double_value, right_result.value.value.int_value);
             return_value.value.value.double_value = (double)log_((double)left_result.value.value.double_value, (double)right_result.value.value.int_value);
         }
         NotSupportCul();
