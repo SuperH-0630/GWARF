@@ -74,5 +74,6 @@ return x n  函数返回值x，返回n层
 * 处理``GWARF_result``
 * 新增Exception, 修复了``to_object``会捕获异常的bug
 * Div和Log运算检查数字类型
+* 调整了运算优先级，修改了无法读取``5 ** -2``而可以读取``5 ** (-2)``的bug
 ## 关于GWARF
 最后更新时间 ： 2020年05月07日 广州

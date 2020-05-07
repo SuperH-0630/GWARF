@@ -2079,16 +2079,16 @@ void factor(p_status *status, token_node *list){  // 因试分解
 
     left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
     if(left.type == NON_factor){  // 模式2/3
-        fprintf(status_log, "[info][grammar]  (factor)reduce right\n");
+        fprintf(status_log, "[info][grammar]  (power)reduce right\n");
         get_pop_token(status, list, symbol);
 
         if(symbol.type == MUL_PASER || symbol.type == DIV_PASER || symbol.type == INTDIV_PASER || symbol.type == MOD_PASER){  // 模式2/3
-            get_right_token(status, list, negative, right);  // 回调右边
-            if(right.type != NON_negative){
+            get_right_token(status, list, power, right);  // 回调右边
+            if(right.type != NON_power){
                 paser_error("Don't get a value");
             }
             // 逻辑操作
-            new_token.type = NON_factor;
+            new_token.type = NON_power;
             new_token.data_type = statement_value;
             statement *code_tmp =  make_statement();
             code_tmp->type = operation;
@@ -2122,14 +2122,77 @@ void factor(p_status *status, token_node *list){  // 因试分解
     else{  // 模式1
         fprintf(status_log, "[info][grammar]  (factor)back one token to (element)\n");
         back_one_token(list, left);
-        get_base_token(status, list, negative, new_token);
-        if(new_token.type != NON_negative){
+        get_base_token(status, list, power, new_token);
+        if(new_token.type != NON_power){
             back_one_token(list, new_token);  // 往回[不匹配类型]
             return;
         }
         new_token.type = NON_factor;
         add_node(list, new_token);
         return factor(status, list);  // 回调自己
+    }
+}
+
+/*
+power : element
+      | power POW element
+      | power LOG element
+      | power SQRT element
+*/
+void power(p_status *status, token_node *list){
+    fprintf(status_log, "[info][grammar]  mode status: power\n");
+    token left, right, symbol, new_token;
+
+    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
+    if(left.type == NON_power){  // 模式2/3
+        fprintf(status_log, "[info][grammar]  (negative)reduce right\n");
+        get_pop_token(status, list, symbol);
+
+        if(symbol.type == POW_PASER || symbol.type == LOG_PASER || symbol.type == SQRT_PASER){  // 模式2/3/4
+            get_right_token(status, list, negative, right);  // 回调右边
+            if(right.type != NON_negative){
+                paser_error("Don't get a negative");
+            }
+            // 逻辑操作
+            new_token.type = NON_power;
+            new_token.data_type = statement_value;
+            statement *code_tmp =  make_statement();
+            code_tmp->type = operation;
+
+            if(symbol.type == POW_PASER){
+                code_tmp->code.operation.type = POW_func;
+            }
+            else if(symbol.type == LOG_PASER){
+                code_tmp->code.operation.type = LOG_func;
+            }
+            else{
+                code_tmp->code.operation.type = SQRT_func;
+            }
+            code_tmp->code.operation.left_exp = left.data.statement_value;
+            code_tmp->code.operation.right_exp = right.data.statement_value;
+            new_token.data.statement_value = code_tmp;
+            add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+            return power(status, list);  // 回调自己
+        }
+        else{  // 递归跳出
+            // 回退，也就是让下一次pop的时候读取到的是left而不是symbol
+            fprintf(status_log, "[info][grammar]  (power)out\n");
+            back_one_token(list, left);
+            back_again(list, symbol);
+            return;
+        }
+    }
+    else{  // 模式1
+        fprintf(status_log, "[info][grammar]  (power)back one token to (negative)\n");
+        back_one_token(list, left);
+        get_base_token(status, list, negative, new_token);
+        if(new_token.type != NON_negative){
+            back_one_token(list, new_token);  // 往回[不匹配类型]
+            return;
+        }
+        new_token.type = NON_power;
+        add_node(list, new_token);
+        return power(status, list);  // 回调自己
     }
 }
 
@@ -2183,8 +2246,8 @@ void negative(p_status *status, token_node *list){
 }
 
 /*
-bit_not : power
-        | BITNOT power
+bit_not : self_exp
+        | BITNOT self_exp
 */
 void bit_not(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: bit_not\n");
@@ -2192,11 +2255,11 @@ void bit_not(p_status *status, token_node *list){
 
     left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
     if(left.type == BITNOT_PASER){  // 模式2
-        fprintf(status_log, "[info][grammar]  (bit_not)reduce right\n");
+        fprintf(status_log, "[info][grammar]  (self_exp)reduce right\n");
 
-        get_right_token(status, list, bit_not, right);  // 回调右边
-        if(right.type != NON_bit_not){
-            paser_error("Don't get a bit_not");
+        get_right_token(status, list, self_exp, right);  // 回调右边
+        if(right.type != NON_self_exp){
+            paser_error("Don't get a self_exp");
         }
         // 逻辑操作
         new_token.type = NON_bit_not;
@@ -2212,79 +2275,16 @@ void bit_not(p_status *status, token_node *list){
         return;  // 回调自己
     }
     else{  // 模式1
-        fprintf(status_log, "[info][grammar]  (bit_not)back one token to (power)\n");
-        back_one_token(list, left);
-        get_base_token(status, list, power, new_token);
-        if(new_token.type != NON_power){
-            back_one_token(list, new_token);  // 往回[不匹配类型]
-            return;
-        }
-        new_token.type = NON_bit_not;
-        add_node(list, new_token);
-        return;
-    }
-}
-
-/*
-power : element
-      | power POW element
-      | power LOG element
-      | power SQRT element
-*/
-void power(p_status *status, token_node *list){
-    fprintf(status_log, "[info][grammar]  mode status: power\n");
-    token left, right, symbol, new_token;
-
-    left = pop_node(list);  // 先弹出一个token   检查token的类型：区分是模式1,还是模式2/3
-    if(left.type == NON_power){  // 模式2/3
-        fprintf(status_log, "[info][grammar]  (power)reduce right\n");
-        get_pop_token(status, list, symbol);
-
-        if(symbol.type == POW_PASER || symbol.type == LOG_PASER || symbol.type == SQRT_PASER){  // 模式2/3/4
-            get_right_token(status, list, self_exp, right);  // 回调右边
-            if(right.type != NON_self_exp){
-                paser_error("Don't get a self_exp");
-            }
-            // 逻辑操作
-            new_token.type = NON_power;
-            new_token.data_type = statement_value;
-            statement *code_tmp =  make_statement();
-            code_tmp->type = operation;
-
-            if(symbol.type == POW_PASER){
-                code_tmp->code.operation.type = POW_func;
-            }
-            else if(symbol.type == LOG_PASER){
-                code_tmp->code.operation.type = LOG_func;
-            }
-            else{
-                code_tmp->code.operation.type = SQRT_func;
-            }
-            code_tmp->code.operation.left_exp = left.data.statement_value;
-            code_tmp->code.operation.right_exp = right.data.statement_value;
-            new_token.data.statement_value = code_tmp;
-            add_node(list, new_token);  // 压入节点[弹出3个压入1个]
-            return power(status, list);  // 回调自己
-        }
-        else{  // 递归跳出
-            // 回退，也就是让下一次pop的时候读取到的是left而不是symbol
-            fprintf(status_log, "[info][grammar]  (power)out\n");
-            back_one_token(list, left);
-            back_again(list, symbol);
-            return;
-        }
-    }
-    else{  // 模式1
-        fprintf(status_log, "[info][grammar]  (power)back one token to (element)\n");
+        fprintf(status_log, "[info][grammar]  (bit_not)back one token to (self_exp)\n");
         back_one_token(list, left);
         get_base_token(status, list, self_exp, new_token);
         if(new_token.type != NON_self_exp){
             back_one_token(list, new_token);  // 往回[不匹配类型]
             return;
         }
-        new_token.type = NON_power;
+        new_token.type = NON_bit_not;
         add_node(list, new_token);
-        return power(status, list);  // 回调自己
+        return;
     }
 }
 
