@@ -12,7 +12,15 @@
 #define read_statement_list(the_statement,the_var,global_inter) read_statement(the_statement,the_var,NULL,NULL,lock,global_inter)
 #define run_func(base_the_var,the_var,name,global_inter) run_func_core(base_the_var,the_var,name,false,global_inter)
 #define GWARF_value_reset {.type=NULL_value,.value.int_value=0,.lock_token=base}
-#define GWARF_result_reset {.value.type=NULL_value,.value.value.int_value=0,.value.lock_token=base}
+#define GWARF_result_reset {.value.type=NULL_value,.value.value.int_value=0,.value.lock_token=base,.u = statement_end}
+
+#define error_space(tmp, to, as) \
+do{ \
+if(is_error(&tmp) || is_space(&tmp)){ \
+    as = tmp; \
+    goto to; \
+} \
+}while(0);
 
 #define push_statement(tmp_statement,token) \
 do{ \
@@ -605,15 +613,16 @@ GWARF_result bit_and_func(GWARF_result, GWARF_result, var_list *, inter *);
 double sqrt_(double, double);
 double log_(double, double);
 
-GWARF_value to_int(GWARF_value, var_list *the_var,inter *);
-GWARF_value to_double(GWARF_value value, var_list *the_var,inter *);
-GWARF_value to_str(GWARF_value value, var_list *the_var,inter *);
-GWARF_value to_str_dict(GWARF_value value, var_list *the_var,inter *);
-GWARF_value to_bool_(GWARF_value value, var_list *the_var,inter *);
-GWARF_value to_list(GWARF_value value, var_list *the_var,inter *);
-GWARF_value to_dict(GWARF_value value, var_list *the_var,inter *);
-GWARF_value parameter_to_list(parameter *tmp_s, var_list *the_var, inter *global_inter);
-GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var, inter *global_inter);
+GWARF_result to_int(GWARF_value, var_list *the_var,inter *);
+GWARF_result to_double(GWARF_value value, var_list *the_var,inter *);
+GWARF_result to_str(GWARF_value value, var_list *the_var,inter *);
+GWARF_result to_str_dict(GWARF_value value, var_list *the_var,inter *);
+GWARF_result to_bool_(GWARF_value value, var_list *the_var,inter *);
+GWARF_result to_list(GWARF_value value, var_list *the_var,inter *);
+GWARF_result to_dict(GWARF_value value, var_list *the_var,inter *);
+GWARF_result to_tuple(GWARF_value value, inter *);
+GWARF_result parameter_to_list(parameter *tmp_s, var_list *the_var, inter *global_inter);
+GWARF_result parameter_to_dict(parameter *tmp_s, var_list *the_var, inter *global_inter);
 
 bool start_with(char *, char *);
 char *del_start(char *, char *);
@@ -632,7 +641,7 @@ int len_only_double(double num);
 int len_double(double num);
 int len_int(int num);
 int len_intx(unsigned int num);
-GWARF_value to_object(GWARF_value, inter *);
+GWARF_result to_object(GWARF_value, inter *);
 GWARF_result get_object(parameter *, char *, var_list *, inter *);
 class_object *make_object(var_list *the_var, var_list *father_var_list);
 

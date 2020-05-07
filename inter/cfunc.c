@@ -45,15 +45,15 @@ int len_intx(unsigned int num){  // 16进制
     return count;
 }
 
-GWARF_value to_object(GWARF_value value, inter *global_inter){  // 把GWARF_value封装成objct
-    if((value.type == CLASS_value) || (value.type == OBJECT_value) || (value.type == FUNC_value) || (value.type == NULL_value)){  // 可以直接返回
-        return value;
-    }
-    var_list *the_var = make_var_base(global_inter->global_var);
+GWARF_result to_object(GWARF_value value, inter *global_inter){  // 把GWARF_value封装成objct
     GWARF_result func_result = GWARF_result_reset;
-    func_result.u = statement_end;
-    func_result.value.type = NULL_value;
-    func_result.value.value.int_value = 0;
+
+    if((value.type == CLASS_value) || (value.type == OBJECT_value) || (value.type == FUNC_value) || (value.type == NULL_value)){  // 可以直接返回
+        func_result.value = value;
+        return func_result;
+    }
+
+    var_list *the_var = make_var_base(global_inter->global_var);
     var *tmp;
     if(value.type == NUMBER_value){
         tmp = find_var(the_var, 0, "double", NULL);
@@ -92,29 +92,27 @@ GWARF_value to_object(GWARF_value value, inter *global_inter){  // 把GWARF_valu
         }
     }
     else{
-        free(the_var);
-        return value;
+        // TODO:: 报错（解释器错误）
     }
-    GWARF_value return_tmp = call_back_core(func_result, the_var, pack_value_parameter(value), global_inter).value;
+    GWARF_result return_tmp = call_back_core(func_result, the_var, pack_value_parameter(value), global_inter);
     free(the_var);
     return return_tmp;
 }
 
 
-GWARF_value to_tuple(GWARF_value value, inter *global_inter){  // 把GWARF_value封装成objct
+GWARF_result to_tuple(GWARF_value value, inter *global_inter){  // 把GWARF_value封装成objct
     GWARF_result func_result = GWARF_result_reset;
-    func_result.u = statement_end;
     var_list *the_var = make_var_base(global_inter->global_var);
     var *tmp;
     tmp = find_var(the_var, 0, "tuple", NULL);
     if(tmp != NULL){
         func_result.value = tmp->value;
     }
-    else{  // 应该报错
+    else{  // 应该报错 (TypeError)
         free(the_var);
-        return value;
+        return func_result;
     }
-    GWARF_value return_tmp = call_back_core(func_result, the_var, pack_value_parameter(value), global_inter).value;
+    GWARF_result return_tmp = call_back_core(func_result, the_var, pack_value_parameter(value), global_inter);
     free(the_var);
     return return_tmp;
 }
@@ -153,7 +151,7 @@ GWARF_result to_error(char *error_info, char *error_type, inter *global_inter){ 
 
     if(tmp != NULL){
         func_result.value = tmp->value;
-        return_result.value = call_back_core(func_result, the_var, pack_value_parameter(tmp_value), global_inter).value;
+        return_result = call_back_core(func_result, the_var, pack_value_parameter(tmp_value), global_inter);
     }
     else{
         printf("NameError * 2\n");
@@ -207,14 +205,7 @@ GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var, 
         }
         while(1){
             GWARF_result tmp = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp)){  // Name Error错误
-                return_value = tmp;
-                goto return_result;
-            }
-            else if(is_space(&tmp)){
-                return_value = tmp;
-                goto return_result;
-            }
+            error_space(tmp, return_result, return_value);
             if((tmp.value.type == INT_value)){
                 printf("%d", tmp.value.value.int_value);
             }
@@ -300,8 +291,7 @@ GWARF_result object_official_func(func *the_func, parameter *tmp_s, var_list *th
     switch (the_func->official_func)
     {
         case __value__func:{  // 若想实现运算必须要有这个方法
-            return_value.value.type = STRING_value;  // 取得用于计算的数值
-            return_value.value = to_str(*(father.father), out_var, global_inter);
+            return_value = to_str(*(father.father), out_var, global_inter);
             break;
         }
         case __assignment__func:
@@ -356,23 +346,17 @@ GWARF_result BaseException_official_func(func *the_func, parameter *tmp_s, var_l
     else if(father.father->type == OBJECT_value){
         login_var = father.father->value.object_value->the_var;
     }
-    else{
+    else{  // 报错
         printf("NO login, father type = %d\n", father.father->type);
     }
     switch (the_func->official_func)
     {
         case __init__func:{  // printf something
             GWARF_result tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
-            tmp.value = to_str(tmp_result.value, out_var, global_inter);  // 只有一个参数[要针对不同数据类型对此处作出处理]
-            assignment_func("ErrorInfo", tmp, login_var, 0, auto_public);  // 注册到self -> ErrorInfo
+            error_space(tmp_result, return_result, return_value);
+            tmp = to_str(tmp_result.value, out_var, global_inter);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+            error_space(tmp, return_result, return_value);
+            assignment_func("ErrorInfo", tmp, login_var, 0, auto_public);  // 不会权限不足
             return_value.u = statement_end;  // __init__没有return
             break;
         }
@@ -514,14 +498,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __add__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -537,14 +515,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __sub__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -560,14 +532,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __subr__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -583,14 +549,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __mul__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -606,14 +566,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __div__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -629,14 +583,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __divr__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -652,14 +600,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __eq__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -675,14 +617,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __more__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -698,14 +634,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __less__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -721,14 +651,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __eqmore__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -744,14 +668,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __eqless__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -767,14 +685,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __noteq__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -790,14 +702,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __pow__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -813,14 +719,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __log__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -836,14 +736,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __sqrt__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -859,14 +753,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __powr__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -882,14 +770,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __logr__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -905,14 +787,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __sqrtr__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -941,14 +817,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __idiv__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -964,14 +834,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __idivr__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -987,14 +851,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __mod__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -1010,14 +868,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __modr__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -1035,14 +887,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
 
         case __bitand__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -1058,14 +904,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __bitor__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -1081,14 +921,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __bitnotor__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -1104,14 +938,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __bitleft__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -1127,14 +955,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __bitleftr__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -1150,14 +972,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __bitright__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -1173,14 +989,8 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
         }
         case __bitrightr__func:{
             GWARF_result reight_tmp, left_tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
+            
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -1253,16 +1063,10 @@ GWARF_result int_official_func(func *the_func, parameter *tmp_s, var_list *the_v
     {
         case __init__func:{  // printf something
             GWARF_result tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
+            error_space(tmp_result, return_result, return_value);
             GWARF_value base_the_var = tmp.value;  // 只有一个参数
-            tmp.value = to_int(tmp_result.value,out_var,global_inter);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+            tmp = to_int(tmp_result.value,out_var,global_inter);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+            error_space(tmp, return_result, return_value);
             assignment_func("value", tmp, login_var, 0, auto_public);  // 注册到self
             return_value.u = statement_end;  // __init__没有return
             break;
@@ -1278,7 +1082,8 @@ GWARF_result int_official_func(func *the_func, parameter *tmp_s, var_list *the_v
                 GWARF_result self_value = GWARF_result_reset;
                 var *tmp = find_var(login_var, 0, "value", NULL);
                 if(tmp != NULL){
-                    self_value.value = to_int(tmp->value, out_var, global_inter);
+                    self_value = to_int(tmp->value, out_var, global_inter);
+                    error_space(self_value, return_result, return_value);
                 }
                 else{
                     self_value.value.type = INT_value;
@@ -1301,29 +1106,30 @@ GWARF_result int_official_func(func *the_func, parameter *tmp_s, var_list *the_v
 }
 
 // to int[底层实现]
-GWARF_value to_int(GWARF_value value, var_list *the_var, inter *global_inter){
-    if((value.type == INT_value)){
-        return value;  // 直接返回数据
-    }
+GWARF_result to_int(GWARF_value value, var_list *the_var, inter *global_inter){
+    GWARF_result return_number = GWARF_result_reset;
+    return_number.value.type = INT_value;
 
-    GWARF_value return_number = GWARF_value_reset;
-    return_number.type = INT_value;
+    if((value.type == INT_value)){
+        return_number.value = value;
+        return return_number;  // 直接返回数据
+    }
 
     if(value.type == OBJECT_value){  // 调用__value__方法
         return_number = to_int(get__value__(&value, the_var, global_inter).value, the_var, global_inter);  // 递归
     }
     else{
         if(value.type == BOOL_value){
-            return_number.value.int_value = value.value.bool_value;
+            return_number.value.value.int_value = value.value.bool_value;
         }
         else if(value.type == NUMBER_value){
-            return_number.value.int_value = (int)value.value.double_value;
+            return_number.value.value.int_value = (int)value.value.double_value;
         }
         else if(value.type == STRING_value){
-            return_number.value.int_value = atoi(value.value.string);
+            return_number.value.value.int_value = atoi(value.value.string);
         }
-        else{
-            return_number.value.int_value = 0;
+        else{  // 还有list等
+            return_number.value.value.int_value = 0;
         }
     }
     return return_number;
@@ -1371,15 +1177,9 @@ GWARF_result double_official_func(func *the_func, parameter *tmp_s, var_list *th
     {
         case __init__func:{  // printf something
             GWARF_result tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
-            tmp.value = to_double(tmp_result.value, out_var, global_inter);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+            error_space(tmp_result, return_result, return_value);
+            tmp = to_double(tmp_result.value, out_var, global_inter);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+            error_space(tmp, return_result, return_value);
             assignment_func("value", tmp, login_var, 0, auto_public);  // 注册到self
             return_value.u = statement_end;  // __init__没有return
             break;
@@ -1395,7 +1195,8 @@ GWARF_result double_official_func(func *the_func, parameter *tmp_s, var_list *th
                 GWARF_result self_value = GWARF_result_reset;
                 var *tmp = find_var(login_var, 0, "value", NULL);
                 if(tmp != NULL){
-                    self_value.value = to_double(tmp->value, out_var, global_inter);
+                    self_value = to_double(tmp->value, out_var, global_inter);
+                    error_space(self_value, return_result, return_value);
                 }
                 else{
                     self_value.value.type = NUMBER_value;
@@ -1418,29 +1219,29 @@ GWARF_result double_official_func(func *the_func, parameter *tmp_s, var_list *th
 }
 
 // to double[底层实现]
-GWARF_value to_double(GWARF_value value, var_list *the_var, inter *global_inter){
+GWARF_result to_double(GWARF_value value, var_list *the_var, inter *global_inter){
+    GWARF_result return_number = GWARF_result_reset;
+    return_number.value.type = NUMBER_value;
     if((value.type == NUMBER_value)){
-        return value;  // 直接返回数据
+        return_number.value = value;
+        return return_number;  // 直接返回数据
     }
-
-    GWARF_value return_number = GWARF_value_reset;
-    return_number.type = NUMBER_value;
 
     if(value.type == OBJECT_value){  // 调用__value__方法
         return_number = to_double(get__value__(&value, the_var, global_inter).value, the_var, global_inter);  // 递归
     }
     else{
         if(value.type == BOOL_value){
-            return_number.value.double_value = (double)value.value.bool_value;
+            return_number.value.value.double_value = (double)value.value.bool_value;
         }
         else if(value.type == INT_value){
-            return_number.value.double_value = (double)value.value.int_value;
+            return_number.value.value.double_value = (double)value.value.int_value;
         }
         else if(value.type == STRING_value){
-            return_number.value.double_value = (double)atof(value.value.string);
+            return_number.value.value.double_value = (double)atof(value.value.string);
         }
         else{
-            return_number.value.double_value = 0;
+            return_number.value.value.double_value = 0;
         }
     }
     return return_number;
@@ -1487,15 +1288,9 @@ GWARF_result str_official_func(func *the_func, parameter *tmp_s, var_list *the_v
     {
         case __init__func:{  // printf something
             GWARF_result tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
-            tmp.value = to_str(tmp_result.value, out_var, global_inter);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+            error_space(tmp_result, return_result, return_value);
+            tmp = to_str(tmp_result.value, out_var, global_inter);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+            error_space(tmp, return_result, return_value);
             assignment_func("value", tmp, login_var, 0, auto_public);  // 注册到self
             return_value.u = statement_end;  // __init__没有return
             break;
@@ -1507,13 +1302,14 @@ GWARF_result str_official_func(func *the_func, parameter *tmp_s, var_list *the_v
 }
 
 // to str[底层实现]
-GWARF_value to_str(GWARF_value value, var_list *the_var, inter *global_inter){
-    if((value.type == STRING_value)){
-        return value;  // 直接返回数据
-    }
+GWARF_result to_str(GWARF_value value, var_list *the_var, inter *global_inter){
+    GWARF_result return_number = GWARF_result_reset;
+    return_number.value.type = STRING_value;
 
-    GWARF_value return_number = GWARF_value_reset;
-    return_number.type = STRING_value;
+    if((value.type == STRING_value)){
+        return_number.value = value;
+        return return_number;  // 直接返回数据
+    }
 
     if(value.type == OBJECT_value){  // 调用__value__方法
         return_number = to_str(get__value__(&value, the_var, global_inter).value, the_var, global_inter);  // 递归
@@ -1521,89 +1317,98 @@ GWARF_value to_str(GWARF_value value, var_list *the_var, inter *global_inter){
     else{
         if(value.type == BOOL_value){
             if(value.value.bool_value){
-                return_number.value.string = "true";
+                return_number.value.value.string = (char *)malloc(6);
+                strcpy(return_number.value.value.string, "true");
             }
             else{
-                return_number.value.string = "false";
+                return_number.value.value.string = (char *)malloc(7);
+                strcpy(return_number.value.value.string, "false");
             }
         }
         else if(value.type == INT_value){
             size_t size = (size_t)(2 + len_int(value.value.int_value));
-            return_number.value.string = (char *)malloc(size);
-            snprintf(return_number.value.string, size, "%d", value.value.int_value);
+            return_number.value.value.string = (char *)malloc(size);
+            snprintf(return_number.value.value.string, size, "%d", value.value.int_value);
         }
         else if(value.type == NUMBER_value){
             size_t size = (size_t)(2 + len_double(value.value.double_value));
-            return_number.value.string = (char *)malloc(size);
-            snprintf(return_number.value.string, size, "%f", value.value.double_value);
+            return_number.value.value.string = (char *)malloc(size);
+            snprintf(return_number.value.value.string, size, "%f", value.value.double_value);
         }
         else if(value.type == NULL_value){
-            return_number.value.string = "<-None->";
+            return_number.value.value.string = (char *)malloc(10);
+            strcpy(return_number.value.value.string, "<-None->");
         }
         else if(value.type == FUNC_value){
             size_t size = (size_t)(20 + len_intx((unsigned long int)value.value.func_value));  // 转换为无符号整形数字
-            return_number.value.string = (char *)malloc(size);
-            snprintf(return_number.value.string, size, "<-function on %u->", value.value.func_value);
+            return_number.value.value.string = (char *)malloc(size);
+            snprintf(return_number.value.value.string, size, "<-function on %u->", value.value.func_value);
         }
         else if(value.type == CLASS_value){
             size_t size = (size_t)(16 + len_intx((unsigned long int)value.value.class_value));
-            return_number.value.string = (char *)malloc(size);
-            snprintf(return_number.value.string, size, "<-class on %u->", value.value.class_value);
+            return_number.value.value.string = (char *)malloc(size);
+            snprintf(return_number.value.value.string, size, "<-class on %u->", value.value.class_value);
         }
-        else{
-            return_number.value.string = "other";
+        else{  // 还有LIST等，其余报错
+            ;
         }
     }
     return return_number;
 }
 
 // dict key 带有类型的前缀
-GWARF_value to_str_dict(GWARF_value value, var_list *the_var, inter *global_inter){
-    GWARF_value return_number = GWARF_value_reset;
-    return_number.type = STRING_value;
+GWARF_result to_str_dict(GWARF_value value, var_list *the_var, inter *global_inter){
+    GWARF_result return_number = GWARF_result_reset;
+    return_number.value.type = STRING_value;
 
     if((value.type == STRING_value)){
         size_t size = (size_t)(5 + strlen(value.value.string));
-        return_number.value.string = calloc(sizeof(char), size);
-        snprintf(return_number.value.string, size, "str_%s", value.value.string);
+        return_number.value.value.string = calloc(sizeof(char), size);
+        snprintf(return_number.value.value.string, size, "str_%s", value.value.string);
     }
     else if(value.type == OBJECT_value){  // 调用__value__方法
-        GWARF_value tmp_str = to_str_dict(get__value__(&value, the_var, global_inter).value, the_var, global_inter);  // 递归
-        size_t size = strlen(tmp_str.value.string) + 2;
-        return_number.value.string = calloc(sizeof(char), size);
-        snprintf(return_number.value.string, size, "%s", tmp_str.value.string);
+        GWARF_result tmp_str = to_str_dict(get__value__(&value, the_var, global_inter).value, the_var, global_inter);
+        if(is_error(&tmp_str) || is_space(&tmp_str)){  // 返回error
+            return tmp_str;
+        }
+        size_t size = strlen(tmp_str.value.value.string) + 2;
+        return_number.value.value.string = calloc(sizeof(char), size);
+        snprintf(return_number.value.value.string, size, "%s", tmp_str.value.value.string);
     }
     else{
         if(value.type == BOOL_value){
             if(value.value.bool_value){
-                return_number.value.string = "bool_true";
+                return_number.value.value.string = calloc(sizeof(char), 11);
+                strcpy(return_number.value.value.string,  "bool_true");
             }
             else{
-                return_number.value.string = "bool_false";
+                return_number.value.value.string = calloc(sizeof(char), 12);
+                strcpy(return_number.value.value.string,  "bool_false");
             }
         }
         else if(value.type == INT_value){
             size_t size = (size_t)(6 + len_int(value.value.int_value));
-            return_number.value.string = calloc(sizeof(char), size);
-            snprintf(return_number.value.string, size, "int_%d", value.value.int_value);
+            return_number.value.value.string = calloc(sizeof(char), size);
+            snprintf(return_number.value.value.string, size, "int_%d", value.value.int_value);
         }
         else if(value.type == NUMBER_value){
             size_t size = (size_t)(10 + len_double(value.value.double_value));
-            return_number.value.string = calloc(sizeof(char), size);
-            snprintf(return_number.value.string, size, "double_%f", value.value.double_value);
+            return_number.value.value.string = calloc(sizeof(char), size);
+            snprintf(return_number.value.value.string, size, "double_%f", value.value.double_value);
         }
         else if(value.type == FUNC_value){
             size_t size = (size_t)(29 + len_intx((unsigned long int)value.value.func_value));  // 转换为无符号整形数字
-            return_number.value.string = calloc(sizeof(char), size);
-            snprintf(return_number.value.string, size, "str_<-function on %u->", value.value.func_value);
+            return_number.value.value.string = calloc(sizeof(char), size);
+            snprintf(return_number.value.value.string, size, "str_<-function on %u->", value.value.func_value);
         }
-        else if(value.type == CLASS_value){
+        else if(value.type == CLASS_value){  // class_value和func_value应该调用__name__
             size_t size = (size_t)(22 + len_intx((unsigned long int)value.value.class_value));
-            return_number.value.string = calloc(sizeof(char), size);
-            snprintf(return_number.value.string, size, "str_<-class on %u->", value.value.class_value);
+            return_number.value.value.string = calloc(sizeof(char), size);
+            snprintf(return_number.value.value.string, size, "str_<-class on %u->", value.value.class_value);
         }
         else{
-            return_number.value.string = "none_<-None->";
+            return_number.value.value.string = calloc(sizeof(char), 13);
+            strcpy(return_number.value.value.string,  "none_<none>");
         }
     }
     return_value: 
@@ -1707,15 +1512,9 @@ GWARF_result bool_official_func(func *the_func, parameter *tmp_s, var_list *the_
     {
         case __init__func:{  // printf something
             GWARF_result tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                return_value = tmp_result;
-                goto return_result;
-            }
-            else if(is_space(&tmp_result)){
-                return_value = tmp_result;
-                goto return_result;
-            }
-            tmp.value = to_bool_(tmp_result.value, out_var, global_inter);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+            error_space(tmp_result, return_result, return_value);
+            tmp = to_bool_(tmp_result.value, out_var, global_inter);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+            error_space(tmp, return_result, return_value);
             assignment_func("value", tmp, login_var, 0, auto_public);  // 注册到self
             return_value.u = statement_end;  // __init__没有return
             break;
@@ -1731,7 +1530,8 @@ GWARF_result bool_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 GWARF_result self_value = GWARF_result_reset;
                 var *tmp = find_var(login_var, 0, "value", NULL);
                 if(tmp != NULL){
-                    self_value.value = to_bool_(tmp->value, out_var, global_inter);
+                    self_value= to_bool_(tmp->value, out_var, global_inter);
+                    error_space(self_value, return_result, return_value);
                 }
                 else{
                     self_value.value.type = BOOL_value;
@@ -1754,19 +1554,24 @@ GWARF_result bool_official_func(func *the_func, parameter *tmp_s, var_list *the_
 }
 
 // to bool[底层实现]
-GWARF_value to_bool_(GWARF_value value, var_list *the_var, inter *global_inter){
+GWARF_result to_bool_(GWARF_value value, var_list *the_var, inter *global_inter){
+    GWARF_result return_number = GWARF_result_reset;
+    return_number.value.type = BOOL_value;
+    
     if((value.type == BOOL_value)){
-        return value;  // 直接返回数据
+        return_number.value = value;
+        return return_number;  // 直接返回数据
     }
 
-    GWARF_value return_number = GWARF_value_reset;
-    return_number.type = BOOL_value;
-
-    if(value.type == OBJECT_value){  // 调用__value__方法
-        return_number = to_bool_(get__value__(&value, the_var, global_inter).value, the_var, global_inter);  // 递归
+    if(value.type == OBJECT_value){  // 调用__value__方法, 如果是class则调用__clsbool__，func则查看参数__bool__
+        GWARF_result tmp_result = get__bool__(&value, the_var, global_inter);
+        if(is_error(&tmp_result) || is_space(&tmp_result)){
+            return tmp_result;
+        }
+        return_number = to_bool_(tmp_result.value, the_var, global_inter);
     }
     else{
-        return_number.value.bool_value = to_bool(value, global_inter);  // 转换成bool
+        return_number.value.value.bool_value = to_bool(value, global_inter);  // 转换成bool
     }
     return return_number;
 }
@@ -1824,24 +1629,16 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
             }
             else if(tmp_s->next == NULL){  // 只有一个参数
                 GWARF_result tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-                if(is_error(&tmp_result)){  // Name Error错误
-                    return_value = tmp_result;
-                    goto return_result;
-                }
-                else if(is_space(&tmp_result)){
-                    return_value = tmp_result;
-                    goto return_result;
-                }
-                tmp.value = to_list(tmp_result.value, out_var, global_inter);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+                error_space(tmp_result, return_result, return_value);
+                tmp = to_list(tmp_result.value, out_var, global_inter);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+                error_space(tmp, return_result, return_value);
                 assignment_func("value", tmp, login_var, 0, auto_public);  // 注册到self
                 return_value.u = statement_end;  // __init__没有return
             }
             else{
                 GWARF_result tmp_result = GWARF_result_reset;
-                GWARF_value list_tmp = GWARF_value_reset;
-                list_tmp.type = LIST_value;
-                list_tmp.value.list_value = parameter_to_list(tmp_s, out_var, global_inter).value.list_value;
-                tmp_result.value = list_tmp;
+                tmp_result = parameter_to_list(tmp_s, out_var, global_inter);
+                error_space(tmp_result, return_result,return_value);
                 assignment_func("value", tmp_result, login_var, 0, auto_public);  // 注册到self
                 return_value.u = statement_end;  // __init__没有return
             }
@@ -1873,7 +1670,9 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
                 iter_index = 0;
             }
             else{
-                iter_index = to_int(tmp->value, out_var, global_inter).value.int_value;
+                GWARF_result int_tmp = to_int(tmp->value, out_var, global_inter);
+                error_space(int_tmp, return_result, return_value);
+                iter_index = int_tmp.value.value.int_value;
             }
 
             tmp = find_var(login_var, 0, "value", NULL);
@@ -1896,54 +1695,47 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
             var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-                if(is_error(&tmp_result)){  // Name Error错误
-                    return_value = tmp_result;
-                    goto break_down;
-                }
-                else if(is_space(&tmp_result)){
-                    return_value = tmp_result;
-                    goto break_down;
-                }
+                error_space(tmp_result, return_result, return_value);
                 GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
                 get_value = get__value__(&base_the_var, the_var, global_inter);
-                get_value.value = to_int(get_value.value, out_var, global_inter);
-                // puts("NONE");
+                error_space(get_value, return_result, return_value);
+                get_value = to_int(get_value.value, out_var, global_inter);
+                error_space(get_value, return_result, return_value);
                 return_value.value = tmp->value.value.list_value->list_value[get_value.value.value.int_value];
             }
             else{
                 return_value.value.type = NULL_value;
                 return_value.value.value.int_value = 0;
             }
-            break_down: break;
+            break;
         }
         case __slice__func:{  // return index
             var *tmp = find_var(login_var, 0, "value", NULL);
             int len = tmp->value.value.list_value->index;
             int start, end;
             if(tmp != NULL){
-                GWARF_result start_result = traverse(tmp_s->u.value, out_var, false, global_inter), end_result;
-                if(is_error(&start_result)){  // Name Error错误
-                    return_value = start_result;
-                    goto return_result;
-                }
-                else if(is_space(&start_result)){
-                    return_value = start_result;
-                    goto return_result;
-                }
-
-                start = to_int(get__value__(&(start_result.value), the_var, global_inter).value, out_var, global_inter).value.int_value;
+                GWARF_result start_result = traverse(tmp_s->u.value, out_var, false, global_inter), end_result, tmp_result;
+                error_space(start_result, return_result, return_value);
+                
+                tmp_result = get__value__(&(start_result.value), the_var, global_inter);
+                error_space(tmp_result, return_result, return_value);
+                
+                tmp_result = to_int(tmp_result.value, out_var, global_inter);
+                error_space(tmp_result, return_result, return_value);
+                
+                start = tmp_result.value.value.int_value;
                 tmp_s = tmp_s->next;
                 if(tmp_s != NULL){
                     end_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-                    if(is_error(&end_result)){  // Name Error错误
-                        return_value = end_result;
-                        goto return_result;
-                    }
-                    else if(is_space(&end_result)){
-                        return_value = end_result;
-                        goto return_result;
-                    }
-                    end = to_int(get__value__(&(end_result.value), the_var, global_inter).value, out_var, global_inter).value.int_value;
+                    error_space(end_result, return_result, return_value);
+                    
+                    GWARF_result tmp = get__value__(&(end_result.value), the_var, global_inter);
+                    error_space(tmp, return_result, return_value);
+                    
+                    tmp = to_int(tmp.value, the_var, global_inter);
+                    error_space(tmp, return_result, return_value);
+                    
+                    end = tmp.value.value.int_value;
                 }
                 else{
                     end = len;
@@ -2010,28 +1802,17 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
             var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-                if(is_error(&tmp_result)){  // Name Error错误
-                    return_value = tmp_result;
-                    goto return_result;
-                }
-                else if(is_space(&tmp_result)){
-                    return_value = tmp_result;
-                    goto return_result;
-                }
+                error_space(tmp_result, return_result, return_value);
+                
                 GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
                 get_value = get__value__(&base_the_var, the_var, global_inter);
-                get_value.value = to_int(get_value.value, out_var, global_inter);
-
+                error_space(get_value, return_result, return_value);
+                
+                get_value = to_int(get_value.value, out_var, global_inter);
+                error_space(get_value, return_result, return_value);
                 tmp_s = tmp_s->next;
                 GWARF_result new_value = traverse(tmp_s->u.value, out_var, false, global_inter);
-                if(is_error(&new_value)){  // Name Error错误
-                    return_value = new_value;
-                    goto return_result;
-                }
-                else if(is_space(&new_value)){
-                    return_value = new_value;
-                    goto return_result;
-                }
+                error_space(new_value, return_result, return_value);
 
                 tmp->value.value.list_value->list_value[get_value.value.value.int_value] = new_value.value;
                 tmp->value.value.list_value->index += 1;
@@ -2049,57 +1830,63 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
 }
 
 
-GWARF_value to_dict(GWARF_value value, var_list *the_var, inter *global_inter){
+GWARF_result to_dict(GWARF_value value, var_list *the_var, inter *global_inter){
+    GWARF_result return_number = GWARF_result_reset;
+    return_number.value.type = DICT_value;
     if((value.type == DICT_value)){
-        return value;  // 直接返回数据
+        return_number.value = value;
+        return return_number;  // 直接返回数据
     }
 
-    GWARF_value return_number = GWARF_value_reset;
-    return_number.type = DICT_value;
-
     if(value.type == OBJECT_value){  // 调用__value__方法
-        return_number = to_dict(get__value__(&value, the_var, global_inter).value, the_var, global_inter);  // 递归
+        GWARF_result tmp = get__value__(&value, the_var, global_inter);
+        error_space(tmp, return_result, return_number);
+        return_number = to_dict(tmp.value, the_var, global_inter);  // 递归
     }
     else{
         // 生成一个空的DICT
-        return_number.type = DICT_value;
-        return_number.value.dict_value = malloc(sizeof(the_dict));
-        return_number.value.dict_value->index = 0;
-        return_number.value.dict_value->dict_value = make_hash_var();
-        return_number.value.dict_value->name_list = malloc(sizeof(dict_key));
-        return_number.value.dict_value->name_list->key = "";
-        return_number.value.dict_value->name_list->next = NULL;
+        return_number.value.type = DICT_value;
+        return_number.value.value.dict_value = malloc(sizeof(the_dict));
+        return_number.value.value.dict_value->index = 0;
+        return_number.value.value.dict_value->dict_value = make_hash_var();
+        return_number.value.value.dict_value->name_list = malloc(sizeof(dict_key));
+        return_number.value.value.dict_value->name_list->key = "";
+        return_number.value.value.dict_value->name_list->next = NULL;
     }
-    return return_number;
+    return_result: return return_number;
 }
 
-GWARF_value to_list(GWARF_value value, var_list *the_var, inter *global_inter){
-    if((value.type == LIST_value)){
-        return value;  // 直接返回数据
-    }
+GWARF_result to_list(GWARF_value value, var_list *the_var, inter *global_inter){
+    GWARF_result return_number = GWARF_result_reset;
+    return_number.value.type = LIST_value;
 
-    GWARF_value return_number = GWARF_value_reset;
-    return_number.type = LIST_value;
+    if((value.type == LIST_value)){
+        return_number.value = value;
+        return return_number;  // 直接返回数据
+    }
 
     if(value.type == OBJECT_value){  // 调用__value__方法
-        return_number = to_list(get__value__(&value, the_var, global_inter).value, the_var, global_inter);  // 递归
+        GWARF_result tmp_result = get__value__(&value, the_var, global_inter);
+        if(is_space(&tmp_result) || is_error(&tmp_result)){
+            return tmp_result;
+        }
+        return_number = to_list(tmp_result.value, the_var, global_inter);  // 递归
     }
     else{
-        return_number.value.list_value = malloc(sizeof(the_list));
-        return_number.value.list_value->index = 1;
-        return_number.value.list_value->list_value = malloc(sizeof(GWARF_value));
-        return_number.value.list_value->list_value[0] = value;  // 保存value
+        return_number.value.value.list_value = malloc(sizeof(the_list));
+        return_number.value.value.list_value->index = 1;
+        return_number.value.value.list_value->list_value = malloc(sizeof(GWARF_value));
+        return_number.value.value.list_value->list_value[0] = value;  // 保存value
     }
     return return_number;
 }
 
-GWARF_value parameter_to_list(parameter *tmp_s, var_list *the_var, inter *global_inter){  // 把parameter转换为list
-    GWARF_value return_list = GWARF_value_reset;
-    return_list.type = LIST_value;
-    return_list.value.list_value = malloc(sizeof(the_list));
-    return_list.value.list_value->list_value = malloc(0);
+GWARF_result parameter_to_list(parameter *tmp_s, var_list *the_var, inter *global_inter){  // 把parameter转换为list
+    GWARF_result return_list = GWARF_result_reset, result_tmp = GWARF_result_reset;
+    return_list.value.type = LIST_value;
+    return_list.value.value.list_value = malloc(sizeof(the_list));
+    return_list.value.value.list_value->list_value = malloc(0);
     int index = 0;
-    GWARF_result result_tmp = GWARF_result_reset;
     while(1){
         if(tmp_s == NULL){
             break;
@@ -2108,11 +1895,25 @@ GWARF_value parameter_to_list(parameter *tmp_s, var_list *the_var, inter *global
             parameter *before = tmp_s, *after = tmp_s->next;
 
             GWARF_result tmp = traverse(tmp_s->u.value, the_var, false, global_inter);  // 不会和下面发生重复计算
-            GWARF_value iter_value = get__iter__(&(tmp.value), the_var, global_inter).value;
+            if(is_error(&tmp) || is_space(&tmp)){
+                free(return_list.value.value.list_value->list_value);
+                free(return_list.value.value.list_value);
+                return tmp;
+            }
+            GWARF_result result_tmp = get__iter__(&(tmp.value), the_var, global_inter);
+            if(is_error(&result_tmp) || is_space(&result_tmp)){
+                free(return_list.value.value.list_value->list_value);
+                free(return_list.value.value.list_value);
+                return result_tmp;
+            }
+            GWARF_value iter_value = result_tmp.value;
+            
             while (1){
                 GWARF_result tmp_next = get__next__(&(iter_value), the_var, global_inter);
                 if(is_error(&tmp_next) || is_space(&tmp_next)){  // TODO:: 检查是否为IterException
-                    break;
+                    free(return_list.value.value.list_value->list_value);
+                    free(return_list.value.value.list_value);
+                    return tmp_next;  // TODO:: return 都需要实方内存
                 }
                 before->next = pack_value_parameter(tmp_next.value);
                 before = before->next;
@@ -2126,40 +1927,52 @@ GWARF_value parameter_to_list(parameter *tmp_s, var_list *the_var, inter *global
         }
         result_tmp = traverse(tmp_s->u.value, the_var, false, global_inter);  // 不需要取__value__
         if(is_error(&result_tmp) || is_space(&result_tmp)){  // Name Error错误
-            goto next;  // 直接指向下一个
+            free(return_list.value.value.list_value->list_value);
+            free(return_list.value.value.list_value);
+            return result_tmp;
         }
         index += 1;
-        return_list.value.list_value->list_value = realloc(return_list.value.list_value->list_value, sizeof(GWARF_value) * index);  // 申请新空间
-        return_list.value.list_value->list_value[index - 1] = result_tmp.value;  // 保存value
+        return_list.value.value.list_value->list_value = realloc(return_list.value.value.list_value->list_value, sizeof(GWARF_value) * index);  // 申请新空间
+        return_list.value.value.list_value->list_value[index - 1] = result_tmp.value;  // 保存value
         next: tmp_s = tmp_s->next;  // 指向下一个
     }
-    return_list.value.list_value->index = index;
+    return_list.value.value.list_value->index = index;
     return return_list;
 }
 
-GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var, inter *global_inter){  // 把parameter转换为list
-    GWARF_value return_dict = GWARF_value_reset;
-    return_dict.type = DICT_value;
-    return_dict.value.dict_value = malloc(sizeof(the_dict));
-    return_dict.value.dict_value->index = 0;
-    return_dict.value.dict_value->dict_value = make_hash_var();
-    return_dict.value.dict_value->name_list = malloc(sizeof(dict_key));
-    return_dict.value.dict_value->name_list->key = "";
-    return_dict.value.dict_value->name_list->next = NULL;
+GWARF_result parameter_to_dict(parameter *tmp_s, var_list *the_var, inter *global_inter){  // 把parameter转换为list
+    GWARF_result return_dict = GWARF_result_reset, result_tmp = GWARF_result_reset;
+    return_dict.value.type = DICT_value;
+    return_dict.value.value.dict_value = malloc(sizeof(the_dict));
+    return_dict.value.value.dict_value->index = 0;
+    return_dict.value.value.dict_value->dict_value = make_hash_var();
+    return_dict.value.value.dict_value->name_list = malloc(sizeof(dict_key));
+    return_dict.value.value.dict_value->name_list->key = "";
+    return_dict.value.value.dict_value->name_list->next = NULL;
 
     int index = 0;
-    GWARF_result result_tmp = GWARF_result_reset;
-    var_list *tmp_var_list = make_var_base(return_dict.value.dict_value->dict_value);
-    puts("[tag 2]");
+    var_list *tmp_var_list = make_var_base(return_dict.value.value.dict_value->dict_value);
     while(1){
         if(tmp_s == NULL){
             break;
         }
         if(tmp_s->type == put_kwargs){
-            puts("[tag 3]");
             parameter *before = tmp_s, *after = tmp_s->next;
-            GWARF_result get, tmp = traverse(tmp_s->u.value, the_var, false, global_inter);  // 不会和下面发生重复计算
-            GWARF_value iter_value = get__iter__(&(tmp.value), the_var, global_inter).value;  // 获取迭代object，一般是返回self
+            GWARF_result tmp = traverse(tmp_s->u.value, the_var, false, global_inter);  // 不会和下面发生重复计算
+            if(is_error(&tmp) || is_space(&tmp)){
+                free(return_dict.value.value.dict_value->name_list);
+                free(return_dict.value.value.dict_value);
+                // TODO::还需要释放哈希表
+                return tmp;
+            }
+            GWARF_result tmp_result = get__iter__(&(tmp.value), the_var, global_inter);
+            if(is_error(&tmp_result) || is_space(&tmp_result)){
+                free(return_dict.value.value.dict_value->name_list);
+                free(return_dict.value.value.dict_value);
+                // TODO::还需要释放哈希表
+                return tmp_result;
+            }
+            GWARF_value iter_value = tmp_result.value;  // 获取迭代object，一般是返回self
             while (1){
                 GWARF_result tmp_next = get__next__(&(iter_value), the_var, global_inter), tmp_next_down;// 执行__next__的返回值
                 if(is_error(&tmp_next) || is_space(&tmp_next)){  // TODO:: 检查是否为IterException
@@ -2174,12 +1987,30 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var, inter *global
                     get.value = __down__tmp->value;
                     get.father = &(tmp.value);  // 设置father
                     tmp_next_down = call_back_core(get, the_var, pack_value_parameter(tmp_next.value), global_inter);
+                    if(is_error(&tmp_next_down) || is_space(&tmp_next_down)){
+                        free(return_dict.value.value.dict_value->name_list);
+                        free(return_dict.value.value.dict_value);
+                        // TODO::还需要释放哈希表
+                        return tmp_next_down;
+                    }
+                }
+                else{
+                    free(return_dict.value.value.dict_value->name_list);
+                    free(return_dict.value.value.dict_value);
+                    return to_error("Name Not Found __down__", "NameException", global_inter);
                 }
 
                 before->next = pack_value_parameter(tmp_next_down.value);
                 before->next->u.var = make_statement();
                 before->next->u.var->type = base_var;
-                before->next->u.var->code.base_var.var_name = to_str(tmp_next.value, the_var, global_inter).value.string;
+                GWARF_result str_tmp = to_str(tmp_next.value, the_var, global_inter);
+                if(is_error(&str_tmp) || is_space(&str_tmp)){
+                    free(return_dict.value.value.dict_value->name_list);
+                    free(return_dict.value.value.dict_value);
+                    // TODO::还需要释放哈希表
+                    return str_tmp;
+                }
+                before->next->u.var->code.base_var.var_name = str_tmp.value.value.string;
                 before->next->u.var->code.base_var.from = NULL;
                 before->next->type = name_value;
                 before = before->next;
@@ -2191,24 +2022,31 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var, inter *global
             goto next;  // 跳过这一个
         }
         result_tmp = traverse(tmp_s->u.value, the_var, false, global_inter);  // 不需要取__value__
-        if(is_error(&result_tmp)){  // Name Error错误
-            goto next;  // 直接指向下一个
-        }
-        else if(is_space(&result_tmp)){
-            goto next;
+        if(is_error(&result_tmp) || is_space(&result_tmp)){  // Name Error错误
+            free(return_dict.value.value.dict_value->name_list);
+            free(return_dict.value.value.dict_value);
+            // tmp_dict_name是链表，释放必须特别小心
+            // TODO::还需要释放哈希表
+            return result_tmp;
         }
         char *key;
-        if(tmp_s->u.var->type == base_var){
+        if(tmp_s->u.var->type == base_var){  // 设置key
             size_t size = (size_t)(13 + strlen(tmp_s->u.var->code.base_var.var_name));
             key = (char *)malloc(size);
             snprintf(key, size, "str_%s", tmp_s->u.var->code.base_var.var_name);
         }
         else{
             GWARF_result key_tmp = traverse(tmp_s->u.var, the_var, 0, global_inter);
-            key = to_str_dict(key_tmp.value, the_var, global_inter).value.string;
+            if(is_error(&key_tmp) || is_space(&key_tmp)){  // Name Error错误
+                free(return_dict.value.value.dict_value->name_list);
+                free(return_dict.value.value.dict_value);
+                // TODO::还需要释放哈希表
+                return key_tmp;
+            }
+            key = to_str_dict(key_tmp.value, the_var, global_inter).value.value.string;
         }
-        login_node(key, result_tmp.value, return_dict.value.dict_value->dict_value, public);  // 插入
-        dict_key *tmp_dict_name = return_dict.value.dict_value->name_list;
+        login_node(key, result_tmp.value, return_dict.value.value.dict_value->dict_value, public);  // 插入
+        dict_key *tmp_dict_name = return_dict.value.value.dict_value->name_list;
         while (1){  // 迭代
             if(!strcmp(tmp_dict_name->key, key)){  // 已经存在
                 break;
@@ -2225,7 +2063,7 @@ GWARF_value parameter_to_dict(parameter *tmp_s, var_list *the_var, inter *global
         }
         next: tmp_s = tmp_s->next;  // 指向下一个
     }
-    return_dict.value.dict_value->index = index;
+    return_dict.value.value.dict_value->index = index;
     return return_dict;
 }
 
@@ -2285,25 +2123,18 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
             }
             else if(tmp_s->next == NULL){  // 只有一个参数
                 GWARF_result tmp, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-                if(is_error(&tmp_result)){  // Name Error错误
-                    return_value = tmp_result;
-                    goto return_result;
-                }
-                else if(is_space(&tmp_result)){
-                    return_value = tmp_result;
-                    goto return_result;
-                }
-                tmp.value = to_dict(tmp_result.value, out_var, global_inter);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+                error_space(tmp_result, return_result, return_value);
+                tmp = to_dict(tmp_result.value, out_var, global_inter);  // 只有一个参数[要针对不同数据类型对此处作出处理]
+                error_space(tmp, return_result, return_value);
                 assignment_func("value", tmp, login_var, 0, auto_public);  // 注册到self
                 return_value.u = statement_end;  // __init__没有return
             }
             else{  // 有多个实参
-                GWARF_result tmp_result = GWARF_result_reset;
-                GWARF_value dict_tmp = GWARF_value_reset;
-                dict_tmp.type = DICT_value;
-                dict_tmp.value.dict_value = parameter_to_dict(tmp_s, out_var, global_inter).value.dict_value;
-                tmp_result.value = dict_tmp;
-                assignment_func("value", tmp_result, login_var, 0, auto_public);  // 注册到self
+                GWARF_result dict_tmp = GWARF_result_reset;
+                dict_tmp = parameter_to_dict(tmp_s, out_var, global_inter);
+                error_space(dict_tmp, return_result, return_value);
+
+                assignment_func("value", dict_tmp, login_var, 0, auto_public);  // 注册到self
                 return_value.u = statement_end;  // __init__没有return
             }
 
@@ -2320,7 +2151,9 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 iter_index = 0;
             }
             else{
-                iter_index = to_int(tmp->value, out_var, global_inter).value.int_value;
+                GWARF_result int_tmp = to_int(tmp->value, out_var, global_inter);
+                error_space(int_tmp, return_result,return_value);
+                iter_index = int_tmp.value.value.int_value;
             }
 
             tmp = find_var(login_var, 0, "value", NULL);
@@ -2351,15 +2184,9 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
             var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-                if(is_error(&tmp_result)){  // Name Error错误
-                    return_value = tmp_result;
-                    goto break_down;
-                }
-                else if(is_space(&tmp_result)){
-                    return_value = tmp_result;
-                    goto break_down;
-                }
-                get_value.value = to_str_dict(tmp_result.value, out_var, global_inter);
+                error_space(tmp_result, return_result, return_value);
+                get_value = to_str_dict(tmp_result.value, out_var, global_inter);
+                error_space(get_value, return_result, return_value);
                 var *find_var = find_node(get_value.value.value.string, tmp->value.value.dict_value->dict_value);
                 if(find_var == NULL){  // not found
                     return_value = to_error("Dict key Not Found", "NameException", global_inter);
@@ -2372,32 +2199,19 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 return_value.value.type = NULL_value;
                 return_value.value.value.int_value = 0;
             }
-            break_down: break;
+            break;
         }
         case __set__func:{  // return index
             var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
-                if(is_error(&tmp_result)){  // Name Error错误
-                    return_value = tmp_result;
-                    goto return_result;
-                }
-                else if(is_space(&tmp_result)){
-                    return_value = tmp_result;
-                    goto return_result;
-                }
-                get_value.value = to_str_dict(tmp_result.value, out_var, global_inter);
-
+                error_space(tmp_result, return_result, return_value);
+                get_value = to_str_dict(tmp_result.value, out_var, global_inter);
+                error_space(get_value, return_result, return_value);
                 tmp_s = tmp_s->next;
                 GWARF_result new_value = traverse(tmp_s->u.value, out_var, false, global_inter);
-                if(is_error(&new_value)){  // Name Error错误
-                    return_value = new_value;
-                    goto return_result;
-                }
-                else if(is_space(&new_value)){
-                    return_value = new_value;
-                    goto return_result;
-                }
+                error_space(new_value, return_result, return_value);
+
                 login_node(get_value.value.value.string, new_value.value, tmp->value.value.dict_value->dict_value, public);  // 插入
                 dict_key *tmp_dict_name = tmp->value.value.dict_value->name_list;
                 while (1){  // 迭代
@@ -2427,48 +2241,23 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
 }
 
 GWARF_result get__assignment__(GWARF_value *base_the_var, var_list *the_var, inter *global_inter){  // 获取__assignment__
-    GWARF_result tmp = run_func_core(base_the_var, the_var, "__assignment__", true,global_inter);
-    if(is_error(&tmp) || is_space(&tmp)){
-        tmp.u = statement_end;
-        tmp.value = *base_the_var;  // 返回原值
-    }
-    return tmp;
+    return run_func_core(base_the_var, the_var, "__assignment__", true,global_inter);
 }
 
 GWARF_result get__next__(GWARF_value *base_the_var, var_list *the_var, inter *global_inter){  // 获取__next__
-    GWARF_result tmp = run_func_core(base_the_var, the_var, "__next__", true,global_inter);
-    //  不需要捕获IterException[表示到达尽头]
-    return tmp;
+    return run_func_core(base_the_var, the_var, "__next__", true,global_inter);
 }
 
 GWARF_result get__iter__(GWARF_value *base_the_var, var_list *the_var, inter *global_inter){  // 获取__iter__
-    GWARF_result tmp = run_func_core(base_the_var, the_var, "__iter__", true,global_inter);
-    if(is_error(&tmp)){
-        tmp.u = statement_end;
-        tmp.value.type = NULL_value;
-        tmp.value.value.int_value = 0;
-    }
-    return tmp;
+    return run_func_core(base_the_var, the_var, "__iter__", true,global_inter);
 }
 
 GWARF_result get__value__(GWARF_value *base_the_var, var_list *the_var, inter *global_inter){  // 用于计算的get__value__统一核心
-    GWARF_result tmp = run_func(base_the_var, the_var, "__value__",global_inter);
-    if(is_error(&tmp)){
-        tmp.u = statement_end;
-        tmp.value.type = NULL_value;
-        tmp.value.value.int_value = 0;
-    }
-    return tmp;
+    return run_func(base_the_var, the_var, "__value__",global_inter);
 }
 
 GWARF_result get__bool__(GWARF_value *base_the_var, var_list *the_var, inter *global_inter){  // 获取__bool__  [所有转换为bool的object都执行这个]
-    GWARF_result tmp = run_func(base_the_var, the_var, "__bool__",global_inter);
-    if(is_error(&tmp)){  // 检查是否为name_error
-        tmp.u = statement_end;
-        tmp.value.type = BOOL_value;
-        tmp.value.value.bool_value = true;
-    }
-    return tmp;
+    return run_func(base_the_var, the_var, "__bool__",global_inter);
 }
 
 GWARF_result run_func_core(GWARF_value *base_the_var, var_list *the_var, char *name, bool only, inter *global_inter){  // 无参数func->直到返回GWARF_value[not class]
@@ -2494,6 +2283,7 @@ GWARF_result run_func_core(GWARF_value *base_the_var, var_list *the_var, char *n
             get.value = tmp_var->value;  // TODO:: 需要检查__value__是否存在
             get.father = base_the_var;  // 设置father
             reight_tmp = call_back_core(get, the_var, NULL, global_inter);
+            error_space(reight_tmp, return_result, reight_tmp);
             if(only){  // 不需要重复获取，比如__iter__，__next__
                 goto return_result;
             }
