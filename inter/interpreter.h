@@ -188,6 +188,14 @@ typedef struct statement{
                 BITRIGHT_func,
                 BITLEFT_func,
                 BITNOT_func,
+                ILEFT_func,  // <==
+                IRIGHT_func,  // ==>
+                ISLEFT_func,  // <:=
+                ISRIGHT_func,  // =:>
+                BOOLNOTOR_func,  // !==
+                BOOLIS_func,  // <=>
+                BOOLSAND_func,  // and
+                BOOLSOR_func,  // or
             } type;
             struct statement *right_exp;  // the right exp
             struct statement *left_exp;  // the left exp
@@ -580,6 +588,9 @@ GWARF_result negative_func(GWARF_result, var_list *, inter *);
 GWARF_result assignment_statement_core(statement *, var_list *, var_list *, GWARF_result, bool, int, inter *);
 GWARF_result assignment_statement_value(statement *, var_list *, var_list *, GWARF_value, inter *);
 GWARF_result not_func(GWARF_result, var_list *, inter *);
+GWARF_result matchbool_func(statement *, statement *, var_list *, int, inter *);
+GWARF_result sleft_func(statement *, statement *, var_list *, inter *);
+GWARF_result sright_func(statement *, statement *, var_list *, inter *);
 GWARF_result or_func(statement *, statement *, var_list *, inter *);
 GWARF_result and_func(statement *, statement *, var_list *, inter *);
 GWARF_result int_div_func(GWARF_result, GWARF_result, var_list *, inter *);

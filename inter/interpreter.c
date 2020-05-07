@@ -1672,80 +1672,117 @@ GWARF_result while_func(statement *the_statement, var_list *the_var, inter *glob
 }
 
 // -----------------operation func
+#define get_left_result \
+do{ \
+left_result = traverse(the_statement->code.operation.left_exp, the_var, false, global_inter); \
+if(is_error(&left_result)){ \
+    return left_result; \
+} \
+else if(is_space(&left_result)){ \
+    return left_result; \
+} \
+}while(0);
+
+#define get_right_result \
+do{ \
+right_result = traverse(the_statement->code.operation.right_exp, the_var, false, global_inter); \
+if(is_error(&right_result)) \
+{ \
+    return right_result; \
+} \
+else if(right_result.u != return_def && is_space(&right_result)){ \
+    return right_result; \
+} \
+}while(0);
 
 GWARF_result operation_func(statement *the_statement, var_list *the_var, var_list *login_var, inter *global_inter){  // read the statement list with case to run by func
-    GWARF_result value, left_result, right_result = GWARF_result_reset;
+    GWARF_result value, left_result = GWARF_result_reset, right_result = GWARF_result_reset;
     int func_type = the_statement->code.operation.type;
-    if(func_type != ASSIGnMENT_func && func_type != AND_func && func_type != OR_func)
-    {
-        left_result = traverse(the_statement->code.operation.left_exp, the_var, false, global_inter);  // NEGATIVE_func等的left为NULL相当与不执行
-        if(is_error(&left_result)){
-            return left_result;
-        }
-        else if(is_space(&left_result)){
-            return left_result;
-        }
-    }
-    right_result = traverse(the_statement->code.operation.right_exp, the_var, false, global_inter);
-    if(is_error(&right_result))
-    {
-        return right_result;
-    }
-    else if(right_result.u != return_def && is_space(&right_result)){
-        return right_result;
-    }
     switch (func_type)  // 获取运算类型
     {
         case ADD_func:
+            get_left_result;
+            get_right_result;
             value = add_func(left_result, right_result, the_var, global_inter);
             break;
         case SUB_func:
+            get_left_result;
+            get_right_result;
             value = sub_func(left_result, right_result, the_var, global_inter);
             break;
         case MUL_func:
+            get_left_result;
+            get_right_result;
             value = mul_func(left_result, right_result, the_var, global_inter);
             break;
         case DIV_func:
+            get_left_result;
+            get_right_result;
             value = div_func(left_result, right_result, the_var, global_inter);
             break;
         case AADD_func:
+            get_left_result;
+            get_right_result;
             value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(add_func(left_result, right_result, the_var, global_inter).value, global_inter),global_inter);
             // exit(1);
             break;
         case ASUB_func:
+            get_left_result;
+            get_right_result;
             value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(sub_func(left_result, right_result, the_var, global_inter).value, global_inter),global_inter);
             break;
         case AMUL_func:
+            get_left_result;
+            get_right_result;
             value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(mul_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
             break;
         case ADIV_func:
+            get_left_result;
+            get_right_result;
             value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(div_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
             break;
         case AMOD_func:
+            get_left_result;
+            get_right_result;
             value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(mod_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
             break;
         case AINTDIV_func:
+            get_left_result;
+            get_right_result;
             value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(int_div_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
             break;
         case APOW_func:
+            get_left_result;
+            get_right_result;
             value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(pow_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
             break;
         case ABITAND_func:
+            get_left_result;
+            get_right_result;
             value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(bit_and_func(left_result, right_result, the_var, global_inter).value, global_inter),global_inter);
             break;
         case ABITOR_func:
+            get_left_result;
+            get_right_result;
             value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(bit_or_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
             break;
         case ABITNOTOR_func:
+            get_left_result;
+            get_right_result;
             value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(bit_notor_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
             break;
         case ABITRIGHT_func:
+            get_left_result;
+            get_right_result;
             value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(bit_right_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
             break;
         case ABITLEFT_func:
+            get_left_result;
+            get_right_result;
             value = assignment_statement_value(the_statement->code.operation.left_exp, the_var, login_var, to_object(bit_left_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);
             break;
         case LADD_func:  // a++
+            get_left_result;
             right_result.u = statement_end;
             right_result.value.type = INT_value;
             right_result.value.value.int_value = 1;
@@ -1753,12 +1790,14 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
             value = left_result;  // 先返回值，后自增
             break;
         case FADD_func:  // ++a
+            get_right_result;
             left_result.u = statement_end;
             left_result.value.type = INT_value;
             left_result.value.value.int_value = 1;
             value = assignment_statement_value(the_statement->code.operation.right_exp, the_var, login_var, to_object(add_func(left_result, right_result, the_var, global_inter).value, global_inter), global_inter);  // 先自增，后返回值
             break;
         case LSUB_func:  // a--
+            get_left_result;
             right_result.u = statement_end;
             right_result.value.type = INT_value;
             right_result.value.value.int_value = 1;
@@ -1766,43 +1805,64 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
             value = left_result;  // 先返回值，后自增
             break;
         case FSUB_func:  // --a
+            get_right_result;
             left_result.u = statement_end;
             left_result.value.type = INT_value;
             left_result.value.value.int_value = 1;
             value = assignment_statement_value(the_statement->code.operation.right_exp, the_var, login_var, to_object(sub_func(right_result, left_result, the_var, global_inter).value, global_inter), global_inter);  // 先自增，后返回值
             break;
         case NEGATIVE_func:
+            get_right_result;
             value = negative_func(right_result, the_var, global_inter);
             break;
         case ASSIGnMENT_func:{  // because the var char, we should ues a {} to make a block[name space] for the tmp var;
+            get_right_result;
             value = assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, right_result, global_inter);
             break;
         }
         case EQUAL_func:
+            get_left_result;
+            get_right_result;
             value = equal_func(left_result, right_result, the_var, 0, global_inter);
             break;
         case MORE_func:
+            get_left_result;
+            get_right_result;
             value = equal_func(left_result, right_result, the_var, 1, global_inter);
             break;
         case LESS_func:
+            get_left_result;
+            get_right_result;
             value = equal_func(left_result, right_result, the_var, 2, global_inter);
             break;
         case MOREEQ_func:
+            get_left_result;
+            get_right_result;
             value = equal_func(left_result, right_result, the_var, 3, global_inter);
             break;
         case LESSEQ_func:
+            get_left_result;
+            get_right_result;
             value = equal_func(left_result, right_result, the_var, 4, global_inter);
             break;
         case NOTEQ_func:
+            get_left_result;
+            get_right_result;
             value = equal_func(left_result, right_result, the_var, 5, global_inter);
             break;
         case POW_func:
+            get_left_result;
+            get_right_result;
             value = pow_func(left_result, right_result, the_var, global_inter);
             break;
         case LOG_func:
+            get_left_result;
+            get_right_result;
             value = log_func(left_result, right_result, the_var, global_inter);
             break;
         case SQRT_func:
+            get_left_result;
+            get_right_result;
             value = sqrt_func(left_result, right_result, the_var, global_inter);
             break;
         case AND_func:
@@ -1812,31 +1872,73 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
             value = or_func(the_statement->code.operation.left_exp, the_statement->code.operation.right_exp, the_var, global_inter);
             break;
         case NOT_func:
+            get_left_result;
+            get_right_result;
             value = not_func(right_result, the_var, global_inter);
             break;
         case MOD_func:
+            get_left_result;
+            get_right_result;
             value = mod_func(left_result, right_result, the_var, global_inter);
             break;
         case INTDIV_func:
+            get_left_result;
+            get_right_result;
             value = int_div_func(left_result, right_result, the_var, global_inter);
             break;
         case BITAND_func:
+            get_left_result;
+            get_right_result;
             value = bit_and_func(left_result, right_result, the_var, global_inter);
             break;
         case BITOR_func:
+            get_left_result;
+            get_right_result;
             value = bit_or_func(left_result, right_result, the_var, global_inter);
             break;
         case BITNOTOR_func:
+            get_left_result;
+            get_right_result;
             value = bit_notor_func(left_result, right_result, the_var, global_inter);
             break;
         case BITRIGHT_func:
+            get_left_result;
+            get_right_result;
             value = bit_right_func(left_result, right_result, the_var, global_inter);
             break;
         case BITLEFT_func:
+            get_left_result;
+            get_right_result;
             value = bit_left_func(left_result, right_result, the_var, global_inter);
             break;
         case BITNOT_func:
+            get_left_result;
+            get_right_result;
             value = bit_not_func(right_result, the_var, global_inter);
+            break;
+        case BOOLSAND_func:
+            value = matchbool_func(the_statement->code.operation.left_exp, the_statement->code.operation.right_exp, the_var, 1, global_inter);
+            break;
+        case BOOLSOR_func:
+            value = matchbool_func(the_statement->code.operation.left_exp, the_statement->code.operation.right_exp, the_var, 2, global_inter);
+            break;
+        case BOOLNOTOR_func:
+            value = matchbool_func(the_statement->code.operation.left_exp, the_statement->code.operation.right_exp, the_var, 3, global_inter);
+            break;
+        case BOOLIS_func:
+            value = matchbool_func(the_statement->code.operation.left_exp, the_statement->code.operation.right_exp, the_var, 4, global_inter);
+            break;
+        case IRIGHT_func:
+            value = matchbool_func(the_statement->code.operation.left_exp, the_statement->code.operation.right_exp, the_var, 4, global_inter);
+            break;
+        case ILEFT_func:
+            value = matchbool_func(the_statement->code.operation.left_exp, the_statement->code.operation.right_exp, the_var, 4, global_inter);
+            break;
+        case ISRIGHT_func:  // a =:> b
+            value = sright_func(the_statement->code.operation.left_exp, the_statement->code.operation.right_exp, the_var, global_inter);
+            break;
+        case ISLEFT_func:  // a <:= b
+            value = sleft_func(the_statement->code.operation.left_exp, the_statement->code.operation.right_exp, the_var, global_inter);
             break;
         default:
             break;
@@ -2585,7 +2687,7 @@ GWARF_result and_func(statement *left_statement, statement *right_statement, var
 // 4- is(相等)
 // 5- left ==> right
 // 6- left <== right
-GWARF_result sbool_func(statement *left_statement, statement *right_statement, var_list *the_var, int type, inter *global_inter){  // the func for add and call from read_statement_list
+GWARF_result matchbool_func(statement *left_statement, statement *right_statement, var_list *the_var, int type, inter *global_inter){  // the func for add and call from read_statement_list
     GWARF_result return_value, get;  // the result by call read_statement_list with left and right = GWARF_result_reset; value is the result for and
     return_value.u = statement_end;
     return_value.value.type = BOOL_value;

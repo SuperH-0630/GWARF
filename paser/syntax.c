@@ -1562,7 +1562,7 @@ void bool_or(p_status *status, token_node *list){  // 因试分解
         fprintf(status_log, "[info][grammar]  (bool_or)reduce right\n");
         get_pop_token(status, list, symbol);
 
-        if(symbol.type == OR_PASER){  // 模式2/3
+        if(symbol.type == OR_PASER || symbol.type == BOOLSOR_PASER){  // 模式2/3
             get_right_token(status, list, bool_and, right);  // 回调右边
             if(right.type != NON_bool_and){
                 paser_error("Don't get a compare");
@@ -1573,7 +1573,7 @@ void bool_or(p_status *status, token_node *list){  // 因试分解
 
             statement *code_tmp =  make_statement();
             code_tmp->type = operation;
-            code_tmp->code.operation.type = OR_func;
+            code_tmp->code.operation.type = ((symbol.type == OR_PASER) ? OR_func : BOOLSOR_func);
             code_tmp->code.operation.left_exp = left.data.statement_value;
             code_tmp->code.operation.right_exp = right.data.statement_value;
             
@@ -1616,7 +1616,7 @@ void bool_and(p_status *status, token_node *list){  // 因试分解
         fprintf(status_log, "[info][grammar]  (bool_and)reduce right\n");
         get_pop_token(status, list, symbol);
 
-        if(symbol.type == AND_PASER){  // 模式2/3
+        if(symbol.type == AND_PASER || symbol.type == BOOLSAND_PASER){  // 模式2/3
             get_right_token(status, list, bool_not, right);  // 回调右边
             if(right.type != NON_bool_not){
                 paser_error("Don't get a bool_not");
@@ -1627,7 +1627,7 @@ void bool_and(p_status *status, token_node *list){  // 因试分解
 
             statement *code_tmp =  make_statement();
             code_tmp->type = operation;
-            code_tmp->code.operation.type = AND_func;
+            code_tmp->code.operation.type = ((symbol.type == AND_PASER) ? AND_func : BOOLSAND_func);
             code_tmp->code.operation.left_exp = left.data.statement_value;
             code_tmp->code.operation.right_exp = right.data.statement_value;
             
@@ -1710,7 +1710,9 @@ void compare(p_status *status, token_node *list){  // 多项式
         fprintf(status_log, "[info][grammar]  (compare)reduce right\n");
         get_pop_token(status, list, symbol);
         if(symbol.type == EQEQ_PASER || symbol.type == MOREEQ_PASER || symbol.type == LESSEQ_PASER ||
-           symbol.type == MORE_PASER || symbol.type == LESS_PASER || symbol.type == NOTEQ_PASER){  // 模式2/3
+           symbol.type == MORE_PASER || symbol.type == LESS_PASER || symbol.type == NOTEQ_PASER ||
+           symbol.type == ISLEFT_PASER || symbol.type == ISRIGHT_PASER || symbol.type == BOOLIS_PASER||
+           symbol.type == ILEFT_PASER || symbol.type == IRIGHT_PASER || symbol.type == BOOLNOTOR_PASER){
             get_right_token(status, list, bit_notor, right);  // 回调右边
             if(right.type != NON_bit_notor){
                 paser_error("Don't get a bit_notor");
@@ -1720,23 +1722,44 @@ void compare(p_status *status, token_node *list){  // 多项式
             statement *code_tmp =  make_statement();
             code_tmp->type = operation;
 
-            if(symbol.type == EQEQ_PASER){
+            switch (symbol.type)
+            {
+            case EQEQ_PASER:
                 code_tmp->code.operation.type = EQUAL_func;
-            }
-            else if(symbol.type == MOREEQ_PASER){
+                break;
+            case MOREEQ_PASER:
                 code_tmp->code.operation.type = MOREEQ_func;
-            }
-            else if(symbol.type == LESSEQ_PASER){
+                break;
+            case LESSEQ_PASER:
                 code_tmp->code.operation.type = LESSEQ_func;
-            }
-            else if(symbol.type == MORE_PASER){
+                break;
+            case MORE_PASER:
                 code_tmp->code.operation.type = MORE_func;
-            }
-            else if(symbol.type == LESS_PASER){
+                break;
+            case LESS_PASER:
                 code_tmp->code.operation.type = LESS_func;
-            }
-            else{
+                break;
+            case NOTEQ_PASER:
                 code_tmp->code.operation.type = NOTEQ_func;
+                break;
+            case ISLEFT_PASER:
+                code_tmp->code.operation.type = ISLEFT_func;
+                break;
+            case ISRIGHT_PASER:
+                code_tmp->code.operation.type = ISRIGHT_func;
+                break;
+            case ILEFT_PASER:
+                code_tmp->code.operation.type = ILEFT_func;
+                break;
+            case IRIGHT_PASER:
+                code_tmp->code.operation.type = IRIGHT_func;
+                break;
+            case BOOLIS_PASER:
+                code_tmp->code.operation.type = BOOLIS_func;
+                break;
+            case BOOLNOTOR_PASER:
+                code_tmp->code.operation.type = BOOLNOTOR_func;
+                break;
             }
             code_tmp->code.operation.left_exp = left.data.statement_value;
             code_tmp->code.operation.right_exp = right.data.statement_value;
