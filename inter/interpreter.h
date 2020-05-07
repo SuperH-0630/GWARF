@@ -641,7 +641,7 @@ int len_only_double(double num);
 int len_double(double num);
 int len_int(int num);
 int len_intx(unsigned int num);
-GWARF_result to_object(GWARF_value, inter *);
+GWARF_result to_object(GWARF_result, inter *);
 GWARF_result get_object(parameter *, char *, var_list *, inter *);
 class_object *make_object(var_list *the_var, var_list *father_var_list);
 
@@ -696,6 +696,16 @@ class_object *NameException_login_official(var_list *the_var, var_list *father_v
 class_object *IterException_login_official(var_list *the_var, var_list *father_var_list,inter *global_inter);
 class_object *AssertException_login_official(var_list *the_var, var_list *father_var_list,inter *global_inter);
 class_object *AssignmentException_login_official(var_list *the_var, var_list *father_var_list,inter *global_inter);
+class_object *IndexException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter);
+class_object *KeyException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter);
+class_object *ImportException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter);
+class_object *IncludeException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter);
+class_object *DivZeroException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter);
+class_object *ValueException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter);
+class_object *TypeException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter);
+class_object *ArgsException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter);
+class_object *SystemctlException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter);
+class_object *VarException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter);
 
 // 生成错误
 GWARF_result to_error(char *, char *, inter *);
@@ -759,8 +769,5 @@ GWARF_result traverse_get_value(statement *, var_list *, var_list *,inter *);
 
 inter *get_inter();
 void login(var_list *the_var, inter *global_inter);
-
-// inter *global_inter;
-// statement_list *statement_base;
 
 #endif

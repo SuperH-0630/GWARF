@@ -67,6 +67,16 @@ void login(var_list *the_var, inter *global_inter){
     IterException_login_official(the_var, tmp_Exception->the_var, global_inter);
     AssertException_login_official(the_var, tmp_Exception->the_var, global_inter);
     AssignmentException_login_official(the_var, tmp_Exception->the_var, global_inter);
+    IndexException_login_official(the_var, tmp_Exception->the_var, global_inter);
+    KeyException_login_official(the_var, tmp_Exception->the_var, global_inter);
+    ImportException_login_official(the_var, tmp_Exception->the_var, global_inter);
+    IncludeException_login_official(the_var, tmp_Exception->the_var, global_inter);
+    DivZeroException_login_official(the_var, tmp_Exception->the_var, global_inter);
+    ValueException_login_official(the_var, tmp_Exception->the_var, global_inter);
+    TypeException_login_official(the_var, tmp_Exception->the_var, global_inter);
+    ArgsException_login_official(the_var, tmp_Exception->the_var, global_inter);
+    SystemctlException_login_official(the_var, tmp_Exception->the_var, global_inter);
+    VarException_login_official(the_var, tmp_Exception->the_var, global_inter);
 }
 
 // 合并编译：cd "/home/songzihuan/文档/CProject/gwarf/" && gcc gwarf.c -lm -o gwarf && "/home/songzihuan/文档/CProject/gwarf/"gwarf

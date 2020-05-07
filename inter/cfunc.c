@@ -45,56 +45,55 @@ int len_intx(unsigned int num){  // 16进制
     return count;
 }
 
-GWARF_result to_object(GWARF_value value, inter *global_inter){  // 把GWARF_value封装成objct
-    GWARF_result func_result = GWARF_result_reset;
-
-    if((value.type == CLASS_value) || (value.type == OBJECT_value) || (value.type == FUNC_value) || (value.type == NULL_value)){  // 可以直接返回
-        func_result.value = value;
-        return func_result;
+GWARF_result to_object(GWARF_result value, inter *global_inter){  // 把GWARF_value封装成objct
+    error_space(value, return_self, value);
+    if((value.value.type == CLASS_value) || (value.value.type == OBJECT_value) || (value.value.type == FUNC_value) || (value.value.type == NULL_value)){  // 可以直接返回
+        return_self: return value;
     }
-
+    GWARF_result func_result = GWARF_result_reset;
     var_list *the_var = make_var_base(global_inter->global_var);
     var *tmp;
-    if(value.type == NUMBER_value){
+    if(value.value.type == NUMBER_value){
         tmp = find_var(the_var, 0, "double", NULL);
         if(tmp != NULL){
             func_result.value = tmp->value;
         }
     }
-    else if(value.type == INT_value){
+    else if(value.value.type == INT_value){
         tmp = find_var(the_var, 0, "int", NULL);
         if(tmp != NULL){
             func_result.value = tmp->value;
         }
     }
-    else if(value.type == BOOL_value){
+    else if(value.value.type == BOOL_value){
         tmp = find_var(the_var, 0, "bool", NULL);
         if(tmp != NULL){
             func_result.value = tmp->value;
         }
     }
-    else if(value.type == STRING_value){
+    else if(value.value.type == STRING_value){
         tmp = find_var(the_var, 0, "str", NULL);
         if(tmp != NULL){
             func_result.value = tmp->value;
         }
     }
-    else if(value.type == LIST_value){
+    else if(value.value.type == LIST_value){
         tmp = find_var(the_var, 0, "list", NULL);
         if(tmp != NULL){
             func_result.value = tmp->value;
         }
     }
-    else if(value.type == DICT_value){
+    else if(value.value.type == DICT_value){
         tmp = find_var(the_var, 0, "dict", NULL);
         if(tmp != NULL){
             func_result.value = tmp->value;
         }
     }
     else{
-        // TODO:: 报错（解释器错误）
+        free(the_var);
+        return to_error("SystemctlError", "SystemctlException", global_inter);
     }
-    GWARF_result return_tmp = call_back_core(func_result, the_var, pack_value_parameter(value), global_inter);
+    GWARF_result return_tmp = call_back_core(func_result, the_var, pack_value_parameter(value.value), global_inter);
     free(the_var);
     return return_tmp;
 }
@@ -110,7 +109,7 @@ GWARF_result to_tuple(GWARF_value value, inter *global_inter){  // 把GWARF_valu
     }
     else{  // 应该报错 (TypeError)
         free(the_var);
-        return func_result;
+        return to_error("[Systemctl]Can't Not Found Class : 'tuple'", "SystemctlException", global_inter);
     }
     GWARF_result return_tmp = call_back_core(func_result, the_var, pack_value_parameter(value), global_inter);
     free(the_var);
@@ -128,7 +127,7 @@ GWARF_result get_object(parameter *tmp_s, char *name, var_list *the_var, inter *
         func_result.value = tmp->value;
     }
     else{
-        return to_error("Object Name Not Found", "NameException", global_inter);
+        return to_error("[Systemctl]Object Name Not Found", "SystemctlException", global_inter);
     }
     return call_back_core(func_result, the_var, tmp_s, global_inter);
 }
@@ -142,11 +141,6 @@ GWARF_result to_error(char *error_info, char *error_type, inter *global_inter){ 
     tmp_value.type = STRING_value;
     tmp_value.value.string = error_info;
 
-    func_result.u = statement_end;
-
-    return_result.u = error;
-    return_result.error_info = error_info;
-
     var *tmp = find_var(the_var, 0, error_type, NULL);
 
     if(tmp != NULL){
@@ -154,11 +148,13 @@ GWARF_result to_error(char *error_info, char *error_type, inter *global_inter){ 
         return_result = call_back_core(func_result, the_var, pack_value_parameter(tmp_value), global_inter);
     }
     else{
-        printf("NameError * 2\n");
+        printf("NOT FOUND :: %s for %s", error_type, error_info);
         return_result.value.type = NULL_value;
         return_result.value.value.int_value = 0;
     }
     free(the_var);
+    return_result.u = error;
+    return_result.error_info = error_info;
     return return_result;
 }
 
@@ -236,7 +232,7 @@ GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var, 
                 printf("<-object on %u->", tmp.value.value.object_value);
             }
             else{
-                printf("var value = other\n");
+                return to_error("print: Get Don't Support Type", "TypeException", global_inter);
             }
             if (tmp_s->next == NULL){  // the last
                 break;
@@ -276,6 +272,10 @@ class_object *object_login_official(var_list *the_var, GWARF_result (*paser)(fun
     }
     return class_tmp;
 }
+#define NotFatherError \
+else{ \
+    to_error("Don't get base var", "ValueException", global_inter); \
+}
 
 GWARF_result object_official_func(func *the_func, parameter *tmp_s, var_list *the_var, GWARF_result father, var_list *out_var,inter *global_inter){  // out_var是外部环境
     GWARF_result return_value = GWARF_result_reset;
@@ -288,10 +288,22 @@ GWARF_result object_official_func(func *the_func, parameter *tmp_s, var_list *th
     else if(father.father->type == OBJECT_value){
         login_var = father.father->value.object_value->the_var;
     }
+    NotFatherError;
     switch (the_func->official_func)
     {
         case __value__func:{  // 若想实现运算必须要有这个方法
-            return_value = to_str(*(father.father), out_var, global_inter);
+            size_t size;
+            unsigned long int ad;
+            if(father.father->type == CLASS_value){  // is class so that can use "."
+                ad = (unsigned long int)father.father->value.class_value;
+            }
+            else if(father.father->type == OBJECT_value){
+                ad = (unsigned long int)father.father->value.object_value;
+            }
+            size = (size_t)(9 + len_intx(ad));
+            return_value.value.type = STRING_value;
+            return_value.value.value.string = (char *)malloc(size);
+            snprintf(return_value.value.value.string, size, "<-%u->", ad);
             break;
         }
         case __assignment__func:
@@ -346,9 +358,8 @@ GWARF_result BaseException_official_func(func *the_func, parameter *tmp_s, var_l
     else if(father.father->type == OBJECT_value){
         login_var = father.father->value.object_value->the_var;
     }
-    else{  // 报错
-        printf("NO login, father type = %d\n", father.father->type);
-    }
+    NotFatherError;
+
     switch (the_func->official_func)
     {
         case __init__func:{  // printf something
@@ -436,6 +447,146 @@ class_object *AssignmentException_login_official(var_list *the_var, var_list *fa
     return class_tmp;
 }
 
+class_object *IndexException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value = GWARF_result_reset;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assignment_func("IndexException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
+    puts("----stop set class----");
+    return class_tmp;
+}
+
+class_object *KeyException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value = GWARF_result_reset;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assignment_func("KeyException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
+    puts("----stop set class----");
+    return class_tmp;
+}
+
+class_object *ImportException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value = GWARF_result_reset;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assignment_func("ImportException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
+    puts("----stop set class----");
+    return class_tmp;
+}
+
+class_object *IncludeException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value = GWARF_result_reset;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assignment_func("IncludeException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
+    puts("----stop set class----");
+    return class_tmp;
+}
+
+class_object *DivZeroException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value = GWARF_result_reset;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assignment_func("DivZeroException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
+    puts("----stop set class----");
+    return class_tmp;
+}
+
+class_object *ValueException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value = GWARF_result_reset;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assignment_func("ValueException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
+    puts("----stop set class----");
+    return class_tmp;
+}
+
+class_object *TypeException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value = GWARF_result_reset;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assignment_func("TypeException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
+    puts("----stop set class----");
+    return class_tmp;
+}
+
+class_object *ArgsException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value = GWARF_result_reset;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assignment_func("ArgsException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
+    puts("----stop set class----");
+    return class_tmp;
+}
+
+class_object *SystemctlException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value = GWARF_result_reset;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assignment_func("SystemctlException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
+    puts("----stop set class----");
+    return class_tmp;
+}
+
+class_object *VarException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
+    // 创建对象[空对象]
+    puts("----set class----");
+    GWARF_result class_value = GWARF_result_reset;
+    class_object *class_tmp = make_object(the_var, father_var_list);
+
+    class_value.value.type = CLASS_value;
+    class_value.value.value.class_value = class_tmp;
+
+    assignment_func("VarException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
+    puts("----stop set class----");
+    return class_tmp;
+}
+
 class_object *gobject_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list, inter *global_inter){  // 内置对象继承的类
     // 创建对象[空对象]
     puts("----set class----");
@@ -472,9 +623,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
     else if(father.father->type == OBJECT_value){
         login_var = father.father->value.object_value->the_var;
     }
-    else{
-        printf("NO login, father type = %d\n", father.father->type);
-    }
+    NotFatherError;
     switch (the_func->official_func)
     {
         case __init__func:{  // printf something
@@ -553,6 +702,7 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
 
             GWARF_value base_the_var = tmp_result.value;  // 只有一个参数
             reight_tmp = get__value__(&base_the_var, the_var, global_inter);
+            error_space(reight_tmp, return_result, return_value);
             var *tmp = find_var(login_var, 0, "value", NULL);
             if(tmp != NULL){
                 left_tmp.value = tmp->value;
@@ -1056,9 +1206,7 @@ GWARF_result int_official_func(func *the_func, parameter *tmp_s, var_list *the_v
     else if(father.father->type == OBJECT_value){
         login_var = father.father->value.object_value->the_var;
     }
-    else{
-        printf("NO login, father type = %d\n", father.father->type);
-    }
+    NotFatherError;
     switch (the_func->official_func)
     {
         case __init__func:{  // printf something
@@ -1170,9 +1318,7 @@ GWARF_result double_official_func(func *the_func, parameter *tmp_s, var_list *th
     else if(father.father->type == OBJECT_value){
         login_var = father.father->value.object_value->the_var;
     }
-    else{
-        printf("NO login, father type = %d\n", father.father->type);
-    }
+    NotFatherError;
     switch (the_func->official_func)
     {
         case __init__func:{  // printf something
@@ -1234,14 +1380,14 @@ GWARF_result to_double(GWARF_value value, var_list *the_var, inter *global_inter
         if(value.type == BOOL_value){
             return_number.value.value.double_value = (double)value.value.bool_value;
         }
-        else if(value.type == INT_value){
+        else if(value.type == INT_value || value.type == NULL_value){
             return_number.value.value.double_value = (double)value.value.int_value;
         }
         else if(value.type == STRING_value){
             return_number.value.value.double_value = (double)atof(value.value.string);
         }
         else{
-            return_number.value.value.double_value = 0;
+            return_number = to_error("Get a Don't Support Type", "TypeException", global_inter);
         }
     }
     return return_number;
@@ -1281,9 +1427,7 @@ GWARF_result str_official_func(func *the_func, parameter *tmp_s, var_list *the_v
     else if(father.father->type == OBJECT_value){
         login_var = father.father->value.object_value->the_var;
     }
-    else{
-        printf("NO login, father type = %d\n", father.father->type);
-    }
+    NotFatherError;
     switch (the_func->official_func)
     {
         case __init__func:{  // printf something
@@ -1350,7 +1494,7 @@ GWARF_result to_str(GWARF_value value, var_list *the_var, inter *global_inter){
             snprintf(return_number.value.value.string, size, "<-class on %u->", value.value.class_value);
         }
         else{  // 还有LIST等，其余报错
-            ;
+            return_number = to_error("Get a Don't Support Type", "TypeException", global_inter);
         }
     }
     return return_number;
@@ -1406,9 +1550,12 @@ GWARF_result to_str_dict(GWARF_value value, var_list *the_var, inter *global_int
             return_number.value.value.string = calloc(sizeof(char), size);
             snprintf(return_number.value.value.string, size, "str_<-class on %u->", value.value.class_value);
         }
-        else{
+        else if(value.type == NULL_value){
             return_number.value.value.string = calloc(sizeof(char), 13);
             strcpy(return_number.value.value.string,  "none_<none>");
+        }
+        else{
+            return_number = to_error("Get a Don't Support Type", "TypeException", global_inter);
         }
     }
     return_value: 
@@ -1505,9 +1652,7 @@ GWARF_result bool_official_func(func *the_func, parameter *tmp_s, var_list *the_
     else if(father.father->type == OBJECT_value){
         login_var = father.father->value.object_value->the_var;
     }
-    else{
-        printf("NO login, father type = %d\n", father.father->type);
-    }
+    NotFatherError;
     switch (the_func->official_func)
     {
         case __init__func:{  // printf something
@@ -1610,9 +1755,7 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
     else if(father.father->type == OBJECT_value){
         login_var = father.father->value.object_value->the_var;
     }
-    else{
-        printf("NO login, father type = %d\n", father.father->type);
-    }
+    NotFatherError;
     switch (the_func->official_func)
     {
         case __init__func:{  // printf something
@@ -1693,6 +1836,7 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
         }
         case __down__func:{  // return index
             var *tmp = find_var(login_var, 0, "value", NULL);
+            int len = tmp->value.value.list_value->index;
             if(tmp != NULL){
                 GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
                 error_space(tmp_result, return_result, return_value);
@@ -1701,11 +1845,20 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
                 error_space(get_value, return_result, return_value);
                 get_value = to_int(get_value.value, out_var, global_inter);
                 error_space(get_value, return_result, return_value);
+                if(len - 1 < get_value.value.value.int_value){
+                    return_value = to_error("Index To Max", "IndexException", global_inter);
+                    puts("FSFS");
+                    goto return_result;
+                }
+                else if(get_value.value.value.int_value < 0){
+                    return_value = to_error("Index To Min", "IndexException", global_inter);
+                    goto return_result;
+                }
                 return_value.value = tmp->value.value.list_value->list_value[get_value.value.value.int_value];
             }
             else{
-                return_value.value.type = NULL_value;
-                return_value.value.value.int_value = 0;
+                return_value = to_error("Don't get List Value", "ValueException", global_inter);
+                goto return_result;
             }
             break;
         }
@@ -1740,12 +1893,19 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
                 else{
                     end = len;
                 }
-
+                if(len < start || len < end || end < start){
+                    return_value = to_error("Index To Max[1]", "IndexException", global_inter);
+                    goto return_result;
+                }
+                else if(end < 0 || start < 0){
+                    return_value = to_error("Index To Min", "IndexException", global_inter);
+                    goto return_result;
+                }
                 return_value.value.type = LIST_value;
                 return_value.value.value.list_value = malloc(sizeof(the_list));  // 申请list的空间
                 return_value.value.value.list_value->list_value = malloc((size_t)((end - start) * sizeof(GWARF_value)));
                 memcpy(return_value.value.value.list_value->list_value, (tmp->value.value.list_value->list_value + start), (size_t)((end - start) * sizeof(GWARF_value)));
-                return_value.value.value.list_value->index = (end - start) - 1;
+                return_value.value.value.list_value->index = end - start;
             }
             else{
                 return_value.value.type = NULL_value;
@@ -1756,7 +1916,9 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
         default:
             break;
     }
-    return_result: return return_value;
+    return_result:
+    puts("STOP");
+    return return_value;
 }
 
 class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list, inter *global_inter){
@@ -1793,13 +1955,12 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
     else if(father.father->type == OBJECT_value){
         login_var = father.father->value.object_value->the_var;
     }
-    else{
-        printf("NO login, father type = %d\n", father.father->type);
-    }
+    NotFatherError;
     switch (the_func->official_func)
     {
         case __set__func:{  // return index
             var *tmp = find_var(login_var, 0, "value", NULL);
+            int len = tmp->value.value.list_value->index;
             if(tmp != NULL){
                 GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
                 error_space(tmp_result, return_result, return_value);
@@ -1813,7 +1974,14 @@ GWARF_result list_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 tmp_s = tmp_s->next;
                 GWARF_result new_value = traverse(tmp_s->u.value, out_var, false, global_inter);
                 error_space(new_value, return_result, return_value);
-
+                if(len - 1 < get_value.value.value.int_value){
+                    return_value = to_error("Index To Max", "IndexException", global_inter);
+                    goto return_result;
+                }
+                else if(get_value.value.value.int_value < 0){
+                    return_value = to_error("Index To Min", "IndexException", global_inter);
+                    goto return_result;
+                }
                 tmp->value.value.list_value->list_value[get_value.value.value.int_value] = new_value.value;
                 tmp->value.value.list_value->index += 1;
             }
@@ -1844,14 +2012,7 @@ GWARF_result to_dict(GWARF_value value, var_list *the_var, inter *global_inter){
         return_number = to_dict(tmp.value, the_var, global_inter);  // 递归
     }
     else{
-        // 生成一个空的DICT
-        return_number.value.type = DICT_value;
-        return_number.value.value.dict_value = malloc(sizeof(the_dict));
-        return_number.value.value.dict_value->index = 0;
-        return_number.value.value.dict_value->dict_value = make_hash_var();
-        return_number.value.value.dict_value->name_list = malloc(sizeof(dict_key));
-        return_number.value.value.dict_value->name_list->key = "";
-        return_number.value.value.dict_value->name_list->next = NULL;
+        return to_error("Get a Don't Support Type", "TypeException", global_inter);
     }
     return_result: return return_number;
 }
@@ -1873,10 +2034,7 @@ GWARF_result to_list(GWARF_value value, var_list *the_var, inter *global_inter){
         return_number = to_list(tmp_result.value, the_var, global_inter);  // 递归
     }
     else{
-        return_number.value.value.list_value = malloc(sizeof(the_list));
-        return_number.value.value.list_value->index = 1;
-        return_number.value.value.list_value->list_value = malloc(sizeof(GWARF_value));
-        return_number.value.value.list_value->list_value[0] = value;  // 保存value
+        return to_error("Get a Don't Support Type", "TypeException", global_inter);
     }
     return return_number;
 }
@@ -2101,9 +2259,7 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
     else if(father.father->type == OBJECT_value){
         login_var = father.father->value.object_value->the_var;
     }
-    else{
-        printf("NO login, father type = %d\n", father.father->type);
-    }
+    NotFatherError;
     switch (the_func->official_func)
     {
         case __init__func:{  // printf something
@@ -2160,13 +2316,14 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
             len = tmp->value.value.dict_value->index;
             if(iter_index >= len){
                 return_value = to_error("Max Iter", "IterException", global_inter);
+                goto return_result;
             }
             else{
                 dict_key *tmp_dict_key = tmp->value.value.dict_value->name_list->next;  // 忽略第一个点
                 for(int i = 0;i < iter_index;i += 1){
                     if(tmp_dict_key == NULL){  // to_error
                         return_value = to_error("Max Iter", "IterException", global_inter);
-                        goto next_break;  // 
+                        goto return_result;  // 
                     }
                     tmp_dict_key = tmp_dict_key->next;
                 }
@@ -2178,7 +2335,7 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 return_value.value = key_to_str(tmp_dict_key->key);
             }
 
-            next_break: break;
+             break;
         }
         case __down__func:{  // return index
             var *tmp = find_var(login_var, 0, "value", NULL);
@@ -2189,7 +2346,8 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
                 error_space(get_value, return_result, return_value);
                 var *find_var = find_node(get_value.value.value.string, tmp->value.value.dict_value->dict_value);
                 if(find_var == NULL){  // not found
-                    return_value = to_error("Dict key Not Found", "NameException", global_inter);
+                    return_value = to_error("Dict key Not Found", "KeyException", global_inter);
+                    goto return_result;
                 }
                 else{
                     return_value.value = find_var->value;
@@ -2294,8 +2452,9 @@ GWARF_result run_func_core(GWARF_value *base_the_var, var_list *the_var, char *n
         }
         else{
             char *tmp = malloc((size_t)( 21 + strlen(name)) );
-            sprintf(tmp, "name not found [%s]\n", name);
+            sprintf(tmp, "Name Not Found [%s]\n", name);
             reight_tmp = to_error(tmp, "NameException", global_inter);
+            puts("GGGGGG");
             goto return_result;
         }
     }
