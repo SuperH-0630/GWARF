@@ -80,7 +80,7 @@ return x n  函数返回值x，返回n层
 * 实现了slice赋None值(本质是依靠了虚解包)
 * 修改了无法return的bug
 * in 语句
-* 疑似bug：``a.__iter__.__next__``会出现内存错误，``a.__iter__().__next__()``会出现解析错误
+* 可以捕捉import和include的代码语法异常
 ## GWARF计划
 * 类型转换(list, str, int之间的转换)
 * 魔法方法：``__eq__(用于特殊赋值)，__int__，__str__，__double__，__repo__，__list__，__tuple__，__dict__，__key__，__in__``
@@ -95,9 +95,7 @@ return x n  函数返回值x，返回n层
 * goto语句
 * 宏定义
 * 生成语法树
-* 允许捕捉import和include时的``paser_error``，使用jmp
 * yield生成器和列表推导试
-* 整理了输出日志到InterINFO.log中而不是stdout
-* 文件输入位置作为参数
+* 疑似bug：``a.__iter__.__next__``会出现内存错误，``a.__iter__().__next__()``会出现解析错误
 ## 关于GWARF
 最后更新时间 ： 2020年05月08日 广州
