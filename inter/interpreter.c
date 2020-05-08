@@ -477,7 +477,9 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 if(tmp != NULL){
                     get.value = tmp->value;
                     get.father = &base_the_var;  // 设置father
+                    puts("case down");
                     return_value = call_back_core(get, the_var, (the_statement->code).down.child_var, global_inter);
+                    printf("return_value.u = %d\n", return_value.u);
                 }
                 else{
                     return_value = to_error("Don't Support Down Number", "TypeException", global_inter);
@@ -2404,6 +2406,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
 
         if(func_->type == customize){  // 用户定义的方法
             // 赋值self
+            puts("WWSSSSS");
             GWARF_result father = GWARF_result_reset;
             if(func_->is_class == action){
                 if(get.father != NULL && get.father->type == OBJECT_value){
@@ -2442,6 +2445,19 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                 }
                 out:
                 ;
+            }
+            puts("WFWFSSSSSSSSSSSSSSSSSSSSSs");
+            if(tmp_s->next == NULL){
+                puts("tmp_s->next == NULL");
+            }
+            else{
+                puts("tmp_s->next != NULL");
+            }
+            if(tmp_x->next == NULL){
+                puts("tmp_x->next == NULL");
+            }
+            else{
+                puts("tmp_x->next != NULL");
             }
             GWARF_result tmp_return = login_var(the_var, old_var_list, tmp_x, tmp_s, global_inter);
             if(tmp_return.u != statement_end){

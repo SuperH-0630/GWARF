@@ -637,7 +637,7 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
             new_status.not_match_tuple = true;
             token tmp_next;
             get_right_token(&new_status, list, top_exp, tmp_next);
-            if(tmp_next.type != NON_top_exp){  // 结尾分号 -> 虚解包
+            if(tmp_next.type != NON_top_exp){  // 结尾分号 -> 虚解包，或者slice填充None值
                 if(!status->is_args){
                     back_again(list, tmp_next);
                     next.type = NON_top_exp;
@@ -2638,7 +2638,10 @@ void call_down(p_status *status, token_node *list){  // 因试分解
             if(rb_t.type == RI_PASER || rb_t.type == COMMA_PASER){  // a[1,2,3,4]模式
                 back_one_token(list, parameter_t);
                 back_again(list, rb_t);
-                get_base_token(status,list,formal_parameter,parameter_t);
+                p_status new_status;
+                new_status = *status;
+                reset_status(new_status);
+                get_base_token(&new_status,list,formal_parameter,parameter_t);
                 if(parameter_t.type != NON_parameter){
                     paser_error("Don't get formal_parameter");
                 }
@@ -2648,11 +2651,12 @@ void call_down(p_status *status, token_node *list){  // 因试分解
                 code_tmp->code.down.base_var = left.data.statement_value;
                 code_tmp->code.down.child_var = p_list;
             }
-            else if(rb_t.type == COLON_PASER){  // a[1,2,3,4]模式
+            else if(rb_t.type == COLON_PASER){  // a[1:2:3:4]模式
                 back_one_token(list, parameter_t);
                 back_again(list, rb_t);
                 p_status new_status;
                 new_status = *status;
+                reset_status(new_status);  // 避免正在dict和list模式中
                 new_status.is_slice = true;
                 get_base_token(&new_status,list,formal_parameter,parameter_t);
                 if(parameter_t.type != NON_parameter){

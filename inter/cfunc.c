@@ -134,6 +134,7 @@ GWARF_result get_object(parameter *tmp_s, char *name, var_list *the_var, inter *
 
 
 GWARF_result to_error(char *error_info, char *error_type, inter *global_inter){  // 把GWARF_value封装成error
+    printf("%s(%s)\n", error_type, error_info);
     GWARF_result func_result, return_result = GWARF_result_reset;
     GWARF_value tmp_value = GWARF_value_reset;
     var_list *the_var = make_var_base(global_inter->global_var);
@@ -1884,12 +1885,17 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
                     GWARF_result tmp = get__value__(&(end_result.value), the_var, global_inter);
                     error_space(tmp, return_result, return_value);
                     
-                    tmp = to_int(tmp.value, the_var, global_inter);
-                    error_space(tmp, return_result, return_value);
-                    
-                    end = tmp.value.value.int_value;
+                    if(tmp.value.type != NULL_value){
+                        tmp = to_int(tmp.value, the_var, global_inter);
+                        error_space(tmp, return_result, return_value);
+                        end = tmp.value.value.int_value;
+                    }
+                    else{
+                        goto not_last;
+                    }
                 }
                 else{
+                    not_last:
                     end = len;
                 }
                 if(len < start || len < end || end < start){
