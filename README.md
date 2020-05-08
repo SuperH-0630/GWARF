@@ -79,6 +79,8 @@ return x n  函数返回值x，返回n层
 * try...except增加了else和finally语句，并且允许``except``，``except as``，``else``，``finally``为可选语句
 * 实现了slice赋None值(本质是依靠了虚解包)
 * 修改了无法return的bug
+* in 语句
+* 疑似bug：``a.__iter__.__next__``会出现内存错误，``a.__iter__().__next__()``会出现解析错误
 ## GWARF计划
 * 类型转换(list, str, int之间的转换)
 * 魔法方法：``__eq__(用于特殊赋值)，__int__，__str__，__double__，__repo__，__list__，__tuple__，__dict__，__key__，__in__``
@@ -86,7 +88,6 @@ return x n  函数返回值x，返回n层
 * 数据类型：``set()，link()``
 * 内置类：``range,exp(列表推导试)``
 * 内置函数：``print, input, exit``
-* xx in yy语法
 * @装饰器语法
 * 内存控制：控制``var``链表，控制``哈希表``，控制``var_list``
 * 多重继承优化：super().__init__()

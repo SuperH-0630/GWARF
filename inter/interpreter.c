@@ -1817,6 +1817,11 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
             get_right_result;
             value = is_func(left_result, right_result, the_var, global_inter);
             break;
+        case IN_func:
+            get_left_result;
+            get_right_result;
+            value = in_func(left_result, right_result, the_var, global_inter);
+            break;
         case EQUAL_func:
             get_left_result;
             get_right_result;
@@ -3995,6 +4000,26 @@ GWARF_result sqrt_func(GWARF_result left_result, GWARF_result right_result, var_
         }
         NotSupportCul();
     }
+    return_back: return return_value;
+}
+
+// ---------  IN
+GWARF_result in_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var, inter *global_inter){  // the func for div and call from read_statement_list
+    GWARF_result return_value;  // the result by call read_statement_list with left and right = GWARF_result_reset; value is the result for div
+    if(right_result.value.type == OBJECT_value){  // 调用右sqrt方法
+        GWARF_result get = GWARF_result_reset;
+        GWARF_value base_the_var = right_result.value;  // 只有一个参数
+        var_list *call_var = base_the_var.value.object_value->the_var;
+
+        var *tmp = find_var(call_var, 0, "__in__", NULL);
+        if(tmp != NULL){
+            get.value = tmp->value;
+            get.father = &base_the_var;  // 设置father
+            return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter);
+        }
+        NotSupportCul();
+    }
+    NotSupportCul();
     return_back: return return_value;
 }
 

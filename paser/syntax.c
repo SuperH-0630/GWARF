@@ -759,6 +759,8 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
             }
             p_status new_status;
             new_status = *status;
+            reset_status(new_status);
+            new_status.is_left = false;
             new_status.not_match_tuple = true;
             if(!status->match_dict) new_status.not_match_eq = true;
             get_right_token(&new_status, list, top_exp, value_token);
@@ -772,7 +774,7 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
         }
         else{
             if(status->match_dict){
-                paser_error("dict should get ':'[2]");
+                paser_error("dict should get ':'[3]");
             }
             back_again(list,eq);  // 回退[如果使用back_one_token则会导致add_node在EQ的后面]
             new_token.data.parameter_list = make_parameter_value(next.data.statement_value);
@@ -1848,7 +1850,7 @@ void compare(p_status *status, token_node *list){  // 多项式
            symbol.type == MORE_PASER || symbol.type == LESS_PASER || symbol.type == NOTEQ_PASER ||
            symbol.type == ISLEFT_PASER || symbol.type == ISRIGHT_PASER || symbol.type == BOOLIS_PASER ||
            symbol.type == ILEFT_PASER || symbol.type == IRIGHT_PASER || symbol.type == BOOLNOTOR_PASER ||
-           symbol.type == IS_PASER){
+           symbol.type == IS_PASER || (symbol.type == IN_PASER && !status->is_for)){
             get_right_token(status, list, bit_notor, right);  // 回调右边
             if(right.type != NON_bit_notor){
                 paser_error("Don't get a bit_notor");
@@ -1897,6 +1899,9 @@ void compare(p_status *status, token_node *list){  // 多项式
                 code_tmp->code.operation.type = BOOLNOTOR_func;
             case IS_PASER:
                 code_tmp->code.operation.type = IS_func;
+                break;
+            case IN_PASER:
+                code_tmp->code.operation.type = IN_func;
                 break;
             }
             code_tmp->code.operation.left_exp = left.data.statement_value;

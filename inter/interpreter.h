@@ -206,6 +206,7 @@ typedef struct statement{
                 BOOLSAND_func,  // and
                 BOOLSOR_func,  // or
                 IS_func,  // a is b
+                IN_func,
             } type;
             struct statement *right_exp;  // the right exp
             struct statement *left_exp;  // the left exp
@@ -618,6 +619,7 @@ GWARF_result bit_left_func(GWARF_result, GWARF_result, var_list *, inter *);
 GWARF_result bit_notor_func(GWARF_result, GWARF_result, var_list *, inter *);
 GWARF_result bit_or_func(GWARF_result, GWARF_result, var_list *, inter *);
 GWARF_result bit_and_func(GWARF_result, GWARF_result, var_list *, inter *);
+GWARF_result in_func(GWARF_result, GWARF_result, var_list *, inter *);
 
 double sqrt_(double, double);
 double log_(double, double);

@@ -1747,8 +1747,8 @@ class_object *tuple_login_official(var_list *the_var, GWARF_result (*paser)(func
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{__init__func,1},{__len__func,1},{__down__func,1},{__slice__func,1},{__iter__func,1},{__next__func,1}};
-    char *name[] = {"__init__", "__len__", "__down__", "__slice__", "__iter__", "__next__"};  //  __len__是获取长度，__down__是获取下值，__slice__是切片
+    int a[][2] = {{__init__func,1},{__len__func,1},{__down__func,1},{__slice__func,1},{__iter__func,1},{__next__func,1},{__in__func, 1}};
+    char *name[] = {"__init__", "__len__", "__down__", "__slice__", "__iter__", "__next__","__in__"};  //  __len__是获取长度，__down__是获取下值，__slice__是切片
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
@@ -1867,6 +1867,36 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
                     goto return_result;
                 }
                 return_value.value = tmp->value.value.list_value->list_value[get_value.value.value.int_value];
+            }
+            else{
+                return_value = to_error("Don't get List Value", "ValueException", global_inter);
+                goto return_result;
+            }
+            break;
+        }
+        case __in__func:{  // return index
+            var *tmp = find_var(login_var, 0, "value", NULL);
+            int len = tmp->value.value.list_value->index;
+            if(tmp != NULL){
+                GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
+                error_space(tmp_result, return_result, return_value);
+                get_value = get__value__(&(tmp_result.value), the_var, global_inter);
+                error_space(get_value, return_result, return_value);
+
+                GWARF_result self = GWARF_result_reset, tmp_eq = GWARF_result_reset;
+                for(int i = 0;i < len;i++){
+                    self.value = tmp->value.value.list_value->list_value[i];
+                    tmp_eq = equal_func(get_value, self, out_var, 0, global_inter);
+                    error_space(tmp_eq, return_result, return_value);
+                    if(tmp_eq.value.value.bool_value){  // 相等
+                        return_value.value.type = BOOL_value;
+                        return_value.value.value.bool_value = true;
+                        goto return_result;  // return true
+                    }
+                }
+
+                return_value.value.type = BOOL_value;
+                return_value.value.value.bool_value = false;
             }
             else{
                 return_value = to_error("Don't get List Value", "ValueException", global_inter);
@@ -2254,8 +2284,8 @@ class_object *dict_login_official(var_list *the_var, GWARF_result (*paser)(func 
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{__init__func,1},{__down__func,1},{__set__func,1},{__next__func,1}};
-    char *name[] = {"__init__", "__down__", "__set__", "__next__"};  //  继承tuple
+    int a[][2] = {{__init__func,1},{__down__func,1},{__set__func,1},{__next__func,1},{__in__func,1}};
+    char *name[] = {"__init__", "__down__", "__set__", "__next__", "__in__"};  //  继承tuple
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
@@ -2352,6 +2382,28 @@ GWARF_result dict_official_func(func *the_func, parameter *tmp_s, var_list *the_
             }
 
              break;
+        }
+        case __in__func:{  // return index
+            var *tmp = find_var(login_var, 0, "value", NULL);
+            if(tmp != NULL){
+                GWARF_result get_value, tmp_result = traverse(tmp_s->u.value, out_var, false, global_inter);
+                error_space(tmp_result, return_result, return_value);
+                get_value = to_str_dict(tmp_result.value, out_var, global_inter);
+                error_space(get_value, return_result, return_value);
+                var *find_var = find_node(get_value.value.value.string, tmp->value.value.dict_value->dict_value);
+                return_value.value.type = BOOL_value;
+                if(find_var != NULL){  // not found
+                    return_value.value.value.bool_value = true;
+                }
+                else{
+                    return_value.value.value.bool_value = false;
+                }
+            }
+            else{
+                return_value = to_error("Don't get List Value", "ValueException", global_inter);
+                goto return_result;
+            }
+            break;
         }
         case __down__func:{  // return index
             var *tmp = find_var(login_var, 0, "value", NULL);
