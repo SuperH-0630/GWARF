@@ -219,6 +219,7 @@ typedef struct statement{
             struct statement *condition;  // when to while 
             struct statement *done;  // while to do
             bool first_do;  // do_while = true, while = false
+            struct statement *else_do;  // else to do
         } while_cycle;
 
         struct{
@@ -226,6 +227,7 @@ typedef struct statement{
             struct statement *condition;  // when to while 
             struct statement *after;  // what to do after the done
             struct statement *done;  // while to do
+            struct statement *else_do;  // else to do
         } for_cycle;
         
         struct{
@@ -367,6 +369,8 @@ typedef struct statement{
             struct statement *try;
             struct statement *except;
             struct statement *var;  // as var
+            struct statement *else_do;  // else to do
+            struct statement *finally_do;  // finally to do
         } try_code;
 
         struct
@@ -396,6 +400,7 @@ typedef struct statement{
             struct statement *var;  // for i in a -> i
             struct statement *iter;  // for i in a -> a
             struct statement *done;  // for while to do
+            struct statement *else_do;  // else to do
         } for_in_cycle;
 
         struct

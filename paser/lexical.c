@@ -193,6 +193,7 @@ int paser(int *index, p_status *status){
         match_text(p, global_paser[PROTECT_PASER], "protect");
         match_text(p, global_paser[PUBLIC_PASER], "public");
         match_text(p, global_paser[PRIVATE_PASER], "private");
+        match_text(p, global_paser[FINALLY_PASER], "finally");
 
         *index = check_list(global_paser, p, status);  // 检查解析结果
 

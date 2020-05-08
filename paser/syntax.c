@@ -328,7 +328,7 @@ for_ : FOR LB top_exp COMMA top_exp COMMA top_exp RB block
 */
 void for_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: for_\n");
-    token for_t, exp_1, exp_2, exp_3, block_t, comma_t,new_token;
+    token for_t, exp_1, exp_2, exp_3, block_t, next_t, child_t, comma_t,new_token;
     statement *exp_a, *exp_b, *exp_c;
     for_t = pop_node(list);
     if(for_t.type == FOR_PASER){
@@ -415,12 +415,30 @@ void for_(p_status *status, token_node *list){
             paser_error("Don't get '{'");
         }
 
+        statement *else_do = NULL;
+        el_again: 
+        get_pop_token(status,list,next_t);
+        if(next_t.type == ENTER_PASER){  // 忽略Enter
+            goto el_again;
+        }
+        if(next_t.type == ELSE_PASER){  // else
+            get_right_token(status,list,block_,child_t);
+            if(child_t.type != NON_block){
+                paser_error("Don't get '{'\n");
+            }
+            else_do = child_t.data.statement_value;
+        }
+        else{
+            back_again(list, next_t);  // 下一次读取需要用safe_get_token
+        }
+
         statement *for_tmp =  make_statement();
         if(is_for_in){
             for_tmp->type = for_in_cycle;
             for_tmp->code.for_in_cycle.var = exp_a;
             for_tmp->code.for_in_cycle.iter = exp_c;
             for_tmp->code.for_in_cycle.done = block_t.data.statement_value;
+            for_tmp->code.for_in_cycle.else_do = else_do;
         }
         else{
             for_tmp->type = for_cycle;
@@ -428,12 +446,19 @@ void for_(p_status *status, token_node *list){
             for_tmp->code.for_cycle.condition = exp_b;
             for_tmp->code.for_cycle.after = exp_c;
             for_tmp->code.for_cycle.done = block_t.data.statement_value;
+            for_tmp->code.for_cycle.else_do = else_do;
         }
 
         new_token.type = NON_for;
         new_token.data_type = statement_value;
         new_token.data.statement_value = for_tmp;
         add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+
+        token tmp_enter;
+        tmp_enter.type = ENTER_PASER;
+        tmp_enter.data_type = empty;
+        back_again(list, tmp_enter);  // push入一个ENTER
+
         return;
     }
     else{
@@ -809,7 +834,7 @@ while_ : WHILE LB top_exp RB block
 */
 void do_while_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: while_\n");
-    token do_t, while_t, exp_t, block_t, new_token;
+    token do_t, while_t, exp_t, block_t, next_t, child_t, new_token;
     do_t = pop_node(list);
     if(do_t.type == DO_PASER){
         get_right_token(status,list,block_,block_t);
@@ -836,10 +861,35 @@ void do_while_(p_status *status, token_node *list){
             tmp->code.while_cycle.first_do = true;
         }
 
+        statement *else_do = NULL;
+        el_again: 
+        get_pop_token(status,list,next_t);
+        if(next_t.type == ENTER_PASER){  // 忽略Enter
+            goto el_again;
+        }
+        if(next_t.type == ELSE_PASER){  // else
+            get_right_token(status,list,block_,child_t);
+            if(child_t.type != NON_block){
+                paser_error("Don't get '{'\n");
+            }
+            else_do = child_t.data.statement_value;
+        }
+        else{
+            back_again(list, next_t);  // 下一次读取需要用safe_get_token
+        }
+
+        tmp->code.while_cycle.else_do = else_do;
+
         new_token.type = NON_do_while;
         new_token.data_type = statement_value;
         new_token.data.statement_value = tmp;
         add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+
+        token tmp_enter;
+        tmp_enter.type = ENTER_PASER;
+        tmp_enter.data_type = empty;
+        back_again(list, tmp_enter);  // push入一个ENTER
+
         return;
     }
     else{
@@ -853,7 +903,7 @@ while_ : WHILE LB top_exp RB block
 */
 void while_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: while_\n");
-    token while_t, exp_t, block_t, new_token;
+    token while_t, exp_t, block_t, next_t, child_t, new_token;
     while_t = pop_node(list);
     if(while_t.type == WHILE_PASER){
         get_right_token(status,list,top_exp,exp_t);
@@ -866,16 +916,40 @@ void while_(p_status *status, token_node *list){
             paser_error("Don't get '{'");
         }
 
+        statement *else_do = NULL;
+        el_again: 
+        get_pop_token(status,list,next_t);
+        if(next_t.type == ENTER_PASER){  // 忽略Enter
+            goto el_again;
+        }
+        if(next_t.type == ELSE_PASER){  // else
+            get_right_token(status,list,block_,child_t);
+            if(child_t.type != NON_block){
+                paser_error("Don't get '{'\n");
+            }
+            else_do = child_t.data.statement_value;
+        }
+        else{
+            back_again(list, next_t);  // 下一次读取需要用safe_get_token
+        }
+
         statement *while_tmp =  make_statement();
         while_tmp->type = while_cycle;
         while_tmp->code.while_cycle.condition = exp_t.data.statement_value;
         while_tmp->code.while_cycle.done = block_t.data.statement_value;
         while_tmp->code.while_cycle.first_do = false;
+        while_tmp->code.while_cycle.else_do = else_do;
 
         new_token.type = NON_while;
         new_token.data_type = statement_value;
         new_token.data.statement_value = while_tmp;
         add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+
+        token tmp_enter;
+        tmp_enter.type = ENTER_PASER;
+        tmp_enter.data_type = empty;
+        back_again(list, tmp_enter);  // push入一个ENTER
+
         return;
     }
     else{

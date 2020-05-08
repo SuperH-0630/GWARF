@@ -3,7 +3,7 @@
 
 #include "../inter/interpreter.h"
 
-#define MAX_PASER_SIZE 106
+#define MAX_PASER_SIZE 107
 #define INT_PASER 0
 #define DOUBLE_PASER 1
 #define ENTER_PASER 2
@@ -110,6 +110,7 @@
 #define BOOLIS_PASER 103
 #define BOOLSAND_PASER 104
 #define BOOLSOR_PASER 105
+#define FINALLY_PASER 106
 
 // 获取并返回一个token
 #define get_pop_token(status,list,new_token) \
@@ -264,6 +265,7 @@ typedef enum token_type
     BOOLIS = BOOLIS_PASER,
     BOOLSAND = BOOLSAND_PASER,
     BOOLSOR = BOOLSOR_PASER,
+    FINALLY = FINALLY_PASER,
 
     // 特殊符号
     BAD_token = -2,

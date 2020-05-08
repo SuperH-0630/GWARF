@@ -1156,31 +1156,15 @@ GWARF_result for_func(statement *the_statement, var_list *the_var, inter *global
     hash_var *tmp = make_hash_var();  // base_var
     the_var = append_var_list(tmp, the_var);
     the_var->tag = run_while;
-    bool condition;
+    bool condition, do_else = true;
     if(the_statement->code.for_cycle.first != NULL){
         GWARF_result tmp_result = traverse(the_statement->code.for_cycle.first, the_var, false, global_inter); // first to do
-        if(is_error(&tmp_result)){  // Name Error错误
-            // puts("STOP:: Name No Found!");
-            value = tmp_result;
-            return value;
-        }
-        else if(is_space(&tmp_result)){
-            value = tmp_result;
-            return value;
-        }
+        error_space(tmp_result, return_value, value);
     }
     while (1){
         if(the_statement->code.for_cycle.condition != NULL){  // 检查是否存在循环条件
             GWARF_result tmp_result = traverse(the_statement->code.for_cycle.condition, the_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                // puts("STOP:: Name No Found!");
-                value = tmp_result;
-                goto return_value;
-            }
-            else if(is_space(&tmp_result)){
-                value = tmp_result;
-                goto return_value;
-            }
+            error_space(tmp_result, return_value, value);
             condition = to_bool(tmp_result.value, global_inter);
             printf("for condition = %d\n", condition);
             if(!condition){
@@ -1193,6 +1177,7 @@ GWARF_result for_func(statement *the_statement, var_list *the_var, inter *global
 
         //break操作
         if((value.u == cycle_break) || (value.u == code_broken)){
+            do_else = false;
             if(value.value.type != INT_value){
                 value.value.type = INT_value;
                 value.value.value.int_value = 0;
@@ -1253,6 +1238,10 @@ GWARF_result for_func(statement *the_statement, var_list *the_var, inter *global
                 break;
             }
         }
+    }
+    if(do_else){
+        GWARF_result tmp_result = traverse(the_statement->code.for_cycle.else_do, the_var, false, global_inter);
+        error_space(tmp_result, return_value, value);   
     }
     return_value: 
     the_var = free_var_list(the_var);  // free the new var
@@ -1453,18 +1442,12 @@ GWARF_result forin_func(statement *the_statement, var_list *the_var, inter *glob
     the_var = append_var_list(tmp, the_var);
     the_var->tag = run_while;
     GWARF_result tmp_result = traverse(the_statement->code.for_in_cycle.iter, the_var, false, global_inter);  // 取得迭代器
-    if(is_error(&tmp_result)){  // Name Error错误
-        // puts("STOP:: Name No Found!");
-        value = tmp_result;
-        goto return_value;
-    }
-    else if(is_space(&tmp_result)){
-        value = tmp_result;
-        goto return_value;
-    }
-    
+    error_space(tmp_result, return_value, value);
+
     GWARF_result iter_value = get__iter__(&(tmp_result.value), the_var, global_inter);  // 获取迭代object，一般是返回self
     error_space(iter_value, return_value, value);
+    
+    bool do_else = true;
     while (1){
         GWARF_result tmp_next = get__next__(&(iter_value.value), the_var, global_inter);// 执行__next__的返回值
         if(is_error(&tmp_next)){  // TODO:: 检查是否为IterException
@@ -1483,6 +1466,7 @@ GWARF_result forin_func(statement *the_statement, var_list *the_var, inter *glob
 
         // break的操作
         if((value.u == cycle_break) || (value.u == code_broken)){
+            do_else = false;
             if(value.value.type != INT_value){
                 value.value.type = INT_value;
                 value.value.value.int_value = 0;
@@ -1528,6 +1512,10 @@ GWARF_result forin_func(statement *the_statement, var_list *the_var, inter *glob
             }
         }
     }
+    if(do_else){
+        GWARF_result tmp_result = traverse(the_statement->code.for_in_cycle.else_do, the_var, false, global_inter);
+        error_space(tmp_result, return_value, value);   
+    }
     return_value: 
     the_var = free_var_list(the_var);  // free the new var
     return value;
@@ -1542,19 +1530,11 @@ GWARF_result while_func(statement *the_statement, var_list *the_var, inter *glob
     hash_var *tmp = make_hash_var();  // base_var
     the_var = append_var_list(tmp, the_var);
     the_var->tag = run_while;
-    bool condition;
+    bool condition, do_else = true;
     while (1){
         if(!do_while){  // do_while 为 true的时候跳过条件检查
             GWARF_result tmp_result = traverse(the_statement->code.while_cycle.condition, the_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                // puts("STOP:: Name No Found!");
-                value = tmp_result;
-                goto return_value;
-            }
-            else if(is_space(&tmp_result)){
-                value = tmp_result;
-                goto return_value;
-            }
+            error_space(tmp_result, return_value, value);
             condition = to_bool(tmp_result.value, global_inter);
             printf("while condition = %d\n", condition);
             if(!condition){
@@ -1572,6 +1552,7 @@ GWARF_result while_func(statement *the_statement, var_list *the_var, inter *glob
 
         // break的操作
         if((value.u == cycle_break) || (value.u == code_broken)){
+            do_else = false;  // 不执行else部分
             if(value.value.type != INT_value){
                 value.value.type = INT_value;
                 value.value.value.int_value = 0;
@@ -1616,6 +1597,10 @@ GWARF_result while_func(statement *the_statement, var_list *the_var, inter *glob
                 break;
             }
         }
+    }
+    if(do_else){
+        GWARF_result tmp_result = traverse(the_statement->code.while_cycle.else_do, the_var, false, global_inter);
+        error_space(tmp_result, return_value, value);   
     }
     return_value: 
     the_var = free_var_list(the_var);  // free the new var

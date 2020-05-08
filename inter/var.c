@@ -279,11 +279,8 @@ var *find_var(var_list *var_base, int from, char *name, int *index){  // indexè¡
     if(index != NULL){
         *index = from;
     }
-    // puts("[tag 3]");
-    // printf("name = %s, from = %d, address = %x\n", name, from, start->var_base);
     while (1)
     {
-        // printf("[tag 4] %x  :  %x\n", start, var_base);
         return_var = find_node(name, start->hash_var_base);
         if((return_var == NULL) && (start->next == NULL)){  // don't get the var and not next
             return NULL;
