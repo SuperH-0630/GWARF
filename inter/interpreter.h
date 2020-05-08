@@ -165,10 +165,10 @@ typedef struct statement{
                 LESS_func,  // <
                 MOREEQ_func,  // >=
                 LESSEQ_func,  // <=
-                NOTEQ_func,  // <>
-                POW_func,  // <>
-                LOG_func,  // <>
-                SQRT_func,  // <>
+                NOTEQ_func,  // !=
+                POW_func,  // **
+                LOG_func,  // log
+                SQRT_func,  // sqrt
                 NEGATIVE_func,  // -a
                 AND_func,  // &&
                 OR_func,  // ||

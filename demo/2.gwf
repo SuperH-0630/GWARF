@@ -1,0 +1,32 @@
+if(True){
+print("I am True")
+}
+else{
+print("I am False")
+}
+
+a = 0
+while(a < 3){
+a++
+print("a = ", a)
+}
+
+do{
+print("Do One")
+}while(False)
+
+a = 1,2,3,4,6,7
+for i in a
+{
+print("i = ", i)
+}
+
+for z=0,z<3,z++,
+{
+print("z = ", z)
+}
+
+do{
+print("I am command block")
+}
+

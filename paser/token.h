@@ -3,7 +3,7 @@
 
 #include "../inter/interpreter.h"
 
-#define MAX_PASER_SIZE 108
+#define MAX_PASER_SIZE 109
 #define INT_PASER 0
 #define DOUBLE_PASER 1
 #define ENTER_PASER 2
@@ -112,6 +112,7 @@
 #define BOOLSOR_PASER 105
 #define FINALLY_PASER 106
 #define IS_PASER 107
+#define SEMICOLON_PASER 108
 
 // 获取并返回一个token
 #define get_pop_token(status,list,new_token) \
@@ -152,7 +153,7 @@ if((status.dict_to_enter && stop.type == RP_PASER) || stop.type == EOF_token){ \
     back_again(list, stop); \
     break;  \
 } \
-if(stop.type != ENTER_PASER){ \
+if(stop.type != ENTER_PASER && stop.type != SEMICOLON_PASER){ \
     paser_error("Don't get stop token or EOF"); \
 } \
 }while(0);
@@ -267,6 +268,7 @@ typedef enum token_type
     BOOLSOR = BOOLSOR_PASER,
     FINALLY = FINALLY_PASER,
     IS = IS_PASER,
+    SEMICOLON = SEMICOLON_PASER,
 
     // 特殊符号
     BAD_token = -2,
