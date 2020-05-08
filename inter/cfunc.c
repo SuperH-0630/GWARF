@@ -240,7 +240,7 @@ class_object *object_login_official(var_list *the_var, GWARF_result (*paser)(fun
 
 
     // 注册函数
-    int a[][2] = {{3,1}, {__assignment__func, 1}};
+    int a[][2] = {{__value__func,1}, {__assignment__func, 1}};
     char *name[] = {"__value__", "__assignment__"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
@@ -280,7 +280,7 @@ GWARF_result object_official_func(func *the_func, parameter *tmp_s, var_list *th
             size = (size_t)(9 + len_intx(ad));
             return_value.value.type = STRING_value;
             return_value.value.value.string = (char *)malloc(size);
-            snprintf(return_value.value.value.string, size, "<-%u->", ad);
+            snprintf(return_value.value.value.string, size, "<-%x->", ad);
             break;
         }
         case __assignment__func:

@@ -1,3 +1,12 @@
-a = [1,2,3,5,6]
-a.__iter__.__next__
+class a()
+{
+def run(self,b=3,c=10)
+{
+b * c
+return self;
+}
+}
+q = a()
+z = q.__value__()
+print(z)
 
