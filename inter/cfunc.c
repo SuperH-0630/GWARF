@@ -173,6 +173,8 @@ void login_official_func(int type, int is_class, var_list *the_var, char *name, 
     func_tmp->is_class = is_class;
     func_tmp->is_lambda = false;
     func_tmp->paser = paser;
+    func_tmp->self = make_var_base(make_hash_var());
+    func_tmp->self->tag = run_object;
 
     func_value.value.type = FUNC_value;
     func_value.value.value.func_value = func_tmp;
@@ -278,7 +280,7 @@ GWARF_result object_official_func(func *the_func, parameter *tmp_s, var_list *th
             size = (size_t)(9 + len_intx(ad));
             return_value.value.type = STRING_value;
             return_value.value.value.string = (char *)malloc(size);
-            fprintf(inter_info, return_value.value.value.string, size, "<-%u->", ad);
+            snprintf(return_value.value.value.string, size, "<-%u->", ad);
             break;
         }
         case __assignment__func:
@@ -2210,7 +2212,7 @@ GWARF_result parameter_to_dict(parameter *tmp_s, var_list *the_var, inter *globa
         if(tmp_s->u.var->type == base_var){  // 设置key
             size_t size = (size_t)(13 + strlen(tmp_s->u.var->code.base_var.var_name));
             key = (char *)malloc(size);
-            fprintf(inter_info, key, size, "str_%s", tmp_s->u.var->code.base_var.var_name);
+            snprintf(key, size, "str_%s", tmp_s->u.var->code.base_var.var_name);
         }
         else{
             GWARF_result key_tmp = traverse(tmp_s->u.var, the_var, 0, global_inter);
@@ -2493,7 +2495,7 @@ GWARF_result run_func_core(GWARF_value *base_the_var, var_list *the_var, char *n
         }
         else{
             char *tmp = malloc((size_t)( 21 + strlen(name)) );
-             fprintf(inter_info, tmp, "Name Not Found [%s]\n", name);
+            sprintf(tmp, "Name Not Found [%s]\n", name);
             reight_tmp = to_error(tmp, "NameException", global_inter);
             goto return_result;
         }

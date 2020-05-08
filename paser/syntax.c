@@ -2604,7 +2604,6 @@ void attribute(p_status *status, token_node *list){  // 因试分解
     if(left.type == NON_point){  // 模式2/3
         fprintf(status_log, "[info][grammar]  (attribute)reduce right\n");
         get_pop_token(status, list, symbol);
-
         if(symbol.type == POINT_PASER){  // 模式2/3
             get_right_token(status, list, call_down, right);  // 回调右边
             if(right.type != NON_call_down){
