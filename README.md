@@ -76,5 +76,6 @@ return x n  函数返回值x，返回n层
 * Div和Log运算检查数字类型
 * 调整了运算优先级，修改了无法读取``5 ** -2``而可以读取``5 ** (-2)``的bug
 * while和for循环新增else语句
+* try...except增加了else和finally语句，并且允许``except``，``except as``，``else``，``finally``为可选语句
 ## 关于GWARF
 最后更新时间 ： 2020年05月07日 广州

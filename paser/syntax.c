@@ -836,6 +836,7 @@ void do_while_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: while_\n");
     token do_t, while_t, exp_t, block_t, next_t, child_t, new_token;
     do_t = pop_node(list);
+    int mode = 0;  // mode为1模式需要push enter
     if(do_t.type == DO_PASER){
         get_right_token(status,list,block_,block_t);
         if(block_t.type != NON_block){  // 不是表达式
@@ -849,46 +850,50 @@ void do_while_(p_status *status, token_node *list){
             back_again(list,while_t);
             tmp->type = code_block;
             tmp->code.code_block.done = block_t.data.statement_value;
+            mode = 0;
         }
         else{
             get_right_token(status,list,top_exp,exp_t);
             if(exp_t.type != NON_top_exp){  // 不是表达式
                 paser_error("Don't get 'top_exp'");
             }
+
+            statement *else_do = NULL;
+            el_again: 
+            get_pop_token(status,list,next_t);
+            if(next_t.type == ENTER_PASER){  // 忽略Enter
+                goto el_again;
+            }
+            if(next_t.type == ELSE_PASER){  // else
+                get_right_token(status,list,block_,child_t);
+                if(child_t.type != NON_block){
+                    paser_error("Don't get '{'\n");
+                }
+                else_do = child_t.data.statement_value;
+            }
+            else{
+                back_again(list, next_t);  // 下一次读取需要用safe_get_token
+            }
+        
             tmp->type = while_cycle;
             tmp->code.while_cycle.condition = exp_t.data.statement_value;
             tmp->code.while_cycle.done = block_t.data.statement_value;
             tmp->code.while_cycle.first_do = true;
+            tmp->code.while_cycle.else_do = else_do;
+            mode = 1;
         }
-
-        statement *else_do = NULL;
-        el_again: 
-        get_pop_token(status,list,next_t);
-        if(next_t.type == ENTER_PASER){  // 忽略Enter
-            goto el_again;
-        }
-        if(next_t.type == ELSE_PASER){  // else
-            get_right_token(status,list,block_,child_t);
-            if(child_t.type != NON_block){
-                paser_error("Don't get '{'\n");
-            }
-            else_do = child_t.data.statement_value;
-        }
-        else{
-            back_again(list, next_t);  // 下一次读取需要用safe_get_token
-        }
-
-        tmp->code.while_cycle.else_do = else_do;
 
         new_token.type = NON_do_while;
         new_token.data_type = statement_value;
         new_token.data.statement_value = tmp;
         add_node(list, new_token);  // 压入节点[弹出3个压入1个]
 
-        token tmp_enter;
-        tmp_enter.type = ENTER_PASER;
-        tmp_enter.data_type = empty;
-        back_again(list, tmp_enter);  // push入一个ENTER
+        if(mode){
+            token tmp_enter;
+            tmp_enter.type = ENTER_PASER;
+            tmp_enter.data_type = empty;
+            back_again(list, tmp_enter);  // push入一个ENTER
+        }
 
         return;
     }
@@ -963,7 +968,10 @@ try_ : TRY block EXCEPT AS top_exp block
 */
 void try_(p_status *status, token_node *list){
     fprintf(status_log, "[info][grammar]  mode status: while_\n");
-    token try_t, try_block, except_t, as_t, var_t, except_block, new_token;
+    token try_t, try_block, except_t, as_t, var_t, except_block, child_t, next_t, new_token;
+    statement *else_do = NULL ,*finally_do = NULL, *except_do = NULL, *var_do = NULL;
+    bool mode_else = true, mode_finally = true;
+
     try_t = pop_node(list);
     if(try_t.type == TRY_PASER){
         get_right_token(status, list, block_, try_block);
@@ -977,34 +985,87 @@ void try_(p_status *status, token_node *list){
             goto except_again;
         }
         else if(except_t.type != EXCEPT_PASER){  // 不是except
-            paser_error("Don't get 'except'");
+            back_again(list, except_t);
+            goto el_again;
         }
 
         get_pop_token(status,list,as_t);
         if(as_t.type != AS_PASER){  // 不是except
-            paser_error("Don't get 'as'");
+            back_again(list, as_t);
+            goto not_var;
         }
 
         get_right_token(status, list, top_exp, var_t);
         if(var_t.type != NON_top_exp){
             paser_error("Don't get top_exp");
         }
+        else{
+            var_do = var_t.data.statement_value;
+        }
 
+        not_var:
         get_right_token(status,list,block_,except_block);
         if(except_block.type != NON_block){  // 不是表达式
             paser_error("Don't get '{'");
+        }
+        else{
+            except_do = except_block.data.statement_value;
+        }
+
+        el_again: 
+        get_pop_token(status,list,next_t);
+        if(next_t.type == ENTER_PASER){  // 忽略Enter
+            goto el_again;
+        }
+        if(next_t.type == ELSE_PASER){  // else
+            if(mode_else){
+                get_right_token(status,list,block_,child_t);
+                if(child_t.type != NON_block){
+                    paser_error("Don't get '{'\n");
+                }
+                else_do = child_t.data.statement_value;
+                mode_else = false;
+                goto el_again;
+            }
+            else{
+                paser_error("Get 'else' twict\n");
+            }
+        }
+        if(next_t.type == FINALLY_PASER){  // else
+            if(mode_finally){
+                get_right_token(status,list,block_,child_t);
+                if(child_t.type != NON_block){
+                    paser_error("Don't get '{'\n");
+                }
+                finally_do = child_t.data.statement_value;
+                mode_finally = false;
+                goto el_again;
+            }
+            else{
+                paser_error("Get 'finally' twict\n");
+            }
+        }
+        else{
+            back_again(list, next_t);  // 下一次读取需要用safe_get_token
         }
 
         statement *try_tmp =  make_statement();
         try_tmp->type = try_code;
         try_tmp->code.try_code.try = try_block.data.statement_value;
-        try_tmp->code.try_code.except = except_block.data.statement_value;
-        try_tmp->code.try_code.var = var_t.data.statement_value;
+        try_tmp->code.try_code.except = except_do;
+        try_tmp->code.try_code.var = var_do;
+        try_tmp->code.try_code.else_do = else_do;
+        try_tmp->code.try_code.finally_do = finally_do;
 
         new_token.type = NON_try;
         new_token.data_type = statement_value;
         new_token.data.statement_value = try_tmp;
         add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+
+        token tmp_enter;
+        tmp_enter.type = ENTER_PASER;
+        tmp_enter.data_type = empty;
+        back_again(list, tmp_enter);  // push入一个ENTER
         return;
     }
     else{

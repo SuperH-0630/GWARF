@@ -1195,15 +1195,7 @@ GWARF_result for_func(statement *the_statement, var_list *the_var, inter *global
         // after do
         if(the_statement->code.for_cycle.after != NULL){
             GWARF_result tmp_result = traverse(the_statement->code.for_cycle.after, the_var, false, global_inter);
-            if(is_error(&tmp_result)){  // Name Error错误
-                // puts("STOP:: Name No Found!");
-                value = tmp_result;
-                goto return_value;
-            }
-            else if(is_space(&tmp_result)){
-                value = tmp_result;
-                goto return_value;
-            }
+            error_space(tmp_result, return_value, value);
         }
         // continue操作
         if((value.u == cycle_continue) || (value.u == code_continued)){
@@ -1218,6 +1210,7 @@ GWARF_result for_func(statement *the_statement, var_list *the_var, inter *global
             }
             else{
                 value.value.value.int_value -= 1;
+                do_else = false;
                 break;
             }
         }
@@ -1235,8 +1228,13 @@ GWARF_result for_func(statement *the_statement, var_list *the_var, inter *global
             }
             else{
                 value.value.value.int_value -= 1;
+                do_else = false;
                 break;
             }
+        }
+
+        if(value.u == rego){  // rewent认为是正常执行
+            do_else = false;
         }
     }
     if(do_else){
@@ -1310,7 +1308,7 @@ GWARF_result raise_func(statement *the_statement, var_list *the_var, bool not_cl
 // -----------------try func
 GWARF_result try_func(statement *the_statement, var_list *the_var, inter *global_inter){  // read the statement list with case to run by func
     GWARF_result value = GWARF_result_reset;
-
+    bool do_else = true;
     hash_var *tmp = make_hash_var();  // base_var
     the_var = append_var_list(tmp, the_var);  // run func
 
@@ -1322,12 +1320,14 @@ GWARF_result try_func(statement *the_statement, var_list *the_var, inter *global
     // restart操作[和continue效果相同]
 
     if(is_error(&value)){  // 遇到错误->执行except语句[不需要再检查break...]
+        do_else = false;
         assignment_statement(the_statement->code.try_code.var, the_var, the_var, value,global_inter);
         puts("----except----");
         value = traverse(the_statement->code.try_code.except, the_var, false, global_inter);
         puts("----stop except----");
     }
 
+    // 不使用else
     if(value.u == code_restarted){
         if(value.value.type != INT_value){
             value.value.type = INT_value;
@@ -1344,7 +1344,7 @@ GWARF_result try_func(statement *the_statement, var_list *the_var, inter *global
     }
     
     // continued操作
-    if(value.u == code_continued){
+    else if(value.u == code_continued){
         if(value.value.type != INT_value){
             value.value.type = INT_value;
             value.value.value.int_value = 0;
@@ -1360,7 +1360,7 @@ GWARF_result try_func(statement *the_statement, var_list *the_var, inter *global
     }
 
     // broken操作
-    if(value.u == code_broken){
+    else if(value.u == code_broken){
         if(value.value.type != INT_value){
             value.value.type = INT_value;
             value.value.value.int_value = 0;
@@ -1372,6 +1372,19 @@ GWARF_result try_func(statement *the_statement, var_list *the_var, inter *global
             value.value.value.int_value -= 1;
         }
     }
+
+    if(do_else){  // 不会捕捉break等
+        GWARF_result tmp_result = traverse(the_statement->code.try_code.else_do, the_var, false, global_inter);
+        error_space(tmp_result, return_value, value);   
+    }
+    return_value: 
+    // 执行finally[必须会执行]
+    {
+        GWARF_result tmp_result = traverse(the_statement->code.try_code.finally_do, the_var, false, global_inter);
+        error_space(tmp_result, to_finally, value);   
+    }
+
+    to_finally:
     the_var = free_var_list(the_var);  // free the new var
     return value;
 }
@@ -1492,6 +1505,7 @@ GWARF_result forin_func(statement *the_statement, var_list *the_var, inter *glob
             }
             else{
                 value.value.value.int_value -= 1;
+                do_else = false;
                 break;
             }
         }
@@ -1508,8 +1522,13 @@ GWARF_result forin_func(statement *the_statement, var_list *the_var, inter *glob
             }
             else{
                 value.value.value.int_value -= 1;
+                do_else = false;
                 break;
             }
+        }
+
+        if(value.u == rego){  // rewent认为是正常执行
+            do_else = false;
         }
     }
     if(do_else){
@@ -1578,6 +1597,7 @@ GWARF_result while_func(statement *the_statement, var_list *the_var, inter *glob
             }
             else{
                 value.value.value.int_value -= 1;
+                do_else = false;
                 break;
             }
         }
@@ -1594,8 +1614,13 @@ GWARF_result while_func(statement *the_statement, var_list *the_var, inter *glob
             }
             else{
                 value.value.value.int_value -= 1;
+                do_else = false;
                 break;
             }
+        }
+
+        if(value.u == rego){  // rewent认为是正常执行
+            do_else = false;
         }
     }
     if(do_else){
@@ -1926,7 +1951,11 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
         right_result.value.lock_token = base;
     }
 
-    if(the_statement->type == base_var){  // 通过base_var赋值
+    if(the_statement == NULL){
+        value = right_result;
+        value.base_name = NULL;  // 默认是NULL
+    }
+    else if(the_statement->type == base_var){  // 通过base_var赋值
         char *left = the_statement->code.base_var.var_name;  // get var name but not value
         int from = 0;
         if(the_statement->code.base_var.from == NULL){
@@ -1984,18 +2013,22 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
         GWARF_value base_the_var = tmp_result.value;  // 不用取value
         if(base_the_var.type == CLASS_value){
             value = assignment_statement(the_statement->code.point.child_var, the_var, base_the_var.value.class_value->the_var, right_result,global_inter);
+            value.base_name = NULL;  // 默认是NULL
         }
         else if(base_the_var.type == OBJECT_value){
             value = assignment_statement(the_statement->code.point.child_var, the_var, base_the_var.value.object_value->the_var, right_result,global_inter);
+            value.base_name = NULL;  // 默认是NULL
         }
         else if(base_the_var.type == FUNC_value){
             value = assignment_statement(the_statement->code.point.child_var, the_var, base_the_var.value.func_value->self, right_result,global_inter);
+            value.base_name = NULL;  // 默认是NULL
         }
         else if(base_the_var.type == NULL_value){
             return value;  // 对NONE的point运算均为NULL
         }
         else{
-            return value;  // 对NONE的point运算均为NULL
+            value = to_error("Type Not Support The Point", "TypeException",global_inter);  // 赋值错误
+            value.base_name = NULL;  // 默认是NULL
         }
     }
     else if(the_statement->type == down){  // 通过down赋值
@@ -2011,6 +2044,7 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
                 parameter *tmp = the_statement->code.down.child_var;
                 tmp->next = pack_value_parameter(right_result.value);
                 value = call_back_core(get, the_var, tmp, global_inter);
+                value.base_name = NULL;  // 默认是NULL
                 goto the_else;
             }
         }
@@ -2022,6 +2056,7 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
                 parameter *tmp = the_statement->code.down.child_var;
                 tmp->next = pack_value_parameter(right_result.value);
                 value = call_back_core(get, the_var, tmp, global_inter);
+                value.base_name = NULL;  // 默认是NULL
             }
             else{
                 goto the_else;
@@ -2029,7 +2064,7 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
         }
         else{
             the_else: value = to_error("Bad Assignment", "AssignmentException",global_inter);  // 赋值错误
-            puts("Bad Assignment");
+            value.base_name = NULL;  // 默认是NULL
         }
     }
     else if(the_statement->type == base_svar){  // 通过base_svar赋值
