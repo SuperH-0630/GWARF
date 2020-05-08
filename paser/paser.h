@@ -1,8 +1,12 @@
 #ifndef MEM_INCLUDE
 #define MEM_INCLUDE
 
-#define reset_status(status) {status.not_match_eq=false,status.not_match_tuple=false,status.not_match_call=false,status.match_list=false,status.match_dict=false,status.is_left=true,status.is_peq=false,status.is_for=false,status.dict_to_enter=false,status.ignore_enter=false,status.is_slice=false,status.is_args=false;}
+#include <setjmp.h>
 
+#define reset_status(status) {status.not_match_eq=false,status.not_match_tuple=false, \
+                              status.not_match_call=false,status.match_list=false,status.match_dict=false, \
+                              status.is_left=true,status.is_peq=false,status.is_for=false, \
+                              status.dict_to_enter=false,status.ignore_enter=false,status.is_slice=false,status.is_args=false;}
 FILE *debug = NULL, *status_log = NULL, *token_log = NULL, *token_info = NULL, *inter_info = NULL;
 
 typedef struct p_status
@@ -22,6 +26,7 @@ typedef struct p_status
     FILE *file_p;
     struct word_paser **global_paser;
     struct statement *statement_base;
+    jmp_buf buf;
 } p_status;
 
 

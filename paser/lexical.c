@@ -12,7 +12,7 @@ void match_comment(char p, word_paser *paser);
 void match_enter(char p, word_paser *paser);
 
 int is_in(int, p_status *status);
-extern void paser_error(char *);
+extern void paser_error(p_status *status, char *);
 
 token get_token(p_status *status){
     token return_token;
@@ -30,7 +30,7 @@ token get_token(p_status *status){
         fprintf(status_log, "[info]token type = <EOF>\n");
     }
     else if(index == -2){
-        paser_error("lexical token error");
+        paser_error(status, "lexical token error");
     }
     else{
         return_token.type = index;

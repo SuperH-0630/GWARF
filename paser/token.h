@@ -154,7 +154,7 @@ if((status.dict_to_enter && stop.type == RP_PASER) || stop.type == EOF_token){ \
     break;  \
 } \
 if(stop.type != ENTER_PASER && stop.type != SEMICOLON_PASER){ \
-    paser_error("Don't get stop token or EOF"); \
+    paser_error(&status, "Don't get stop token or EOF"); \
 } \
 }while(0);
 // EOF的返回使用了回退，目的是让command_list第二次执行command的时候，执行safe_get_token获取EOF，否则将会回去两个EOF

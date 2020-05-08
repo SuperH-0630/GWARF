@@ -45,7 +45,7 @@ void attribute(p_status *status, token_node *list);
 void import_include(p_status *status, token_node *list);
 void chose_exp_(p_status *status, token_node *list);
 void svar_token(p_status *status, token_node *list);
-void paser_error(char *text);
+void paser_error(p_status *status, char *text);
 
 /*
 command_list : command
@@ -230,12 +230,12 @@ void if_(p_status *status, token_node *list){
     if(if_t.type == IF_PASER){
         get_right_token(status,list,top_exp,exp_t);
         if(exp_t.type != NON_top_exp){  // 不是表达式
-            paser_error("Don't get 'top_exp'");
+            paser_error(status, "Don't get 'top_exp'");
         }
 
         get_right_token(status,list,block_,block_t);
         if(block_t.type != NON_block){  // 不是表达式
-            paser_error("Don't get '{'");
+            paser_error(status, "Don't get '{'");
         }
 
         statement *if_tmp =  make_statement();
@@ -285,12 +285,12 @@ void elif_(p_status *status, token_node *list){
     if(elif_t.type == ELIF_PASER){
         get_right_token(status,list,top_exp,exp_t);
         if(exp_t.type != NON_top_exp){  // 不是表达式
-            paser_error("Don't get 'top_exp'");
+            paser_error(status, "Don't get 'top_exp'");
         }
 
         get_right_token(status,list,block_,block_t);
         if(block_t.type != NON_block){  // 不是表达式
-            paser_error("Don't get '{'");
+            paser_error(status, "Don't get '{'");
         }
 
         if_list *if_tmp =  make_if(exp_t.data.statement_value, block_t.data.statement_value);
@@ -304,7 +304,7 @@ void elif_(p_status *status, token_node *list){
     if(elif_t.type == ELSE_PASER){  // else
         get_right_token(status,list,block_,block_t);
         if(block_t.type != NON_block){  // 不是表达式
-            paser_error("Don't get '{'");
+            paser_error(status, "Don't get '{'");
         }
 
         if_list *if_tmp =  make_if(NULL, block_t.data.statement_value);
@@ -345,7 +345,7 @@ void for_(p_status *status, token_node *list){
             get_base_token(&new_status,list,top_exp,exp_1);  // 不是使用right token，不需要执行safe_get_token
             new_status.is_for = false;
             if(exp_1.type != NON_top_exp){  // 不是表达式
-                paser_error("Don't get 'top_exp'");
+                paser_error(status, "Don't get 'top_exp'");
             }
             get_pop_token(status, list, comma_t);
             if(comma_t.type == IN_PASER){  // for in 模式 -> exp1不可以为NULL
@@ -354,7 +354,7 @@ void for_(p_status *status, token_node *list){
                 goto exp3;
             }
             else if(comma_t.type != COMMA_PASER){
-                paser_error("Don't get ',' in for cycle");
+                paser_error(status, "Don't get ',' in for cycle");
             }
             exp_a = exp_1.data.statement_value;
         }
@@ -371,11 +371,11 @@ void for_(p_status *status, token_node *list){
             get_base_token(&new_status,list,top_exp,exp_2);  // 不是使用right token，不需要执行safe_get_token
             new_status.is_for = false;
             if(exp_2.type != NON_top_exp){  // 不是表达式
-                paser_error("Don't get 'top_exp'");
+                paser_error(status, "Don't get 'top_exp'");
             }
             get_pop_token(status, list, comma_t);
             if(comma_t.type != COMMA_PASER){
-                paser_error("Don't get ',' in for cycle");
+                paser_error(status, "Don't get ',' in for cycle");
             }
             exp_b = exp_2.data.statement_value;
         }
@@ -385,7 +385,7 @@ void for_(p_status *status, token_node *list){
         get_pop_token(status, list, exp_3);
         if(exp_3.type == COMMA_PASER){
             if(is_for_in){
-                paser_error("Don't get iter object");
+                paser_error(status, "Don't get iter object");
             }
             exp_c = NULL;  // exp_1 = NULL;
         }
@@ -397,12 +397,12 @@ void for_(p_status *status, token_node *list){
             get_base_token(&new_status,list,top_exp,exp_3);  // 不是使用right token，不需要执行safe_get_token
             if(!is_for_in) new_status.is_for = false;
             if(exp_3.type != NON_top_exp){  // 不是表达式
-                paser_error("Don't get 'top_exp'");
+                paser_error(status, "Don't get 'top_exp'");
             }
             if(!is_for_in){  // for in 不需要匹配“,”
                 get_pop_token(status, list, comma_t);
                 if(comma_t.type != COMMA_PASER){
-                    paser_error("Don't get ',' in for cycle");
+                    paser_error(status, "Don't get ',' in for cycle");
                 }
             }
             exp_c = exp_3.data.statement_value;
@@ -410,7 +410,7 @@ void for_(p_status *status, token_node *list){
 
         get_right_token(status,list,block_,block_t);
         if(block_t.type != NON_block){  // 不是表达式
-            paser_error("Don't get '{'");
+            paser_error(status, "Don't get '{'");
         }
 
         statement *else_do = NULL;
@@ -422,7 +422,7 @@ void for_(p_status *status, token_node *list){
         if(next_t.type == ELSE_PASER){  // else
             get_right_token(status,list,block_,child_t);
             if(child_t.type != NON_block){
-                paser_error("Don't get '{'\n");
+                paser_error(status, "Don't get '{'\n");
             }
             else_do = child_t.data.statement_value;
         }
@@ -477,7 +477,7 @@ void def_class(p_status *status, token_node *list){
     if(def_t.type == SETUP_PASER){  // 动态函数
         get_right_token(status,list,block_,block_t);  // 获取初始化信息
         if(block_t.type != NON_block){  // 不是表达式
-            paser_error("Don't get '{'");
+            paser_error(status, "Don't get '{'");
         }
         token next, main_func;
         again:
@@ -495,7 +495,7 @@ void def_class(p_status *status, token_node *list){
             goto again;
         }
         else{
-            error: paser_error("Don't get main func for setup");
+            error: paser_error(status, "Don't get main func for setup");
         }
         new_token.type = NON_def;
         new_token.data_type = statement_value;
@@ -515,7 +515,7 @@ void def_class(p_status *status, token_node *list){
             new_token.data.statement_value->code.def.is_inline = true;  // 设置setup
         }
         else{
-            error_inline: paser_error("Don't func for inline func");
+            error_inline: paser_error(status, "Don't func for inline func");
         }
         new_token.type = NON_def;
         new_token.data_type = statement_value;
@@ -529,22 +529,22 @@ void def_class(p_status *status, token_node *list){
         new_status.not_match_call = true;
         get_right_token(&new_status,list,top_exp,name_t);  // 避免了top_exp把括号捕捉为call_back，不过，可以使用list设置status参数从而让call_back不捕捉[未实现]
         if(name_t.type != NON_top_exp){  // 不是表达式
-            paser_error("Don't get 'top_exp'");
+            paser_error(status, "Don't get 'top_exp'");
         }
         get_pop_token(status, list, lb_t);
         if(lb_t.type != LB_PASER){
-            paser_error("Don't get '('");
+            paser_error(status, "Don't get '('");
         }
         get_pop_token(status, list, rb_t);
         if(rb_t.type != RB_PASER){  // 带参数
             back_one_token(list, rb_t);
             get_base_token(status,list,formal_parameter,parameter_t);  // 不需要safe_get_token
             if(parameter_t.type != NON_parameter){
-                paser_error("Don't get formal_parameter");
+                paser_error(status, "Don't get formal_parameter");
             }
             get_pop_token(status, list, rb_t);
             if(rb_t.type != RB_PASER){
-                paser_error("Don't get ')'[1]");
+                paser_error(status, "Don't get ')'[1]");
             }
             p_list = parameter_t.data.parameter_list;
         }
@@ -554,7 +554,7 @@ void def_class(p_status *status, token_node *list){
 
         get_right_token(status,list,block_,block_t);
         if(block_t.type != NON_block){  // 不是表达式
-            paser_error("Don't get '{'");
+            paser_error(status, "Don't get '{'");
         }
 
         statement *def_tmp =  make_statement();
@@ -612,13 +612,13 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
             get_pop_token(status, list, before);
             if(before.type == MUL_PASER){
                 if(status->match_dict){
-                    paser_error("dict shouldn't get '*'");
+                    paser_error(status, "dict shouldn't get '*'");
                 }
                 mode = put_args;
             }
             else if(before.type == POW_PASER){
                 if(status->match_list){
-                    paser_error("list shouldn't get '*'");
+                    paser_error(status, "list shouldn't get '*'");
                 }
                 mode = put_kwargs;
             }
@@ -640,7 +640,7 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
                     next.data.statement_value = make_statement();  // NULL返回None
                 }
                 else{
-                    paser_error("args shouldn't get * or ** with not var name");
+                    paser_error(status, "args shouldn't get * or ** with not var name");
                 }
             }
             else{
@@ -652,7 +652,7 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
             get_pop_token(status, list, eq);
             if(eq.type == ((status->match_dict || status->is_peq) ? COLON_PASER : EQ_PASER)){  // name_value模式
                 if(status->match_list){
-                    paser_error("list shouldn't get '='");
+                    paser_error(status, "list shouldn't get '='");
                 }
                 p_status new_status;
                 new_status = *status;
@@ -660,7 +660,7 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
                 new_status.not_match_tuple = true;
                 get_right_token(&new_status, list, top_exp, value_token);
                 if(value_token.type != NON_top_exp){
-                    paser_error("Don't get a top_exp");
+                    paser_error(status, "Don't get a top_exp");
                     return;
                 }
                 tmp = append_parameter_name(next.data.statement_value, new_token.data.parameter_list);
@@ -669,7 +669,7 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
             }
             else{
                 if(status->match_dict){
-                    paser_error("dict should get ':'[1]");
+                    paser_error(status, "dict should get ':'[1]");
                 }
                 back_again(list,eq);  // 回退[如果使用back_one_token则会导致add_node在EQ的后面]
                 tmp = append_parameter_value(next.data.statement_value, new_token.data.parameter_list);
@@ -704,7 +704,7 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
                 next.data.statement_value = make_statement();  // NULL返回None
             }
             else{
-                paser_error("args shouldn't get * or ** with not var name");
+                paser_error(status, "args shouldn't get * or ** with not var name");
             }
         }
         else{
@@ -716,13 +716,13 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
         new_token.data.parameter_list->u.var = new_token.data.parameter_list->u.value;
         if(left.type == POW_PASER){
             if(status->match_list){
-                paser_error("list shouldn't get '**'");
+                paser_error(status, "list shouldn't get '**'");
             }
             new_token.data.parameter_list->type = put_kwargs;
         }
         else{
             if(status->match_dict){
-                paser_error("dict shouldn't get '*'");
+                paser_error(status, "dict shouldn't get '*'");
             }
             new_token.data.parameter_list->type = put_args;
         }
@@ -749,7 +749,7 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
         get_pop_token(status, list, eq);
         if(eq.type == ((status->match_dict || status->is_peq) ? COLON_PASER : EQ_PASER)){  // name_value模式
             if(status->match_list){
-                paser_error("list shouldn't get '='");
+                paser_error(status, "list shouldn't get '='");
             }
             p_status new_status;
             new_status = *status;
@@ -759,7 +759,7 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
             if(!status->match_dict) new_status.not_match_eq = true;
             get_right_token(&new_status, list, top_exp, value_token);
             if(value_token.type != NON_top_exp){
-                paser_error("Don't get a top_exp");
+                paser_error(status, "Don't get a top_exp");
                 return;
             }
             new_token.data.parameter_list = make_parameter_name(next.data.statement_value);
@@ -768,7 +768,7 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
         }
         else{
             if(status->match_dict){
-                paser_error("dict should get ':'[3]");
+                paser_error(status, "dict should get ':'[3]");
             }
             back_again(list,eq);  // 回退[如果使用back_one_token则会导致add_node在EQ的后面]
             new_token.data.parameter_list = make_parameter_value(next.data.statement_value);
@@ -790,19 +790,19 @@ void import_include(p_status *status, token_node *list){
     if(type_t.type == IMPORT_PASER || type_t.type == INCLUDE_PASER){
         get_right_token(status,list,top_exp,str_t);
         if(str_t.type != NON_top_exp){  // 不是表达式
-            paser_error("Don't get top_exp");
+            paser_error(status, "Don't get top_exp");
         }
 
         statement *tmp =  make_statement();
         if(type_t.type == IMPORT_PASER){  // import才有as top_exp
             get_pop_token(status, list, as_t);
             if(as_t.type != AS_PASER){
-                paser_error("Don't get as");
+                paser_error(status, "Don't get as");
             }
 
             get_right_token(status,list,top_exp,var_t);
             if(var_t.type != NON_top_exp){  // 不是表达式
-                paser_error("Don't get top_exp");
+                paser_error(status, "Don't get top_exp");
             }
             tmp->type = import_class;
             tmp->code.import_class.file = str_t.data.statement_value;
@@ -836,7 +836,7 @@ void do_while_(p_status *status, token_node *list){
     if(do_t.type == DO_PASER){
         get_right_token(status,list,block_,block_t);
         if(block_t.type != NON_block){  // 不是表达式
-            paser_error("Don't get '{'");
+            paser_error(status, "Don't get '{'");
         }
 
         statement *tmp =  make_statement();
@@ -851,7 +851,7 @@ void do_while_(p_status *status, token_node *list){
         else{
             get_right_token(status,list,top_exp,exp_t);
             if(exp_t.type != NON_top_exp){  // 不是表达式
-                paser_error("Don't get 'top_exp'");
+                paser_error(status, "Don't get 'top_exp'");
             }
 
             statement *else_do = NULL;
@@ -863,7 +863,7 @@ void do_while_(p_status *status, token_node *list){
             if(next_t.type == ELSE_PASER){  // else
                 get_right_token(status,list,block_,child_t);
                 if(child_t.type != NON_block){
-                    paser_error("Don't get '{'\n");
+                    paser_error(status, "Don't get '{'\n");
                 }
                 else_do = child_t.data.statement_value;
             }
@@ -909,12 +909,12 @@ void while_(p_status *status, token_node *list){
     if(while_t.type == WHILE_PASER){
         get_right_token(status,list,top_exp,exp_t);
         if(exp_t.type != NON_top_exp){  // 不是表达式
-            paser_error("Don't get 'top_exp'");
+            paser_error(status, "Don't get 'top_exp'");
         }
 
         get_right_token(status,list,block_,block_t);
         if(block_t.type != NON_block){  // 不是表达式
-            paser_error("Don't get '{'");
+            paser_error(status, "Don't get '{'");
         }
 
         statement *else_do = NULL;
@@ -926,7 +926,7 @@ void while_(p_status *status, token_node *list){
         if(next_t.type == ELSE_PASER){  // else
             get_right_token(status,list,block_,child_t);
             if(child_t.type != NON_block){
-                paser_error("Don't get '{'\n");
+                paser_error(status, "Don't get '{'\n");
             }
             else_do = child_t.data.statement_value;
         }
@@ -972,7 +972,7 @@ void try_(p_status *status, token_node *list){
     if(try_t.type == TRY_PASER){
         get_right_token(status, list, block_, try_block);
         if(try_block.type != NON_block){
-            paser_error("Don't get '{'");
+            paser_error(status, "Don't get '{'");
         }
 
         except_again:
@@ -993,7 +993,7 @@ void try_(p_status *status, token_node *list){
 
         get_right_token(status, list, top_exp, var_t);
         if(var_t.type != NON_top_exp){
-            paser_error("Don't get top_exp");
+            paser_error(status, "Don't get top_exp");
         }
         else{
             var_do = var_t.data.statement_value;
@@ -1002,7 +1002,7 @@ void try_(p_status *status, token_node *list){
         not_var:
         get_right_token(status,list,block_,except_block);
         if(except_block.type != NON_block){  // 不是表达式
-            paser_error("Don't get '{'");
+            paser_error(status, "Don't get '{'");
         }
         else{
             except_do = except_block.data.statement_value;
@@ -1017,28 +1017,28 @@ void try_(p_status *status, token_node *list){
             if(mode_else){
                 get_right_token(status,list,block_,child_t);
                 if(child_t.type != NON_block){
-                    paser_error("Don't get '{'\n");
+                    paser_error(status, "Don't get '{'\n");
                 }
                 else_do = child_t.data.statement_value;
                 mode_else = false;
                 goto el_again;
             }
             else{
-                paser_error("Get 'else' twict\n");
+                paser_error(status, "Get 'else' twict\n");
             }
         }
         if(next_t.type == FINALLY_PASER){  // else
             if(mode_finally){
                 get_right_token(status,list,block_,child_t);
                 if(child_t.type != NON_block){
-                    paser_error("Don't get '{'\n");
+                    paser_error(status, "Don't get '{'\n");
                 }
                 finally_do = child_t.data.statement_value;
                 mode_finally = false;
                 goto el_again;
             }
             else{
-                paser_error("Get 'finally' twict\n");
+                paser_error(status, "Get 'finally' twict\n");
             }
         }
         else{
@@ -1089,7 +1089,7 @@ void block_(p_status *status, token_node *list){
 
         get_pop_token(status, list, rp_t);
         if(rp_t.type != RP_PASER){
-            paser_error("Don't get '}'");
+            paser_error(status, "Don't get '}'");
         }
         new_token.type = NON_block;
         new_token.data_type = statement_value;
@@ -1126,7 +1126,7 @@ void var_ctrl_(p_status *status, token_node *list){
             new_status.not_match_tuple = true;  // 不捕捉,
             get_right_token(&new_status, list, top_exp, var);  // 取得base_var
             if(var.type != NON_top_exp && var.data.statement_value->type != base_var){
-                paser_error("Don't get var");
+                paser_error(status, "Don't get var");
             }
             else{
                 var_name = malloc(sizeof(var.data.statement_value->code.base_var.var_name));
@@ -1206,13 +1206,13 @@ void out_exception(p_status *status, token_node *list){
 
         get_right_token(status, list, top_exp, exp1);  // 取得base_var
         if(exp1.type != NON_top_exp){
-            paser_error("Don't get top_exp");
+            paser_error(status, "Don't get top_exp");
         }
 
         if(left.type != THROW_PASER){  // 设置times
             get_right_token(status, list, top_exp, exp2);  // 回调右边
             if(exp2.type != NON_top_exp){
-                paser_error("Don't get top_exp");
+                paser_error(status, "Don't get top_exp");
             }
         }
         // 逻辑操作
@@ -1400,7 +1400,7 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
             symbol.type == ALEFT_PASER || symbol.type == ARIGHT_PASER){  // 模式2/3
             get_right_token(status, list, hide_list, right);  // 回调右边
             if(right.type != NON_hide_list){
-                paser_error("Don't get a hide_list");
+                paser_error(status, "Don't get a hide_list");
             }
             // 逻辑操作
             new_token.type = NON_eq;
@@ -1488,7 +1488,7 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
                 new_status.is_peq = true;
                 get_base_token(&new_status,list,formal_parameter,p_left);
                 if(p_left.type != NON_parameter){
-                    paser_error("Dont get formal_parameter");
+                    paser_error(status, "Dont get formal_parameter");
                 }
                 
                 get_pop_token(status, list, eq_t);
@@ -1509,7 +1509,7 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
                     }
                     get_right_token(status,list,formal_parameter,p_right);
                     if(p_right.type != NON_parameter){
-                        paser_error("Don't get formal_parameter");
+                        paser_error(status, "Don't get formal_parameter");
                     }
                     the_right = p_right.data.parameter_list;
                 }
@@ -1517,7 +1517,7 @@ void eq_number(p_status *status, token_node *list){  // 因试分解
                     back_again(list, tmp);
                     get_right_token(status,list,hide_list,p_right);  // 把后面匹配为list
                     if(p_right.type != NON_hide_list){
-                        paser_error("Don't get hide_list");
+                        paser_error(status, "Don't get hide_list");
                     }
                     the_right = make_parameter_value(p_right.data.statement_value);
                     the_right->type = put_args;
@@ -1568,7 +1568,7 @@ void hide_list(p_status *status, token_node *list){
             new_status.not_match_tuple = true;
             get_base_token(&new_status, list, formal_parameter, new_token);
             if(new_token.type != NON_parameter){
-                paser_error("Don't get formal_parameter");
+                paser_error(status, "Don't get formal_parameter");
             }
             statement *code_tmp =  make_statement();
             code_tmp->type = base_tuple;
@@ -1607,7 +1607,7 @@ void lambda_(p_status *status, token_node *list){
 
     get_right_token(status, list, block_, block_t);
     if(block_t.type != NON_block){
-        paser_error("Do't get '{");
+        paser_error(status, "Do't get '{");
     }
 
     statement *lambda_tmp =  make_statement();
@@ -1652,18 +1652,18 @@ void chose_exp_(p_status *status, token_node *list){
 
     get_right_token(status, list, bool_or, condition);
     if(condition.type != NON_bool_or){
-        paser_error("Do't get condition");
+        paser_error(status, "Do't get condition");
     }
 
     get_pop_token(status, list, else_t);
     if(else_t.type != ELSE_PASER){  // 不是if else表达式
-        paser_error("Do't get else");
+        paser_error(status, "Do't get else");
         return;
     }
 
     get_right_token(status, list, bool_or, right);
     if(right.type != NON_bool_or){
-        paser_error("Do't get bool or");
+        paser_error(status, "Do't get bool or");
     }
 
     statement *chose_tmp =  make_statement();
@@ -1695,7 +1695,7 @@ void bool_or(p_status *status, token_node *list){  // 因试分解
         if(symbol.type == OR_PASER || symbol.type == BOOLSOR_PASER){  // 模式2/3
             get_right_token(status, list, bool_and, right);  // 回调右边
             if(right.type != NON_bool_and){
-                paser_error("Don't get a compare");
+                paser_error(status, "Don't get a compare");
             }
             // 逻辑操作
             new_token.type = NON_bool_or;
@@ -1749,7 +1749,7 @@ void bool_and(p_status *status, token_node *list){  // 因试分解
         if(symbol.type == AND_PASER || symbol.type == BOOLSAND_PASER){  // 模式2/3
             get_right_token(status, list, bool_not, right);  // 回调右边
             if(right.type != NON_bool_not){
-                paser_error("Don't get a bool_not");
+                paser_error(status, "Don't get a bool_not");
             }
             // 逻辑操作
             new_token.type = NON_bool_and;
@@ -1801,7 +1801,7 @@ void bool_not(p_status *status, token_node *list){
 
         get_right_token(status, list, bool_not, right);  // 回调右边
         if(right.type != NON_bool_not){
-            paser_error("Don't get a bool_not");
+            paser_error(status, "Don't get a bool_not");
         }
         // 逻辑操作
         new_token.type = NON_bool_not;
@@ -1846,7 +1846,7 @@ void compare(p_status *status, token_node *list){  // 多项式
            symbol.type == IS_PASER || (symbol.type == IN_PASER && !status->is_for)){
             get_right_token(status, list, bit_notor, right);  // 回调右边
             if(right.type != NON_bit_notor){
-                paser_error("Don't get a bit_notor");
+                paser_error(status, "Don't get a bit_notor");
             }
             new_token.type = NON_compare;
             new_token.data_type = statement_value;
@@ -1941,7 +1941,7 @@ void bit_notor(p_status *status, token_node *list){  // 因试分解
         if(symbol.type == BITNOTOR_PASER){  // 模式2/3
             get_right_token(status, list, bit_or, right);  // 回调右边
             if(right.type != NON_bit_or){
-                paser_error("Don't get a bit_or");
+                paser_error(status, "Don't get a bit_or");
             }
             // 逻辑操作
             new_token.type = NON_bit_notor;
@@ -1995,7 +1995,7 @@ void bit_or(p_status *status, token_node *list){  // 因试分解
         if(symbol.type == BITOR_PASER){  // 模式2/3
             get_right_token(status, list, bit_and, right);  // 回调右边
             if(right.type != NON_bit_and){
-                paser_error("Don't get a bit_and");
+                paser_error(status, "Don't get a bit_and");
             }
             // 逻辑操作
             new_token.type = NON_bit_or;
@@ -2049,7 +2049,7 @@ void bit_and(p_status *status, token_node *list){  // 因试分解
         if(symbol.type == BITAND_PASER){  // 模式2/3
             get_right_token(status, list, bit_move, right);  // 回调右边
             if(right.type != NON_bit_move){
-                paser_error("Don't get a bit_move");
+                paser_error(status, "Don't get a bit_move");
             }
             // 逻辑操作
             new_token.type = NON_bit_and;
@@ -2104,7 +2104,7 @@ void bit_move(p_status *status, token_node *list){  // 因试分解
         if(symbol.type == BITRIGHT_PASER || symbol.type == BITLEFT_PASER){  // 模式2/3
             get_right_token(status, list, polynomial, right);  // 回调右边
             if(right.type != NON_polynomial){
-                paser_error("Don't get a polynomial");
+                paser_error(status, "Don't get a polynomial");
             }
             // 逻辑操作
             new_token.type = NON_bit_move;
@@ -2163,7 +2163,7 @@ void polynomial(p_status *status, token_node *list){  // 多项式
         if(symbol.type == ADD_PASER || symbol.type == SUB_PASER){  // 模式2/3
             get_right_token(status, list, factor, right);  // 回调右边
             if(right.type != NON_factor){
-                paser_error("Don't get a factor");
+                paser_error(status, "Don't get a factor");
             }
             new_token.type = NON_polynomial;
             new_token.data_type = statement_value;
@@ -2221,7 +2221,7 @@ void factor(p_status *status, token_node *list){  // 因试分解
         if(symbol.type == MUL_PASER || symbol.type == DIV_PASER || symbol.type == INTDIV_PASER || symbol.type == MOD_PASER){  // 模式2/3
             get_right_token(status, list, power, right);  // 回调右边
             if(right.type != NON_power){
-                paser_error("Don't get a value");
+                paser_error(status, "Don't get a value");
             }
             // 逻辑操作
             new_token.type = NON_power;
@@ -2287,7 +2287,7 @@ void power(p_status *status, token_node *list){
         if(symbol.type == POW_PASER || symbol.type == LOG_PASER || symbol.type == SQRT_PASER){  // 模式2/3/4
             get_right_token(status, list, negative, right);  // 回调右边
             if(right.type != NON_negative){
-                paser_error("Don't get a negative");
+                paser_error(status, "Don't get a negative");
             }
             // 逻辑操作
             new_token.type = NON_power;
@@ -2347,7 +2347,7 @@ void negative(p_status *status, token_node *list){
 
         get_right_token(status, list, negative, right);  // 回调右边
         if(right.type != NON_negative){
-            paser_error("Don't get a negative");
+            paser_error(status, "Don't get a negative");
         }
         // 逻辑操作
         new_token.type = NON_negative;
@@ -2395,7 +2395,7 @@ void bit_not(p_status *status, token_node *list){
 
         get_right_token(status, list, self_exp, right);  // 回调右边
         if(right.type != NON_self_exp){
-            paser_error("Don't get a self_exp");
+            paser_error(status, "Don't get a self_exp");
         }
         // 逻辑操作
         new_token.type = NON_bit_not;
@@ -2440,7 +2440,7 @@ void self_exp(p_status *status, token_node *list){
     if(left.type == FADD_PASER || left.type == FSUB_PASER){  // ++a和--a
         get_right_token(status, list, self_exp, right);  // 递归自己，比如----a匹配为--new_token，new_token匹配为--a
         if(right.type != NON_self_exp){
-            paser_error("Don't get self_exp");
+            paser_error(status, "Don't get self_exp");
         }
         statement *code_tmp =  make_statement();
         code_tmp->type = operation;
@@ -2511,11 +2511,11 @@ void call_back_(p_status *status, token_node *list){  // 因试分解
                 new_status.is_args = true;
                 get_right_token(&new_status,list,formal_parameter,parameter_t);
                 if(parameter_t.type != NON_parameter){
-                    paser_error("Don't get formal_parameter");
+                    paser_error(status, "Don't get formal_parameter");
                 }
                 get_pop_token(status, list, rb_t);
                 if(rb_t.type != RB_PASER){
-                    paser_error("Don't get ')'[2]");
+                    paser_error(status, "Don't get ')'[2]");
                 }
                 p_list = parameter_t.data.parameter_list;
             }
@@ -2541,12 +2541,12 @@ void call_back_(p_status *status, token_node *list){  // 因试分解
             token call_func, second_args;
             get_base_token(status, list, element, call_func);
             if(call_func.type != NON_element){
-                paser_error("Don't get the element");
+                paser_error(status, "Don't get the element");
             }
 
             get_right_token(status, list, attribute, second_args);
             if(second_args.type != NON_point){
-                paser_error("Don't get the attribute[1]");
+                paser_error(status, "Don't get the attribute[1]");
             }
 
             parameter *first, *second;
@@ -2608,7 +2608,7 @@ void attribute(p_status *status, token_node *list){  // 因试分解
         if(symbol.type == POINT_PASER){  // 模式2/3
             get_right_token(status, list, call_down, right);  // 回调右边
             if(right.type != NON_call_down){
-                paser_error("Don't get a call_down");
+                paser_error(status, "Don't get a call_down");
             }
             // 逻辑操作
             new_token.type = NON_point;
@@ -2664,7 +2664,7 @@ void call_down(p_status *status, token_node *list){  // 因试分解
             new_status.not_match_tuple = true;
             get_right_token(&new_status, list, top_exp, parameter_t);  // 回调右边
             if(parameter_t.type != NON_top_exp){
-                paser_error("Don't get a top_exp");
+                paser_error(status, "Don't get a top_exp");
             }
 
             statement *code_tmp =  make_statement();
@@ -2677,7 +2677,7 @@ void call_down(p_status *status, token_node *list){  // 因试分解
                 reset_status(new_status);
                 get_base_token(&new_status,list,formal_parameter,parameter_t);
                 if(parameter_t.type != NON_parameter){
-                    paser_error("Don't get formal_parameter");
+                    paser_error(status, "Don't get formal_parameter");
                 }
                 get_pop_token(status, list, rb_t);  // 把rb重新弹出来
                 p_list = parameter_t.data.parameter_list;
@@ -2694,7 +2694,7 @@ void call_down(p_status *status, token_node *list){  // 因试分解
                 new_status.is_slice = true;
                 get_base_token(&new_status,list,formal_parameter,parameter_t);
                 if(parameter_t.type != NON_parameter){
-                    paser_error("Don't get formal_parameter");
+                    paser_error(status, "Don't get formal_parameter");
                 }
                 get_pop_token(status, list, rb_t);  // 把rb重新弹出来
                 if(rb_t.type != RI_PASER){
@@ -2707,7 +2707,7 @@ void call_down(p_status *status, token_node *list){  // 因试分解
             }
             else{
                 free(code_tmp);
-                error: paser_error("Don't get ']', ':' or ','");
+                error: paser_error(status, "Don't get ']', ':' or ','");
             }
 
             // 逻辑操作
@@ -2762,12 +2762,12 @@ void element(p_status *status, token_node *list){  // 数字归约
             goto return_back;
         }
         else if(new_token.type != NON_top_exp){
-            paser_error("Don't get 'top_exp'");            
+            paser_error(status, "Don't get 'top_exp'");            
         }
         token rb;
         get_pop_token(status, list ,rb);
         if(rb.type != RB_PASER){  // 匹配失败
-            paser_error("Don't get ')'");
+            paser_error(status, "Don't get ')'");
         }
         return_back:
         new_token.type = NON_element;
@@ -2803,7 +2803,7 @@ void element(p_status *status, token_node *list){  // 数字归约
         new_status.ignore_enter = true;  // 括号内忽略回车
         get_base_token(&new_status,list,dict_,new_token);  // 不需要safe_get_token
         if(new_token.type != NON_dict){
-            paser_error("Don't get a dict_");
+            paser_error(status, "Don't get a dict_");
         }
         new_token.type = NON_element;
         add_node(list, new_token);
@@ -2822,12 +2822,12 @@ void element(p_status *status, token_node *list){  // 数字归约
             back_again(list, exp_token);
             get_base_token(status,list,list_,new_token);  // 返回空列表
             if(new_token.type != NON_list){
-                paser_error("Don't get a list_");
+                paser_error(status, "Don't get a list_");
             }
             goto back;
         }
         else if(exp_token.type != NON_top_exp){
-            paser_error("Don't get 'top_exp'");            
+            paser_error(status, "Don't get 'top_exp'");            
         }
         
         get_pop_token(status, list ,rb);
@@ -2837,7 +2837,7 @@ void element(p_status *status, token_node *list){  // 数字归约
                 back_one_token(list, tmp_var);
                 get_base_token(status, list, var_token, new_token);
                 if(new_token.type != NON_base_var){
-                    paser_error("Don't get var");
+                    paser_error(status, "Don't get var");
                 }
                 new_token.data.statement_value->code.base_var.from = exp_token.data.statement_value;
                 goto back;
@@ -2846,7 +2846,7 @@ void element(p_status *status, token_node *list){  // 数字归约
                 back_one_token(list, tmp_var);
                 get_base_token(status, list, svar_token, new_token);
                 if(new_token.type != NON_svar){
-                    paser_error("Don't get svar");
+                    paser_error(status, "Don't get svar");
                 }
                 new_token.data.statement_value->code.base_svar.from = exp_token.data.statement_value;
                 goto back;
@@ -2871,7 +2871,7 @@ void element(p_status *status, token_node *list){  // 数字归约
                 back_again(list, exp_token);
                 get_base_token(&new_status,list,list_,new_token);  // 不需要safe_get_token
                 if(new_token.type != NON_list){
-                    paser_error("Don't get a list_");
+                    paser_error(status, "Don't get a list_");
                 }
                 goto back;
             }
@@ -2882,7 +2882,7 @@ void element(p_status *status, token_node *list){  // 数字归约
             back_again(list, exp_token);
             get_base_token(&new_status,list,list_,new_token);  // 不需要safe_get_token
             if(new_token.type != NON_list){
-                paser_error("Don't get a list_");
+                paser_error(status, "Don't get a list_");
             }
             goto back;
         }
@@ -2930,12 +2930,12 @@ void list_(p_status *status, token_node *list){  // 数字归约
             base = list_core.data.parameter_list;
         }
         else{
-            paser_error("Don't get formal_parameter");
+            paser_error(status, "Don't get formal_parameter");
         }
 
         get_pop_token(status,list,ri_t);
         if(ri_t.type != RI_PASER){
-            paser_error("Don't get ']'");
+            paser_error(status, "Don't get ']'");
         }
 
         make_list:
@@ -2983,12 +2983,12 @@ void dict_(p_status *status, token_node *list){  // 数字归约
             base = dict_core.data.parameter_list;
         }
         else{
-            paser_error("Don't get formal_parameter");
+            paser_error(status, "Don't get formal_parameter");
         }
 
         get_pop_token(status,list,rp_t);
         if(rp_t.type != RP_PASER){
-            paser_error("Don't get '}'");
+            paser_error(status, "Don't get '}'");
         }
 
         make_dict:
@@ -3042,19 +3042,19 @@ void svar_token(p_status *status, token_node *list){  // 数字归约
             }
             get_pop_token(status, list, var_t);
             if(var_t.type != COLON_PASER){
-                paser_error("Don't get ':'");
+                paser_error(status, "Don't get ':'");
             }
             get_right_token(status, list, element, var_t);
             if(var_t.type != NON_element){
 
-                paser_error("Don't get element[1]");
+                paser_error(status, "Don't get element[1]");
             }
         }
         else{
             back_one_token(list, var_t);
             get_base_token(status, list, element, var_t);
             if(var_t.type != NON_element){
-                paser_error("Don't get element[2]");
+                paser_error(status, "Don't get element[2]");
             }
         }
 
@@ -3107,11 +3107,11 @@ void var_token(p_status *status, token_node *list){  // 数字归约
             }
             get_pop_token(status, list, gett);
             if(gett.type != COLON_PASER){
-                paser_error("Don't get ':'");
+                paser_error(status, "Don't get ':'");
             }
             get_pop_token(status, list, gett);
             if(gett.type != VAR_PASER){
-                paser_error("Don't get var");
+                paser_error(status, "Don't get var");
             }
         }
         new_token.type = NON_base_var;
@@ -3234,8 +3234,8 @@ void paser_value(p_status *status, token_node *list){  // 数字归约
     add_node(list, new_token);  // 压入节点
 }
 
-void paser_error(char *text){
+void paser_error(p_status *status, char *text){
     fprintf(status_log, "[error][grammar]  paser error : %s\n\n", text);
     fprintf(inter_info, "[error][grammar]  paser error : %s\n\n", text);
-    exit(1);
+    longjmp(status->buf, 1);
 }

@@ -4270,8 +4270,8 @@ GWARF_result traverse_global(statement *the_statement, var_list *the_var, inter 
         }
         result = read_statement_list(tmp, the_var, global_inter);
         if(result.u == error){  // Name Error错误
-            fprintf(inter_info, "%s", result.error_info);
-            printf("%s", result.error_info);
+            fprintf(inter_info, "%s\n", result.error_info);
+            printf("%s\n", result.error_info);
             break;
         }
         tmp = tmp->next;
@@ -4294,8 +4294,8 @@ GWARF_result traverse_get_value(statement *the_statement, var_list *the_var, var
         }
         result = read_statement(tmp, the_var, NULL, out_var, lock, global_inter);
         if(result.u == error){  // Name Error错误
-            fprintf(inter_info, "%s", result.error_info);
-            printf("%s", result.error_info);
+            fprintf(inter_info, "%s\n", result.error_info);
+            printf("%s\n", result.error_info);
             break;
         }
         else if(result.u == return_def && result.return_times != 0){  // return def

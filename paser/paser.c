@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <setjmp.h>
 
 #include"../inter/interpreter.h"
 #include "paser.h"
@@ -17,6 +18,9 @@ int parser(char *file_address, inter *global_inter){
     paser_status.file_p = fopen(file_address, "r");  // 打开文件
     if(paser_status.file_p == NULL){
         return 0;
+    }
+    if(setjmp(paser_status.buf)){
+        return 1;
     }
     paser_status.statement_base = global_inter->global_code;
     safe_get_token(&paser_status, global_token_node);
