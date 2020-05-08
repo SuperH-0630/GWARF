@@ -66,7 +66,6 @@ void command_list(p_status *status, token_node *list){  // 多项式
             return command_list(status, list);  // 回调自己
         }
         else{  // 递归跳出[EOF_token]
-            printf("right.type = %d\n", right.type);
             fprintf(status_log, "[info][grammar]  (command_list)out\n");
             back_one_token(list, left);
             back_again(list, right);
@@ -248,7 +247,6 @@ void if_(p_status *status, token_node *list){
         if(next_t.type == ENTER_PASER){  // 忽略Enter
             goto el_again;
         }
-        printf("next_t.type = %d\n", next_t.type);
         if(next_t.type == ELIF_PASER || next_t.type == ELSE_PASER){  // elif
             back_one_token(list, next_t);
             get_base_token(status,list,elif_,child_t);
@@ -535,7 +533,6 @@ void def_class(p_status *status, token_node *list){
         }
         get_pop_token(status, list, lb_t);
         if(lb_t.type != LB_PASER){
-            printf("lb_t.type = %d\n", lb_t.type);
             paser_error("Don't get '('");
         }
         get_pop_token(status, list, rb_t);
@@ -545,9 +542,7 @@ void def_class(p_status *status, token_node *list){
             if(parameter_t.type != NON_parameter){
                 paser_error("Don't get formal_parameter");
             }
-            printf("parameter_t = %d\n", parameter_t.data.parameter_list->u.var->type);
             get_pop_token(status, list, rb_t);
-            printf("rb_t.type = %d\n", rb_t.type);
             if(rb_t.type != RB_PASER){
                 paser_error("Don't get ')'[1]");
             }
@@ -655,7 +650,6 @@ void formal_parameter(p_status *status, token_node *list){  // 因试分解
             new_token = left;
             parameter *tmp = NULL;
             get_pop_token(status, list, eq);
-            printf("eq.type = %d   %d\n", eq.type, status->is_peq);
             if(eq.type == ((status->match_dict || status->is_peq) ? COLON_PASER : EQ_PASER)){  // name_value模式
                 if(status->match_list){
                     paser_error("list shouldn't get '='");
@@ -1108,7 +1102,6 @@ void block_(p_status *status, token_node *list){
         goto again;
     }
     else{
-        printf("lp_t.type = %d != %d\n", lp_t.type, LP_PASER);
         back_one_token(list, lp_t);
         return;
     }
@@ -2520,7 +2513,6 @@ void call_back_(p_status *status, token_node *list){  // 因试分解
                 if(parameter_t.type != NON_parameter){
                     paser_error("Don't get formal_parameter");
                 }
-                printf("rb_t.type = %d\n", rb_t.type);
                 get_pop_token(status, list, rb_t);
                 if(rb_t.type != RB_PASER){
                     paser_error("Don't get ')'[2]");
@@ -2706,7 +2698,6 @@ void call_down(p_status *status, token_node *list){  // 因试分解
                 }
                 get_pop_token(status, list, rb_t);  // 把rb重新弹出来
                 if(rb_t.type != RI_PASER){
-                    printf("rb_t.type = %d\n", rb_t.type);
                     goto error;
                 }
                 p_list = parameter_t.data.parameter_list;
@@ -3194,7 +3185,6 @@ void paser_value(p_status *status, token_node *list){  // 数字归约
         else{
             tmp_value.value.string = gett.data.text;
         }
-        printf("tmp_value.value.string = %s, %s\n", tmp_value.value.string, gett.data.text);
         statement *code_tmp =  make_statement();
         code_tmp->type = call;
         code_tmp->code.call.func = pack_call_name("str", NULL);
@@ -3203,7 +3193,6 @@ void paser_value(p_status *status, token_node *list){  // 数字归约
         new_token.data_type = statement_value;
         goto not_free;
 
-        // printf("[info][grammar]  (paser_value)get str: %s\n", tmp_value.value.string);
     }
     else if(gett.type == TRUE_PASER || gett.type == FALSE_PASER){
         new_token.type = NON_base_value;
@@ -3247,6 +3236,6 @@ void paser_value(p_status *status, token_node *list){  // 数字归约
 
 void paser_error(char *text){
     fprintf(status_log, "[error][grammar]  paser error : %s\n\n", text);
-    printf("[error][grammar]  paser error : %s\n\n", text);
+    fprintf(inter_info, "[error][grammar]  paser error : %s\n\n", text);
     exit(1);
 }

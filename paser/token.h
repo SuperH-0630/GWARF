@@ -148,7 +148,6 @@ back_token(list); \
 do{ \
 token stop; \
 get_pop_token(&status, list, stop); \
-printf("stop.type = %d\n", stop.type); \
 if((status.dict_to_enter && stop.type == RP_PASER) || stop.type == EOF_token){ \
     back_again(list, stop); \
     break;  \

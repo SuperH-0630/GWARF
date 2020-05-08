@@ -135,7 +135,7 @@ GWARF_result get_object(parameter *tmp_s, char *name, var_list *the_var, inter *
 
 
 GWARF_result to_error(char *error_info, char *error_type, inter *global_inter){  // 把GWARF_value封装成error
-    printf("%s(%s)\n", error_type, error_info);
+    fprintf(inter_info, "%s(%s)\n", error_type, error_info);
     GWARF_result func_result, return_result = GWARF_result_reset;
     GWARF_value tmp_value = GWARF_value_reset;
     var_list *the_var = make_var_base(global_inter->global_var);
@@ -150,7 +150,7 @@ GWARF_result to_error(char *error_info, char *error_type, inter *global_inter){ 
         return_result = call_back_core(func_result, the_var, pack_value_parameter(tmp_value), global_inter);
     }
     else{
-        printf("NOT FOUND :: %s for %s", error_type, error_info);
+        fprintf(inter_info, "NOT FOUND :: %s for %s", error_type, error_info);
         return_result.value.type = NULL_value;
         return_result.value.value.int_value = 0;
     }
@@ -180,7 +180,7 @@ void login_official_func(int type, int is_class, var_list *the_var, char *name, 
 }
 
 void login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), inter *global_inter){
-    int a[][2] = {{1,0}};
+    int a[][2] = {{printf_func,0}};
     char *name[] = {"print"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
@@ -201,47 +201,20 @@ GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var, 
         if(tmp_s == NULL){  // 没有东西要打印
             goto return_result;
         }
+        char *str = malloc(0);
         while(1){
             GWARF_result tmp = traverse(tmp_s->u.value, out_var, false, global_inter);
             error_space(tmp, return_result, return_value);
-            if((tmp.value.type == INT_value)){
-                printf("%d", tmp.value.value.int_value);
-            }
-            else if(tmp.value.type == BOOL_value){
-                if(tmp.value.value.bool_value){
-                    printf("true");
-                }
-                else{
-                    printf("false");
-                } 
-            }
-            else if(tmp.value.type == NUMBER_value){
-                printf("%f", tmp.value.value.double_value);
-            }
-            else if(tmp.value.type == NULL_value){
-                printf("<-None->");
-            }
-            else if(tmp.value.type == STRING_value){
-                printf("'%s'", tmp.value.value.string);
-            }
-            else if(tmp.value.type == FUNC_value){
-                printf("<-function on %u->", tmp.value.value.func_value);
-            }
-            else if(tmp.value.type == CLASS_value){
-                printf("<-class on %u->", tmp.value.value.class_value);
-            }
-            else if(tmp.value.type == OBJECT_value){
-                printf("<-object on %u->", tmp.value.value.object_value);
-            }
-            else{
-                return to_error("print: Get Don't Support Type", "TypeException", global_inter);
-            }
+            tmp = to_str(tmp.value, out_var, global_inter);
+            error_space(tmp, return_result, return_value);
+            str = realloc(str, strlen(str) + strlen(tmp.value.value.string) + 2);
+            strcat(str, tmp.value.value.string);
             if (tmp_s->next == NULL){  // the last
                 break;
             }
             tmp_s = tmp_s->next;
         }
-        printf("\n");  // 换行
+        printf("%s\n", str);  // 换行
         return_value.u = statement_end;
         break;
     }
@@ -253,7 +226,7 @@ GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var, 
 
 class_object *object_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), inter *global_inter){  // 内置对象继承的类
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, NULL);
 
@@ -261,7 +234,7 @@ class_object *object_login_official(var_list *the_var, GWARF_result (*paser)(fun
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("object", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
 
 
     // 注册函数
@@ -305,7 +278,7 @@ GWARF_result object_official_func(func *the_func, parameter *tmp_s, var_list *th
             size = (size_t)(9 + len_intx(ad));
             return_value.value.type = STRING_value;
             return_value.value.value.string = (char *)malloc(size);
-            snprintf(return_value.value.value.string, size, "<-%u->", ad);
+            fprintf(inter_info, return_value.value.value.string, size, "<-%u->", ad);
             break;
         }
         case __assignment__func:
@@ -329,14 +302,14 @@ class_object *make_object(var_list *the_var, var_list *father_var_list){
 
 class_object *BaseException_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("BaseException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
 
     // 注册函数
     int a[][2] = {{__init__func,1}};
@@ -381,7 +354,7 @@ GWARF_result BaseException_official_func(func *the_func, parameter *tmp_s, var_l
 
 class_object *Exception_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -389,13 +362,13 @@ class_object *Exception_login_official(var_list *the_var, var_list *father_var_l
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("Exception", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
     return class_tmp;
 }
 
 class_object *AssertException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -403,13 +376,13 @@ class_object *AssertException_login_official(var_list *the_var, var_list *father
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("AssertException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
     return class_tmp;
 }
 
 class_object *NameException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -417,13 +390,13 @@ class_object *NameException_login_official(var_list *the_var, var_list *father_v
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("NameException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
     return class_tmp;
 }
 
 class_object *IterException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -431,13 +404,13 @@ class_object *IterException_login_official(var_list *the_var, var_list *father_v
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("IterException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
     return class_tmp;
 }
 
 class_object *AssignmentException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -445,13 +418,13 @@ class_object *AssignmentException_login_official(var_list *the_var, var_list *fa
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("AssignmentException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
     return class_tmp;
 }
 
 class_object *IndexException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -459,13 +432,13 @@ class_object *IndexException_login_official(var_list *the_var, var_list *father_
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("IndexException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
     return class_tmp;
 }
 
 class_object *KeyException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -473,13 +446,13 @@ class_object *KeyException_login_official(var_list *the_var, var_list *father_va
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("KeyException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
     return class_tmp;
 }
 
 class_object *ImportException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -487,13 +460,13 @@ class_object *ImportException_login_official(var_list *the_var, var_list *father
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("ImportException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
     return class_tmp;
 }
 
 class_object *IncludeException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -501,13 +474,13 @@ class_object *IncludeException_login_official(var_list *the_var, var_list *fathe
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("IncludeException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
     return class_tmp;
 }
 
 class_object *DivZeroException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -515,13 +488,13 @@ class_object *DivZeroException_login_official(var_list *the_var, var_list *fathe
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("DivZeroException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
     return class_tmp;
 }
 
 class_object *ValueException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -529,13 +502,13 @@ class_object *ValueException_login_official(var_list *the_var, var_list *father_
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("ValueException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
     return class_tmp;
 }
 
 class_object *TypeException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -543,13 +516,13 @@ class_object *TypeException_login_official(var_list *the_var, var_list *father_v
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("TypeException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
     return class_tmp;
 }
 
 class_object *ArgsException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -557,13 +530,13 @@ class_object *ArgsException_login_official(var_list *the_var, var_list *father_v
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("ArgsException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
     return class_tmp;
 }
 
 class_object *SystemctlException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -571,13 +544,13 @@ class_object *SystemctlException_login_official(var_list *the_var, var_list *fat
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("SystemctlException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
     return class_tmp;
 }
 
 class_object *VarException_login_official(var_list *the_var, var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -585,13 +558,13 @@ class_object *VarException_login_official(var_list *the_var, var_list *father_va
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("VarException", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
     return class_tmp;
 }
 
 class_object *gobject_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list, inter *global_inter){  // 内置对象继承的类
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
     
@@ -599,7 +572,7 @@ class_object *gobject_login_official(var_list *the_var, GWARF_result (*paser)(fu
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("gobject", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
 
     // 注册函数
     int a[][2] = {{__init__func,1}, {__value__func,1}, {__add__func,1}, {__sub__func,1}, {__mul__func,1},
@@ -1188,14 +1161,14 @@ GWARF_result gobject_official_func(func *the_func, parameter *tmp_s, var_list *t
 
 class_object *int_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
     class_value.value.type = CLASS_value;
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("int", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
 
     // 注册函数
     int a[][2] = {{__init__func,1}, {__assignment__func, 1}};
@@ -1299,7 +1272,7 @@ GWARF_result to_int(GWARF_value value, var_list *the_var, inter *global_inter){
 
 class_object *double_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -1307,7 +1280,7 @@ class_object *double_login_official(var_list *the_var, GWARF_result (*paser)(fun
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("double", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
 
     // 注册函数
     int a[][2] = {{__init__func,1}, {__assignment__func, 1}};
@@ -1408,7 +1381,7 @@ GWARF_result to_double(GWARF_value value, var_list *the_var, inter *global_inter
 
 class_object *str_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -1416,7 +1389,7 @@ class_object *str_login_official(var_list *the_var, GWARF_result (*paser)(func *
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("str", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
 
     // 注册函数
     int a[][2] = {{__init__func,1}};
@@ -1485,12 +1458,12 @@ GWARF_result to_str(GWARF_value value, var_list *the_var, inter *global_inter){
         else if(value.type == INT_value){
             size_t size = (size_t)(2 + len_int(value.value.int_value));
             return_number.value.value.string = (char *)malloc(size);
-            snprintf(return_number.value.value.string, size, "%d", value.value.int_value);
+            fprintf(inter_info, return_number.value.value.string, size, "%d", value.value.int_value);
         }
         else if(value.type == NUMBER_value){
             size_t size = (size_t)(2 + len_double(value.value.double_value));
             return_number.value.value.string = (char *)malloc(size);
-            snprintf(return_number.value.value.string, size, "%f", value.value.double_value);
+            fprintf(inter_info, return_number.value.value.string, size, "%f", value.value.double_value);
         }
         else if(value.type == NULL_value){
             return_number.value.value.string = (char *)malloc(10);
@@ -1499,12 +1472,12 @@ GWARF_result to_str(GWARF_value value, var_list *the_var, inter *global_inter){
         else if(value.type == FUNC_value){
             size_t size = (size_t)(20 + len_intx((unsigned long int)value.value.func_value));  // 转换为无符号整形数字
             return_number.value.value.string = (char *)malloc(size);
-            snprintf(return_number.value.value.string, size, "<-function on %u->", value.value.func_value);
+            fprintf(inter_info, return_number.value.value.string, size, "<-function on %u->", value.value.func_value);
         }
         else if(value.type == CLASS_value){
             size_t size = (size_t)(16 + len_intx((unsigned long int)value.value.class_value));
             return_number.value.value.string = (char *)malloc(size);
-            snprintf(return_number.value.value.string, size, "<-class on %u->", value.value.class_value);
+            fprintf(inter_info, return_number.value.value.string, size, "<-class on %u->", value.value.class_value);
         }
         else{  // 还有LIST等，其余报错
             return_number = to_error("Get a Don't Support Type", "TypeException", global_inter);
@@ -1521,7 +1494,7 @@ GWARF_result to_str_dict(GWARF_value value, var_list *the_var, inter *global_int
     if((value.type == STRING_value)){
         size_t size = (size_t)(5 + strlen(value.value.string));
         return_number.value.value.string = calloc(sizeof(char), size);
-        snprintf(return_number.value.value.string, size, "str_%s", value.value.string);
+        fprintf(inter_info, return_number.value.value.string, size, "str_%s", value.value.string);
     }
     else if(value.type == OBJECT_value){  // 调用__value__方法
         GWARF_result tmp_str = to_str_dict(get__value__(&value, the_var, global_inter).value, the_var, global_inter);
@@ -1530,7 +1503,7 @@ GWARF_result to_str_dict(GWARF_value value, var_list *the_var, inter *global_int
         }
         size_t size = strlen(tmp_str.value.value.string) + 2;
         return_number.value.value.string = calloc(sizeof(char), size);
-        snprintf(return_number.value.value.string, size, "%s", tmp_str.value.value.string);
+        fprintf(inter_info, return_number.value.value.string, size, "%s", tmp_str.value.value.string);
     }
     else{
         if(value.type == BOOL_value){
@@ -1546,22 +1519,22 @@ GWARF_result to_str_dict(GWARF_value value, var_list *the_var, inter *global_int
         else if(value.type == INT_value){
             size_t size = (size_t)(6 + len_int(value.value.int_value));
             return_number.value.value.string = calloc(sizeof(char), size);
-            snprintf(return_number.value.value.string, size, "int_%d", value.value.int_value);
+            fprintf(inter_info, return_number.value.value.string, size, "int_%d", value.value.int_value);
         }
         else if(value.type == NUMBER_value){
             size_t size = (size_t)(10 + len_double(value.value.double_value));
             return_number.value.value.string = calloc(sizeof(char), size);
-            snprintf(return_number.value.value.string, size, "double_%f", value.value.double_value);
+            fprintf(inter_info, return_number.value.value.string, size, "double_%f", value.value.double_value);
         }
         else if(value.type == FUNC_value){
             size_t size = (size_t)(29 + len_intx((unsigned long int)value.value.func_value));  // 转换为无符号整形数字
             return_number.value.value.string = calloc(sizeof(char), size);
-            snprintf(return_number.value.value.string, size, "str_<-function on %u->", value.value.func_value);
+            fprintf(inter_info, return_number.value.value.string, size, "str_<-function on %u->", value.value.func_value);
         }
         else if(value.type == CLASS_value){  // class_value和func_value应该调用__name__
             size_t size = (size_t)(22 + len_intx((unsigned long int)value.value.class_value));
             return_number.value.value.string = calloc(sizeof(char), size);
-            snprintf(return_number.value.value.string, size, "str_<-class on %u->", value.value.class_value);
+            fprintf(inter_info, return_number.value.value.string, size, "str_<-class on %u->", value.value.class_value);
         }
         else if(value.type == NULL_value){
             return_number.value.value.string = calloc(sizeof(char), 13);
@@ -1633,7 +1606,7 @@ GWARF_value key_to_str(char *key){  // 复原key
 
 class_object *bool_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -1641,7 +1614,7 @@ class_object *bool_login_official(var_list *the_var, GWARF_result (*paser)(func 
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("bool", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
 
     // 注册函数
     int a[][2] = {{__init__func,1}, {__assignment__func, 1}};
@@ -1736,7 +1709,7 @@ GWARF_result to_bool_(GWARF_value value, var_list *the_var, inter *global_inter)
 
 class_object *tuple_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -1744,7 +1717,7 @@ class_object *tuple_login_official(var_list *the_var, GWARF_result (*paser)(func
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("tuple", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
 
     // 注册函数
     int a[][2] = {{__init__func,1},{__len__func,1},{__down__func,1},{__slice__func,1},{__iter__func,1},{__next__func,1},{__in__func, 1}};
@@ -1833,7 +1806,7 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
 
             tmp = find_var(login_var, 0, "value", NULL);
             len = tmp->value.value.list_value->index;
-            printf("len = %d, iter_index = %d\n", len, iter_index);
+            fprintf(inter_info, "len = %d, iter_index = %d\n", len, iter_index);
             if(iter_index >= len){  // 已经超出
                 return_value = to_error("Max Iter", "IterException", global_inter);
             }
@@ -1969,7 +1942,7 @@ GWARF_result tuple_official_func(func *the_func, parameter *tmp_s, var_list *the
 
 class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -1977,7 +1950,7 @@ class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func 
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("list", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
 
     // 注册函数
     int a[][2] = {{__set__func,1}};
@@ -2237,7 +2210,7 @@ GWARF_result parameter_to_dict(parameter *tmp_s, var_list *the_var, inter *globa
         if(tmp_s->u.var->type == base_var){  // 设置key
             size_t size = (size_t)(13 + strlen(tmp_s->u.var->code.base_var.var_name));
             key = (char *)malloc(size);
-            snprintf(key, size, "str_%s", tmp_s->u.var->code.base_var.var_name);
+            fprintf(inter_info, key, size, "str_%s", tmp_s->u.var->code.base_var.var_name);
         }
         else{
             GWARF_result key_tmp = traverse(tmp_s->u.var, the_var, 0, global_inter);
@@ -2273,7 +2246,7 @@ GWARF_result parameter_to_dict(parameter *tmp_s, var_list *the_var, inter *globa
 
 class_object *dict_login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), var_list *father_var_list, inter *global_inter){
     // 创建对象[空对象]
-    puts("----set class----");
+    fputs("----set class----\n", inter_info);
     GWARF_result class_value = GWARF_result_reset;
     class_object *class_tmp = make_object(the_var, father_var_list);
 
@@ -2281,7 +2254,7 @@ class_object *dict_login_official(var_list *the_var, GWARF_result (*paser)(func 
     class_value.value.value.class_value = class_tmp;
 
     assignment_func("dict", class_value, the_var, 0, auto_public);  // 注册class 的 位置
-    puts("----stop set class----");
+    fputs("----stop set class----\n", inter_info);
 
     // 注册函数
     int a[][2] = {{__init__func,1},{__down__func,1},{__set__func,1},{__next__func,1},{__in__func,1}};
@@ -2520,7 +2493,7 @@ GWARF_result run_func_core(GWARF_value *base_the_var, var_list *the_var, char *n
         }
         else{
             char *tmp = malloc((size_t)( 21 + strlen(name)) );
-            sprintf(tmp, "Name Not Found [%s]\n", name);
+             fprintf(inter_info, tmp, "Name Not Found [%s]\n", name);
             reight_tmp = to_error(tmp, "NameException", global_inter);
             goto return_result;
         }

@@ -97,5 +97,7 @@ return x n  函数返回值x，返回n层
 * 生成语法树
 * 允许捕捉import和include时的``paser_error``，使用jmp
 * yield生成器和列表推导试
+* 整理了输出日志到InterINFO.log中而不是stdout
+* 文件输入位置作为参数
 ## 关于GWARF
 最后更新时间 ： 2020年05月08日 广州

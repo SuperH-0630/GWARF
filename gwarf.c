@@ -20,6 +20,7 @@ void setup(){
     status_log = fopen("./status.log", "w");  // 设置debug的位置
     token_log = fopen("./token.log", "w");  // 设置debug的位置
     token_info = fopen("./tokenINFO.log", "w");  // 设置debug的位置
+    inter_info = fopen("./interINFO.log", "w");  // 设置debug的位置
 }
 
 void do_exit(void){
@@ -27,9 +28,16 @@ void do_exit(void){
     fclose(status_log);
     fclose(token_log);
     fclose(token_info);
+    fclose(inter_info);
 }
 
-int main(){
+int main(int argc, char *argv[]){
+    if(argc < 2){
+        printf("Don't get Enough Args");
+        exit(1);
+    }
+    char *file = argv[1];
+
     atexit(*do_exit);
     setup();
     inter *global_inter = get_inter();  // 拿全局解释器[并声明全局变量]
@@ -37,11 +45,10 @@ int main(){
     the_var->tag = run_class;
     
     login(the_var, global_inter);
-
-    parser("/home/songzihuan/test.gwf", global_inter);
-    printf("----start run----\n");
+    parser(file, global_inter);
+    fprintf(inter_info, "----start run----\n");
     traverse_global(global_inter->global_code, the_var, global_inter);
-    printf("code end...\n");
+    fprintf(inter_info, "code end...\n");
     return 0;
 }
 
@@ -79,4 +86,4 @@ void login(var_list *the_var, inter *global_inter){
     VarException_login_official(the_var, tmp_Exception->the_var, global_inter);
 }
 
-// 合并编译：cd "/home/songzihuan/文档/CProject/gwarf/" && gcc gwarf.c -lm -o gwarf && "/home/songzihuan/文档/CProject/gwarf/"gwarf
+// 合并编译：cd "/home/songzihuan/文档/CProject/gwarf/" && gcc gwarf.c -lm -o gwarf && "/home/songzihuan/文档/CProject/gwarf/"gwarf "/home/songzihuan/test.gwf"

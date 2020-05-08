@@ -73,32 +73,32 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
     switch (the_statement->type)
     {
         case operation:  // 表达式运算
-            puts("----code----");
+            fputs("----code----\n", inter_info);
             return_value = operation_func(the_statement, the_var, the_login_var, global_inter);
             if((return_value.value.type == INT_value)){
-                printf("operation value = %d\n", return_value.value.value.int_value);
+                fprintf(inter_info, "operation value = %d\n", return_value.value.value.int_value);
             }
             else if(return_value.value.type == BOOL_value){
                 if(return_value.value.value.bool_value){
-                    printf("operation value = true\n");
+                    fprintf(inter_info, "operation value = true\n");
                 }
                 else{
-                    printf("operation value = false\n");
+                    fprintf(inter_info, "operation value = false\n");
                 } 
             }
             else if(return_value.value.type == NUMBER_value){
-                printf("operation value = %f\n", return_value.value.value.double_value);
+                fprintf(inter_info, "operation value = %f\n", return_value.value.value.double_value);
             }
             else if(return_value.value.type == NULL_value){
-                printf("operation value = None\n");
+                fprintf(inter_info, "operation value = None\n");
             }
             else if(return_value.value.type == STRING_value){
-                printf("operation value = %s\n", return_value.value.value.string);
+                fprintf(inter_info, "operation value = %s\n", return_value.value.value.string);
             }
             else{
-                printf("operation value = other[%d]\n", return_value.value.type);
+                fprintf(inter_info, "operation value = other[%d]\n", return_value.value.type);
             }
-            puts("----stop code----");
+            fputs("----stop code----\n", inter_info);
             break;
         case chose_exp:{
             GWARF_result tmp_result = traverse(the_statement->code.chose_exp.condition, the_var, false, global_inter);
@@ -122,41 +122,40 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             break;
         }
         case call:
-            puts("statr call");
             return_value = call_back(the_statement, the_var, global_inter);
             break;
         case while_cycle:
-            puts("----while code----");
+            fputs("----while code----\n", inter_info);
             return_value = while_func(the_statement, the_var, global_inter);
-            puts("----stop while code----");
+            fputs("----stop while code----\n", inter_info);
             if(return_value.u == statement_end){  // while循环不需要返回值[避免GWARF_value 进入 the_var]
                 return_value.value.type = NULL_value;
                 return_value.value.value.int_value = 0;
             }
             break;
         case for_cycle:
-            puts("----for code----");
+            fputs("----for code----\n", inter_info);
             return_value = for_func(the_statement, the_var, global_inter);
-            puts("----for while code----");
+            fputs("----for while code----\n", inter_info);
             if(return_value.u == statement_end){  // while循环不需要返回值[避免GWARF_value 进入 the_var]
                 return_value.value.type = NULL_value;
                 return_value.value.value.int_value = 0;
             }
             break;
         case for_in_cycle:
-            puts("----for code----");
+            fputs("----for code----\n", inter_info);
             return_value = forin_func(the_statement, the_var, global_inter);
-            puts("----for while code----");
+            fputs("----for while code----\n", inter_info);
             if(return_value.u == statement_end){  // while循环不需要返回值[避免GWARF_value 进入 the_var]
                 return_value.value.type = NULL_value;
                 return_value.value.value.int_value = 0;
             }
             break;
         case if_branch:
-            puts("----if code----");
+            fputs("----if code----\n", inter_info);
             return_value = if_func(the_statement->code.if_branch.done, the_var, global_inter);
-            printf("return_value.u = %d\n", return_value.u);
-            puts("----stop if code----");
+            fprintf(inter_info, "return_value.u = %d\n", return_value.u);
+            fputs("----stop if code----\n", inter_info);
             if(return_value.u == statement_end){  // while循环不需要返回值[避免GWARF_value 进入 the_var]
                 return_value.value.type = NULL_value;
                 return_value.value.value.int_value = 0;
@@ -168,19 +167,19 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
         case base_value:  // get value[所有字面量均为这个表达式]
             return_value.value = (the_statement->code).base_value.value;  // code
             if((return_value.value.type == INT_value) || (return_value.value.type == BOOL_value)){
-                printf("get value = %d\n", return_value.value.value.int_value);
+                fprintf(inter_info, "get value = %d\n", return_value.value.value.int_value);
             }
             else if(return_value.value.type == NUMBER_value){
-                printf("get value = %f\n", return_value.value.value.double_value);
+                fprintf(inter_info, "get value = %f\n", return_value.value.value.double_value);
             }
             else if(return_value.value.type == NULL_value){
-                printf("get value = None\n");
+                fprintf(inter_info, "get value = None\n");
             }
             else if(return_value.value.type == STRING_value){
-                printf("get value = %s\n", return_value.value.value.string);
+                fprintf(inter_info, "get value = %s\n", return_value.value.value.string);
             }
             else{
-                printf("get value = other[%d]\n", return_value.value.type);
+                fprintf(inter_info, "get value = other[%d]\n", return_value.value.type);
             }
             // base_value返回字面量 -> 主要返回object类型，还会返回GWARF_value的其他类型供生成object类型
             break;
@@ -233,7 +232,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
 
             the_break_slice: 
             return_value = to_object(return_value, global_inter);
-            // printf("return_value.value.type = %d\n", return_value.value);
+            // fprintf(inter_info, "return_value.value.type = %d\n", return_value.value);
             break;
         }
         case base_var:{  // 访问变量
@@ -288,25 +287,25 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             if(tmp == NULL){
                 var_error:
                 str_tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
-                sprintf(str_tmp, "name not found [%s]\n", the_statement->code.base_var.var_name);
+                 fprintf(inter_info, str_tmp, "name not found [%s]\n", the_statement->code.base_var.var_name);
                 return_value = to_error(str_tmp, "NameException",global_inter);
             }
             else if(tmp->lock == protect && the_statement->code.base_var.lock_token == public_token){  // 权限不够
                 // 企图使用public权限访问protect
                 str_tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
-                sprintf(str_tmp, "var is protect [%s]\n", the_statement->code.base_var.var_name);
+                 fprintf(inter_info, str_tmp, "var is protect [%s]\n", the_statement->code.base_var.var_name);
                 return_value = to_error(str_tmp, "VarException",global_inter);
             }
             else if(tmp->lock == private && the_statement->code.base_var.lock_token == protect && index > max_object && index > max_class){
                 // 企图使用不合法的protect权限访问private
                 str_tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
-                sprintf(str_tmp, "var is private [%s]\n", the_statement->code.base_var.var_name);
+                 fprintf(inter_info, str_tmp, "var is private [%s]\n", the_statement->code.base_var.var_name);
                 return_value = to_error(str_tmp, "VarException",global_inter);
             }
             else if(tmp->lock == private && the_statement->code.base_var.lock_token == public_token){
                 // 企图使用public权限访问private
                 str_tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
-                sprintf(str_tmp, "var is private [%s]\n", the_statement->code.base_var.var_name);
+                 fprintf(inter_info, str_tmp, "var is private [%s]\n", the_statement->code.base_var.var_name);
                 return_value = to_error(str_tmp, "VarException",global_inter);
             }
             else{
@@ -366,7 +365,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             error_space(key_tmp, return_result, return_value);
 
             char *str = key_tmp.value.value.string;
-            printf("str = %s\n", str);
+            fprintf(inter_info, "str = %s\n", str);
 
 
             var *tmp = find_var(the_var, from, str, &index);
@@ -375,22 +374,22 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             if(tmp == NULL){
                 svar_error:
                 str_tmp = malloc((size_t)( 21 + strlen(str) ));
-                sprintf(str_tmp, "name not found [%s]\n", str);
+                 fprintf(inter_info, str_tmp, "name not found [%s]\n", str);
                 return_value = to_error(str_tmp, "NameException",global_inter);
             }
             else if(tmp->lock == protect && the_statement->code.base_var.lock_token == public_token){  // 权限不够
                 str_tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
-                sprintf(str_tmp, "var is protect [%s]\n", the_statement->code.base_var.var_name);
+                 fprintf(inter_info, str_tmp, "var is protect [%s]\n", the_statement->code.base_var.var_name);
                 return_value = to_error(str_tmp, "VarException",global_inter);
             }
             else if(tmp->lock == private && the_statement->code.base_var.lock_token == protect && index > max_object && index > max_class){
                 str_tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
-                sprintf(str_tmp, "var is private [%s]\n", the_statement->code.base_var.var_name);
+                 fprintf(inter_info, str_tmp, "var is private [%s]\n", the_statement->code.base_var.var_name);
                 return_value = to_error(str_tmp, "VarException",global_inter);
             }
             else if(tmp->lock == private && the_statement->code.base_var.lock_token == public_token){
                 str_tmp = malloc((size_t)( 21 + strlen(the_statement->code.base_var.var_name) ));
-                sprintf(str_tmp, "var is private [%s]\n", the_statement->code.base_var.var_name);
+                 fprintf(inter_info, str_tmp, "var is private [%s]\n", the_statement->code.base_var.var_name);
                 return_value = to_error(str_tmp, "VarException",global_inter);
             }
             else{
@@ -478,9 +477,9 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 if(tmp != NULL){
                     get.value = tmp->value;
                     get.father = &base_the_var;  // 设置father
-                    puts("case down");
+                    fputs("case down\n", inter_info);
                     return_value = call_back_core(get, the_var, (the_statement->code).down.child_var, global_inter);
-                    // printf("return_value.u = %d\n", return_value.u);
+                    // fprintf(inter_info, "return_value.u = %d\n", return_value.u);
                 }
                 else{
                     return_value = to_error("Don't Support Down Number", "TypeException", global_inter);
@@ -530,7 +529,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
 
             func_value.value.type = FUNC_value;
             func_value.value.value.func_value = func_tmp;
-            printf("the_statement->code.def.var = %d\n", the_statement->code.def.var->type);
+            fprintf(inter_info, "the_statement->code.def.var = %d\n", the_statement->code.def.var->type);
             GWARF_result assignment_tmp = assignment_statement_core(the_statement->code.def.var, the_var, the_login_var, func_value, true, auto_public, global_inter);  // 注册函数到指定的位置
             error_space(assignment_tmp, return_result, return_value);
             // 无返回值
@@ -553,7 +552,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             break;
         }
         case set_class:{
-            puts("----set class----");
+            fputs("----set class----\n", inter_info);
             GWARF_result class_value = GWARF_result_reset;
             class_object *class_tmp = malloc(sizeof(class_object));
 
@@ -679,7 +678,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             class_value.value.type = CLASS_value;
             GWARF_result tmp_assignment = assignment_statement_core(the_statement->code.set_class.var, the_var,the_login_var, class_value, true, auto_public, global_inter);  // 注册class 的 位置
             error_space(tmp_assignment, return_result, return_value);
-            puts("----stop set class----");
+            fputs("----stop set class----\n", inter_info);
             // 无返回值
             break;
         }
@@ -858,7 +857,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             }
             return_value.u = return_def;
             return_value.value.lock_token = base;
-            printf("code :: return_value.u = %d\n", return_value.u);
+            fprintf(inter_info, "code :: return_value.u = %d\n", return_value.u);
             break;
         case rewent:
             return_value.u = code_rewent;  // rego but not now
@@ -883,26 +882,26 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             }
 
             append_default_var_base(name, base_from, the_var->default_list);
-            printf("set_default for %s\n", name);
+            fprintf(inter_info, "set_default for %s\n", name);
             break;
         }
         case set_global:{
             char *name = the_statement->code.set_global.name;
             int base_from = get_var_list_len(the_var);
             append_default_var_base(name, base_from, the_var->default_list);
-            printf("global for %s\n", name);
+            fprintf(inter_info, "global for %s\n", name);
             break;
         }
         case set_nonlocal:{
             char *name = the_statement->code.set_global.name;
             append_default_var_base(name, 1, the_var->default_list);
-            printf("nonlocal for %s\n", name);
+            fprintf(inter_info, "nonlocal for %s\n", name);
             break;
         }
         case code_block:
-            puts("----block code----");
+            fputs("----block code----\n", inter_info);
             return_value = block_func(the_statement, the_var, global_inter);
-            puts("----stop block code----");
+            fputs("----stop block code----\n", inter_info);
             break;
         case try_code:
             return_value = try_func(the_statement, the_var, global_inter);
@@ -923,7 +922,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             return_value = assert_func(the_statement, the_var, global_inter);
             break;
         default:
-            puts("default");
+            fputs("default\n", inter_info);
             break;
     }
     return_result: return return_value;
@@ -947,9 +946,9 @@ GWARF_result include_func(statement *the_statement, var_list *the_var, inter *gl
         return to_error("Include Error", "IncludeException", global_inter);
     }
 
-    printf("----start run----\n");
+    fprintf(inter_info, "----start run----\n");
     traverse_global(new_global_inter->global_code, the_var, new_global_inter);
-    printf("code end...\n");
+    fprintf(inter_info, "code end...\n");
 
     return_value.u = statement_end;
     return_value.value.type = NULL_value;
@@ -975,9 +974,9 @@ GWARF_result import_func(statement *the_statement, var_list *the_var, inter *glo
     if(status){
         return to_error("Import Error", "ImportException", global_inter);
     }
-    printf("----start run----\n");
+    fprintf(inter_info, "----start run----\n");
     traverse_global(new_global_inter->global_code, new_the_var, new_global_inter);
-    printf("code end...\n");
+    fprintf(inter_info, "code end...\n");
 
     GWARF_result import_result = GWARF_result_reset;
     import_result.value.type = CLASS_value;
@@ -1005,20 +1004,20 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
     while(1){
         if(start->condition  == NULL){  // else
             else_restart:
-            puts("----else----");
+            fputs("----else----\n", inter_info);
             value = traverse(start->done, the_var, true, global_inter);
-            puts("----stop else----");
+            fputs("----stop else----\n", inter_info);
             
             // restarted操作
             // TODO::可以检查值类型，如果不正确则是解释器错误
             if(value.u == code_restarted){
                 if(value.value.type != INT_value){
-                    // printf("Code Warrning: Bad Type Number for restart(ed), reset to zero");
+                    // fprintf(inter_info, "Code Warrning: Bad Type Number for restart(ed), reset to zero");
                     value.value.type = INT_value;
                     value.value.value.int_value = 0;
                 }
                 if(value.value.value.int_value <= 0){
-                    puts("----restarted real----");
+                    fputs("----restarted real----\n", inter_info);
                     value.u = statement_end;
                     goto else_restart;
                 }
@@ -1031,12 +1030,12 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
             // continued操作
             if(value.u == code_continued){
                 if(value.value.type != INT_value){
-                    // printf("Code Warrning: Bad Type Number for continue(ed), reset to zero");
+                    // fprintf(inter_info, "Code Warrning: Bad Type Number for continue(ed), reset to zero");
                     value.value.type = INT_value;
                     value.value.value.int_value = 0;
                 }
                 if(value.value.value.int_value <= 0){
-                    puts("----if continue real----");
+                    fputs("----if continue real----\n", inter_info);
                     value.u = statement_end;
                     goto again;
                 }
@@ -1049,7 +1048,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
             // broken操作
             if(value.u == code_broken){
                 if(value.value.type != INT_value){
-                    // printf("Code Warrning: Bad Type Number for break(broken), reset to zero");
+                    // fprintf(inter_info, "Code Warrning: Bad Type Number for break(broken), reset to zero");
                     value.value.type = INT_value;
                     value.value.value.int_value = 0;
                 }
@@ -1074,7 +1073,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
             bool condition;
             GWARF_result tmp_result = traverse(start->condition, the_var, false, global_inter);
             if(is_error(&tmp_result)){  // Name Error错误
-                // puts("STOP:: Name No Found!");
+                // fputs("STOP:: Name No Found!\n", inter_info);
                 value = tmp_result;
                 break;
             }
@@ -1084,23 +1083,23 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
             }
 
             condition = to_bool(tmp_result.value, global_inter);
-            printf("if condition = %d\n", condition);
+            fprintf(inter_info, "if condition = %d\n", condition);
             if(rego || (condition)){  // condition run success or rego(condition won't do) bug rewent can
                 if_restart:
-                puts("----if----");
+                fputs("----if----\n", inter_info);
                 value = traverse(start->done, the_var, true, global_inter);
-                printf("value.u = %d\n", value.u);
-                puts("----stop if----");
+                fprintf(inter_info, "value.u = %d\n", value.u);
+                fputs("----stop if----\n", inter_info);
 
                 // restarted操作
                 if(value.u == code_restarted){
                     if(value.value.type != INT_value){
-                        // printf("Code Warrning: Bad Type Number for restart(ed), reset to zero");
+                        // fprintf(inter_info, "Code Warrning: Bad Type Number for restart(ed), reset to zero");
                         value.value.type = INT_value;
                         value.value.value.int_value = 0;
                     }
                     if(value.value.value.int_value <= 0){
-                        puts("----restarted real----");
+                        fputs("----restarted real----\n", inter_info);
                         value.u = statement_end;
                         goto if_restart;
                     }
@@ -1113,12 +1112,12 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
                 // continued操作 [设在在rewent和rego前面]
                 if(value.u == code_continued){
                     if(value.value.type != INT_value){
-                        // printf("Code Warrning: Bad Type Number for continue(ed), reset to zero");
+                        // fprintf(inter_info, "Code Warrning: Bad Type Number for continue(ed), reset to zero");
                         value.value.type = INT_value;
                         value.value.value.int_value = 0;
                     }
                     if(value.value.value.int_value <= 0){
-                        puts("----if continue real----");
+                        fputs("----if continue real----\n", inter_info);
                         value.u = statement_end;
                         goto again;
                     }
@@ -1131,7 +1130,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
                 // broken操作
                 if(value.u == code_broken){
                     if(value.value.type != INT_value){
-                        // printf("Code Warrning: Bad Type Number for break(broken), reset to zero");
+                        // fprintf(inter_info, "Code Warrning: Bad Type Number for break(broken), reset to zero");
                         value.value.type = INT_value;
                         value.value.value.int_value = 0;
                     }
@@ -1150,7 +1149,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
 
                 // not restarted -> if is rego
                 if(!rego){
-                    printf("value.u = %d\n", value.u);
+                    fprintf(inter_info, "value.u = %d\n", value.u);
                     break;  // don't rego
                 }
             }
@@ -1182,13 +1181,13 @@ GWARF_result for_func(statement *the_statement, var_list *the_var, inter *global
             GWARF_result tmp_result = traverse(the_statement->code.for_cycle.condition, the_var, false, global_inter);
             error_space(tmp_result, return_value, value);
             condition = to_bool(tmp_result.value, global_inter);
-            printf("for condition = %d\n", condition);
+            fprintf(inter_info, "for condition = %d\n", condition);
             if(!condition){
                 break;
             }
         }
         restart_again: 
-        puts("----for----");
+        fputs("----for----\n", inter_info);
         value = traverse(the_statement->code.for_cycle.done, the_var, false, global_inter);
 
         //break操作
@@ -1206,7 +1205,7 @@ GWARF_result for_func(statement *the_statement, var_list *the_var, inter *global
             }
             break;  // break don't need after do
         }
-        puts("----stop for----");
+        fputs("----stop for----\n", inter_info);
 
         // after do
         if(the_statement->code.for_cycle.after != NULL){
@@ -1220,7 +1219,7 @@ GWARF_result for_func(statement *the_statement, var_list *the_var, inter *global
                 value.value.value.int_value = 0;
             }
             if(value.value.value.int_value <= 0){
-                puts("----continue real----");
+                fputs("----continue real----\n", inter_info);
                 value.u = statement_end;
                 continue;
             }
@@ -1238,7 +1237,7 @@ GWARF_result for_func(statement *the_statement, var_list *the_var, inter *global
                 value.value.value.int_value = 0;
             }
             if(value.value.value.int_value <= 0){
-                puts("----restart real----");
+                fputs("----restart real----\n", inter_info);
                 value.u = statement_end;
                 goto restart_again;
             }
@@ -1329,18 +1328,18 @@ GWARF_result try_func(statement *the_statement, var_list *the_var, inter *global
     the_var = append_var_list(tmp, the_var);  // run func
 
     again: 
-    puts("----try----");
+    fputs("----try----\n", inter_info);
     value = traverse(the_statement->code.try_code.try, the_var, false, global_inter);
-    puts("----stop try----");
+    fputs("----stop try----\n", inter_info);
 
     // restart操作[和continue效果相同]
 
     if(is_error(&value)){  // 遇到错误->执行except语句[不需要再检查break...]
         do_else = false;
         assignment_statement(the_statement->code.try_code.var, the_var, the_var, value,global_inter);
-        puts("----except----");
+        fputs("----except----\n", inter_info);
         value = traverse(the_statement->code.try_code.except, the_var, false, global_inter);
-        puts("----stop except----");
+        fputs("----stop except----\n", inter_info);
     }
 
     // 不使用else
@@ -1350,7 +1349,7 @@ GWARF_result try_func(statement *the_statement, var_list *the_var, inter *global
             value.value.value.int_value = 0;
         }
         if(value.value.value.int_value <= 0){
-            puts("----restarted real----");
+            fputs("----restarted real----\n", inter_info);
             value.u = statement_end;
             goto again;
         }
@@ -1366,7 +1365,7 @@ GWARF_result try_func(statement *the_statement, var_list *the_var, inter *global
             value.value.value.int_value = 0;
         }
         if(value.value.value.int_value <= 0){
-            puts("----block continue real----");
+            fputs("----block continue real----\n", inter_info);
             value.u = statement_end;
             goto again;
         }
@@ -1411,9 +1410,9 @@ GWARF_result try_func(statement *the_statement, var_list *the_var, inter *global
 GWARF_result block_func(statement *the_statement, var_list *the_var, inter *global_inter){  // read the statement list with case to run by func
     GWARF_result value = GWARF_result_reset;
     again: 
-    puts("----block----");
+    fputs("----block----\n", inter_info);
     value = traverse(the_statement->code.code_block.done, the_var, true, global_inter);
-    puts("----stop block----");
+    fputs("----stop block----\n", inter_info);
 
     // restart操作[和continue效果相同]
     if(value.u == code_restarted){
@@ -1422,7 +1421,7 @@ GWARF_result block_func(statement *the_statement, var_list *the_var, inter *glob
             value.value.value.int_value = 0;
         }
         if(value.value.value.int_value <= 0){
-            puts("----restarted real----");
+            fputs("----restarted real----\n", inter_info);
             value.u = statement_end;
             goto again;
         }
@@ -1438,7 +1437,7 @@ GWARF_result block_func(statement *the_statement, var_list *the_var, inter *glob
             value.value.value.int_value = 0;
         }
         if(value.value.value.int_value <= 0){
-            puts("----block continue real----");
+            fputs("----block continue real----\n", inter_info);
             value.u = statement_end;
             goto again;
         }
@@ -1489,9 +1488,9 @@ GWARF_result forin_func(statement *the_statement, var_list *the_var, inter *glob
             assignment_statement(the_statement->code.for_in_cycle.var, the_var, the_var,tmp_next,global_inter);  // 赋值
         }
         restart_again: 
-        puts("----for in----");
+        fputs("----for in----\n", inter_info);
         value = traverse(the_statement->code.for_in_cycle.done, the_var, false, global_inter);
-        puts("----stop for in----");
+        fputs("----stop for in----\n", inter_info);
 
         // break的操作
         if((value.u == cycle_break) || (value.u == code_broken)){
@@ -1571,7 +1570,7 @@ GWARF_result while_func(statement *the_statement, var_list *the_var, inter *glob
             GWARF_result tmp_result = traverse(the_statement->code.while_cycle.condition, the_var, false, global_inter);
             error_space(tmp_result, return_value, value);
             condition = to_bool(tmp_result.value, global_inter);
-            printf("while condition = %d\n", condition);
+            fprintf(inter_info, "while condition = %d\n", condition);
             if(!condition){
                 break;
             }
@@ -1581,9 +1580,9 @@ GWARF_result while_func(statement *the_statement, var_list *the_var, inter *glob
         }
         
         restart_again: 
-        puts("----while----");
+        fputs("----while----\n", inter_info);
         value = traverse(the_statement->code.while_cycle.done, the_var, false, global_inter);
-        puts("----stop while----");
+        fputs("----stop while----\n", inter_info);
 
         // break的操作
         if((value.u == cycle_break) || (value.u == code_broken)){
@@ -1702,9 +1701,9 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
             break;
         case MUL_func:
             get_left_result;
-            puts("Get Left");
+            fputs("Get Left\n", inter_info);
             get_right_result;
-            puts("Get Right");
+            fputs("Get Right\n", inter_info);
             value = mul_func(left_result, right_result, the_var, global_inter);
             break;
         case DIV_func:
@@ -2139,7 +2138,7 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
             }
         }
 
-        printf("set : %s\n", str);
+        fprintf(inter_info, "set : %s\n", str);
         value = assignment_func(str, right_result, login_var, from, the_lock);
         value.base_name = str;  // str来自value，本身就是malloc申请的内存
     }
@@ -2474,7 +2473,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                 the_var = free_var_list(the_var);  // free the new var
                 return tmp_return;
             }
-            puts("----start func----");
+            fputs("----start func----\n", inter_info);
             result = traverse(func_->done, the_var, false, global_inter);  // 执行func_value->done
             if(is_error(&result) || is_space(&result)){  // Name Error错误
                 the_var = free_var_list(the_var);  // free the new var
@@ -2485,7 +2484,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                 result.return_times = 0;
                 result.u = return_def;
             }
-            puts("----stop start func----");
+            fputs("----stop start func----\n", inter_info);
         }
         else{
             result = func_->paser(func_, tmp_s, the_var, get, old_var_list, global_inter);
@@ -2543,7 +2542,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                     return tmp_return;
                 }
 
-                puts("----start func----");
+                fputs("----start func----\n", inter_info);
                 {
                     GWARF_result tmp = traverse(func_->done, the_var, false, global_inter);  // 执行func_value->done
                     if(is_error(&tmp) || is_space(&tmp)){  // Name Error错误
@@ -2551,7 +2550,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                         return tmp;
                     }
                 }
-                puts("----stop start func----");
+                fputs("----stop start func----\n", inter_info);
             }
             else{
                 GWARF_result tmp_get = GWARF_result_reset;
@@ -2580,10 +2579,10 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
             the_var = func_->the_var;
             // tmp_x:形参，tmp_s:实参
 
-            // // printf("----address = %d----\n", the_var);
+            // // fprintf(inter_info, "----address = %d----\n", the_var);
             hash_var *tmp = make_hash_var();  // base_var
             the_var = append_var_list(tmp, the_var);
-            // // printf("----new address = %d----\n", the_var);
+            // // fprintf(inter_info, "----new address = %d----\n", the_var);
 
             if(func_->type == customize){  // 用户定义的方法
                 if(func_->is_class == action){
@@ -2616,7 +2615,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                     return tmp_return;
                 }
 
-                puts("----start func----");
+                fputs("----start func----\n", inter_info);
                 result = traverse(func_->done, the_var, false, global_inter);  // 执行func_value->done
                 if(is_error(&result) || is_space(&result)){  // Name Error错误
                     the_var = free_var_list(the_var);  // free the new var
@@ -2627,7 +2626,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                     result.return_times = 0;
                     result.u = return_def;
                 }
-                puts("----stop start func----");
+                fputs("----stop start func----\n", inter_info);
             }
             else{  // 官方方法
                 GWARF_result tmp_get = GWARF_result_reset;
@@ -2638,7 +2637,7 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                 GWARF_result tmp = func_->paser(func_, tmp_s, the_var, tmp_get, old_var_list, global_inter);   // 返回值不记录
                 if(is_error(&tmp)){  // Name Error错误
                     the_var = free_var_list(the_var);  // free the new var
-                    // puts("STOP:: Name No Found!");
+                    // fputs("STOP:: Name No Found!\n", inter_info);
                     return tmp;
                 }
                 else if(is_space(&tmp)){
@@ -3458,7 +3457,7 @@ GWARF_result mul_func(GWARF_result left_result, GWARF_result right_result, var_l
 
         var *tmp = find_var(call_var, 0, "__mul__", NULL);
         if(tmp != NULL){
-            puts("FWW");
+            fputs("FWW\n", inter_info);
             get.value = tmp->value;
             get.father = &base_the_var;  // 设置father
             return_value = call_back_core(get, the_var, pack_value_parameter(left_result.value), global_inter);
@@ -4271,7 +4270,7 @@ GWARF_result traverse_global(statement *the_statement, var_list *the_var, inter 
         }
         result = read_statement_list(tmp, the_var, global_inter);
         if(result.u == error){  // Name Error错误
-            printf("%s", result.error_info);
+            fprintf(inter_info, "%s", result.error_info);
             break;
         }
         tmp = tmp->next;
@@ -4294,7 +4293,7 @@ GWARF_result traverse_get_value(statement *the_statement, var_list *the_var, var
         }
         result = read_statement(tmp, the_var, NULL, out_var, lock, global_inter);
         if(result.u == error){  // Name Error错误
-            printf("%s", result.error_info);
+            fprintf(inter_info, "%s", result.error_info);
             break;
         }
         else if(result.u == return_def && result.return_times != 0){  // return def

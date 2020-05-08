@@ -22,7 +22,6 @@ void add_node(token_node *list, token the_token){
 
     if(list->seek < list->max_index){  // 有回退
         for(int i = list->max_index - 1;i >= list->seek;i -= 1){
-            // printf("FFFF\n");
             memcpy(list->token_list + i + 1, list->token_list + i, sizeof(token));  // 往回复制
         }
     }
