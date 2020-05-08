@@ -1798,6 +1798,11 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
             value = assignment_statement_eq(the_statement->code.operation.left_exp, the_var, login_var, right_result, global_inter);
             break;
         }
+        case IS_func:
+            get_left_result;
+            get_right_result;
+            value = is_func(left_result, right_result, the_var, global_inter);
+            break;
         case EQUAL_func:
             get_left_result;
             get_right_result;
@@ -2446,7 +2451,6 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                 out:
                 ;
             }
-            puts("WFWFSSSSSSSSSSSSSSSSSSSSSs");
             if(tmp_s->next == NULL){
                 puts("tmp_s->next == NULL");
             }
@@ -4126,6 +4130,48 @@ GWARF_result equal_func(GWARF_result left_result, GWARF_result right_result, var
         return_value.value.value.bool_value = return_bool;
         return_value.value.type = BOOL_value;
     }
+    return_back: return return_value;
+}
+
+// ---------  IS
+GWARF_result is_func(GWARF_result left_result, GWARF_result right_result, var_list *the_var, inter *global_inter){
+    GWARF_result return_value = GWARF_result_reset;
+    unsigned long int left, right;
+    if(left_result.value.type == OBJECT_value){  // 调用左div方法
+        left = (unsigned long int)left_result.value.value.object_value;
+    }
+    else if(left_result.value.type == CLASS_value){
+        left = (unsigned long int)left_result.value.value.class_value;
+    }
+    else if(left_result.value.type == FUNC_value){
+        left = (unsigned long int)left_result.value.value.func_value;
+    }
+    else if(left_result.value.type == NULL_value){
+        left = (unsigned long int)0;
+    }
+    NotSupportCul();
+
+    if(right_result.value.type == OBJECT_value){  // 调用左div方法
+        right = (unsigned long int)right_result.value.value.object_value;
+    }
+    else if(right_result.value.type == CLASS_value){
+        right = (unsigned long int)right_result.value.value.class_value;
+    }
+    else if(right_result.value.type == FUNC_value){
+        right = (unsigned long int)right_result.value.value.func_value;
+    }
+    else if(right_result.value.type == NULL_value){
+        right = (unsigned long int)0;
+    }
+    NotSupportCul();
+    return_value.value.type = BOOL_value;
+    if(left == right){
+        return_value.value.value.bool_value = true;
+    }
+    else{
+        return_value.value.value.bool_value = false;
+    }
+    
     return_back: return return_value;
 }
 

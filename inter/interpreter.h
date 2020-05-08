@@ -205,6 +205,7 @@ typedef struct statement{
                 BOOLIS_func,  // <=>
                 BOOLSAND_func,  // and
                 BOOLSOR_func,  // or
+                IS_func,  // a is b
             } type;
             struct statement *right_exp;  // the right exp
             struct statement *left_exp;  // the left exp
@@ -598,6 +599,7 @@ GWARF_result log_func(GWARF_result, GWARF_result, var_list *, inter *);
 GWARF_result sqrt_func(GWARF_result, GWARF_result, var_list *, inter *);
 GWARF_result assignment_func(char *, GWARF_result, var_list *, int, int);  // 不需要inter
 GWARF_result equal_func(GWARF_result, GWARF_result, var_list *, int, inter *);
+GWARF_result is_func(GWARF_result, GWARF_result, var_list *, inter *);
 GWARF_result negative_func(GWARF_result, var_list *, inter *);
 GWARF_result assignment_statement_core(statement *, var_list *, var_list *, GWARF_result, bool, int, inter *);
 GWARF_result assignment_statement_value(statement *, var_list *, var_list *, GWARF_value, inter *);

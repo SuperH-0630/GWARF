@@ -1846,8 +1846,9 @@ void compare(p_status *status, token_node *list){  // 多项式
         get_pop_token(status, list, symbol);
         if(symbol.type == EQEQ_PASER || symbol.type == MOREEQ_PASER || symbol.type == LESSEQ_PASER ||
            symbol.type == MORE_PASER || symbol.type == LESS_PASER || symbol.type == NOTEQ_PASER ||
-           symbol.type == ISLEFT_PASER || symbol.type == ISRIGHT_PASER || symbol.type == BOOLIS_PASER||
-           symbol.type == ILEFT_PASER || symbol.type == IRIGHT_PASER || symbol.type == BOOLNOTOR_PASER){
+           symbol.type == ISLEFT_PASER || symbol.type == ISRIGHT_PASER || symbol.type == BOOLIS_PASER ||
+           symbol.type == ILEFT_PASER || symbol.type == IRIGHT_PASER || symbol.type == BOOLNOTOR_PASER ||
+           symbol.type == IS_PASER){
             get_right_token(status, list, bit_notor, right);  // 回调右边
             if(right.type != NON_bit_notor){
                 paser_error("Don't get a bit_notor");
@@ -1894,6 +1895,8 @@ void compare(p_status *status, token_node *list){  // 多项式
                 break;
             case BOOLNOTOR_PASER:
                 code_tmp->code.operation.type = BOOLNOTOR_func;
+            case IS_PASER:
+                code_tmp->code.operation.type = IS_func;
                 break;
             }
             code_tmp->code.operation.left_exp = left.data.statement_value;
@@ -2535,6 +2538,40 @@ void call_back_(p_status *status, token_node *list){  // 因试分解
             new_token.data.statement_value = code_tmp;
             add_node(list, new_token);  // 压入节点[弹出3个压入1个]
             return call_back_(status, list);  // 回调自己
+        }
+        else if(symbol.type == VAR_PASER || symbol.type == SVAR_PASER){  // 运算符重载，如  yyy add xxx
+            back_one_token(list, symbol);
+            token call_func, second_args;
+            get_base_token(status, list, element, call_func);
+            if(call_func.type != NON_element){
+                paser_error("Don't get the element");
+            }
+
+            get_right_token(status, list, attribute, second_args);
+            if(second_args.type != NON_point){
+                paser_error("Don't get the attribute[1]");
+            }
+
+            parameter *first, *second;
+            first = make_parameter_value(left.data.statement_value);
+            first->u.var = first->u.value;
+
+            second = make_parameter_value(second_args.data.statement_value);
+            second->u.var = second->u.value;
+            first->next = second;
+
+            new_token.type = NON_call;
+            new_token.data_type = statement_value;
+
+            statement *code_tmp =  make_statement();
+            code_tmp->type = call;
+            code_tmp->code.call.func = call_func.data.statement_value;
+            code_tmp->code.call.parameter_list = first;
+            
+            new_token.data.statement_value = code_tmp;
+            add_node(list, new_token);  // 压入节点[弹出3个压入1个]
+            return call_back_(status, list);  // 回调自己            
+
         }
         else{  // 递归跳出
             // 回退，也就是让下一次pop的时候读取到的是left而不是symbol
