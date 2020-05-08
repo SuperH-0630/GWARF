@@ -339,7 +339,7 @@ class_object *BaseException_login_official(var_list *the_var, GWARF_result (*pas
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{2,1}};
+    int a[][2] = {{__init__func,1}};
     char *name[] = {"__init__"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
@@ -602,10 +602,21 @@ class_object *gobject_login_official(var_list *the_var, GWARF_result (*paser)(fu
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{2,1}, {3,1}, {4,1}, {5,1}, {6,1}, {7,1}, {8,1}, {9,1}, {10,1}, {11,1}, {12,1}, {13,1}, {14,1}, {15,1}, {16,1}, {17,1}, {3,1}, {21,1}, {22,1}, {18,1}, {19,1}, {20,1}, {29,1}, {30,1}, {31,1}, {32,1},
-                  {__bitand__func,1}, {__bitor__func,1}, {__bitnotor__func,1}, {__bitright__func,1}, {__bitrightr__func,1}, {__bitleft__func,1}, {__bitleftr__func,1}, {__bitnot__func,1}};
-    char *name[] = {"__init__", "__value__", "__add__", "__sub__", "__mul__","__div__","__eq__", "__more__", "__less__", "__eqmore__", "__eqless__","__noteq__", "__pow__", "__log__","__sqrt__","__negative__","__bool__","__subr__",
-                    "__divr__", "__powr__", "__logr__","__sqrtr__", "__idiv__","__idivr__", "__mod__", "__modr__", "__bitand__", "__bitor__", "__bitnotor__","__bitright__", "__bitrightr__","__bitleft__", "__bitleftr__","__bitnot__"};
+    int a[][2] = {{__init__func,1}, {__value__func,1}, {__add__func,1}, {__sub__func,1}, {__mul__func,1},
+                  {__div__func,1}, {__eq__func,1}, {__more__func,1}, {__less__func,1}, {__eqmore__func,1},
+                  {__eqless__func,1}, {__noteq__func,1}, {__pow__func,1}, {__log__func,1}, {__sqrt__func,1},
+                  {__negative__func,1}, {__value__func,1}, {__subr__func,1}, {__divr__func,1}, {__powr__func,1}, 
+                  {__logr__func,1}, {__sqrtr__func,1}, {__idiv__func,1}, {__idivr__func,1}, {__mod__func,1},
+                  {__modr__func,1},{__bitand__func,1}, {__bitor__func,1}, {__bitnotor__func,1}, {__bitright__func,1},
+                  {__bitrightr__func,1}, {__bitleft__func,1}, {__bitleftr__func,1}, {__bitnot__func,1}};
+    
+    char *name[] = {"__init__", "__value__", "__add__", "__sub__", "__mul__",
+                    "__div__","__eq__", "__more__", "__less__", "__eqmore__",
+                    "__eqless__","__noteq__", "__pow__", "__log__","__sqrt__",
+                    "__negative__","__bool__","__subr__","__divr__", "__powr__",
+                    "__logr__","__sqrtr__", "__idiv__","__idivr__", "__mod__",
+                    "__modr__","__bitand__", "__bitor__", "__bitnotor__","__bitright__",
+                    "__bitrightr__","__bitleft__", "__bitleftr__","__bitnot__"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
@@ -1187,7 +1198,7 @@ class_object *int_login_official(var_list *the_var, GWARF_result (*paser)(func *
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{2,1}, {__assignment__func, 1}};
+    int a[][2] = {{__init__func,1}, {__assignment__func, 1}};
     char *name[] = {"__init__", "__assignment__"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
@@ -1299,7 +1310,7 @@ class_object *double_login_official(var_list *the_var, GWARF_result (*paser)(fun
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{2,1}, {__assignment__func, 1}};
+    int a[][2] = {{__init__func,1}, {__assignment__func, 1}};
     char *name[] = {"__init__", "__assignment__"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
@@ -1408,7 +1419,7 @@ class_object *str_login_official(var_list *the_var, GWARF_result (*paser)(func *
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{2,1}};
+    int a[][2] = {{__init__func,1}};
     char *name[] = {"__init__"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
@@ -1633,7 +1644,7 @@ class_object *bool_login_official(var_list *the_var, GWARF_result (*paser)(func 
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{2,1}, {__assignment__func, 1}};
+    int a[][2] = {{__init__func,1}, {__assignment__func, 1}};
     char *name[] = {"__init__", "__assignment__"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
@@ -1736,7 +1747,7 @@ class_object *tuple_login_official(var_list *the_var, GWARF_result (*paser)(func
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{2,1},{23,1},{24,1},{26,1},{27,1},{28,1}};
+    int a[][2] = {{__init__func,1},{__len__func,1},{__down__func,1},{__slice__func,1},{__iter__func,1},{__next__func,1}};
     char *name[] = {"__init__", "__len__", "__down__", "__slice__", "__iter__", "__next__"};  //  __len__是获取长度，__down__是获取下值，__slice__是切片
 
     int lenth = sizeof(a)/sizeof(a[0]);
@@ -1939,7 +1950,7 @@ class_object *list_login_official(var_list *the_var, GWARF_result (*paser)(func 
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{25,1}};
+    int a[][2] = {{__set__func,1}};
     char *name[] = {"__set__"};  //  继承tuple
 
     int lenth = sizeof(a)/sizeof(a[0]);
@@ -2243,7 +2254,7 @@ class_object *dict_login_official(var_list *the_var, GWARF_result (*paser)(func 
     puts("----stop set class----");
 
     // 注册函数
-    int a[][2] = {{2,1},{24,1},{25,1},{28,1}};
+    int a[][2] = {{__init__func,1},{__down__func,1},{__set__func,1},{__next__func,1}};
     char *name[] = {"__init__", "__down__", "__set__", "__next__"};  //  继承tuple
 
     int lenth = sizeof(a)/sizeof(a[0]);
@@ -2459,7 +2470,6 @@ GWARF_result run_func_core(GWARF_value *base_the_var, var_list *the_var, char *n
             char *tmp = malloc((size_t)( 21 + strlen(name)) );
             sprintf(tmp, "Name Not Found [%s]\n", name);
             reight_tmp = to_error(tmp, "NameException", global_inter);
-            puts("GGGGGG");
             goto return_result;
         }
     }
