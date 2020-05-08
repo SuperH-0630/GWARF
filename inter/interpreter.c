@@ -155,6 +155,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
         case if_branch:
             puts("----if code----");
             return_value = if_func(the_statement->code.if_branch.done, the_var, global_inter);
+            printf("return_value.u = %d\n", return_value.u);
             puts("----stop if code----");
             if(return_value.u == statement_end){  // while循环不需要返回值[避免GWARF_value 进入 the_var]
                 return_value.value.type = NULL_value;
@@ -479,7 +480,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                     get.father = &base_the_var;  // 设置father
                     puts("case down");
                     return_value = call_back_core(get, the_var, (the_statement->code).down.child_var, global_inter);
-                    printf("return_value.u = %d\n", return_value.u);
+                    // printf("return_value.u = %d\n", return_value.u);
                 }
                 else{
                     return_value = to_error("Don't Support Down Number", "TypeException", global_inter);
@@ -634,7 +635,14 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                     break;  // off
                 }
                 result = read_statement(tmp, the_var, class_tmp->the_var, NULL, lock, global_inter);
-                if((result.u == cycle_break) || (result.u == code_broken)){
+                if(result.u == error){  // Name Error错误
+                    break;
+                }
+                else if(result.u == return_def && result.return_times != 0){  // return def
+                    result.return_times -= 1;
+                    break;
+                }
+                else if((result.u == cycle_break) || (result.u == code_broken)){
                     if(result.value.type != INT_value){
                         result.value.type = INT_value;
                         result.value.value.int_value = 0;
@@ -647,7 +655,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                     }
                     break;
                 }
-                if((result.u == cycle_continue) || (result.u == code_continued) || (result.u == cycle_restart) || (result.u == code_restarted)){
+                else if((result.u == cycle_continue) || (result.u == code_continued) || (result.u == cycle_restart) || (result.u == code_restarted)){
                     if(result.value.type != INT_value){
                         result.value.type = INT_value;
                         result.value.value.int_value = 0;
@@ -661,6 +669,9 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                         break;
                     }
                 }
+                else if(is_space(&result)){
+                    break;
+                }
                 error_space(father_tmp, return_result, return_value);
                 tmp = tmp->next;
             }
@@ -673,7 +684,6 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
             break;
         }
         case break_cycle:
-            return_value.u = cycle_break;
             return_value.value.type = INT_value;
             if(the_statement->code.break_cycle.times == NULL){
                 return_value.value.value.int_value = 0;
@@ -695,9 +705,9 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 }
                 return_value.value.value.int_value = int_tmp;
             }
+            return_value.u = cycle_break;
             break;
         case broken:
-            return_value.u = code_broken;
             return_value.value.type = INT_value;
             if(the_statement->code.broken.times == NULL){
                 return_value.value.value.int_value = 0;
@@ -719,9 +729,9 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 }
                 return_value.value.value.int_value = int_tmp;
             }
+            return_value.u = code_broken;
             break;
         case continue_cycle:
-            return_value.u = cycle_continue;
             return_value.value.type = INT_value;
             if(the_statement->code.continue_cycle.times == NULL){
                 return_value.value.value.int_value = 0;
@@ -743,9 +753,9 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 }
                 return_value.value.value.int_value = int_tmp;
             }
+            return_value.u = cycle_continue;
             break;
         case continued:
-            return_value.u = code_continued;
             return_value.value.type = INT_value;
             if(the_statement->code.continued.times == NULL){
                 return_value.value.value.int_value = 0;
@@ -767,9 +777,9 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 }
                 return_value.value.value.int_value = int_tmp;
             }
+            return_value.u = code_continued;
             break;
         case restart:
-            return_value.u = cycle_restart;
             return_value.value.type = INT_value;
             if(the_statement->code.restart.times == NULL){
                 return_value.value.value.int_value = 0;
@@ -791,9 +801,9 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 }
                 return_value.value.value.int_value = int_tmp;
             }
+            return_value.u = cycle_restart;
             break;
         case restarted:
-            return_value.u = code_restarted;
             return_value.value.type = INT_value;
             if(the_statement->code.restarted.times == NULL){
                 return_value.value.value.int_value = 0;
@@ -815,9 +825,9 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 }
                 return_value.value.value.int_value = int_tmp;
             }
+            return_value.u = code_restarted;
             break;
         case return_code:
-            return_value.u = return_def;
             if(the_statement->code.return_code.times == NULL){
                 return_value.return_times = 0;
             }
@@ -846,7 +856,9 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
                 error_space(tmp_result, return_result, return_value);
                 return_value = to_object(tmp_result,global_inter);
             }
+            return_value.u = return_def;
             return_value.value.lock_token = base;
+            printf("code :: return_value.u = %d\n", return_value.u);
             break;
         case rewent:
             return_value.u = code_rewent;  // rego but not now
@@ -1077,6 +1089,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
                 if_restart:
                 puts("----if----");
                 value = traverse(start->done, the_var, true, global_inter);
+                printf("value.u = %d\n", value.u);
                 puts("----stop if----");
 
                 // restarted操作
@@ -1137,6 +1150,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
 
                 // not restarted -> if is rego
                 if(!rego){
+                    printf("value.u = %d\n", value.u);
                     break;  // don't rego
                 }
             }
@@ -2411,7 +2425,6 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
 
         if(func_->type == customize){  // 用户定义的方法
             // 赋值self
-            puts("WWSSSSS");
             GWARF_result father = GWARF_result_reset;
             if(func_->is_class == action){
                 if(get.father != NULL && get.father->type == OBJECT_value){
@@ -2450,18 +2463,6 @@ GWARF_result call_back_core(GWARF_result get, var_list *the_var, parameter *tmp_
                 }
                 out:
                 ;
-            }
-            if(tmp_s->next == NULL){
-                puts("tmp_s->next == NULL");
-            }
-            else{
-                puts("tmp_s->next != NULL");
-            }
-            if(tmp_x->next == NULL){
-                puts("tmp_x->next == NULL");
-            }
-            else{
-                puts("tmp_x->next != NULL");
             }
             GWARF_result tmp_return = login_var(the_var, old_var_list, tmp_x, tmp_s, global_inter);
             if(tmp_return.u != statement_end){
@@ -4198,13 +4199,17 @@ GWARF_result traverse(statement *the_statement, var_list *the_var, bool new, int
 
         // 错误停止
         if(result2.u == error){  // Name Error错误
-            // puts("STOP:: Name No Found!");
             result = result2;
             break;
         }
-        // TODO::rewent语句得优化一下 设置result2.is_rewent值
-        if(result2.u == return_def && result2.return_times != 0){  // return def
-            result2.return_times -= 1;
+        else if(result2.u == return_def && result2.return_times != 0){  // return def
+            result = result2;
+            result.return_times -= 1;
+            break;
+        }
+        else if(result2.u == return_def && result2.return_times == 0){  // return def
+            result = result2;
+            break;
         }
         else if(result2.u == code_rewent){
             lock = true;  // keep the result is rewent for return
@@ -4265,6 +4270,16 @@ GWARF_result traverse_get_value(statement *the_statement, var_list *the_var, var
         result = read_statement(tmp, the_var, NULL, out_var, lock, global_inter);
         if(result.u == error){  // Name Error错误
             printf("%s", result.error_info);
+            break;
+        }
+        else if(result.u == return_def && result.return_times != 0){  // return def
+            result.return_times -= 1;
+            break;
+        }
+        else if(result.u == return_def && result.return_times == 0){  // return def
+            break;
+        }
+        else if(is_space(&result)){
             break;
         }
         tmp = tmp->next;

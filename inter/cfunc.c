@@ -94,8 +94,9 @@ GWARF_result to_object(GWARF_result value, inter *global_inter){  // 把GWARF_va
         return to_error("SystemctlError", "SystemctlException", global_inter);
     }
     GWARF_result return_tmp = call_back_core(func_result, the_var, pack_value_parameter(value.value), global_inter);
+    value.value = return_tmp.value;
     free(the_var);
-    return return_tmp;
+    return value;
 }
 
 

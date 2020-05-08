@@ -13,7 +13,7 @@
 #define read_statement_list(the_statement,the_var,global_inter) read_statement(the_statement,the_var,NULL,NULL,lock,global_inter)
 #define run_func(base_the_var,the_var,name,global_inter) run_func_core(base_the_var,the_var,name,false,global_inter)
 #define GWARF_value_reset {.type=NULL_value,.value.int_value=0,.lock_token=base}
-#define GWARF_result_reset {.value.type=NULL_value,.value.value.int_value=0,.value.lock_token=base,.u = statement_end}
+#define GWARF_result_reset {.value.type=NULL_value,.value.value.int_value=0,.value.lock_token=base,.u = statement_end,.father=NULL,.error_info="",.base_name=NULL}
 
 #define error_space(tmp, to, as) \
 do{ \
