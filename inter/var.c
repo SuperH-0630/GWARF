@@ -13,7 +13,10 @@ var *make_var(){  // make var with base
     return tmp;
 }
 
-void append_var(char *name, GWARF_value value, var *base_var, int lock){
+void append_var(char *name, GWARF_value value, var *base_var, int lock){  // lock本质为var token
+    if(lock == auto_public){
+        lock = public;  // 使用自动权限
+    }
 
     int break_ = 1;  // get var[2] or not[1]
     var *tmp = base_var;  // iter var
@@ -30,7 +33,7 @@ void append_var(char *name, GWARF_value value, var *base_var, int lock){
         tmp = tmp->next;  // get the next to iter
     }
     if(break_ == 2){
-        if(tmp->lock == lock || tmp->lock == public || (tmp->lock == protect && lock == private_token)){  // 检查是否具有修改的权限
+        if(tmp->lock == lock || tmp->lock == public || (tmp->lock == protect && lock == private)){  // 检查是否具有修改的权限
             tmp->value = value;
             if(lock != auto_public){  // 检查是否可以改变权限
                 tmp->lock = lock;
@@ -41,12 +44,7 @@ void append_var(char *name, GWARF_value value, var *base_var, int lock){
 
     var *new_tmp = make_var();
     tmp->next = new_tmp;
-    if(lock == auto_public){
-        tmp->lock = public;  // 使用自动权限
-    }
-    else{
-        new_tmp->lock = lock;
-    }
+    new_tmp->lock = lock;
     new_tmp->name = malloc(sizeof(name));
     strcpy(new_tmp->name, name);
     new_tmp->value = value;

@@ -8,7 +8,8 @@
 #define true 1
 #define bool int
 
-#define assignment_statement(the_statement,the_var,login_var,right_result,global_inter) assignment_statement_core(the_statement,the_var,login_var,right_result,0,auto_public,global_inter)
+#define assignment_statement(the_statement,the_var,login_var,right_result,global_inter) assignment_statement_core(the_statement,the_var,login_var,right_result,1,auto_public,global_inter)
+#define assignment_statement_eq(the_statement,the_var,login_var,right_result,global_inter) assignment_statement_core(the_statement,the_var,login_var,right_result,0,auto_public,global_inter)
 #define read_statement_list(the_statement,the_var,global_inter) read_statement(the_statement,the_var,NULL,NULL,lock,global_inter)
 #define run_func(base_the_var,the_var,name,global_inter) run_func_core(base_the_var,the_var,name,false,global_inter)
 #define GWARF_value_reset {.type=NULL_value,.value.int_value=0,.lock_token=base}

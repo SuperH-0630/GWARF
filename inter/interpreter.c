@@ -1793,7 +1793,7 @@ GWARF_result operation_func(statement *the_statement, var_list *the_var, var_lis
             break;
         case ASSIGnMENT_func:{  // because the var char, we should ues a {} to make a block[name space] for the tmp var;
             get_right_result;
-            value = assignment_statement(the_statement->code.operation.left_exp, the_var, login_var, right_result, global_inter);
+            value = assignment_statement_eq(the_statement->code.operation.left_exp, the_var, login_var, right_result, global_inter);
             break;
         }
         case EQUAL_func:
@@ -2012,15 +2012,15 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
         
         GWARF_value base_the_var = tmp_result.value;  // 不用取value
         if(base_the_var.type == CLASS_value){
-            value = assignment_statement(the_statement->code.point.child_var, the_var, base_the_var.value.class_value->the_var, right_result,global_inter);
+            value = assignment_statement_eq(the_statement->code.point.child_var, the_var, base_the_var.value.class_value->the_var, right_result,global_inter);
             value.base_name = NULL;  // 默认是NULL
         }
         else if(base_the_var.type == OBJECT_value){
-            value = assignment_statement(the_statement->code.point.child_var, the_var, base_the_var.value.object_value->the_var, right_result,global_inter);
+            value = assignment_statement_eq(the_statement->code.point.child_var, the_var, base_the_var.value.object_value->the_var, right_result,global_inter);
             value.base_name = NULL;  // 默认是NULL
         }
         else if(base_the_var.type == FUNC_value){
-            value = assignment_statement(the_statement->code.point.child_var, the_var, base_the_var.value.func_value->self, right_result,global_inter);
+            value = assignment_statement_eq(the_statement->code.point.child_var, the_var, base_the_var.value.func_value->self, right_result,global_inter);
             value.base_name = NULL;  // 默认是NULL
         }
         else if(base_the_var.type == NULL_value){
@@ -2170,7 +2170,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                     else if(tmp_x->type == name_value){
                         GWARF_result tmp = traverse(tmp_x->u.value, the_var, false, global_inter);  // 执行形参
                         error_space(tmp, return_base_result, return_result);
-                        GWARF_result tmp_assignment = assignment_statement(tmp_x->u.var, the_var, the_var, tmp,global_inter);  // 赋值
+                        GWARF_result tmp_assignment = assignment_statement_eq(tmp_x->u.var, the_var, the_var, tmp,global_inter);  // 赋值带等号
                         error_space(tmp_assignment, return_base_result, return_result);
                         tmp_x = tmp_x->next;  // get the next to iter
                     }
@@ -2182,7 +2182,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                         if(list_init != NULL){
                             func_result.value = list_init->value;
                         }
-                        GWARF_result tmp_assignment = assignment_statement(tmp_x->u.var, the_var, the_var,call_back_core(func_result, old_var_list, NULL, global_inter), global_inter);  // old_var_list用于计算from等
+                        GWARF_result tmp_assignment = assignment_statement_eq(tmp_x->u.var, the_var, the_var,call_back_core(func_result, old_var_list, NULL, global_inter), global_inter);  // old_var_list用于计算from等
                         error_space(tmp_assignment, return_base_result, return_result);
                         tmp_x = tmp_x->next;  // get the next to iter
                     }
@@ -2240,14 +2240,14 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                         }
                         GWARF_result dict_result = GWARF_result_reset;
                         dict_result.value = dict_tmp;
-                        GWARF_result assignment_tmp = assignment_statement(tmp_x->u.var, the_var, the_var, dict_result,global_inter);
+                        GWARF_result assignment_tmp = assignment_statement_eq(tmp_x->u.var, the_var, the_var, dict_result,global_inter);
                         error_space(assignment_tmp, return_base_result, return_result);
                         tmp_x->next = NULL;  // 理论上没有下一个
                     }
                     else{
                         GWARF_result tmp_x_var = traverse_get_value(tmp_x->u.var, tmp_var, the_var, global_inter);  // 使用tmp_x->u.var在tmp_var中获取变量的值
                         if((!is_error(&tmp_x_var)) && (!is_space(&tmp_x_var))){  // 如果找到了，就赋值
-                            GWARF_result tmp = assignment_statement(tmp_x->u.var, the_var, the_var, tmp_x_var,global_inter);  // tmp_x的外部变量使用the_var
+                            GWARF_result tmp = assignment_statement_eq(tmp_x->u.var, the_var, the_var, tmp_x_var,global_inter);  // tmp_x的外部变量使用the_var
                             error_space(tmp, return_base_result, return_result);
                             if(tmp.base_name != NULL){  // 删除变量
                                 del_var_var_list(tmp_var, 0, tmp.base_name);  // 从中删除变量
@@ -2257,7 +2257,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                             GWARF_result tmp = traverse(tmp_x->u.value, the_var, false, global_inter);  // 执行形参
                             error_space(tmp, return_base_result, return_result);
 
-                            tmp = assignment_statement(tmp_x->u.var, the_var, the_var, tmp,global_inter);
+                            tmp = assignment_statement_eq(tmp_x->u.var, the_var, the_var, tmp,global_inter);  // 带等于号的赋值
                             error_space(tmp, return_base_result, return_result);
                         }
                         else{
@@ -2330,7 +2330,7 @@ GWARF_result login_var(var_list *the_var, var_list *old_var_list, parameter *tmp
                 return to_error("Miss '=' in Args", "ArgsException", global_inter);
             }
             assignment_type = 1;
-            GWARF_result assignment_tmp = assignment_statement(tmp_s->u.var, old_var_list, tmp_var, tmp,global_inter);  // 先赋值到tmp_var上
+            GWARF_result assignment_tmp = assignment_statement(tmp_s->u.var, old_var_list, tmp_var, tmp,global_inter);  // 先赋值到tmp_var上（先不用EQ，后面赋值在用EQ）
             error_space(assignment_tmp, return_base_result, return_result);
             tmp_s = tmp_s->next;
         }
