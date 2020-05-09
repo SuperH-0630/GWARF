@@ -1,0 +1,8 @@
+class a()
+{
+b = 10
+}
+class c(a){
+d = 20
+}
+print(isinherited(c,a))

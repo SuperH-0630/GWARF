@@ -182,8 +182,8 @@ void login_official_func(int type, int is_class, var_list *the_var, char *name, 
 }
 
 void login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), inter *global_inter){
-    int a[][2] = {{printf_func,0}, {input_func,0}};
-    char *name[] = {"print", "input"};
+    int a[][2] = {{printf_func,0}, {input_func,0}, {isinherited_func,0}};
+    char *name[] = {"print", "input", "isinherited"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
@@ -243,6 +243,45 @@ GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var, 
         str[a] = '\0';
         return_value.value.type = STRING_value;
         return_value.value.value.string = str;
+        return_value = to_object(return_value, global_inter);
+        break;
+    }
+    case isinherited_func:{
+        if(tmp_s == NULL || tmp_s->next == NULL){
+            return to_error("Too Little Args", "ArgsException", global_inter);
+        }
+        else if(tmp_s->next->next != NULL){
+            return to_error("Too Many Args", "ArgsException", global_inter);
+        }
+
+        GWARF_result child = traverse(tmp_s->u.value, out_var, false, global_inter), father = GWARF_result_reset;
+        error_space(child, return_result, return_value);
+
+        tmp_s = tmp_s->next;
+        father = traverse(tmp_s->u.value, out_var, false, global_inter);
+        error_space(father, return_result, return_value);
+
+        if(child.value.type != CLASS_value || father.value.type != CLASS_value){
+            return to_error("Args Should Be Class", "TypeException", global_inter);
+        }
+
+        hash_var *src = father.value.value.class_value->the_var->hash_var_base;
+        var_list *dust = child.value.value.class_value->the_var;
+        bool is = false;
+
+        while(true){  // 读取child的没一个the_var的哈希表，与father的对比
+            if(dust == NULL){
+                break;
+            }
+            if(dust->hash_var_base == src){
+                is = true;
+                break;
+            }
+            dust = dust->next;
+        }
+
+        return_value.value.type = BOOL_value;
+        return_value.value.value.bool_value = is;
         return_value = to_object(return_value, global_inter);
         break;
     }

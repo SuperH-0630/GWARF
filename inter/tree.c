@@ -39,7 +39,7 @@ void print_statement(statement *the_statement, int lv){  // read the statement l
             fprintf(tree_info, "[operation](type = %d)\n", the_statement->code.operation.type);
 
             print_t("left\n", the_statement->code.operation.left_exp);
-            print_t("right\n", the_statement->code.operation.left_exp);
+            print_t("right\n", the_statement->code.operation.right_exp);
             break;
         case chose_exp:{
             fprintf(tree_info, "[chose_exp]\n");
@@ -331,10 +331,10 @@ void parameter_tree(parameter *the_parameter, int lv){
             break;
         }
         print_lv(lv);
-        fprintf(tree_info, "[parameter]\n");
         switch (tmp->type)
         {
         case only_value:
+            fprintf(tree_info, "[only_value](parameter)\n");
             print_t("value\n", tmp->u.value);
             break;
         case put_args:

@@ -496,6 +496,7 @@ typedef enum{
 typedef enum{
     printf_func,
     input_func,
+    isinherited_func,
     __init__func,
     __value__func,
     __add__func,
