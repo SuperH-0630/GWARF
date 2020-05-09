@@ -160,7 +160,7 @@ void print_statement(statement *the_statement, int lv){  // read the statement l
             break;
         }
         case base_svar:{
-            fprintf(tree_info, "[base_svar](name = %s)\n", the_statement->code.base_svar.lock_token);
+            fprintf(tree_info, "[base_svar](token = %d)\n", the_statement->code.base_svar.lock_token);
 
             print_t("var\n", the_statement->code.base_svar.var);
             print_t("from\n", the_statement->code.base_svar.from);
@@ -181,7 +181,7 @@ void print_statement(statement *the_statement, int lv){  // read the statement l
             break;
         }
         case def:{
-            fprintf(tree_info, "[def](type = %d, is_inline)\n", the_statement->code.def.type, the_statement->code.def.is_inline);
+            fprintf(tree_info, "[def](type = %d, is_inline = %d)\n", the_statement->code.def.type, the_statement->code.def.is_inline);
 
             print_t("var(name)\n", the_statement->code.def.var);
             print_p("parameter_list\n", the_statement->code.def.parameter_list);

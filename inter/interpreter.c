@@ -75,7 +75,7 @@ GWARF_result read_statement(statement *the_statement, var_list *the_var, var_lis
         case operation:  // 表达式运算
             fputs("----code----\n", inter_info);
             return_value = operation_func(the_statement, the_var, the_login_var, global_inter);
-            if((return_value.value.type == INT_value)){
+            if(return_value.value.type == INT_value){
                 fprintf(inter_info, "operation value = %d\n", return_value.value.value.int_value);
             }
             else if(return_value.value.type == BOOL_value){
@@ -2021,6 +2021,8 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
                 case private_token:
                 the_lock = private;
                 break;
+                default:
+                break;
             }
         }
         value = assignment_func(left, right_result, login_var, from, the_lock);
@@ -2141,6 +2143,8 @@ GWARF_result assignment_statement_core(statement *the_statement, var_list *the_v
                 break;
                 case private_token:
                 the_lock = private;
+                break;
+                default:
                 break;
             }
         }
