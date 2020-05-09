@@ -1,12 +1,2 @@
-class a()
-{
-def run(self,b=3,c=10)
-{
-b * c
-return self;
-}
-}
-q = a()
-z = q.__value__()
-print(z)
-
+20 * 30
+20 * 30

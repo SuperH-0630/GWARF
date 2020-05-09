@@ -1027,7 +1027,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
             }
 
             // continued操作
-            if(value.u == code_continued){
+            else if(value.u == code_continued){
                 if(value.value.type != INT_value){
                     value.value.type = INT_value;
                     value.value.value.int_value = 0;
@@ -1044,7 +1044,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
             }
 
             // broken操作
-            if(value.u == code_broken){
+            else if(value.u == code_broken){
                 if(value.value.type != INT_value){
                     value.value.type = INT_value;
                     value.value.value.int_value = 0;
@@ -1060,8 +1060,11 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
 
             // rego操作
             // else层的rego和rewent是可以往上层遗传的[也就是else如果显式指定rego和rewent是会遗传的，但是如果是if或elif指定rego是不会遗传的]
-            if((value.u == code_rewent) || (value.u == code_rego)){
+            else if((value.u == code_rewent) || (value.u == code_rego)){
                 ;
+            }
+            else{
+                error_space(value, to_break, value)
             }
 
             break;  // else not next and don't need rego
@@ -1106,7 +1109,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
                 }
                 
                 // continued操作 [设在在rewent和rego前面]
-                if(value.u == code_continued){
+                else if(value.u == code_continued){
                     if(value.value.type != INT_value){
                         value.value.type = INT_value;
                         value.value.value.int_value = 0;
@@ -1123,7 +1126,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
                 }
 
                 // broken操作
-                if(value.u == code_broken){
+                else if(value.u == code_broken){
                     if(value.value.type != INT_value){
                         value.value.type = INT_value;
                         value.value.value.int_value = 0;
@@ -1136,9 +1139,12 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
                 }
                 
                 // rego操作
-                if((value.u == code_rewent) || (value.u == code_rego)){
+                else if((value.u == code_rewent) || (value.u == code_rego)){
                     value.u = statement_end;  // 设置为正常语句
                     rego = true;
+                }
+                else{
+                    error_space(value, to_break, value)
                 }
 
                 // not restarted -> if is rego
@@ -1153,6 +1159,7 @@ GWARF_result if_func(if_list *if_base, var_list *the_var, inter *global_inter){ 
         }
         start = start->next;
     }
+    to_break: 
     if((value.u == cycle_continue) || (value.u == cycle_restart) || (value.u == cycle_break)){  // if不处理也不计入层次 同break一样
         ;
     }
@@ -1225,7 +1232,7 @@ GWARF_result for_func(statement *the_statement, var_list *the_var, inter *global
         }
 
         // restart操作
-        if((value.u == cycle_restart) || (value.u == code_restarted)){
+        else if((value.u == cycle_restart) || (value.u == code_restarted)){
             if(value.value.type != INT_value){
                 value.value.type = INT_value;
                 value.value.value.int_value = 0;
@@ -1241,9 +1248,11 @@ GWARF_result for_func(statement *the_statement, var_list *the_var, inter *global
                 break;
             }
         }
-
-        if(value.u == rego){  // rewent认为是正常执行
+        else if(value.u == rego){  // rewent认为是正常执行
             do_else = false;
+        }
+        else{
+            error_space(value, return_value, value);
         }
     }
     if(do_else){
@@ -1425,7 +1434,7 @@ GWARF_result block_func(statement *the_statement, var_list *the_var, inter *glob
     }
     
     // continued操作
-    if(value.u == code_continued){
+    else if(value.u == code_continued){
         if(value.value.type != INT_value){
             value.value.type = INT_value;
             value.value.value.int_value = 0;
@@ -1441,7 +1450,7 @@ GWARF_result block_func(statement *the_statement, var_list *the_var, inter *glob
     }
 
     // broken操作
-    if(value.u == code_broken){
+    else if(value.u == code_broken){
         if(value.value.type != INT_value){
             value.value.type = INT_value;
             value.value.value.int_value = 0;
@@ -1503,7 +1512,7 @@ GWARF_result forin_func(statement *the_statement, var_list *the_var, inter *glob
         }
 
         // continue的操作
-        if((value.u == cycle_continue) || (value.u == code_continued)){
+        else if((value.u == cycle_continue) || (value.u == code_continued)){
             if(value.value.type != INT_value){
                 value.value.type = INT_value;
                 value.value.value.int_value = 0;
@@ -1520,7 +1529,7 @@ GWARF_result forin_func(statement *the_statement, var_list *the_var, inter *glob
         }
 
         // restart的操作
-        if((value.u == cycle_restart) || (value.u == code_restarted)){
+        else if((value.u == cycle_restart) || (value.u == code_restarted)){
             if(value.value.type != INT_value){
                 value.value.type = INT_value;
                 value.value.value.int_value = 0;
@@ -1535,9 +1544,11 @@ GWARF_result forin_func(statement *the_statement, var_list *the_var, inter *glob
                 break;
             }
         }
-
-        if(value.u == rego){  // rewent认为是正常执行
+        else if(value.u == rego){  // rewent认为是正常执行
             do_else = false;
+        }
+        else{
+            error_space(value, return_value, value);
         }
     }
     if(do_else){
@@ -1595,7 +1606,7 @@ GWARF_result while_func(statement *the_statement, var_list *the_var, inter *glob
         }
 
         // continue的操作
-        if((value.u == cycle_continue) || (value.u == code_continued)){
+        else if((value.u == cycle_continue) || (value.u == code_continued)){
             if(value.value.type != INT_value){
                 value.value.type = INT_value;
                 value.value.value.int_value = 0;
@@ -1612,7 +1623,7 @@ GWARF_result while_func(statement *the_statement, var_list *the_var, inter *glob
         }
 
         // restart的操作
-        if((value.u == cycle_restart) || (value.u == code_restarted)){
+        else if((value.u == cycle_restart) || (value.u == code_restarted)){
             if(value.value.type != INT_value){
                 value.value.type = INT_value;
                 value.value.value.int_value = 0;
@@ -1627,9 +1638,11 @@ GWARF_result while_func(statement *the_statement, var_list *the_var, inter *glob
                 break;
             }
         }
-
-        if(value.u == rego){  // rewent认为是正常执行
+        else if(value.u == rego){  // rewent认为是正常执行
             do_else = false;
+        }
+        else{
+            error_space(value, return_value, value);
         }
     }
     if(do_else){

@@ -781,4 +781,9 @@ GWARF_result traverse_get_value(statement *, var_list *, var_list *,inter *);
 inter *get_inter();
 void login(var_list *the_var, inter *global_inter);
 
+void traverse_tree(statement *the_statement, int lv);
+void print_statement(statement *the_statement, int lv);
+void parameter_tree(parameter *the_parameter, int lv);
+void if_tree(if_list *the_branch, int lv);
+
 #endif

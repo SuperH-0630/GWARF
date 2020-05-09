@@ -1,0 +1,43 @@
+if(True)
+{
+print("I am True")
+}
+else
+{
+print("I am Not True")
+}
+
+if(True)
+{
+print("I am True")
+rewent
+print("I will print")
+}
+elif(False)
+{
+print("beacuse rewent, I can print")
+rego
+print("because rego, I can't print")
+}
+elif(False)
+{
+print("beacuse rego I can print")
+break
+}
+else
+{
+print("because break, I can't print")
+}
+
+if(False)
+{
+print("I am True")
+}
+elif(True)
+{
+print("I am True!")
+}
+else
+{
+print("I am Not True")
+}

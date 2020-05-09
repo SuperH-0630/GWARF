@@ -10,17 +10,19 @@
 #include "inter/statement.c"
 #include "inter/var.c"
 
+#include "inter/tree.c"
 #include "inter/interpreter.c"
 
 void do_exit(void);
 void setup();
 
 void setup(){
-    debug = fopen("./debug.log", "w");  // 设置debug的位置
-    status_log = fopen("./status.log", "w");  // 设置debug的位置
-    token_log = fopen("./token.log", "w");  // 设置debug的位置
-    token_info = fopen("./tokenINFO.log", "w");  // 设置debug的位置
-    inter_info = fopen("./interINFO.log", "w");  // 设置debug的位置
+    debug = fopen("./log/debug.log", "w");  // 设置debug的位置
+    status_log = fopen("./log/status.log", "w");  // 设置debug的位置
+    token_log = fopen("./log/token.log", "w");  // 设置debug的位置
+    token_info = fopen("./log/tokenINFO.log", "w");  // 设置debug的位置
+    inter_info = fopen("./log/interINFO.log", "w");  // 设置debug的位置
+    tree_info = fopen("./log/tree.log", "w");
 }
 
 void do_exit(void){
@@ -29,6 +31,7 @@ void do_exit(void){
     fclose(token_log);
     fclose(token_info);
     fclose(inter_info);
+    fclose(tree_info);
 }
 
 int main(int argc, char *argv[]){
@@ -46,6 +49,7 @@ int main(int argc, char *argv[]){
     
     login(the_var, global_inter);
     parser(file, global_inter);
+    traverse_tree(global_inter->global_code, 0);
     fprintf(inter_info, "----start run----\n");
     traverse_global(global_inter->global_code, the_var, global_inter);
     fprintf(inter_info, "code end...\n");
