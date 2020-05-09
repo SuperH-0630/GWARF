@@ -494,9 +494,15 @@ typedef enum{
 } func_type;
 
 typedef enum{
+    // 全局方法
     printf_func,
     input_func,
     isinherited_func,
+    isinstance_func,
+    isbelong_func,
+    type_func,
+
+    // 类方法
     __init__func,
     __value__func,
     __add__func,

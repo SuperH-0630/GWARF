@@ -4160,6 +4160,11 @@ GWARF_result equal_func(GWARF_result left_result, GWARF_result right_result, var
                 return_bool = true;  // 返回1 否则(默认)为0
             }
         }
+        else if(left_result.value.type == STRING_value && right_result.value.type == STRING_value){
+            if ((type == 0) && !strcmp(left_result.value.value.string, right_result.value.value.string)){  // 如果相等
+                return_bool = true;  // 返回1 否则(默认)为0
+            }
+        }
         NotSupportCul();
         return_value.value.value.bool_value = return_bool;
         return_value.value.type = BOOL_value;

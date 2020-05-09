@@ -182,8 +182,8 @@ void login_official_func(int type, int is_class, var_list *the_var, char *name, 
 }
 
 void login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), inter *global_inter){
-    int a[][2] = {{printf_func,0}, {input_func,0}, {isinherited_func,0}};
-    char *name[] = {"print", "input", "isinherited"};
+    int a[][2] = {{printf_func,0}, {input_func,0}, {isinherited_func,0}, {isinstance_func,0}, {isbelong_func,0}, {type_func, 0}};
+    char *name[] = {"print", "input", "isinherited", "isinstance", "isbelong", "type"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
@@ -278,6 +278,128 @@ GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var, 
                 break;
             }
             dust = dust->next;
+        }
+
+        return_value.value.type = BOOL_value;
+        return_value.value.value.bool_value = is;
+        return_value = to_object(return_value, global_inter);
+        break;
+    }
+    case isbelong_func:{
+        if(tmp_s == NULL || tmp_s->next == NULL){
+            return to_error("Too Little Args", "ArgsException", global_inter);
+        }
+        else if(tmp_s->next->next != NULL){
+            return to_error("Too Many Args", "ArgsException", global_inter);
+        }
+
+        GWARF_result child = traverse(tmp_s->u.value, out_var, false, global_inter), father = GWARF_result_reset;
+        error_space(child, return_result, return_value);
+
+        tmp_s = tmp_s->next;
+        father = traverse(tmp_s->u.value, out_var, false, global_inter);
+        error_space(father, return_result, return_value);
+
+        if(child.value.type != OBJECT_value || father.value.type != CLASS_value){
+            return to_error("First Args Should Be Object, Second Args Should Be Class", "TypeException", global_inter);
+        }
+
+        hash_var *src = father.value.value.class_value->the_var->hash_var_base;
+        var_list *dust = child.value.value.object_value->cls;
+        bool is = false;
+
+        while(true){  // 读取child的没一个the_var的哈希表，与father的对比
+            if(dust == NULL){
+                break;
+            }
+            if(dust->hash_var_base == src){
+                is = true;
+                break;
+            }
+            dust = dust->next;
+        }
+
+        return_value.value.type = BOOL_value;
+        return_value.value.value.bool_value = is;
+        return_value = to_object(return_value, global_inter);
+        break;
+    }
+    case type_func:{
+        if(tmp_s == NULL){
+            return to_error("Too Little Args", "ArgsException", global_inter);
+        }
+        else if(tmp_s->next != NULL){
+            return to_error("Too Many Args", "ArgsException", global_inter);
+        }
+
+        GWARF_result obj = traverse(tmp_s->u.value, out_var, false, global_inter);
+        error_space(obj, return_result, return_value);
+
+        char *str;
+        switch (obj.value.type)
+        {
+        case NULL_value:
+            str = "NULL";
+            break;
+        case NUMBER_value:
+            str = "DOUBLE";
+            break;
+        case INT_value:
+            str = "INT";
+            break;
+        case STRING_value:
+            str = "STR";
+            break;
+        case OBJECT_value:
+            str = "OBJECT";
+            break;
+        case CLASS_value:
+            str = "CLASS";
+            break;
+        case FUNC_value:
+            str = "FUNC";
+            break;
+        case LIST_value:
+            str = "LIST";
+            break;
+        case DICT_value:
+            str = "DICT";
+            break;
+        default:
+            str = "UNKNOW";
+            break;
+        }
+        
+        return_value.value.type = STRING_value;
+        return_value.value.value.string = str;
+        return_value = to_object(return_value, global_inter);
+        break;
+    }
+    case isinstance_func:{
+        if(tmp_s == NULL || tmp_s->next == NULL){
+            return to_error("Too Little Args", "ArgsException", global_inter);
+        }
+        else if(tmp_s->next->next != NULL){
+            return to_error("Too Many Args", "ArgsException", global_inter);
+        }
+
+        GWARF_result child = traverse(tmp_s->u.value, out_var, false, global_inter), father = GWARF_result_reset;
+        error_space(child, return_result, return_value);
+
+        tmp_s = tmp_s->next;
+        father = traverse(tmp_s->u.value, out_var, false, global_inter);
+        error_space(father, return_result, return_value);
+
+        if(child.value.type != OBJECT_value || father.value.type != CLASS_value){
+            return to_error("First Args Should Be Object, Second Args Should Be Class", "TypeException", global_inter);
+        }
+
+        hash_var *src = father.value.value.class_value->the_var->hash_var_base;
+        var_list *dust = child.value.value.class_value->the_var;
+        bool is = false;
+
+        if(father.value.value.class_value->the_var->hash_var_base == child.value.value.object_value->cls->hash_var_base){
+            is = true;
         }
 
         return_value.value.type = BOOL_value;

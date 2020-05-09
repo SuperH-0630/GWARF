@@ -5,4 +5,12 @@ b = 10
 class c(a){
 d = 20
 }
+q = c()
 print(isinherited(c,a))
+print(isinstance(q,c))
+print(isinstance(q,a))
+print(isbelong(q,a))
+print(type(c))
+print(type(q))
+print(type(a) == type(c))
+print(type(q) == type(c))

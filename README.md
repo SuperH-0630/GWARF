@@ -85,13 +85,14 @@ return x n  函数返回值x，返回n层
 * ``a.__iter__().__next__()``会出现解析错误, 已经修复，调整了``.``运算符和``call_back``为同级优先级
 * 解决了object的``__value__``无法调用的问题：原因是注册函数的时候使用了数字而不是枚举体[现在，使用``{__value__func, 1}``取代了数字``{3, 1}``]
 * 可以生成语法树，输出文件到./log下
+* ``isinherited``检查继承关系，``isinstance``检查是否为类的实例(忽略继承)，``isbelong``检查是否为类的实例, ``type``检查数据类型。
 ## GWARF计划
 * 类型转换(list, str, int之间的转换)
 * 魔法方法：``__eq__(用于特殊赋值)，__int__，__str__，__double__，__repo__，__list__，__tuple__，__dict__，__key__，__in__``
 * 魔法属性：``__name__，__id__``
 * 数据类型：``set()，link()，file()``
 * 内置类：``range,exp(列表推导试)``
-* 内置函数：``exit()[报出错误ExitException(Systemctl)], type(), isinherited()[A类是否继承B类], isinstance()[A object是否为B的实例(不检查继承关系)]``
+* 内置函数：``exit()[报出错误ExitException(Systemctl)], type()]``
 * @装饰器语法
 * 内存控制：控制``var``链表，控制``哈希表``，控制``var_list``
 * 多重继承优化：``super().__init__()``
