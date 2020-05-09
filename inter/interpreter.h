@@ -28,6 +28,9 @@ do{ \
 append_statement(tmp_statement,token.data.statement_value); \
 }while(0);
 
+// 日志文件
+extern FILE *debug, *status_log, *token_log, *token_info, *inter_info, *tree_info;
+
 // the type of data(GWARF_value)
 typedef enum{
     NUMBER_value = 1,  // [只允许系统使用] [1]
@@ -492,6 +495,7 @@ typedef enum{
 
 typedef enum{
     printf_func,
+    input_func,
     __init__func,
     __value__func,
     __add__func,

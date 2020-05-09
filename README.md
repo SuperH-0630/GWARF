@@ -91,7 +91,7 @@ return x n  函数返回值x，返回n层
 * 魔法属性：``__name__，__id__``
 * 数据类型：``set()，link()，file()``
 * 内置类：``range,exp(列表推导试)``
-* 内置函数：``print(), input(), exit()[报出错误ExitException(Systemctl)], type(), isinherited()[A类是否继承B类], isinstance()[A object是否为B的实例(不检查继承关系)]``
+* 内置函数：``exit()[报出错误ExitException(Systemctl)], type(), isinherited()[A类是否继承B类], isinstance()[A object是否为B的实例(不检查继承关系)]``
 * @装饰器语法
 * 内存控制：控制``var``链表，控制``哈希表``，控制``var_list``
 * 多重继承优化：``super().__init__()``

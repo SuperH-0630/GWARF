@@ -182,8 +182,8 @@ void login_official_func(int type, int is_class, var_list *the_var, char *name, 
 }
 
 void login_official(var_list *the_var, GWARF_result (*paser)(func *, parameter *, var_list *, GWARF_result, var_list *,inter *), inter *global_inter){
-    int a[][2] = {{printf_func,0}};
-    char *name[] = {"print"};
+    int a[][2] = {{printf_func,0}, {input_func,0}};
+    char *name[] = {"print", "input"};
 
     int lenth = sizeof(a)/sizeof(a[0]);
     for(int i = 0;i < lenth;i+=1){
@@ -204,7 +204,7 @@ GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var, 
             goto return_result;
         }
         char *str = malloc(0);
-        while(1){
+        while(true){
             GWARF_result tmp = traverse(tmp_s->u.value, out_var, false, global_inter);
             error_space(tmp, return_result, return_value);
             tmp = to_str(tmp.value, out_var, global_inter);
@@ -217,7 +217,33 @@ GWARF_result official_func(func *the_func, parameter *tmp_s, var_list *the_var, 
             tmp_s = tmp_s->next;
         }
         printf("%s\n", str);  // 换行
+        free(str);
         return_value.u = statement_end;
+        break;
+    }
+    case input_func:{
+        if(tmp_s != NULL){  // 输出提示
+            GWARF_result tmp = traverse(tmp_s->u.value, out_var, false, global_inter);
+            error_space(tmp, return_result, return_value);
+            tmp = to_str(tmp.value, out_var, global_inter);
+            error_space(tmp, return_result, return_value);
+            printf("%s", tmp.value.value.string);
+        }
+        char p, *str = malloc(0);
+        int a = 0;
+        while(true){
+            a += 1;
+            p = getc(stdin);
+            if(p == '\n' || p == '\0'){
+                break;  // 遇到\n就跳出
+            }
+            str = realloc(str, a);
+            str[a - 1] = p;
+        }
+        str[a] = '\0';
+        return_value.value.type = STRING_value;
+        return_value.value.value.string = str;
+        return_value = to_object(return_value, global_inter);
         break;
     }
     default:
