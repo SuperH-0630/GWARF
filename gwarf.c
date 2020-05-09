@@ -13,6 +13,8 @@
 #include "inter/tree.c"
 #include "inter/interpreter.c"
 
+extern FILE *debug, *status_log, *token_log, *token_info, *inter_info, *tree_info;
+
 void do_exit(void);
 void setup();
 

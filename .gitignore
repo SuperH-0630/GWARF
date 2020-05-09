@@ -1,3 +1,4 @@
 .vscode
 gwarf
 *.log
+.exe
